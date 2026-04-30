@@ -1,5 +1,5 @@
 import { Settings } from '../lib/settings.js';
-import { LanguageManager } from '../lib/language.js?v=topic-earth-i18n-csv-20260428';
+import { LanguageManager } from '../lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
 
 const EUROPE_BOUNDS = {
   minLat: 34,
@@ -88,6 +88,7 @@ export class RegionalMap {
     this.lastRouteRequestAt = 0;
     this.actionHistory = [];
     this.redoHistory = [];
+    this.searchPanelCollapsed = false;
     this.handleClick = this.handleClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
@@ -1299,6 +1300,18 @@ export class RegionalMap {
   renderSearchControl() {
     return `
       <form id="regional-map-search-panel" class="regional-map-search hidden" data-regional-map-search>
+        <button
+          type="button"
+          class="regional-map-panel-collapse"
+          data-action="toggle-regional-map-panel-collapse"
+          aria-label="${this.escapeHtml(this.t('regional.collapseTools'))}"
+          title="${this.escapeHtml(this.t('regional.collapseTools'))}"
+          aria-expanded="true"
+        >
+          <svg class="regional-panel-collapse-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M8 5L13 10L8 15" />
+          </svg>
+        </button>
         <label for="regional-map-search-input">${this.escapeHtml(this.t('map.search'))}</label>
         <div class="regional-map-search-row">
           <input
@@ -1328,10 +1341,14 @@ export class RegionalMap {
       return;
     }
 
+    this.searchPanelCollapsed = false;
     panel.classList.remove('hidden');
+    panel.classList.remove('collapsed-side');
     document.body.classList.add('regional-map-search-open');
+    document.body.classList.remove('regional-map-search-collapsed');
     button?.classList.toggle('active', true);
     button?.setAttribute('aria-expanded', 'true');
+    this.updateSearchPanelCollapseButton(panel);
 
     if (willOpen) {
       panel.querySelector('#regional-map-search-input')?.focus();
@@ -1342,10 +1359,39 @@ export class RegionalMap {
     const panel = this.element?.querySelector('#regional-map-search-panel');
     if (!panel || panel.classList.contains('hidden')) return;
 
+    this.searchPanelCollapsed = false;
     panel.classList.add('hidden');
+    panel.classList.remove('collapsed-side');
     document.body.classList.remove('regional-map-search-open');
+    document.body.classList.remove('regional-map-search-collapsed');
     this.searchToggleButton?.classList.remove('active');
     this.searchToggleButton?.setAttribute('aria-expanded', 'false');
+    this.updateSearchPanelCollapseButton(panel);
+  }
+
+  toggleSearchPanelCollapsed() {
+    const panel = this.element?.querySelector('#regional-map-search-panel');
+    if (!panel || panel.classList.contains('hidden')) return;
+
+    this.searchPanelCollapsed = !panel.classList.contains('collapsed-side');
+    panel.classList.toggle('collapsed-side', this.searchPanelCollapsed);
+    document.body.classList.toggle('regional-map-search-collapsed', this.searchPanelCollapsed);
+    this.updateSearchPanelCollapseButton(panel);
+
+    if (!this.searchPanelCollapsed) {
+      panel.querySelector('#regional-map-search-input')?.focus();
+    }
+  }
+
+  updateSearchPanelCollapseButton(panel = this.element?.querySelector('#regional-map-search-panel')) {
+    const button = panel?.querySelector('[data-action="toggle-regional-map-panel-collapse"]');
+    if (!button) return;
+
+    const collapsed = panel.classList.contains('collapsed-side');
+    const label = this.t(collapsed ? 'regional.expandTools' : 'regional.collapseTools');
+    button.setAttribute('aria-label', label);
+    button.setAttribute('title', label);
+    button.setAttribute('aria-expanded', String(!collapsed));
   }
 
   handleDocumentClick(event) {
@@ -1656,6 +1702,10 @@ export class RegionalMap {
     }
     if (actionButton?.dataset.action === 'clear-regional-route') {
       this.clearRoute({ record: true });
+      return;
+    }
+    if (actionButton?.dataset.action === 'toggle-regional-map-panel-collapse') {
+      this.toggleSearchPanelCollapsed();
       return;
     }
     if (actionButton?.dataset.action === 'regional-propose-location') {

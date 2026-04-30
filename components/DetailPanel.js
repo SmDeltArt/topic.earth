@@ -1,6 +1,6 @@
 import { Settings } from '../lib/settings.js';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-20260423';
-import { LanguageManager } from '../lib/language.js?v=topic-earth-i18n-csv-20260428';
+import { LanguageManager } from '../lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
 import { ReadTranslationService } from '../lib/read-translation.js';
 import { getFeverWarmingTranslation } from '../lib/fever-warming-translations.js?v=topic-earth-fever-json-i18n-20260422';
 import { LocalStorage } from '../lib/storage.js?v=topic-earth-regional-initiative-20260424';
@@ -235,13 +235,14 @@ export class DetailPanel {
     const fallbackMessage = topic.originalSummary || topic.originalFull || topic.ttsText || topic.summary || topic.insight || '';
     const localized = this.getLocalizedFeverWarming(scenario, topic.year, fallbackTitle, fallbackMessage);
 
-    if (localized.translationProvider !== 'static') return topic;
+    if (!['static', 'scenario'].includes(localized.translationProvider)) return topic;
 
     return {
       ...topic,
       title: localized.title,
       summary: localized.message,
       insight: localized.message,
+      source: this.getLocalizedFeverWarningSource(scenario),
       ttsText: localized.message,
       language: localized.language,
       translationProvider: localized.translationProvider,
@@ -249,6 +250,11 @@ export class DetailPanel {
       originalSummary: topic.originalSummary || fallbackMessage,
       ttsLanguage: LanguageManager.getSpeechCode(localized.language)
     };
+  }
+
+  getLocalizedFeverWarningSource(scenario = 'objective') {
+    const scenarioLabel = this.t(`fever.${scenario}`);
+    return `${this.t('fever.earthsFever')} - ${scenarioLabel} ${this.t('fever.scenario').toLowerCase()}`;
   }
 
   setupCloseButton() {
@@ -1904,9 +1910,10 @@ export class DetailPanel {
           </div>
         `;
       } else {
+        const scenarioLabel = this.t(`fever.${scenario}`);
         selectedContentDiv.innerHTML = `
           <div class="insight-content" style="text-align: center; color: var(--text-secondary);">
-            Climate data for ${year} - ${scenario} scenario
+            ${this.escapeHtml(this.t('fever.climateDataForScenario', { year, scenario: scenarioLabel }))}
           </div>
         `;
       }
@@ -1927,7 +1934,7 @@ export class DetailPanel {
       country: 'Global',
       region: 'Worldwide',
       summary: warning.full,
-      source: `Earth's Fever Simulation - ${scenario} scenario`,
+      source: this.getLocalizedFeverWarningSource(scenario),
       insight: warning.full,
       level: warning.level,
       scenario: scenario,

@@ -6,17 +6,17 @@ import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-
 import { FEVER_TOPICS } from './data/fever-topics.js';
 import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-regional-hub-20260423';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=topic-earth-mobile-map-author-20260429';
-import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-regional-route-tools-20260430';
-import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-i18n-csv-20260428';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-language-voice-menu-20260430';
+import { TopBar } from './components/TopBar.js?v=topic-earth-warning-panel-collapse-20260430';
+import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-warning-panel-collapse-20260430';
+import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-warning-panel-collapse-20260430';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-warning-panel-collapse-20260430';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-initiative-20260424';
 import { Settings } from './lib/settings.js?v=topic-earth-regional-proposal-20260423';
-import { LanguageManager } from './lib/language.js?v=topic-earth-i18n-csv-20260428';
-import { ReadTranslationService } from './lib/read-translation.js?v=topic-earth-translate-read-language-20260428';
+import { LanguageManager } from './lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
+import { ReadTranslationService } from './lib/read-translation.js?v=topic-earth-warning-panel-collapse-20260430';
 import { TTSManager } from './lib/tts.js?v=topic-earth-language-voice-menu-20260430';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
-import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-i18n-csv-20260428';
+import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-warning-panel-collapse-20260430';
 import { installAiApiBridge } from './lib/ai-api-bridge.js';
 
 /**
@@ -82,7 +82,7 @@ class TopicEarthApp {
   }
 
   async init() {
-    await LanguageManager.loadTranslationCatalog('./shared/topic-earth-ui.csv?v=topic-earth-language-choice-voice-20260430');
+      await LanguageManager.loadTranslationCatalog('./shared/topic-earth-ui.csv?v=topic-earth-warning-panel-collapse-20260430');
 
     // Initialize settings early
     await this.initSettings();

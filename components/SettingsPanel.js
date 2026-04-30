@@ -1,5 +1,5 @@
 import { Settings } from '../lib/settings.js';
-import { LanguageManager } from '../lib/language.js?v=topic-earth-i18n-csv-20260428';
+import { LanguageManager } from '../lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
 
 /**
  * Settings panel component

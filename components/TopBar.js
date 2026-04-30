@@ -4,7 +4,7 @@
  */
 import { Settings } from '../lib/settings.js';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-20260423';
-import { LanguageManager } from '../lib/language.js?v=topic-earth-i18n-csv-20260428';
+import { LanguageManager } from '../lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
 
 export class TopBar {
   constructor(container) {

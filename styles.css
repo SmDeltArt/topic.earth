@@ -732,10 +732,47 @@ body:not(.admin-mode) [data-admin-only="true"] {
     top: 76px;
     width: 520px;
     z-index: 440;
+    transition: max-width 0.2s ease, width 0.2s ease, left 0.2s ease, right 0.2s ease, background 0.2s ease;
 }
 
 .regional-map-search.hidden {
     display: none;
+}
+
+.regional-map-panel-collapse {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 6px;
+    color: var(--accent);
+    cursor: pointer;
+    display: inline-flex;
+    height: 34px;
+    justify-content: center;
+    padding: 0;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 34px;
+}
+
+.regional-map-panel-collapse:hover {
+    background: rgba(0, 212, 255, 0.18);
+    border-color: var(--accent);
+}
+
+.regional-panel-collapse-icon {
+    height: 18px;
+    transition: transform 0.2s ease;
+    width: 18px;
+}
+
+.regional-panel-collapse-icon path {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
 }
 
 .regional-map-search label {
@@ -746,6 +783,7 @@ body:not(.admin-mode) [data-admin-only="true"] {
     letter-spacing: 0.5px;
     margin-bottom: 6px;
     text-transform: uppercase;
+    padding-right: 42px;
 }
 
 .regional-map-search-row {
@@ -5763,6 +5801,38 @@ canvas:hover {
     body.detail-panel-open:not(.detail-panel-compact) .regional-map-status {
         left: 12px;
     }
+}
+
+.regional-map-search.collapsed-side,
+body.regional-map-search-open .regional-map-search.collapsed-side {
+    height: 44px;
+    left: auto;
+    max-height: 44px;
+    max-width: 44px;
+    min-width: 44px;
+    overflow: hidden;
+    padding: 0;
+    right: 12px;
+    top: 86px;
+    width: 44px;
+}
+
+.regional-map-search.collapsed-side > :not(.regional-map-panel-collapse) {
+    display: none;
+}
+
+.regional-map-search.collapsed-side .regional-map-panel-collapse {
+    background: rgba(10, 14, 26, 0.94);
+    border: 0;
+    border-radius: 8px;
+    height: 44px;
+    inset: 0;
+    position: absolute;
+    width: 44px;
+}
+
+.regional-map-search.collapsed-side .regional-panel-collapse-icon {
+    transform: rotate(180deg);
 }
 
 /* Increased transparency for both panels */
