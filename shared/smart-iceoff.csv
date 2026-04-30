@@ -1,0 +1,252 @@
+key,en,fr,nl,de,es,ar,zh,hi,ja,ru,uk
+# ═══════════════════════════════════════════════════════════════════
+# Smart IceOff — UI translations
+# Edit in any spreadsheet. Empty cells fall back to English.
+# Columns: en=English, fr=Français, nl=Nederlands, de=Deutsch,
+#          es=Español, ar=العربية, zh=中文, hi=हिन्दी, ja=日本語,
+#          ru=Русский, uk=Українська
+# Use {n}, {name}, {page} as placeholders.
+# ═══════════════════════════════════════════════════════════════════
+# ── App meta ───────────────────────────────────────────────────────
+app.title,Smart IceOff,SmΔrt IceOff,,,,,,,
+app.tagline,Document + Sheet editor,Éditeur Document + Tableur,,,,,,,
+# ── Toolbar — file ─────────────────────────────────────────────────
+tb.import,Import,Importer,,,,,,,
+tb.import.tip,Import document or sheet,Importer un document ou tableur,,,,,,,
+tb.save,Save,Sauvegarder,,,,,,,
+tb.save.tip,Save project (.smartproj),Sauvegarder le projet (.smartproj),,,,,,,
+tb.open,Open,Ouvrir,,,,,,,
+tb.open.tip,Open project (.smartproj),Ouvrir un projet (.smartproj),,,,,,,
+tb.storage,Storage,Stockage,,,,,,,
+tb.storage.tip,Storage options…,Options de stockage…,,,,,,,
+tb.printSetup,Print setup,Mise en page,,,,,,,
+tb.printSetup.tip,Print settings…,Paramètres d'impression…,,,,,,,
+tb.print,Print,Imprimer,,,,,,,
+tb.print.tip,Print (Ctrl+P),Imprimer (Ctrl+P),,,,,,,
+tb.export,Export,Exporter,,,,,,,
+tb.export.tip,Export options,Options d'export,,,,,,,
+tb.theme,Theme,Thème,,,,,,,
+tb.theme.tip,Toggle theme,Changer de thème,,,,,,,
+tb.ai,AI,IA,,,,,,,
+tb.ai.tip,AI Assistant,Assistant IA,,,,,,,
+# ── Toolbar — history ──────────────────────────────────────────────
+tb.undo.tip,Undo (Ctrl+Z),Annuler (Ctrl+Z),,,,,,,
+tb.redo.tip,Redo (Ctrl+Y),Rétablir (Ctrl+Y),,,,,,,
+tb.history.tip,History — restore a previous state,Historique — restaurer un état précédent,,,,,,,
+# ── Toolbar — format ───────────────────────────────────────────────
+tb.blockStyle.tip,Block style,Style de bloc,,,,,,,
+tb.block.paragraph,Paragraph,Paragraphe,,,,,,,
+tb.block.quote,Quote,Citation,,,,,,,
+tb.block.code,Code,Code,,,,,,,
+tb.fontSize.tip,Font size,Taille de police,,,,,,,
+tb.bold.tip,Bold (Ctrl+B),Gras (Ctrl+B),,,,,,,
+tb.italic.tip,Italic (Ctrl+I),Italique (Ctrl+I),,,,,,,
+tb.underline.tip,Underline (Ctrl+U),Souligné (Ctrl+U),,,,,,,
+tb.strike.tip,Strikethrough,Barré,,,,,,,
+tb.textColor.tip,Text color,Couleur du texte,,,,,,,
+tb.bgColor.tip,Document background,Arrière-plan du document,,,,,,,
+# ── Toolbar — align / lists ────────────────────────────────────────
+tb.alignLeft.tip,Align left,Aligner à gauche,,,,,,,
+tb.alignCenter.tip,Center,Centrer,,,,,,,
+tb.alignRight.tip,Align right,Aligner à droite,,,,,,,
+tb.justify.tip,Justify,Justifier,,,,,,,
+tb.bullet.tip,Bullet list,Liste à puces,,,,,,,
+tb.number.tip,Numbered list,Liste numérotée,,,,,,,
+# ── Toolbar — insert ───────────────────────────────────────────────
+tb.insertImage.tip,Insert image as floating layer,Insérer une image (calque flottant),,,,,,,
+tb.insertText.tip,Insert text frame (z-stacked),Insérer un cadre texte (empilable),,,,,,,
+tb.insertSheet.tip,Insert live sheet range,Insérer une plage de tableur,,,,,,,
+tb.insertChart.tip,Create chart from selected cells,Créer un graphique depuis les cellules,,,,,,,
+# ── Toolbar — sheet ────────────────────────────────────────────────
+tb.cellData.tip,Mark selected cells as data,Marquer les cellules comme données,,,,,,,
+tb.cellBorder.tip,Toggle border on selected cells,Basculer la bordure des cellules,,,,,,,
+tb.freezeRow.tip,Freeze/unfreeze selected row(s),Figer/libérer les lignes,,,,,,,
+# ── Toolbar — page ─────────────────────────────────────────────────
+tb.pageFormat.tip,Page format,Format de page,,,,,,,
+tb.page.full,Full width,Pleine largeur,,,,,,,
+tb.page.letter,Letter,Letter,,,,,,,
+tb.orientation.tip,Orientation,Orientation,,,,,,,
+tb.orientation.portrait,Portrait,Portrait,,,,,,,
+tb.orientation.landscape,Landscape,Paysage,,,,,,,
+tb.zoom.tip,Page zoom (view only),Zoom d'affichage (vue uniquement),,,,,,,
+tb.tts.tip,Read selection aloud (TTS),Lire la sélection à voix haute,,,,,,,
+# ── Tabs ───────────────────────────────────────────────────────────
+tab.new.tip,New document,Nouveau document,,,,,,,
+# ── AI panel — header ──────────────────────────────────────────────
+ai.title,AI Assistant,Assistant IA,,,,,,,
+ai.badge.tip,API model,Modèle API,,,,,,,
+ai.apiSettings.tip,API settings,Paramètres API,,,,,,,
+ai.close,Close,Fermer,,,,,,,
+# ── AI panel — sections ────────────────────────────────────────────
+ai.section.context,Context,Contexte,,,,,,,
+ai.section.chat,Chat,Chat,,,,,,,
+ai.section.advanced,Advanced,Avancé,,,,,,,
+ai.status.ready,Ready,Prêt,,,,,,,
+ai.ctx.doc,doc,doc,,,,,,,
+ai.ctx.sheet,sheet,tableur,,,,,,,
+# ── AI panel — advanced ────────────────────────────────────────────
+ai.filter.placeholder,Filter tools… (e.g. rewrite SUM chart),Filtrer outils… (ex. réécrire SOMME graphique),,,,,,,
+ai.systemPrompt,System prompt,Invite système,,,,,,,
+ai.examples,Examples,Exemples,,,,,,,
+ai.examples.tip,Insert an example prompt,Insérer un exemple d'invite,,,,,,,
+# ── AI panel — chat actions ────────────────────────────────────────
+ai.btn.clear,Clear,Effacer,,,,,,,
+ai.btn.copy,Copy,Copier,,,,,,,
+ai.btn.stop,Stop,Stop,,,,,,,
+ai.btn.send.tip,Send (Ctrl+Enter),Envoyer (Ctrl+Entrée),,,,,,,
+ai.input.placeholder,Ask AI… (Ctrl+Enter),Demandez à l'IA… (Ctrl+Entrée),,,,,,,
+# ── AI — scrolling status messages ─────────────────────────────────
+ai.status.thinking,Thinking…,Réflexion en cours…,,,,,,,
+ai.status.calling,Calling {provider}…,Appel de {provider}…,,,,,,,
+ai.status.streaming,Streaming response…,Réception de la réponse…,,,,,,,
+ai.status.done,Done,Terminé,,,,,,,
+ai.status.stopped,Stopped,Arrêté,,,,,,,
+ai.status.retrying,Retrying…,Nouvelle tentative…,,,,,,,
+ai.status.noProvider,API unavailable (No provider configured) — click the model badge to configure,API indisponible (aucun fournisseur) — cliquez sur le badge pour configurer,,,,,,,
+ai.status.noKey,API unavailable — API key missing,API indisponible — clé API manquante,,,,,,,
+ai.status.failed,Request failed: {error},Échec de la requête : {error},,,,,,,
+ai.status.suggestions,Showing smart suggestions instead.,Affichage de suggestions intelligentes à la place.,,,,,,,
+ai.status.tokens,{n} tokens,{n} jetons,,,,,,,
+ai.status.model,Model: {model},Modèle : {model},,,,,,,
+ai.status.keyless,keyless,sans clé,,,,,,,
+# ── AI badge ──────────────────────────────────────────────────────
+ai.badge.notConfigured,⚠ not configured,⚠ non configuré,,,,,,,
+ai.badge.noKey,no key,pas de clé,,,,,,,
+ai.badge.noModel,no model,pas de modèle,,,,,,,
+# ── Terminal ───────────────────────────────────────────────────────
+term.title,Terminal,Terminal,,,,,,,
+term.mode.limited,limited,limité,,,,,,,
+term.placeholder,Type 'help'…,Tapez 'help'…,,,,,,,
+# ── Context menu ───────────────────────────────────────────────────
+ctx.cut,Cut,Couper,,,,,,,
+ctx.copy,Copy,Copier,,,,,,,
+ctx.paste,Paste,Coller,,,,,,,
+ctx.pasteFramed,Paste framed,Coller dans un cadre,,,,,,,
+ctx.delete,Delete,Supprimer,,,,,,,
+ctx.insertImage,Insert image…,Insérer une image…,,,,,,,
+ctx.copyImage,Copy image,Copier l'image,,,,,,,
+ctx.saveImage,Save image,Enregistrer l'image,,,,,,,
+# ── Selection status ───────────────────────────────────────────────
+sel.cell,📍 Selected cell,📍 Cellule sélectionnée,,,,,,,
+sel.cells,📍 {n} cells selected,📍 {n} cellules sélectionnées,,,,,,,
+sel.row,📍 Row {n},📍 Ligne {n},,,,,,,
+sel.col,📍 Column {n},📍 Colonne {n},,,,,,,
+sel.table,📄 Whole table,📄 Tableau entier,,,,,,,
+# ── Modals — common ────────────────────────────────────────────────
+modal.cancel,Cancel,Annuler,,,,,,,
+modal.ok,OK,OK,,,,,,,
+modal.close,Close,Fermer,,,,,,,
+modal.apply,Apply,Appliquer,,,,,,,
+modal.confirm,Confirm,Confirmer,,,,,,,
+# ── Storage modal ──────────────────────────────────────────────────
+storage.title,Storage,Stockage,,,,,,,
+storage.password.placeholder,leave empty for plain zip,laisser vide pour un zip non chiffré,,,,,,,
+storage.saveZip,Save project (.smartproj),Sauvegarder le projet,,,,,,,
+storage.loadZip,Open project,Ouvrir un projet,,,,,,,
+storage.migrate,Migrate images → IDB,Migrer images → IDB,,,,,,,
+storage.migrate.tip,Move inline images from localStorage to IndexedDB,Déplacer les images vers IndexedDB,,,,,,,
+storage.clearLs,Clear localStorage,Effacer localStorage,,,,,,,
+storage.clearLs.tip,Clear localStorage autosave (export first!),Effacer l'autosauvegarde (exportez d'abord !),,,,,,,
+storage.clearIdb,Wipe IndexedDB,Effacer IndexedDB,,,,,,,
+storage.clearIdb.tip,Wipe IndexedDB blobs (images media),Effacer IndexedDB (images médias),,,,,,,
+# ── Import modal ───────────────────────────────────────────────────
+import.title,Import Document,Importer un document,,,,,,,
+import.fromFile,From file,Depuis un fichier,,,,,,,
+import.fromUrl,Or from URL (image html csv json xlsx pdf…),Ou depuis une URL (image html csv json xlsx pdf…),,,,,,,
+import.url.placeholder,https://example.com/file.png,https://exemple.com/fichier.png,,,,,,,
+import.load,Load,Charger,,,,,,,
+import.load.tip,Load URL,Charger l'URL,,,,,,,
+import.import,Import,Importer,,,,,,,
+# ── Print modal ────────────────────────────────────────────────────
+print.header,Header,En-tête,,,,,,,
+print.footer,Footer,Pied de page,,,,,,,
+print.author,Author,Auteur,,,,,,,
+print.author.placeholder,Your name,Votre nom,,,,,,,
+# ── Language selector ──────────────────────────────────────────────
+lang.label,Language,Langue,,,,,,,,Язык,Мова
+lang.en,English,Anglais,,,,,,,,Английский,Англійська
+lang.fr,French,Français,,,,,,,,Французский,Французька
+lang.nl,Dutch,Néerlandais,,,,,,,,Голландский,Голландська
+lang.de,German,Allemand,,,,,,,,Немецкий,Німецька
+lang.es,Spanish,Espagnol,,,,,,,,Испанский,Іспанська
+lang.ar,Arabic,Arabe,,,,,,,,Арабский,Арабська
+lang.zh,Chinese,Chinois,,,,,,,,Китайский,Китайська
+lang.hi,Hindi,Hindi,,,,,,,,Хинди,Гінді
+lang.ja,Japanese,Japonais,,,,,,,,Японский,Японська
+lang.ru,Russian,Russe,,,,,,,,Русский,Російська
+lang.uk,Ukrainian,Ukrainien,,,,,,,,Украинский,Українська
+
+# -- Added 2026-04-21: missing buttons / inputs / option labels --
+page.customW.tip,Custom width (mm),Largeur personnalisée (mm),,,,,,,,,
+page.customH.tip,Custom height (mm),Hauteur personnalisée (mm),,,,,,,,,
+btn.newDoc,📄 New Document,📄 Nouveau document,,,,,,,,,
+btn.newSheet,📊 New Table/Sheet,Tableau Nouveau tableur,,,,,,,,,
+modal.save,Save,Sauvegarder,,,,,,,,,
+import.load.glyph,Load,Charger,,,,,,,,,
+ai.btn.send.label,Send,Envoyer,,,,,,,,,
+tb.translations.tip,Open Translations sheet,Ouvrir la feuille de traductions,,,,,,,,,
+tb.speak.tip,Read selection aloud (TTS),Lire la sélection à voix haute,,,,,,,,,
+storage.measuring,Measuring…,Mesure en cours…,,,,,,,,,
+storage.optPass,Optional passphrase,Phrase de passe (facultative),,,,,,,,,
+storage.passHint,— AES-GCM encrypts state + blobs inside the zip,— AES-GCM chiffre l'état et les blobs dans le zip,,,,,,,,,
+storage.passPlaceholder,leave empty for plain zip,laisser vide pour un zip non chiffré,,,,,,,,,
+storage.whatThis,What this does:,Ce que cela fait :,,,,,,,,,
+storage.whatThis.body,"JSZip cannot set a zip password (ZipCrypto is broken). Instead, each payload inside the zip (state.json + every blob) is encrypted with AES-GCM using a key derived from your passphrase via PBKDF2-SHA-256 (200 000 iterations, random salt + IV per file). Lose the passphrase → the zip is unrecoverable. Leave empty for a plain, unencrypted .smartproj.","JSZip ne peut pas poser de mot de passe sur un zip (ZipCrypto est cassé). À la place, chaque charge utile dans le zip (state.json + chaque blob) est chiffrée en AES-GCM avec une clé dérivée de votre phrase de passe via PBKDF2-SHA-256 (200 000 itérations, sel + IV aléatoires par fichier). Si la phrase est perdue, le zip est irrécupérable. Laissez vide pour un .smartproj non chiffré.",,,,,,,,,
+storage.saveZip.label,Save .smartproj,Enregistrer .smartproj,,,,,,,,,
+storage.loadZip.label,Open .smartproj,Ouvrir .smartproj,,,,,,,,,
+storage.migrate.label,Migrate images → IDB,Migrer les images → IDB,,,,,,,,,
+storage.clearLs.label,Clear autosave,Effacer la sauvegarde auto,,,,,,,,,
+storage.clearIdb.label,Clear IDB blobs,Effacer les blobs IDB,,,,,,,,,
+storage.assetsRoot.title,Default assets folder,Dossier d'assets par défaut,Standaard-assetmap,Standard-Assetordner,Carpeta de recursos por defecto,مجلد الأصول الافتراضي,默认资源文件夹,डिफ़ॉल्ट एसेट फ़ोल्डर,既定のアセットフォルダー,Папка ассетов по умолчанию,Типова тека ресурсів
+storage.assetsRoot.empty,No folder selected — pipeline exports fall back to downloads.,Aucun dossier sélectionné — les exports du pipeline tombent dans les téléchargements.,Geen map geselecteerd — pipeline-exports vallen terug op downloads.,Kein Ordner gewählt — Pipeline-Exporte landen im Download-Ordner.,Ninguna carpeta seleccionada — las exportaciones del pipeline van a descargas.,لم يتم اختيار مجلد — ستُحفظ المخرجات في مجلد التنزيلات.,未选择文件夹 — 管道导出将回退到下载目录。,कोई फ़ोल्डर नहीं चुना — पाइपलाइन निर्यात डाउनलोड पर वापस आ जाते हैं।,フォルダー未選択 — パイプラインのエクスポートはダウンロードに保存されます。,Папка не выбрана — экспорт конвейера пойдёт в загрузки.,Теку не вибрано — експорт конвеєра перейде до завантажень.
+storage.assetsRoot.pick,📁 Choose folder…,📁 Choisir un dossier…,📁 Map kiezen…,📁 Ordner wählen…,📁 Elegir carpeta…,📁 اختر مجلدًا…,📁 选择文件夹…,📁 फ़ोल्डर चुनें…,📁 フォルダーを選ぶ…,📁 Выбрать папку…,📁 Обрати теку…
+storage.assetsRoot.scaffold,🌳 Create subfolders,🌳 Créer les sous-dossiers,🌳 Submappen aanmaken,🌳 Unterordner anlegen,🌳 Crear subcarpetas,🌳 أنشئ المجلدات الفرعية,🌳 创建子文件夹,🌳 सबफ़ोल्डर बनाएँ,🌳 サブフォルダーを作成,🌳 Создать подпапки,🌳 Створити підтеки
+storage.assetsRoot.clear,✖ Forget,✖ Oublier,✖ Vergeten,✖ Vergessen,✖ Olvidar,✖ نسيان,✖ 忘记,✖ भूलें,✖ 忘れる,✖ Забыть,✖ Забути
+print.hideNav,Hide navigation & outline panel in exports,Masquer la navigation et le panneau de plan dans les exports,Verberg navigatie- en overzichtspaneel in exports,Navigation und Gliederungsbereich in Exporten ausblenden,Ocultar el panel de navegación y esquema en las exportaciones,إخفاء لوحة التنقل والمخطط في المخرجات,在导出中隐藏导航和大纲面板,निर्यात में नेविगेशन और आउटलाइन पैनल छिपाएँ,エクスポートでナビゲーションとアウトラインパネルを非表示,Скрывать навигацию и панель плана в экспортах,Приховувати навігацію та панель плану в експортах
+tab.selected,{n} tab selected,{n} onglet sélectionné,{n} tabblad geselecteerd,{n} Tab ausgewählt,{n} pestaña seleccionada,{n} علامة تبويب محددة,已选择 {n} 个标签,{n} टैब चयनित,{n} 個のタブを選択,Выбрана {n} вкладка,Вибрано {n} вкладку
+tab.selected.plural,{n} tabs selected,{n} onglets sélectionnés,{n} tabbladen geselecteerd,{n} Tabs ausgewählt,{n} pestañas seleccionadas,{n} علامات تبويب محددة,已选择 {n} 个标签,{n} टैब चयनित,{n} 個のタブを選択,Выбрано {n} вкладок,Вибрано {n} вкладок
+export.batch.docx.merged,Merged {n} tabs into one DOCX,{n} onglets fusionnés en un seul DOCX,{n} tabbladen samengevoegd tot één DOCX,{n} Tabs zu einem DOCX zusammengeführt,Se fusionaron {n} pestañas en un solo DOCX,تم دمج {n} علامات تبويب في ملف DOCX واحد,已将 {n} 个标签合并为一个 DOCX,{n} टैब एक DOCX में मिलाए,{n} 個のタブを 1 つの DOCX に結合,Объединено {n} вкладок в один DOCX,Об'єднано {n} вкладок в один DOCX
+export.batch.docx.zipped,Zipped {n} DOCX files,{n} fichiers DOCX compressés,{n} DOCX-bestanden gezipt,{n} DOCX-Dateien gezippt,{n} archivos DOCX comprimidos,تم ضغط {n} ملفات DOCX,已压缩 {n} 个 DOCX 文件,{n} DOCX फ़ाइलें ज़िप की गईं,{n} 個の DOCX ファイルを ZIP 化,Заархивировано {n} файлов DOCX,Заархівовано {n} файлів DOCX
+export.batch.choose.title,Batch DOCX export,Export DOCX par lot,Batch DOCX-export,DOCX-Stapelexport,Exportación DOCX por lotes,تصدير DOCX مجمّع,批量 DOCX 导出,बैच DOCX निर्यात,DOCX 一括エクスポート,Пакетный экспорт DOCX,Пакетний експорт DOCX
+export.batch.choose.merge,Merge into one DOCX ({n} tabs),Fusionner en un seul DOCX ({n} onglets),Samenvoegen tot één DOCX ({n} tabbladen),In ein DOCX zusammenführen ({n} Tabs),Fusionar en un solo DOCX ({n} pestañas),دمج في ملف DOCX واحد ({n} علامات),合并为一个 DOCX（{n} 个标签）,एक DOCX में मिलाएँ ({n} टैब),1 つの DOCX に結合 ({n} タブ),Объединить в один DOCX ({n} вкладок),Об'єднати в один DOCX ({n} вкладок)
+export.batch.choose.merge.hint,Keeps cross-doc hyperlinks live,Conserve les liens entre documents,Behoudt werkende kruisverwijzingen,Dokumentübergreifende Links bleiben aktiv,Mantiene los enlaces entre documentos,يحافظ على روابط المستندات المتقاطعة,保留跨文档超链接,दस्तावेज़ों के बीच हाइपरलिंक सक्रिय रहते हैं,ドキュメント間のハイパーリンクを保持,Сохраняет гиперссылки между документами,Зберігає гіперпосилання між документами
+export.batch.choose.zip,Save as ZIP of {n} DOCX files,Enregistrer un ZIP de {n} fichiers DOCX,Opslaan als ZIP met {n} DOCX-bestanden,Als ZIP mit {n} DOCX-Dateien speichern,Guardar como ZIP de {n} archivos DOCX,حفظ كأرشيف ZIP من {n} ملفات DOCX,保存为包含 {n} 个 DOCX 的 ZIP,{n} DOCX फ़ाइलों का ZIP सहेजें,{n} 個の DOCX ファイルを ZIP で保存,Сохранить как ZIP из {n} файлов DOCX,Зберегти як ZIP з {n} файлів DOCX
+export.batch.choose.zip.hint,One file per tab — safer for large sets,Un fichier par onglet — plus sûr pour les grands ensembles,Eén bestand per tabblad — veiliger voor grote sets,Eine Datei pro Tab — sicherer bei vielen Dokumenten,Un archivo por pestaña — más seguro para grandes conjuntos,ملف لكل علامة تبويب — أكثر أمانًا للمجموعات الكبيرة,每个标签一个文件 — 大批量更安全,हर टैब के लिए एक फ़ाइल — बड़े सेट के लिए सुरक्षित,タブごとに 1 ファイル — 大量の場合に安全,По одному файлу на вкладку — надёжнее для больших наборов,По одному файлу на вкладку — безпечніше для великих наборів
+clipboard.open.iceoff,Open in IceOff,Ouvrir dans IceOff,Openen in IceOff,In IceOff öffnen,Abrir en IceOff,فتح في IceOff,在 IceOff 中打开,IceOff में खोलें,IceOff で開く,Открыть в IceOff,Відкрити в IceOff
+print.title,Print / Export — Header & Footer,Imprimer / Exporter — En-tête et pied de page,,,,,,,,,
+print.tokens,Tokens:,Jetons :,,,,,,,,,
+print.authorOpt,Author (optional),Auteur (facultatif),,,,,,,,,
+print.enable,Enable header & footer on print / PDF / DOCX,Activer l'en-tête et le pied de page à l'impression / PDF / DOCX,,,,,,,,,
+ai.ask.placeholder,"Ask anything about your document, or request text generation.",Posez toute question sur votre document ou demandez une génération de texte.,,,,,,,,,
+ai.filter.table,"Filter sheet tools… (e.g. SUM, chart, macro)","Filtrer les outils de feuille… (ex. SUM, graphique, macro)",,,,,,,,,
+ai.filter.doc,"Filter doc tools… (e.g. rewrite, tone, outline)","Filtrer les outils document… (ex. réécrire, ton, plan)",,,,,,,,,
+ctx.tab,Tab,Onglet,,,,,,,,,
+ctx.size,Size,Taille,,,,,,,,,
+ctx.words,Words,Mots,,,,,,,,,
+ctx.chars,Chars,Caractères,,,,,,,,,
+ctx.sel,Sel,Sél,,,,,,,,,
+ctx.last,Last,Dernière,,,,,,,,,
+ctx.switched,switched to {title},basculé vers {title},,,,,,,,,
+ctx.rowsShort,rows,lignes,,,,,,,,,
+ctx.colsShort,cols,cols,,,,,,,,,
+sb.words,Words:,Mots :,,,,,,,,,
+sb.chars,Chars:,Caractères :,,,,,,,,,
+sb.fullWidth,Full width,Pleine largeur,,,,,,,,,
+sheet.rows,Rows,Lignes,,,,,,,,,
+sheet.cols,Cols,Cols,,,,,,,,,
+sheet.apply,Apply,Appliquer,,,,,,,,,
+sheet.cellRange.tip,"Cell or range (examples: A1, B3:D7)","Cellule ou plage (ex. A1, B3:D7)",,,,,,,,,
+sheet.type.tip,Input type,Type de saisie,,,,,,,,,
+sheet.type.auto,Auto,Auto,,,,,,,,,
+sheet.type.number,Number,Nombre,,,,,,,,,
+sheet.type.text,Text,Texte,,,,,,,,,
+sheet.type.date,Date,Date,,,,,,,,,
+sheet.formula.placeholder,"Formula or value (examples: =A1+B1*2, =IF(A1>10,""OK"",""NO""), =SUM(A1:A6), =TRANSLATE(A1,""fr""))","Formule ou valeur (ex. =A1+B1*2, =IF(A1>10,""OK"",""NO""), =SUM(A1:A6), =TRANSLATE(A1,""fr""))",,,,,,,,,
+sheet.set,Set,Définir,,,,,,,,,
+sheet.formulaHelper,Formula Helper,Aide aux formules,,,,,,,,,
+sheet.formulaHelper.hint,Click an example to insert it in the formula bar.,Cliquez sur un exemple pour l'insérer dans la barre de formule.,,,,,,,,,
+sheet.formula.arithmetic,Arithmetic,Arithmétique,,,,,,,,,
+sheet.formula.parentheses,Parentheses,Parenthèses,,,,,,,,,
+sheet.formula.logic,Logic,Logique,,,,,,,,,
+sheet.formula.aggregate,Aggregate,Agrégat,,,,,,,,,
+sheet.formula.translate,Translate,Traduire,,,,,,,,,

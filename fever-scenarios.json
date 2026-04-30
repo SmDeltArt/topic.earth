@@ -1,0 +1,1180 @@
+{
+  "version": "0.1.0",
+  "provisional": true,
+  "updatedAt": "2026-04-08",
+  "defaultScenario": "objective",
+  "years": [
+    1950,
+    1975,
+    2000,
+    2025,
+    2050,
+    2075,
+    2100,
+    2125
+  ],
+  "qualityTiers": [
+    "1k",
+    "4k"
+  ],
+  "notes": {
+    "purpose": "Transparent starter structure for Earth's Fever scenarios, loop textures, AMOC, tipping risk, and future updates.",
+    "warning": "Values below are starter placeholders for wiring, UX, and transparency. Replace with reviewed scientific values over time."
+  },
+  "textureSets": {
+    "1k": {
+      "1950": "earth_1950_1k.png",
+      "1975": "earth_1975_1k.png",
+      "2000": "earth_2000_1k.png",
+      "2025": "earth_2025_1k.png",
+      "2050": "earth_2050_1k.png",
+      "2075": "earth_2075_1k.png",
+      "2100": "earth_2100_1k.png",
+      "2125": "earth_2125_1k.png"
+    },
+    "4k": {
+      "1950": "earth_1950_4k.png",
+      "1975": "earth_1975_4k.png",
+      "2000": "earth_2000_4k.png",
+      "2025": "earth_2025_4k.png",
+      "2050": "earth_2050_4k.png",
+      "2075": "earth_2075_4k.png",
+      "2100": "earth_2100_4k.png",
+      "2125": "earth_2125_4k.png"
+    },
+    "legacy": {
+      "1950": "earth_1950.png",
+      "1975": "earth_1975.png",
+      "2000": "earth_2000.png",
+      "2025": "earth_2025.png",
+      "2050": "earth_2050.png",
+      "2075": "earth_2075.png",
+      "2100": "earth_2100.png",
+      "2125": "earth_2125.png"
+    }
+  },
+  "scenarios": {
+    "best": {
+      "label": "Best",
+      "summary": "Fast mitigation, restoration, and adaptation reduce long-term damage after the mid-century peak.",
+      "milestones": {
+        "1950": {
+          "warningLevel": "baseline",
+          "color": "#eaf6ff",
+          "temperatureDeltaC": 0,
+          "seaLevelCm": 0,
+          "arcticIceLossPct": 0,
+          "vegetationStressPct": 4,
+          "amocStrengthPct": 100,
+          "tippingRiskPct": 4,
+          "warningTitle": "Stable baseline",
+          "warningText": "Human warming signal is still low compared with later decades.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Reference stable",
+              "warningText": "Le signal de rechauffement humain reste faible par rapport aux decennies suivantes."
+            },
+            "nl": {
+              "warningTitle": "Stabiele basislijn",
+              "warningText": "Het menselijke opwarmingssignaal is nog laag vergeleken met latere decennia."
+            },
+            "de": {
+              "warningTitle": "Stabile Ausgangslage",
+              "warningText": "Das menschliche Erwarmungssignal ist im Vergleich zu spateren Jahrzehnten noch gering."
+            },
+            "es": {
+              "warningTitle": "Linea base estable",
+              "warningText": "La senal de calentamiento humano sigue baja frente a las decadas posteriores."
+            },
+            "ru": {
+              "warningTitle": "Стабильная базовая линия",
+              "warningText": "Сигнал антропогенного потепления пока слаб по сравнению с последующими десятилетиями."
+            },
+            "hi": {
+              "warningTitle": "स्थिर आधार रेखा",
+              "warningText": "बाद के दशकों की तुलना में मानव-जनित गर्माहट का संकेत अभी कम है."
+            },
+            "ar": {
+              "warningTitle": "خط أساس مستقر",
+              "warningText": "لا تزال إشارة الاحترار البشري منخفضة مقارنة بالعقود اللاحقة."
+            },
+            "zh": {
+              "warningTitle": "稳定基线",
+              "warningText": "与后来的几十年相比，人类造成的变暖信号仍然较低。"
+            }
+          }
+        },
+        "1975": {
+          "warningLevel": "watch",
+          "color": "#d6f0ff",
+          "temperatureDeltaC": 0.2,
+          "seaLevelCm": 2,
+          "arcticIceLossPct": 3,
+          "vegetationStressPct": 6,
+          "amocStrengthPct": 99,
+          "tippingRiskPct": 6,
+          "warningTitle": "Early warming signal",
+          "warningText": "The climate trend is detectable but still relatively limited.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Signal de rechauffement precoce",
+              "warningText": "La tendance climatique est detectable, mais reste encore relativement limitee."
+            },
+            "nl": {
+              "warningTitle": "Vroeg opwarmingssignaal",
+              "warningText": "De klimaattrend is meetbaar, maar nog relatief beperkt."
+            },
+            "de": {
+              "warningTitle": "Fruhes Erwarmungssignal",
+              "warningText": "Der Klimatrend ist erkennbar, aber noch relativ begrenzt."
+            },
+            "es": {
+              "warningTitle": "Senal temprana de calentamiento",
+              "warningText": "La tendencia climatica es detectable, pero todavia relativamente limitada."
+            },
+            "ru": {
+              "warningTitle": "Ранний сигнал потепления",
+              "warningText": "Климатический тренд уже заметен, но остается относительно ограниченным."
+            },
+            "hi": {
+              "warningTitle": "प्रारंभिक गर्माहट संकेत",
+              "warningText": "जलवायु प्रवृत्ति दिखाई देने लगी है, लेकिन अभी अपेक्षाकृत सीमित है."
+            },
+            "ar": {
+              "warningTitle": "إشارة احترار مبكرة",
+              "warningText": "أصبح اتجاه المناخ قابلا للرصد، لكنه لا يزال محدودا نسبيا."
+            },
+            "zh": {
+              "warningTitle": "早期变暖信号",
+              "warningText": "气候趋势已经可以探测到，但仍然相对有限。"
+            }
+          }
+        },
+        "2000": {
+          "warningLevel": "watch",
+          "color": "#ffe89a",
+          "temperatureDeltaC": 0.6,
+          "seaLevelCm": 7,
+          "arcticIceLossPct": 10,
+          "vegetationStressPct": 11,
+          "amocStrengthPct": 96,
+          "tippingRiskPct": 12,
+          "warningTitle": "Warming becoming visible",
+          "warningText": "Ice, sea level, and ecosystems begin showing clearer stress.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Le rechauffement devient visible",
+              "warningText": "La glace, le niveau de la mer et les ecosystemes montrent des signes de stress plus nets."
+            },
+            "nl": {
+              "warningTitle": "Opwarming wordt zichtbaar",
+              "warningText": "IJs, zeespiegel en ecosystemen tonen duidelijkere stress."
+            },
+            "de": {
+              "warningTitle": "Erwarmung wird sichtbar",
+              "warningText": "Eis, Meeresspiegel und Okosysteme zeigen klarere Belastung."
+            },
+            "es": {
+              "warningTitle": "El calentamiento se vuelve visible",
+              "warningText": "El hielo, el nivel del mar y los ecosistemas empiezan a mostrar estres mas claro."
+            },
+            "ru": {
+              "warningTitle": "Потепление становится видимым",
+              "warningText": "Лед, уровень моря и экосистемы начинают показывать более явный стресс."
+            },
+            "hi": {
+              "warningTitle": "गर्माहट दिखाई देने लगी",
+              "warningText": "बर्फ, समुद्र स्तर और पारिस्थितिक तंत्र अधिक साफ तनाव दिखाने लगते हैं."
+            },
+            "ar": {
+              "warningTitle": "الاحترار يصبح مرئيا",
+              "warningText": "يبدأ الجليد ومستوى البحر والنظم البيئية بإظهار ضغط أوضح."
+            },
+            "zh": {
+              "warningTitle": "变暖开始显现",
+              "warningText": "冰层、海平面和生态系统开始显示更清晰的压力。"
+            }
+          }
+        },
+        "2025": {
+          "warningLevel": "warning",
+          "color": "#ffbf5e",
+          "temperatureDeltaC": 1.4,
+          "seaLevelCm": 16,
+          "arcticIceLossPct": 22,
+          "vegetationStressPct": 19,
+          "amocStrengthPct": 92,
+          "tippingRiskPct": 22,
+          "warningTitle": "Current era warning",
+          "warningText": "Strong action is still possible, but multiple systems are already under pressure.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Alerte de l ere actuelle",
+              "warningText": "Une action forte reste possible, mais plusieurs systemes sont deja sous pression."
+            },
+            "nl": {
+              "warningTitle": "Waarschuwing huidige tijd",
+              "warningText": "Sterke actie is nog mogelijk, maar meerdere systemen staan al onder druk."
+            },
+            "de": {
+              "warningTitle": "Warnung der Gegenwart",
+              "warningText": "Entschlossenes Handeln ist noch moglich, aber mehrere Systeme stehen bereits unter Druck."
+            },
+            "es": {
+              "warningTitle": "Advertencia de la era actual",
+              "warningText": "Una accion fuerte sigue siendo posible, pero varios sistemas ya estan bajo presion."
+            },
+            "ru": {
+              "warningTitle": "Предупреждение текущей эпохи",
+              "warningText": "Решительные действия еще возможны, но несколько систем уже находятся под давлением."
+            },
+            "hi": {
+              "warningTitle": "वर्तमान युग की चेतावनी",
+              "warningText": "मजबूत कार्रवाई अभी भी संभव है, लेकिन कई प्रणालियां पहले से दबाव में हैं."
+            },
+            "ar": {
+              "warningTitle": "تحذير العصر الحالي",
+              "warningText": "لا يزال العمل القوي ممكنا، لكن عدة أنظمة واقعة بالفعل تحت الضغط."
+            },
+            "zh": {
+              "warningTitle": "当前时代警告",
+              "warningText": "强有力的行动仍然可能，但多个系统已经承受压力。"
+            }
+          }
+        },
+        "2050": {
+          "warningLevel": "warning",
+          "color": "#ff9f43",
+          "temperatureDeltaC": 1.7,
+          "seaLevelCm": 26,
+          "arcticIceLossPct": 32,
+          "vegetationStressPct": 24,
+          "amocStrengthPct": 88,
+          "tippingRiskPct": 29,
+          "warningTitle": "Managed peak pressure",
+          "warningText": "The system is stressed, but coordinated action begins bending the curve.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Pic de pression gere",
+              "warningText": "Le systeme est sous tension, mais l action coordonnee commence a inflechir la courbe."
+            },
+            "nl": {
+              "warningTitle": "Beheerde piekdruk",
+              "warningText": "Het systeem staat onder stress, maar gecoordineerde actie begint de curve om te buigen."
+            },
+            "de": {
+              "warningTitle": "Gesteuerter Belastungsgipfel",
+              "warningText": "Das System ist belastet, aber koordiniertes Handeln beginnt die Kurve zu biegen."
+            },
+            "es": {
+              "warningTitle": "Pico de presion gestionado",
+              "warningText": "El sistema esta estresado, pero la accion coordinada empieza a doblar la curva."
+            },
+            "ru": {
+              "warningTitle": "Управляемый пик нагрузки",
+              "warningText": "Система напряжена, но согласованные действия начинают менять траекторию."
+            },
+            "hi": {
+              "warningTitle": "संभाला गया चरम दबाव",
+              "warningText": "प्रणाली तनाव में है, लेकिन समन्वित कार्रवाई वक्र को मोड़ना शुरू करती है."
+            },
+            "ar": {
+              "warningTitle": "ذروة ضغط تحت الإدارة",
+              "warningText": "النظام متوتر، لكن العمل المنسق يبدأ في ثني المنحنى."
+            },
+            "zh": {
+              "warningTitle": "受控峰值压力",
+              "warningText": "系统处于压力之下，但协调行动开始让曲线转向。"
+            }
+          }
+        },
+        "2075": {
+          "warningLevel": "elevated",
+          "color": "#ff8a3d",
+          "temperatureDeltaC": 1.6,
+          "seaLevelCm": 34,
+          "arcticIceLossPct": 35,
+          "vegetationStressPct": 23,
+          "amocStrengthPct": 87,
+          "tippingRiskPct": 27,
+          "warningTitle": "Stabilization phase",
+          "warningText": "Some impacts persist, but the trajectory is no longer accelerating.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Phase de stabilisation",
+              "warningText": "Certains impacts persistent, mais la trajectoire n accelere plus."
+            },
+            "nl": {
+              "warningTitle": "Stabilisatiefase",
+              "warningText": "Sommige effecten blijven, maar het pad versnelt niet langer."
+            },
+            "de": {
+              "warningTitle": "Stabilisierungsphase",
+              "warningText": "Einige Auswirkungen bleiben, aber die Entwicklung beschleunigt sich nicht mehr."
+            },
+            "es": {
+              "warningTitle": "Fase de estabilizacion",
+              "warningText": "Algunos impactos persisten, pero la trayectoria ya no acelera."
+            },
+            "ru": {
+              "warningTitle": "Фаза стабилизации",
+              "warningText": "Некоторые воздействия сохраняются, но траектория больше не ускоряется."
+            },
+            "hi": {
+              "warningTitle": "स्थिरीकरण चरण",
+              "warningText": "कुछ प्रभाव बने रहते हैं, लेकिन मार्ग अब तेज नहीं हो रहा."
+            },
+            "ar": {
+              "warningTitle": "مرحلة الاستقرار",
+              "warningText": "تستمر بعض الآثار، لكن المسار لم يعد يتسارع."
+            },
+            "zh": {
+              "warningTitle": "稳定阶段",
+              "warningText": "一些影响仍然存在，但轨迹不再加速。"
+            }
+          }
+        },
+        "2100": {
+          "warningLevel": "elevated",
+          "color": "#ff7b3a",
+          "temperatureDeltaC": 1.4,
+          "seaLevelCm": 40,
+          "arcticIceLossPct": 34,
+          "vegetationStressPct": 20,
+          "amocStrengthPct": 88,
+          "tippingRiskPct": 24,
+          "warningTitle": "Long recovery horizon",
+          "warningText": "The climate remains altered, but the most dangerous escalation is limited.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Horizon de longue recuperation",
+              "warningText": "Le climat reste transforme, mais l escalation la plus dangereuse est limitee."
+            },
+            "nl": {
+              "warningTitle": "Lange herstelhorizon",
+              "warningText": "Het klimaat blijft veranderd, maar de gevaarlijkste escalatie is beperkt."
+            },
+            "de": {
+              "warningTitle": "Langer Erholungshorizont",
+              "warningText": "Das Klima bleibt verandert, aber die gefahrlichste Eskalation ist begrenzt."
+            },
+            "es": {
+              "warningTitle": "Horizonte largo de recuperacion",
+              "warningText": "El clima sigue alterado, pero la escalada mas peligrosa queda limitada."
+            },
+            "ru": {
+              "warningTitle": "Долгий горизонт восстановления",
+              "warningText": "Климат остается измененным, но самая опасная эскалация ограничена."
+            },
+            "hi": {
+              "warningTitle": "लंबा पुनर्प्राप्ति क्षितिज",
+              "warningText": "जलवायु बदली रहती है, लेकिन सबसे खतरनाक वृद्धि सीमित हो जाती है."
+            },
+            "ar": {
+              "warningTitle": "أفق تعاف طويل",
+              "warningText": "يبقى المناخ متغيرا، لكن أخطر تصعيد يصبح محدودا."
+            },
+            "zh": {
+              "warningTitle": "长期恢复前景",
+              "warningText": "气候仍被改变，但最危险的升级得到限制。"
+            }
+          }
+        },
+        "2125": {
+          "warningLevel": "watch",
+          "color": "#ff7040",
+          "temperatureDeltaC": 1.2,
+          "seaLevelCm": 45,
+          "arcticIceLossPct": 30,
+          "vegetationStressPct": 17,
+          "amocStrengthPct": 90,
+          "tippingRiskPct": 20,
+          "warningTitle": "Slow repair world",
+          "warningText": "Past damage remains, but system pressure is lower than in harsher futures.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Monde en lente reparation",
+              "warningText": "Les dommages passes restent visibles, mais la pression du systeme est plus basse que dans les futurs plus durs."
+            },
+            "nl": {
+              "warningTitle": "Langzaam herstellende wereld",
+              "warningText": "Schade uit het verleden blijft, maar de systeemdruk is lager dan in hardere toekomsten."
+            },
+            "de": {
+              "warningTitle": "Langsame Reparaturwelt",
+              "warningText": "Vergangene Schaden bleiben, aber der Systemdruck ist geringer als in harteren Zukunften."
+            },
+            "es": {
+              "warningTitle": "Mundo de reparacion lenta",
+              "warningText": "El dano pasado permanece, pero la presion del sistema es menor que en futuros mas duros."
+            },
+            "ru": {
+              "warningTitle": "Мир медленного восстановления",
+              "warningText": "Прошлый ущерб сохраняется, но давление на систему ниже, чем в более жестких сценариях."
+            },
+            "hi": {
+              "warningTitle": "धीमी मरम्मत वाली दुनिया",
+              "warningText": "पिछला नुकसान बना रहता है, लेकिन प्रणाली पर दबाव कठोर भविष्य की तुलना में कम है."
+            },
+            "ar": {
+              "warningTitle": "عالم إصلاح بطيء",
+              "warningText": "يبقى الضرر السابق، لكن ضغط النظام أقل مما هو عليه في مستقبلات أقسى."
+            },
+            "zh": {
+              "warningTitle": "缓慢修复的世界",
+              "warningText": "过去的损害仍然存在，但系统压力低于更严峻的未来。"
+            }
+          }
+        }
+      }
+    },
+    "objective": {
+      "label": "Objective",
+      "summary": "Middle path based on current momentum, partial mitigation, uneven adaptation, and continued pressure.",
+      "milestones": {
+        "1950": {
+          "warningLevel": "baseline",
+          "color": "#eaf6ff",
+          "temperatureDeltaC": 0,
+          "seaLevelCm": 0,
+          "arcticIceLossPct": 0,
+          "vegetationStressPct": 4,
+          "amocStrengthPct": 100,
+          "tippingRiskPct": 4,
+          "warningTitle": "Stable baseline",
+          "warningText": "This is the visual and data baseline for the later simulation.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Reference stable",
+              "warningText": "C est la reference visuelle et de donnees pour la simulation ulterieure."
+            },
+            "nl": {
+              "warningTitle": "Stabiele basislijn",
+              "warningText": "Dit is de visuele en databasislijn voor de latere simulatie."
+            },
+            "de": {
+              "warningTitle": "Stabile Ausgangslage",
+              "warningText": "Dies ist die visuelle und datenbasierte Ausgangslage fur die spatere Simulation."
+            },
+            "es": {
+              "warningTitle": "Linea base estable",
+              "warningText": "Esta es la linea base visual y de datos para la simulacion posterior."
+            },
+            "ru": {
+              "warningTitle": "Стабильная базовая линия",
+              "warningText": "Это визуальная и числовая базовая линия для последующей симуляции."
+            },
+            "hi": {
+              "warningTitle": "स्थिर आधार रेखा",
+              "warningText": "यह बाद की सिमुलेशन के लिए दृश्य और डेटा आधार रेखा है."
+            },
+            "ar": {
+              "warningTitle": "خط أساس مستقر",
+              "warningText": "هذا هو خط الأساس البصري والبياني للمحاكاة اللاحقة."
+            },
+            "zh": {
+              "warningTitle": "稳定基线",
+              "warningText": "这是后续模拟的视觉和数据基线。"
+            }
+          }
+        },
+        "1975": {
+          "warningLevel": "watch",
+          "color": "#d9f1ff",
+          "temperatureDeltaC": 0.2,
+          "seaLevelCm": 2,
+          "arcticIceLossPct": 4,
+          "vegetationStressPct": 6,
+          "amocStrengthPct": 99,
+          "tippingRiskPct": 7,
+          "warningTitle": "Early warming signal",
+          "warningText": "The system starts warming, but the largest changes are still ahead.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Signal de rechauffement precoce",
+              "warningText": "Le systeme commence a se rechauffer, mais les plus grands changements sont encore devant nous."
+            },
+            "nl": {
+              "warningTitle": "Vroeg opwarmingssignaal",
+              "warningText": "Het systeem begint op te warmen, maar de grootste veranderingen liggen nog voor ons."
+            },
+            "de": {
+              "warningTitle": "Fruhes Erwarmungssignal",
+              "warningText": "Das System beginnt sich zu erwarmen, aber die grossten Veranderungen liegen noch vor uns."
+            },
+            "es": {
+              "warningTitle": "Senal temprana de calentamiento",
+              "warningText": "El sistema empieza a calentarse, pero los mayores cambios aun estan por delante."
+            },
+            "ru": {
+              "warningTitle": "Ранний сигнал потепления",
+              "warningText": "Система начинает нагреваться, но крупнейшие изменения еще впереди."
+            },
+            "hi": {
+              "warningTitle": "प्रारंभिक गर्माहट संकेत",
+              "warningText": "प्रणाली गर्म होना शुरू करती है, लेकिन सबसे बड़े बदलाव अभी आगे हैं."
+            },
+            "ar": {
+              "warningTitle": "إشارة احترار مبكرة",
+              "warningText": "يبدأ النظام في الاحترار، لكن أكبر التغيرات ما زالت أمامنا."
+            },
+            "zh": {
+              "warningTitle": "早期变暖信号",
+              "warningText": "系统开始变暖，但最大的变化仍在前方。"
+            }
+          }
+        },
+        "2000": {
+          "warningLevel": "watch",
+          "color": "#ffe28b",
+          "temperatureDeltaC": 0.7,
+          "seaLevelCm": 8,
+          "arcticIceLossPct": 12,
+          "vegetationStressPct": 12,
+          "amocStrengthPct": 96,
+          "tippingRiskPct": 14,
+          "warningTitle": "Warming clearly visible",
+          "warningText": "Ice loss, ecosystem stress, and ocean heating are becoming more measurable.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Rechauffement clairement visible",
+              "warningText": "La perte de glace, le stress des ecosystemes et le rechauffement de l ocean deviennent plus mesurables."
+            },
+            "nl": {
+              "warningTitle": "Opwarming duidelijk zichtbaar",
+              "warningText": "IJsverlies, ecosysteemstress en oceaanopwarming worden beter meetbaar."
+            },
+            "de": {
+              "warningTitle": "Erwarmung klar sichtbar",
+              "warningText": "Eisverlust, Okosystemstress und Ozeanerwarmung werden messbarer."
+            },
+            "es": {
+              "warningTitle": "Calentamiento claramente visible",
+              "warningText": "La perdida de hielo, el estres ecosistemico y el calentamiento oceanico se vuelven mas medibles."
+            },
+            "ru": {
+              "warningTitle": "Потепление ясно видно",
+              "warningText": "Потеря льда, стресс экосистем и нагрев океана становятся более измеримыми."
+            },
+            "hi": {
+              "warningTitle": "गर्माहट साफ दिखाई देती है",
+              "warningText": "बर्फ की हानि, पारिस्थितिक तनाव और महासागर की गर्मी अधिक मापनीय हो रही है."
+            },
+            "ar": {
+              "warningTitle": "احترار واضح للعيان",
+              "warningText": "يصبح فقدان الجليد وضغط النظم البيئية واحترار المحيط أكثر قابلية للقياس."
+            },
+            "zh": {
+              "warningTitle": "变暖清晰可见",
+              "warningText": "冰损失、生态系统压力和海洋升温变得更可测量。"
+            }
+          }
+        },
+        "2025": {
+          "warningLevel": "warning",
+          "color": "#ffb24d",
+          "temperatureDeltaC": 1.5,
+          "seaLevelCm": 18,
+          "arcticIceLossPct": 24,
+          "vegetationStressPct": 21,
+          "amocStrengthPct": 91,
+          "tippingRiskPct": 25,
+          "warningTitle": "Current era warning",
+          "warningText": "The climate system is already under sustained human pressure.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Alerte de l ere actuelle",
+              "warningText": "Le systeme climatique subit deja une pression humaine durable."
+            },
+            "nl": {
+              "warningTitle": "Waarschuwing huidige tijd",
+              "warningText": "Het klimaatsysteem staat al onder aanhoudende menselijke druk."
+            },
+            "de": {
+              "warningTitle": "Warnung der Gegenwart",
+              "warningText": "Das Klimasystem steht bereits unter anhaltendem menschlichem Druck."
+            },
+            "es": {
+              "warningTitle": "Advertencia de la era actual",
+              "warningText": "El sistema climatico ya esta bajo presion humana sostenida."
+            },
+            "ru": {
+              "warningTitle": "Предупреждение текущей эпохи",
+              "warningText": "Климатическая система уже находится под устойчивым давлением человека."
+            },
+            "hi": {
+              "warningTitle": "वर्तमान युग की चेतावनी",
+              "warningText": "जलवायु प्रणाली पहले से ही स्थायी मानव दबाव में है."
+            },
+            "ar": {
+              "warningTitle": "تحذير العصر الحالي",
+              "warningText": "النظام المناخي واقع بالفعل تحت ضغط بشري مستمر."
+            },
+            "zh": {
+              "warningTitle": "当前时代警告",
+              "warningText": "气候系统已经承受持续的人类压力。"
+            }
+          }
+        },
+        "2050": {
+          "warningLevel": "severe",
+          "color": "#ff8c3a",
+          "temperatureDeltaC": 2.1,
+          "seaLevelCm": 31,
+          "arcticIceLossPct": 39,
+          "vegetationStressPct": 31,
+          "amocStrengthPct": 84,
+          "tippingRiskPct": 39,
+          "warningTitle": "Escalating instability",
+          "warningText": "Multiple risks grow together: heat, water stress, ecosystem loss, and ocean disruption.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Instabilite croissante",
+              "warningText": "Plusieurs risques grandissent ensemble: chaleur, stress hydrique, perte d ecosystemes et perturbation oceanique."
+            },
+            "nl": {
+              "warningTitle": "Escalerende instabiliteit",
+              "warningText": "Meerdere risico's groeien samen: hitte, waterstress, ecosysteemverlies en oceaanverstoring."
+            },
+            "de": {
+              "warningTitle": "Zunehmende Instabilitat",
+              "warningText": "Mehrere Risiken wachsen zusammen: Hitze, Wasserstress, Okosystemverlust und Ozeanstorung."
+            },
+            "es": {
+              "warningTitle": "Inestabilidad en aumento",
+              "warningText": "Varios riesgos crecen juntos: calor, estres hidrico, perdida de ecosistemas y disrupcion oceanica."
+            },
+            "ru": {
+              "warningTitle": "Нарастающая нестабильность",
+              "warningText": "Несколько рисков растут вместе: жара, дефицит воды, потеря экосистем и нарушение океана."
+            },
+            "hi": {
+              "warningTitle": "बढ़ती अस्थिरता",
+              "warningText": "कई जोखिम साथ बढ़ते हैं: गर्मी, जल तनाव, पारिस्थितिकी हानि और महासागर व्यवधान."
+            },
+            "ar": {
+              "warningTitle": "عدم استقرار متصاعد",
+              "warningText": "تنمو عدة مخاطر معا: الحرارة، ضغط المياه، فقدان النظم البيئية واضطراب المحيط."
+            },
+            "zh": {
+              "warningTitle": "不稳定性升级",
+              "warningText": "多种风险一起增长：高温、水压力、生态系统损失和海洋扰动。"
+            }
+          }
+        },
+        "2075": {
+          "warningLevel": "severe",
+          "color": "#ff6f32",
+          "temperatureDeltaC": 2.6,
+          "seaLevelCm": 46,
+          "arcticIceLossPct": 52,
+          "vegetationStressPct": 40,
+          "amocStrengthPct": 77,
+          "tippingRiskPct": 52,
+          "warningTitle": "Compounding damage phase",
+          "warningText": "The world faces stronger cascading effects and rising adaptation limits.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Phase de dommages composes",
+              "warningText": "Le monde affronte des effets en cascade plus forts et des limites d adaptation croissantes."
+            },
+            "nl": {
+              "warningTitle": "Fase van samengestelde schade",
+              "warningText": "De wereld krijgt sterkere cascade-effecten en stijgende aanpassingsgrenzen."
+            },
+            "de": {
+              "warningTitle": "Phase verstarkter Schaden",
+              "warningText": "Die Welt erlebt starkere Kaskadeneffekte und wachsende Grenzen der Anpassung."
+            },
+            "es": {
+              "warningTitle": "Fase de dano compuesto",
+              "warningText": "El mundo enfrenta efectos en cascada mas fuertes y limites crecientes de adaptacion."
+            },
+            "ru": {
+              "warningTitle": "Фаза накапливающегося ущерба",
+              "warningText": "Мир сталкивается с более сильными каскадными эффектами и растущими пределами адаптации."
+            },
+            "hi": {
+              "warningTitle": "संयुक्त क्षति चरण",
+              "warningText": "दुनिया मजबूत शृंखलाबद्ध प्रभावों और बढ़ती अनुकूलन सीमाओं का सामना करती है."
+            },
+            "ar": {
+              "warningTitle": "مرحلة ضرر متراكب",
+              "warningText": "يواجه العالم آثارا متسلسلة أقوى وحدودا متزايدة للتكيف."
+            },
+            "zh": {
+              "warningTitle": "复合损害阶段",
+              "warningText": "世界面临更强的连锁效应和不断上升的适应极限。"
+            }
+          }
+        },
+        "2100": {
+          "warningLevel": "critical",
+          "color": "#f5522f",
+          "temperatureDeltaC": 3,
+          "seaLevelCm": 60,
+          "arcticIceLossPct": 63,
+          "vegetationStressPct": 49,
+          "amocStrengthPct": 70,
+          "tippingRiskPct": 64,
+          "warningTitle": "Deep system stress",
+          "warningText": "Several Earth systems are under intense pressure and recovery becomes slower.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Stress profond du systeme",
+              "warningText": "Plusieurs systemes terrestres subissent une pression intense et la recuperation ralentit."
+            },
+            "nl": {
+              "warningTitle": "Diepe systeemstress",
+              "warningText": "Meerdere aardse systemen staan onder intense druk en herstel wordt trager."
+            },
+            "de": {
+              "warningTitle": "Tiefe Systembelastung",
+              "warningText": "Mehrere Erdsysteme stehen unter starkem Druck und die Erholung wird langsamer."
+            },
+            "es": {
+              "warningTitle": "Estres profundo del sistema",
+              "warningText": "Varios sistemas terrestres estan bajo presion intensa y la recuperacion se vuelve mas lenta."
+            },
+            "ru": {
+              "warningTitle": "Глубокий стресс системы",
+              "warningText": "Несколько земных систем находятся под сильным давлением, а восстановление замедляется."
+            },
+            "hi": {
+              "warningTitle": "गहरा प्रणाली तनाव",
+              "warningText": "कई पृथ्वी प्रणालियां तीव्र दबाव में हैं और पुनर्प्राप्ति धीमी हो जाती है."
+            },
+            "ar": {
+              "warningTitle": "ضغط عميق على النظام",
+              "warningText": "عدة أنظمة أرضية تحت ضغط شديد، والتعافي يصبح أبطأ."
+            },
+            "zh": {
+              "warningTitle": "深层系统压力",
+              "warningText": "多个地球系统承受强烈压力，恢复变得更慢。"
+            }
+          }
+        },
+        "2125": {
+          "warningLevel": "critical",
+          "color": "#e5432d",
+          "temperatureDeltaC": 3.2,
+          "seaLevelCm": 73,
+          "arcticIceLossPct": 70,
+          "vegetationStressPct": 55,
+          "amocStrengthPct": 66,
+          "tippingRiskPct": 70,
+          "warningTitle": "Long-tail damage",
+          "warningText": "Even if warming slows later, system impacts remain locked in for a long time.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Dommages a longue traine",
+              "warningText": "Meme si le rechauffement ralentit ensuite, les impacts restent verrouilles pendant longtemps."
+            },
+            "nl": {
+              "warningTitle": "Langdurige schade",
+              "warningText": "Zelfs als opwarming later vertraagt, blijven systeemeffecten lang vastliggen."
+            },
+            "de": {
+              "warningTitle": "Langzeitschaden",
+              "warningText": "Selbst wenn sich die Erwarmung spater verlangsamt, bleiben Systemfolgen lange festgeschrieben."
+            },
+            "es": {
+              "warningTitle": "Dano de larga cola",
+              "warningText": "Aunque el calentamiento se desacelere despues, los impactos quedan fijados durante mucho tiempo."
+            },
+            "ru": {
+              "warningTitle": "Долгий хвост ущерба",
+              "warningText": "Даже если потепление позже замедлится, последствия останутся закрепленными надолго."
+            },
+            "hi": {
+              "warningTitle": "दीर्घकालिक क्षति",
+              "warningText": "यदि बाद में गर्माहट धीमी भी हो, तो प्रणालीगत प्रभाव लंबे समय तक बंद रहते हैं."
+            },
+            "ar": {
+              "warningTitle": "ضرر طويل الأمد",
+              "warningText": "حتى إذا تباطأ الاحترار لاحقا، تبقى الآثار النظامية مثبتة لفترة طويلة."
+            },
+            "zh": {
+              "warningTitle": "长尾损害",
+              "warningText": "即使之后变暖放缓，系统影响也会长期锁定。"
+            }
+          }
+        }
+      }
+    },
+    "high": {
+      "label": "High",
+      "summary": "Late action and stronger feedbacks push the climate into a more dangerous, cascading pathway.",
+      "milestones": {
+        "1950": {
+          "warningLevel": "baseline",
+          "color": "#eaf6ff",
+          "temperatureDeltaC": 0,
+          "seaLevelCm": 0,
+          "arcticIceLossPct": 0,
+          "vegetationStressPct": 4,
+          "amocStrengthPct": 100,
+          "tippingRiskPct": 4,
+          "warningTitle": "Stable baseline",
+          "warningText": "The baseline looks calm, but later decades diverge sharply in this scenario.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Reference stable",
+              "warningText": "La reference semble calme, mais les decennies suivantes divergent fortement dans ce scenario."
+            },
+            "nl": {
+              "warningTitle": "Stabiele basislijn",
+              "warningText": "De basislijn lijkt rustig, maar latere decennia wijken sterk af in dit scenario."
+            },
+            "de": {
+              "warningTitle": "Stabile Ausgangslage",
+              "warningText": "Die Ausgangslage wirkt ruhig, aber spatere Jahrzehnte weichen in diesem Szenario stark ab."
+            },
+            "es": {
+              "warningTitle": "Linea base estable",
+              "warningText": "La linea base parece tranquila, pero las decadas posteriores divergen con fuerza en este escenario."
+            },
+            "ru": {
+              "warningTitle": "Стабильная базовая линия",
+              "warningText": "Базовая линия выглядит спокойной, но последующие десятилетия резко расходятся в этом сценарии."
+            },
+            "hi": {
+              "warningTitle": "स्थिर आधार रेखा",
+              "warningText": "आधार रेखा शांत दिखती है, लेकिन इस परिदृश्य में बाद के दशक तेजी से अलग हो जाते हैं."
+            },
+            "ar": {
+              "warningTitle": "خط أساس مستقر",
+              "warningText": "يبدو خط الأساس هادئا، لكن العقود اللاحقة تنحرف بشدة في هذا السيناريو."
+            },
+            "zh": {
+              "warningTitle": "稳定基线",
+              "warningText": "基线看似平静，但在此情景下后来的几十年会急剧分化。"
+            }
+          }
+        },
+        "1975": {
+          "warningLevel": "watch",
+          "color": "#d7f0ff",
+          "temperatureDeltaC": 0.3,
+          "seaLevelCm": 3,
+          "arcticIceLossPct": 5,
+          "vegetationStressPct": 7,
+          "amocStrengthPct": 98,
+          "tippingRiskPct": 8,
+          "warningTitle": "Warming signal starting",
+          "warningText": "The climate trend begins similarly, before the sharper acceleration later.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Debut du signal de rechauffement",
+              "warningText": "La tendance climatique commence de facon similaire, avant l acceleration plus nette qui suit."
+            },
+            "nl": {
+              "warningTitle": "Opwarmingssignaal begint",
+              "warningText": "De klimaattrend begint vergelijkbaar, voordat de latere versnelling scherper wordt."
+            },
+            "de": {
+              "warningTitle": "Erwarmungssignal beginnt",
+              "warningText": "Der Klimatrend beginnt ahnlich, bevor die spatere Beschleunigung scharfer wird."
+            },
+            "es": {
+              "warningTitle": "Comienza la senal de calentamiento",
+              "warningText": "La tendencia climatica empieza de forma similar, antes de una aceleracion mas brusca."
+            },
+            "ru": {
+              "warningTitle": "Начало сигнала потепления",
+              "warningText": "Климатический тренд начинается похоже, прежде чем позже ускориться сильнее."
+            },
+            "hi": {
+              "warningTitle": "गर्माहट संकेत शुरू",
+              "warningText": "जलवायु प्रवृत्ति समान रूप से शुरू होती है, फिर बाद में तेज त्वरण आता है."
+            },
+            "ar": {
+              "warningTitle": "بداية إشارة الاحترار",
+              "warningText": "يبدأ اتجاه المناخ بطريقة مشابهة، قبل تسارع أشد لاحقا."
+            },
+            "zh": {
+              "warningTitle": "变暖信号开始",
+              "warningText": "气候趋势起初相似，随后出现更强的加速。"
+            }
+          }
+        },
+        "2000": {
+          "warningLevel": "warning",
+          "color": "#ffd66c",
+          "temperatureDeltaC": 0.8,
+          "seaLevelCm": 9,
+          "arcticIceLossPct": 14,
+          "vegetationStressPct": 14,
+          "amocStrengthPct": 95,
+          "tippingRiskPct": 17,
+          "warningTitle": "Acceleration beginning",
+          "warningText": "This path starts to separate more clearly from safer futures.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Debut de l acceleration",
+              "warningText": "Cette trajectoire commence a se separer plus clairement des futurs plus surs."
+            },
+            "nl": {
+              "warningTitle": "Versnelling begint",
+              "warningText": "Dit pad begint zich duidelijker te scheiden van veiligere toekomsten."
+            },
+            "de": {
+              "warningTitle": "Beschleunigung beginnt",
+              "warningText": "Dieser Pfad trennt sich klarer von sichereren Zukunften."
+            },
+            "es": {
+              "warningTitle": "Comienza la aceleracion",
+              "warningText": "Esta ruta empieza a separarse con mas claridad de futuros mas seguros."
+            },
+            "ru": {
+              "warningTitle": "Начало ускорения",
+              "warningText": "Этот путь начинает заметнее отделяться от более безопасных вариантов будущего."
+            },
+            "hi": {
+              "warningTitle": "त्वरण शुरू",
+              "warningText": "यह मार्ग सुरक्षित भविष्य से अधिक साफ अलग होना शुरू करता है."
+            },
+            "ar": {
+              "warningTitle": "بداية التسارع",
+              "warningText": "يبدأ هذا المسار في الابتعاد بوضوح أكبر عن مستقبلات أكثر أمانا."
+            },
+            "zh": {
+              "warningTitle": "加速开始",
+              "warningText": "这条路径开始更清楚地偏离较安全的未来。"
+            }
+          }
+        },
+        "2025": {
+          "warningLevel": "warning",
+          "color": "#ffac48",
+          "temperatureDeltaC": 1.6,
+          "seaLevelCm": 19,
+          "arcticIceLossPct": 26,
+          "vegetationStressPct": 23,
+          "amocStrengthPct": 90,
+          "tippingRiskPct": 28,
+          "warningTitle": "Current era warning",
+          "warningText": "The present becomes the launching point for faster destabilization.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Alerte de l ere actuelle",
+              "warningText": "Le present devient le point de depart d une destabilisation plus rapide."
+            },
+            "nl": {
+              "warningTitle": "Waarschuwing huidige tijd",
+              "warningText": "Het heden wordt het startpunt voor snellere destabilisatie."
+            },
+            "de": {
+              "warningTitle": "Warnung der Gegenwart",
+              "warningText": "Die Gegenwart wird zum Ausgangspunkt schnellerer Destabilisierung."
+            },
+            "es": {
+              "warningTitle": "Advertencia de la era actual",
+              "warningText": "El presente se convierte en el punto de partida de una desestabilizacion mas rapida."
+            },
+            "ru": {
+              "warningTitle": "Предупреждение текущей эпохи",
+              "warningText": "Настоящее становится стартовой точкой более быстрой дестабилизации."
+            },
+            "hi": {
+              "warningTitle": "वर्तमान युग की चेतावनी",
+              "warningText": "वर्तमान तेज अस्थिरता का प्रारंभिक बिंदु बन जाता है."
+            },
+            "ar": {
+              "warningTitle": "تحذير العصر الحالي",
+              "warningText": "يصبح الحاضر نقطة انطلاق لزعزعة استقرار أسرع."
+            },
+            "zh": {
+              "warningTitle": "当前时代警告",
+              "warningText": "当下成为更快速失稳的起点。"
+            }
+          }
+        },
+        "2050": {
+          "warningLevel": "severe",
+          "color": "#ff7f30",
+          "temperatureDeltaC": 2.8,
+          "seaLevelCm": 39,
+          "arcticIceLossPct": 49,
+          "vegetationStressPct": 40,
+          "amocStrengthPct": 76,
+          "tippingRiskPct": 52,
+          "warningTitle": "Major destabilization underway",
+          "warningText": "Heat, ice loss, and circulation stress intensify together.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Destabilisation majeure en cours",
+              "warningText": "Chaleur, perte de glace et stress de circulation s intensifient ensemble."
+            },
+            "nl": {
+              "warningTitle": "Grote destabilisatie gaande",
+              "warningText": "Hitte, ijsverlies en circulatiestress nemen samen toe."
+            },
+            "de": {
+              "warningTitle": "Grosse Destabilisierung lauft",
+              "warningText": "Hitze, Eisverlust und Zirkulationsstress verstarken sich gemeinsam."
+            },
+            "es": {
+              "warningTitle": "Gran desestabilizacion en marcha",
+              "warningText": "El calor, la perdida de hielo y el estres de circulacion se intensifican juntos."
+            },
+            "ru": {
+              "warningTitle": "Крупная дестабилизация идет",
+              "warningText": "Жара, потеря льда и стресс циркуляции усиливаются вместе."
+            },
+            "hi": {
+              "warningTitle": "बड़ी अस्थिरता जारी",
+              "warningText": "गर्मी, बर्फ हानि और परिसंचरण तनाव साथ-साथ तेज होते हैं."
+            },
+            "ar": {
+              "warningTitle": "زعزعة كبرى جارية",
+              "warningText": "تشتد الحرارة وفقدان الجليد وضغط الدوران معا."
+            },
+            "zh": {
+              "warningTitle": "重大失稳正在发生",
+              "warningText": "高温、冰损失和环流压力共同加剧。"
+            }
+          }
+        },
+        "2075": {
+          "warningLevel": "critical",
+          "color": "#f85c2d",
+          "temperatureDeltaC": 3.8,
+          "seaLevelCm": 61,
+          "arcticIceLossPct": 68,
+          "vegetationStressPct": 56,
+          "amocStrengthPct": 62,
+          "tippingRiskPct": 71,
+          "warningTitle": "Cascading risk phase",
+          "warningText": "Feedbacks and thresholds become much harder to manage.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Phase de risque en cascade",
+              "warningText": "Les retroactions et les seuils deviennent beaucoup plus difficiles a gerer."
+            },
+            "nl": {
+              "warningTitle": "Cascaderisicofase",
+              "warningText": "Terugkoppelingen en drempels worden veel moeilijker te beheersen."
+            },
+            "de": {
+              "warningTitle": "Phase kaskadierender Risiken",
+              "warningText": "Ruckkopplungen und Schwellen werden viel schwerer zu steuern."
+            },
+            "es": {
+              "warningTitle": "Fase de riesgo en cascada",
+              "warningText": "Las retroalimentaciones y los umbrales se vuelven mucho mas dificiles de gestionar."
+            },
+            "ru": {
+              "warningTitle": "Фаза каскадного риска",
+              "warningText": "Обратные связи и пороги становится намного сложнее контролировать."
+            },
+            "hi": {
+              "warningTitle": "शृंखलाबद्ध जोखिम चरण",
+              "warningText": "फीडबैक और सीमाएं संभालना बहुत कठिन हो जाता है."
+            },
+            "ar": {
+              "warningTitle": "مرحلة خطر متسلسل",
+              "warningText": "تصبح التغذيات الراجعة والعتبات أصعب بكثير في الإدارة."
+            },
+            "zh": {
+              "warningTitle": "级联风险阶段",
+              "warningText": "反馈和阈值变得更加难以管理。"
+            }
+          }
+        },
+        "2100": {
+          "warningLevel": "critical",
+          "color": "#e63b28",
+          "temperatureDeltaC": 4.7,
+          "seaLevelCm": 88,
+          "arcticIceLossPct": 82,
+          "vegetationStressPct": 69,
+          "amocStrengthPct": 50,
+          "tippingRiskPct": 84,
+          "warningTitle": "Extreme system disruption",
+          "warningText": "Several systems are pushed close to or beyond major thresholds.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Perturbation extreme du systeme",
+              "warningText": "Plusieurs systemes sont pousses pres de seuils majeurs ou au-dela."
+            },
+            "nl": {
+              "warningTitle": "Extreme systeemverstoring",
+              "warningText": "Meerdere systemen worden dicht bij of voorbij grote drempels geduwd."
+            },
+            "de": {
+              "warningTitle": "Extreme Systemstorung",
+              "warningText": "Mehrere Systeme werden nahe an oder uber wichtige Schwellen gedruckt."
+            },
+            "es": {
+              "warningTitle": "Disrupcion extrema del sistema",
+              "warningText": "Varios sistemas son empujados cerca de, o mas alla de, grandes umbrales."
+            },
+            "ru": {
+              "warningTitle": "Экстремальное нарушение системы",
+              "warningText": "Несколько систем подталкиваются близко к крупным порогам или за них."
+            },
+            "hi": {
+              "warningTitle": "अत्यधिक प्रणाली व्यवधान",
+              "warningText": "कई प्रणालियां बड़े सीमांतों के पास या उनके पार धकेली जाती हैं."
+            },
+            "ar": {
+              "warningTitle": "اضطراب نظامي شديد",
+              "warningText": "تدفع عدة أنظمة قرب عتبات كبرى أو إلى ما بعدها."
+            },
+            "zh": {
+              "warningTitle": "极端系统扰动",
+              "warningText": "多个系统被推近或推过主要阈值。"
+            }
+          }
+        },
+        "2125": {
+          "warningLevel": "critical",
+          "color": "#c92c24",
+          "temperatureDeltaC": 5.3,
+          "seaLevelCm": 114,
+          "arcticIceLossPct": 90,
+          "vegetationStressPct": 78,
+          "amocStrengthPct": 42,
+          "tippingRiskPct": 91,
+          "warningTitle": "Entrenched high-risk world",
+          "warningText": "The climate remains highly unstable, with long-lasting global consequences.",
+          "warningTranslations": {
+            "fr": {
+              "warningTitle": "Monde a haut risque installe",
+              "warningText": "Le climat reste tres instable, avec des consequences mondiales durables."
+            },
+            "nl": {
+              "warningTitle": "Verankerde hoogrisicowereld",
+              "warningText": "Het klimaat blijft zeer instabiel, met langdurige wereldwijde gevolgen."
+            },
+            "de": {
+              "warningTitle": "Verfestigte Hochrisikowelt",
+              "warningText": "Das Klima bleibt hoch instabil, mit langfristigen globalen Folgen."
+            },
+            "es": {
+              "warningTitle": "Mundo de alto riesgo arraigado",
+              "warningText": "El clima sigue muy inestable, con consecuencias globales duraderas."
+            },
+            "ru": {
+              "warningTitle": "Укоренившийся мир высокого риска",
+              "warningText": "Климат остается крайне нестабильным, с долгосрочными глобальными последствиями."
+            },
+            "hi": {
+              "warningTitle": "स्थायी उच्च-जोखिम दुनिया",
+              "warningText": "जलवायु लंबे समय तक चलने वाले वैश्विक परिणामों के साथ अत्यधिक अस्थिर रहती है."
+            },
+            "ar": {
+              "warningTitle": "عالم عالي المخاطر راسخ",
+              "warningText": "يبقى المناخ شديد الاضطراب، مع عواقب عالمية طويلة الأمد."
+            },
+            "zh": {
+              "warningTitle": "根深蒂固的高风险世界",
+              "warningText": "气候仍然高度不稳定，并带来长期全球后果。"
+            }
+          }
+        }
+      }
+    }
+  }
+}
