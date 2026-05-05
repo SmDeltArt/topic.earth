@@ -284,7 +284,13 @@ export class LayerPanel {
     } else {
       layerNews = this.points.filter(point => point.category === layer.id);
 
-      if (this.shouldSortLayerByRegionalContext(layer)) {
+      if (layer.id === 'space') {
+        layerNews = layerNews.sort((a, b) => {
+          const orderDelta = (a.spaceOrder ?? Number.POSITIVE_INFINITY) - (b.spaceOrder ?? Number.POSITIVE_INFINITY);
+          if (orderDelta !== 0) return orderDelta;
+          return new Date(b.date) - new Date(a.date);
+        });
+      } else if (this.shouldSortLayerByRegionalContext(layer)) {
         const context = this.regionalContext;
         layerNews = layerNews
           .map(point => ({
@@ -300,7 +306,9 @@ export class LayerPanel {
         layerNews = layerNews.sort((a, b) => new Date(b.date) - new Date(a.date));
       }
 
-      layerNews = layerNews.slice(0, 5);
+      if (layer.id !== 'space') {
+        layerNews = layerNews.slice(0, 5);
+      }
     }
 
     return layerNews;

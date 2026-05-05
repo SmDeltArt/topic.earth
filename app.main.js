@@ -1,14 +1,15 @@
-import { GlobeRenderer } from './lib/globe.js?v=topic-earth-solar-cloudinary-20260504';
+import { GlobeRenderer } from './lib/globe.js?v=topic-earth-space-topics-20260505';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-access-20260423';
 import { LAYERS } from './data/layers.js?v=topic-earth-regional-proposal-20260423';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-cloud-over-20260423';
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-regional-hub-20260423';
 import { FEVER_TOPICS } from './data/fever-topics.js';
 import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-regional-hub-20260423';
+import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-topics-20260505';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=topic-earth-warning-panel-collapse-20260430';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-warning-panel-collapse-20260430';
-import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-warning-panel-collapse-20260430';
+import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-space-topics-20260505';
 import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-warning-panel-collapse-20260430';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-initiative-20260424';
 import { Settings } from './lib/settings.js?v=topic-earth-regional-proposal-20260423';
@@ -77,7 +78,7 @@ class TopicEarthApp {
       }
     });
 
-    this.allPoints = [...MOCK_POINTS, ...FEVER_TOPICS, ...mergedCustomPoints, ...this.realtimeMeteoPoints];
+    this.allPoints = [...MOCK_POINTS, ...SPACE_TOPICS, ...FEVER_TOPICS, ...mergedCustomPoints, ...this.realtimeMeteoPoints];
     return this.allPoints;
   }
 
@@ -1867,8 +1868,14 @@ class TopicEarthApp {
   updateMarkers() {
     this.globe.removeAllMarkers();
     
+    const markerPoints = this.allPoints.filter(point =>
+      !point.isSpaceTopic &&
+      Number.isFinite(Number(point.lat)) &&
+      Number.isFinite(Number(point.lon))
+    );
+
     // Cluster dense regions
-    const clustered = this.clusterPoints(this.allPoints);
+    const clustered = this.clusterPoints(markerPoints);
     
     clustered.forEach(item => {
       const layer = this.allLayers.find(l => l.id === item.category);
@@ -2345,6 +2352,37 @@ class TopicEarthApp {
   }
 
   showPointDetail(point) {
+    if (point.isSpaceTopic || point.solarSystemObject) {
+      const showAndFocusSpaceObject = () => {
+        this.detailPanel.show(point);
+        setTimeout(() => {
+          const focused = this.globe.focusSolarSystemObject?.(point.solarSystemObject || point.planetData?.name || point.title);
+          if (!focused) {
+            console.warn('[Space] Could not focus solar-system object:', point.solarSystemObject || point.title);
+          }
+        }, 0);
+      };
+
+      if (!this.globe.inSolarSystemView) {
+        this.globe.loadSolarSystem()
+          .then(() => {
+            if (!this.globe.inSolarSystemView) {
+              this.globe.transitionToSolarSystem();
+              setTimeout(showAndFocusSpaceObject, 2700);
+            } else {
+              showAndFocusSpaceObject();
+            }
+          })
+          .catch(error => {
+            console.error('[Space] Failed to load solar-system object topic:', error);
+            this.detailPanel.show(point);
+          });
+      } else {
+        showAndFocusSpaceObject();
+      }
+      return;
+    }
+
     // AMOC topic: ensure Fever mode, show monitoring and enable AMOC overlay
     if (point.isAMOC) {
       const openAMOC = () => {
