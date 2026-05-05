@@ -23,24 +23,24 @@
   },
   "textureSets": {
     "1k": {
-      "1950": "earth_1950_1k.png",
-      "1975": "earth_1975_1k.png",
-      "2000": "earth_2000_1k.png",
-      "2025": "earth_2025_1k.png",
-      "2050": "earth_2050_1k.png",
-      "2075": "earth_2075_1k.png",
-      "2100": "earth_2100_1k.png",
-      "2125": "earth_2125_1k.png"
+      "1950": "assets/textures/fever/earth_1950_1k.png",
+      "1975": "assets/textures/fever/earth_1975_1k.png",
+      "2000": "assets/textures/fever/earth_2000_1k.png",
+      "2025": "assets/textures/fever/earth_2025_1k.png",
+      "2050": "assets/textures/fever/earth_2050_1k.png",
+      "2075": "assets/textures/fever/earth_2075_1k.png",
+      "2100": "assets/textures/fever/earth_2100_1k.png",
+      "2125": "assets/textures/fever/earth_2125_1k.png"
     },
     "4k": {
-      "1950": "earth_1950_4k.png",
-      "1975": "earth_1975_4k.png",
-      "2000": "earth_2000_4k.png",
-      "2025": "earth_2025_4k.png",
-      "2050": "earth_2050_4k.png",
-      "2075": "earth_2075_4k.png",
-      "2100": "earth_2100_4k.png",
-      "2125": "earth_2125_4k.png"
+      "1950": "assets/textures/fever/earth_1950_4k.png",
+      "1975": "assets/textures/fever/earth_1975_4k.png",
+      "2000": "assets/textures/fever/earth_2000_4k.png",
+      "2025": "assets/textures/fever/earth_2025_4k.png",
+      "2050": "assets/textures/fever/earth_2050_4k.png",
+      "2075": "assets/textures/fever/earth_2075_4k.png",
+      "2100": "assets/textures/fever/earth_2100_4k.png",
+      "2125": "assets/textures/fever/earth_2125_4k.png"
     },
     "legacy": {
       "1950": "earth_1950.png",

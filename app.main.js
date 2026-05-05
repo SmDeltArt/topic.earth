@@ -1,4 +1,4 @@
-import { GlobeRenderer } from './lib/globe.js?v=topic-earth-cloud-over-20260423';
+import { GlobeRenderer } from './lib/globe.js?v=topic-earth-solar-cloudinary-20260504';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-access-20260423';
 import { LAYERS } from './data/layers.js?v=topic-earth-regional-proposal-20260423';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-cloud-over-20260423';
@@ -477,7 +477,11 @@ class TopicEarthApp {
 
       if (this.currentLayerFilter === 'regional' && this.regionalMap?.visible) {
         this.refreshRegionalMap();
-        this.maybeAutoLocateRegionalMode(true);
+        if (this.regionalContext && this.isUserRegionalFocus(this.regionalContext)) {
+          this.applyRegionalAutoLocation(this.regionalContext);
+        } else {
+          this.maybeAutoLocateRegionalMode(true);
+        }
       }
     });
   }
@@ -581,27 +585,6 @@ class TopicEarthApp {
     // Settings now use the detail panel
     window.addEventListener('openSettings', () => {
       this.detailPanel.showSettings(this.ttsManager);
-    });
-  }
-  
-  setupSettingsListener() {
-    window.addEventListener('settingsChanged', async (e) => {
-      const { settings, feverResolutionChanged } = e.detail;
-      this.applyTutorialMode(settings);
-      this.applyDocumentLanguage(settings);
-      this.ttsManager?.updateSettings?.(settings);
-      LanguageManager.translateDom(document.body, this.getCurrentUiLanguage(settings));
-      
-      // If Fever loop resolution changed and we're in Fever mode, reload textures
-      if (feverResolutionChanged && this.globe && this.globe.inFeverMode) {
-        console.log('[Settings] Fever resolution changed, reloading textures...');
-        await this.globe.reloadFeverTextures();
-      }
-
-      if (this.currentLayerFilter === 'regional' && this.regionalMap?.visible) {
-        this.refreshRegionalMap();
-        this.maybeAutoLocateRegionalMode(true);
-      }
     });
   }
 
@@ -831,10 +814,19 @@ class TopicEarthApp {
   handleRegionalContextChange(context = null) {
     if (!context) return;
 
+    const precision = context.precision || 'region';
+    const availablePrecision = context.availablePrecision || precision;
+    const zoom = Number.isFinite(Number(context.zoom))
+      ? Number(context.zoom)
+      : this.getRegionalZoomFromPrecision(precision);
+
     this.regionalContext = {
       ...context,
       lat: Number(context.lat),
-      lon: Number(context.lon)
+      lon: Number(context.lon),
+      precision,
+      availablePrecision,
+      zoom
     };
 
     window.dispatchEvent(new CustomEvent('regionalContextChanged', {
@@ -869,6 +861,13 @@ class TopicEarthApp {
 
     this.regionalAutoLocatePending = (async () => {
       const ipContext = await this.fetchRegionalIpLocation(desiredPrecision);
+      if (ipContext && this.isRegionalPrecisionLessThan(ipContext.precision, desiredPrecision)) {
+        const browserContext = await this.fetchBrowserRegionalLocation(desiredPrecision);
+        if (await this.applyRegionalAutoLocation(browserContext)) {
+          return true;
+        }
+      }
+
       if (await this.applyRegionalAutoLocation(ipContext)) {
         return true;
       }
@@ -924,6 +923,7 @@ class TopicEarthApp {
           lat,
           lon,
           label: this.getRegionalContextLabel(details, precision) || 'Your area',
+          availablePrecision,
           precision,
           source: 'ip-geolocation'
         };
@@ -962,6 +962,7 @@ class TopicEarthApp {
         lat,
         lon,
         label: this.getRegionalContextLabel(details, precision) || 'Your area',
+        availablePrecision,
         precision,
         source: 'browser-geolocation'
       };
@@ -978,7 +979,9 @@ class TopicEarthApp {
     const lon = Number(context.lon);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
 
-    const precision = context.precision || 'region';
+    const desiredPrecision = Settings.get().regionalLocationPrecision || context.precision || 'region';
+    const availablePrecision = context.availablePrecision || context.precision || 'region';
+    const precision = this.resolveRegionalPrecision(desiredPrecision, availablePrecision);
     const zoom = this.getRegionalZoomFromPrecision(precision);
     const label = context.label || 'Your area';
     const normalizedContext = {
@@ -986,6 +989,7 @@ class TopicEarthApp {
       lat,
       lon,
       label,
+      availablePrecision,
       precision,
       zoom,
       source: context.source || 'auto-location'
@@ -995,6 +999,7 @@ class TopicEarthApp {
       this.regionalMap?.focusCoordinate(lat, lon, label, {
         zoom,
         source: normalizedContext.source,
+        availablePrecision,
         precision,
         city: context.city || '',
         region: context.region || '',
@@ -1012,6 +1017,19 @@ class TopicEarthApp {
     }
 
     return true;
+  }
+
+  isUserRegionalFocus(context = null) {
+    const source = String(context?.source || '').trim();
+    return ['search', 'manual-coordinates', 'map-point', 'topic'].includes(source);
+  }
+
+  isRegionalPrecisionLessThan(actualPrecision = 'region', desiredPrecision = 'region') {
+    const precisionOrder = ['continent', 'country', 'region', 'city', 'address'];
+    const actualIndex = precisionOrder.indexOf(actualPrecision);
+    const desiredIndex = precisionOrder.indexOf(desiredPrecision);
+    if (actualIndex === -1 || desiredIndex === -1) return false;
+    return actualIndex < desiredIndex;
   }
 
   async reverseGeocodeRegionalLocation(lat, lon) {
@@ -1800,7 +1818,7 @@ class TopicEarthApp {
     const globeContainer = document.getElementById('globe-container');
     
     this.globe = new GlobeRenderer(globeContainer, {
-      earthTexture: './earth_texture.png',
+      earthTexture: './assets/textures/main/Material.001_baseColor_1k.jpeg',
       minDistance: 1.3,
       maxDistance: 6,
       autoRotate: true
