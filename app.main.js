@@ -7,7 +7,7 @@ import { FEVER_TOPICS } from './data/fever-topics.js';
 import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-regional-hub-20260423';
 import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-topics-20260505';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=topic-earth-warning-panel-collapse-20260430';
+import { TopBar } from './components/TopBar.js?v=topic-earth-logo-modes-20260505';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-warning-panel-collapse-20260430';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-space-topics-20260505';
 import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-warning-panel-collapse-20260430';
@@ -19,6 +19,28 @@ import { TTSManager } from './lib/tts.js?v=topic-earth-language-voice-menu-20260
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
 import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-warning-panel-collapse-20260430';
 import { installAiApiBridge } from './lib/ai-api-bridge.js';
+
+const TOPIC_EARTH_FAVICON_URL = 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg';
+const TOPIC_EARTH_FAVICON_FALLBACK_URL = './assets/icons/topic.earth_24x24.svg?v=topic-earth-icons-20260505';
+const DEFAULT_BROWSER_TITLE = 'topic.earth | Global Intelligence Dashboard';
+const BROWSER_MODE_TITLES = {
+  main: DEFAULT_BROWSER_TITLE,
+  regional: 'topic.earth | Regional',
+  space: 'topic.earth | Space',
+  fever: 'topic.earth | Fever Monitor'
+};
+const LOGO_MODE_CLASSES = ['topic-mode-main', 'topic-mode-regional', 'topic-mode-space', 'topic-mode-fever'];
+const TIPPING_BOUNDARY_COLORS = {
+  climate_change: ['#ff5f57', '#ffb020', '#ff2d55'],
+  novel_entities: ['#ff5eea', '#b777ff', '#00d4ff'],
+  stratospheric_ozone_depletion: ['#bca7ff', '#6da8ff', '#d9f2ff'],
+  atmospheric_aerosol_loading: ['#f5d76e', '#a8b3c7', '#ffffff'],
+  ocean_acidification: ['#00d4ff', '#2ee6c9', '#7cf7ff'],
+  biogeochemical_flows: ['#ffe066', '#8dff7c', '#ff9f1c'],
+  freshwater_change: ['#55d6ff', '#6f9cff', '#b6f7ff'],
+  land_system_change: ['#7cff6b', '#d4ff57', '#ffb020'],
+  biosphere_integrity: ['#64ff9b', '#00d4ff', '#b8ff72']
+};
 
 /**
  * Main application orchestrator
@@ -93,6 +115,7 @@ class TopicEarthApp {
     
     // Initialize UI components
     this.initTopBar();
+    this.updateBrowserTabState(this.currentLayerFilter);
     this.initLayerPanel();
     window.addEventListener('amocToggled', (e) => {
       if (!this.layerPanel) return;
@@ -593,6 +616,48 @@ class TopicEarthApp {
     document.body.classList.toggle('tutorial-mode-off', settings.tutorialModeEnabled === false);
   }
 
+  updateBrowserTabState(filter = this.currentLayerFilter) {
+    const mode = filter || 'main';
+    const nextTitle = BROWSER_MODE_TITLES[mode] || DEFAULT_BROWSER_TITLE;
+    if (document.title !== nextTitle) {
+      document.title = nextTitle;
+    }
+    this.updateLogoModeState(mode);
+
+    const favicon = document.querySelector('link[data-topic-favicon]') || document.querySelector('link[rel~="icon"]');
+    if (favicon) {
+      favicon.dataset.fallbackHref = favicon.dataset.fallbackHref || TOPIC_EARTH_FAVICON_FALLBACK_URL;
+      if (favicon.dataset.iconFallbackBound !== 'true') {
+        favicon.dataset.iconFallbackBound = 'true';
+        const probe = new Image();
+        probe.onerror = () => {
+          favicon.href = favicon.dataset.fallbackHref || TOPIC_EARTH_FAVICON_FALLBACK_URL;
+        };
+        probe.src = TOPIC_EARTH_FAVICON_URL;
+      }
+      if (!favicon.href.includes('topic.earth_24x24_pivz9m.svg') && !favicon.href.includes('topic.earth_24x24.svg')) {
+        favicon.href = TOPIC_EARTH_FAVICON_URL;
+      }
+    }
+  }
+
+  updateLogoModeState(mode = 'main') {
+    const safeMode = BROWSER_MODE_TITLES[mode] ? mode : 'main';
+    document.body.classList.remove(...LOGO_MODE_CLASSES);
+    document.body.classList.add(`topic-mode-${safeMode}`);
+    document.body.dataset.topicMode = safeMode;
+  }
+
+  updateLogoBoundarySignal(boundaryKey) {
+    const colors = TIPPING_BOUNDARY_COLORS[boundaryKey];
+    if (!colors) return;
+
+    document.body.dataset.logoBoundary = boundaryKey;
+    document.body.style.setProperty('--logo-boundary-a', colors[0]);
+    document.body.style.setProperty('--logo-boundary-b', colors[1]);
+    document.body.style.setProperty('--logo-boundary-c', colors[2]);
+  }
+
   setupViewToggle() {
     window.addEventListener('layerFilterChanged', (e) => {
       const filter = e.detail.filter;
@@ -600,6 +665,7 @@ class TopicEarthApp {
       
       // Store current filter
       this.currentLayerFilter = filter;
+      this.updateBrowserTabState(filter);
       
       // Save/restore layer states when switching modes
       if (filter === 'fever' || filter === 'space') {
@@ -677,6 +743,12 @@ class TopicEarthApp {
     window.addEventListener('boundarySelected', (e) => {
       this.handleBoundarySelection(e.detail.boundary, false);
     });
+
+    window.addEventListener('boundaryMonitorUpdate', (e) => {
+      if (e.detail?.boundary) {
+        this.updateLogoBoundarySignal(e.detail.boundary);
+      }
+    });
     
     // Listen for boundary double click (open detail)
     window.addEventListener('boundaryDoubleClick', (e) => {
@@ -701,6 +773,8 @@ class TopicEarthApp {
       console.warn(`[Tipping] No topic found for boundary ${boundaryKey}`);
       return;
     }
+
+    this.updateLogoBoundarySignal(boundaryKey);
     
     if (shouldOpenDetail) {
       // Double click - open detail/editor synced to milestone
@@ -2381,6 +2455,10 @@ class TopicEarthApp {
         showAndFocusSpaceObject();
       }
       return;
+    }
+
+    if (point?.isTippingPoint && point.boundary) {
+      this.updateLogoBoundarySignal(point.boundary);
     }
 
     // AMOC topic: ensure Fever mode, show monitoring and enable AMOC overlay

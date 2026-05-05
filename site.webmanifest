@@ -1,0 +1,34 @@
+{
+  "name": "topic.earth",
+  "short_name": "topic.earth",
+  "description": "Interactive Earth intelligence dashboard for climate systems, regional initiatives, space context, tipping points, AMOC, and AI-assisted topic research.",
+  "id": "https://topic.earth/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0e1a",
+  "theme_color": "#0a0e1a",
+  "categories": ["education", "productivity", "science", "utilities"],
+  "lang": "en",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg",
+      "sizes": "24x24",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icons/topic.earth_64x64.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://res.cloudinary.com/dsbfcgtdv/image/upload/w_512,h_512,c_pad,b_rgb:0a0e1a/f_png/v1778010556/topic.earth_64x64_frtsvs.svg",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

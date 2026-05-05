@@ -6,6 +6,9 @@ import { Settings } from '../lib/settings.js';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-20260423';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
 
+const TOPIC_EARTH_MARK_URL = 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg';
+const TOPIC_EARTH_MARK_FALLBACK_URL = './assets/icons/topic.earth_64x64.svg?v=topic-earth-icons-20260505';
+
 export class TopBar {
   constructor(container) {
     this.container = container;
@@ -172,7 +175,9 @@ export class TopBar {
 
     this.container.innerHTML = `
       <div class="logo" aria-label="${this.escapeHtml(this.t('app.brand'))}">
-        <span class="logo-label">${this.escapeHtml(this.t('app.brand'))}</span>
+        <span class="logo-word logo-word-topic">topic</span>
+        <img class="logo-mark" src="${TOPIC_EARTH_MARK_URL}" data-fallback-src="${TOPIC_EARTH_MARK_FALLBACK_URL}" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc;" alt="" aria-hidden="true">
+        <span class="logo-word logo-word-earth">earth</span>
       </div>
       <button class="mode-toggle-btn ${this.interactionMode === 'interaction' ? 'active' : ''}" id="mode-toggle-btn" data-action="toggle-mode" title="${this.escapeHtml(interactionLabel)}" aria-label="${this.escapeHtml(interactionLabel)}">
         ${this.interactionMode === 'rotate' && !isRegionalMode ? `
