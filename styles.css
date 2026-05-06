@@ -168,6 +168,14 @@ body:not(.admin-mode) [data-admin-only="true"] {
     animation-delay: -3s;
 }
 
+body.topic-logo-stopped #top-bar .logo::before,
+body.topic-logo-stopped #top-bar .logo::after,
+body.topic-logo-stopped #top-bar .logo-mark,
+body.topic-logo-stopped #top-bar .logo-word,
+body.topic-logo-stopped #top-bar .logo-word::after {
+    animation-play-state: paused !important;
+}
+
 body.topic-mode-main #top-bar .logo {
     --logo-cycle: 6s;
     --logo-topic: #00d4ff;

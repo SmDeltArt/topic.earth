@@ -1,4 +1,4 @@
-import { GlobeRenderer } from './lib/globe.js?v=topic-earth-space-topics-20260505';
+import { GlobeRenderer } from './lib/globe.js?v=topic-earth-local-vendor-20260506';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-access-20260423';
 import { LAYERS } from './data/layers.js?v=topic-earth-regional-proposal-20260423';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-cloud-over-20260423';
@@ -8,7 +8,7 @@ import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-regional-hu
 import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-topics-20260505';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=topic-earth-logo-modes-20260505';
-import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-warning-panel-collapse-20260430';
+import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-local-vendor-20260506';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-space-topics-20260505';
 import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-warning-panel-collapse-20260430';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-initiative-20260424';
@@ -72,6 +72,10 @@ class TopicEarthApp {
     this.regionalAutoLocateRequested = false;
     this.regionalAutoLocatePending = null;
     this.aiApiBridge = installAiApiBridge({ appName: 'topic-earth' });
+    this.loadingWatchdog = window.setTimeout(() => {
+      console.warn('[App Init] Loading screen watchdog released the startup overlay.');
+      this.hideLoadingScreen(0);
+    }, 8000);
     
     // Make app globally accessible for boundary updates
     window.app = this;
@@ -85,7 +89,17 @@ class TopicEarthApp {
     this.rebuildAllPoints();
     console.log(`[Tipping Points] Loaded ${TIPPING_POINT_TOPICS.length} tipping topics into layer system`);
     
-    this.init();
+    this.init()
+      .catch((error) => {
+        console.error('[App Init] Startup failed before completion.', error);
+        this.hideLoadingScreen(0);
+      })
+      .finally(() => {
+        if (this.loadingWatchdog) {
+          window.clearTimeout(this.loadingWatchdog);
+          this.loadingWatchdog = null;
+        }
+      });
   }
 
   rebuildAllPoints() {
@@ -626,6 +640,9 @@ class TopicEarthApp {
 
     const favicon = document.querySelector('link[data-topic-favicon]') || document.querySelector('link[rel~="icon"]');
     if (favicon) {
+      if (favicon.dataset.topicClockManaged === 'true' || window.TopicFavicon?.isManaging?.()) {
+        return;
+      }
       favicon.dataset.fallbackHref = favicon.dataset.fallbackHref || TOPIC_EARTH_FAVICON_FALLBACK_URL;
       if (favicon.dataset.iconFallbackBound !== 'true') {
         favicon.dataset.iconFallbackBound = 'true';
@@ -2757,14 +2774,17 @@ Return ONLY a JSON object with this exact format, no other text:
     }
   }
 
-  hideLoadingScreen() {
+  hideLoadingScreen(delayMs = 1500) {
+    const loading = document.getElementById('loading');
+    if (!loading || loading.dataset.hideScheduled === 'true') return;
+    loading.dataset.hideScheduled = 'true';
+
     setTimeout(() => {
-      const loading = document.getElementById('loading');
-      if (loading) {
+      if (loading.isConnected) {
         loading.classList.add('fade-out');
         setTimeout(() => loading.remove(), 500);
       }
-    }, 1500);
+    }, delayMs);
   }
 }
 

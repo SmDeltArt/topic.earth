@@ -84,25 +84,12 @@
         ]
       }
     </script>
-    <link rel="icon" type="image/svg+xml" sizes="24x24" data-topic-favicon data-fallback-href="./assets/icons/topic.earth_24x24.svg?v=topic-earth-icons-20260505" href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg">
+    <link rel="icon" type="image/svg+xml" sizes="24x24" data-topic-favicon data-local-href="./assets/icons/topic.earth_24x24.svg?v=topic-earth-icons-20260506" data-cloud-href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg" href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg">
     <link rel="preload" as="image" href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg">
-    <script>
-      (() => {
-        const icon = document.querySelector('link[data-topic-favicon]');
-        if (!icon) return;
-        icon.dataset.iconFallbackBound = 'true';
-        const probe = new Image();
-        probe.onerror = () => {
-          icon.href = icon.dataset.fallbackHref;
-        };
-        probe.src = icon.href;
-      })();
-    </script>
-  <link rel="stylesheet" href="styles.css?v=topic-earth-logo-modes-20260505">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="./shared/topic-favicon.js?v=topic-earth-svg-groups-20260506"></script>
+    <link rel="stylesheet" href="./assets/fonts/space-mono.css?v=topic-earth-local-vendor-20260506">
+  <link rel="stylesheet" href="styles.css?v=topic-earth-local-vendor-20260506">
+    <script src="./vendor/chart/chart.umd.min.js?v=4.4.0"></script>
 </head>
 <body>
     <div id="app">
@@ -159,12 +146,11 @@
 
     <script src="./shared/widget-bridge.js"></script>
     <script src="./shared/smart-widget-sync.js"></script>
-    <script src="./shared/smart-api-sync.js"></script>
     <script src="./shared/smart-ai-api-bridge.js"></script>
     <script>
       window.TOPIC_EARTH_PROFILE = window.TOPIC_EARTH_PROFILE || (['localhost', '127.0.0.1'].includes(location.hostname) ? 'admin' : 'demo');
     </script>
-  <script type="module" src="./app.main.js?v=topic-earth-logo-modes-20260505"></script>
+  <script type="module" src="./app.main.js?v=topic-earth-boot-fix-20260506"></script>
   
   <style>
     /* Mobile panel visibility rules */

@@ -3,14 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>⚡</title>
-    <!-- Animated Rotating Delta Favicon - JS controlled for continuous animation -->
+    <title>topic.earth API Settings</title>
     <link
       rel="icon"
       id="dynamicFavicon"
       type="image/svg+xml"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpolygon points='16,5.33 26.67,24 5.33,24' fill='none' stroke='%2300ffff' stroke-width='2.5'/%3E%3C/svg%3E"
+      data-local-href="./assets/icons/topic.earth_24x24.svg?v=topic-earth-icons-20260506"
+      data-cloud-href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg"
+      href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg"
     />
+    <script src="shared/topic-favicon.js?v=topic-earth-svg-groups-20260506"></script>
     <script>
       document.documentElement.classList.add(
         window.self === window.top ? "detached-mode" : "in-iframe",
@@ -18,13 +20,9 @@
       if (new URLSearchParams(location.search).get("embed") === "true")
         document.documentElement.classList.add("embed-mode");
     </script>
-    <link rel="stylesheet" href="shared/smart-spa-base.css" />
     <script src="shared/widget-bridge.js"></script>
     <script src="shared/smart-widget-sync.js"></script>
     <script src="shared/smart-api-sync.js"></script>
-    <script src="shared/smart-favicon.js"></script>
-    <script src="shared/smart-nav-manager.js"></script>
-    <script src="shared/smart-app-binding.js"></script>
     <style>
       :root {
         --primary-color: #6d9eeb;
@@ -1034,7 +1032,7 @@
   <body>
     <div class="main-container">
       <div class="header">
-        <button class="back-btn" onclick="SmartNav.goBack()" title="Back">
+        <button class="back-btn" onclick="goBackFromApiSettings()" title="Back">
           <svg
             width="14"
             height="14"
@@ -5223,14 +5221,7 @@
           return;
         }
 
-        // THIRD: Fallback - Use SmartNav for proper SPA navigation (no iframe trapping)
-        console.log("⚠️ SmartPopup not available, using SmartNav...");
-        if (typeof SmartNav !== "undefined" && SmartNav.navigateTo) {
-          SmartNav.navigateTo("llama31-install-guide.html");
-        } else {
-          // Ultimate fallback: direct navigation
-          window.location.href = "llama31-install-guide.html";
-        }
+        window.location.href = "llama31-install-guide.html";
       }
 
       // Category toggle functionality
@@ -11711,11 +11702,17 @@
         }
       }
 
-      // ΔI is no longer clickable - just a styled element that matches favicon color
-      // The color sync happens in initAnimatedFavicon() when favicon stops
+      function goBackFromApiSettings() {
+        if (window.history.length > 1) {
+          window.history.back();
+          return;
+        }
+        window.close();
+      }
+      window.goBackFromApiSettings = goBackFromApiSettings;
+
       function setupHeaderLogoClick() {
-        // Nothing to do - ΔI is just styled text now, not a link
-        console.log("ΔI branding: color synced with favicon on stop");
+        console.log("API settings branding ready");
       }
 
       // Sync settings when saved
@@ -11781,7 +11778,6 @@
       document.addEventListener("DOMContentLoaded", () => {
         initWidgetSync();
         setupHeaderLogoClick();
-        initAnimatedFavicon();
         disablePasswordManagers();
         applyContentScale();
       });
@@ -11809,151 +11805,6 @@
       }
 
       // ====================================================================
-      // 🔺 ANIMATED DELTA FAVICON
-      // ====================================================================
-
-      /**
-       * Creates an animated favicon with rotating delta triangle
-       * Runs animation for at least 1 full 360° rotation, then stops at random point
-       * Each page load shows different final color: Cyan, Green, or Yellow
-       * Syncs color with detached windows via sessionStorage
-       */
-      function initAnimatedFavicon() {
-        const totalDuration = 4000; // 4 seconds per cycle
-        const minFullRotations = 1; // At least 1 full 360° before stopping
-
-        // Check if we should use a synced color (from parent/detached window)
-        const syncedColorIndex = sessionStorage.getItem("deltaColorIndex");
-
-        // Random stop point: 1 = after 1/3 (Green), 2 = after 2/3 (Yellow), 3 = after full (Cyan)
-        const stopAfterCycles = syncedColorIndex
-          ? parseInt(syncedColorIndex)
-          : Math.floor(Math.random() * 3) + 1;
-        const stopPositions = [
-          { rotation: 120, color: "#6efe00", name: "Green" }, // 1/3
-          { rotation: 240, color: "#ffff00", name: "Yellow" }, // 2/3
-          { rotation: 0, color: "#00ffff", name: "Cyan" }, // Full (back to 0)
-        ];
-        const finalPosition = stopPositions[stopAfterCycles - 1];
-
-        // Store the color index for syncing with detached windows
-        sessionStorage.setItem("deltaColorIndex", stopAfterCycles.toString());
-
-        // Calculate when to stop (in ms from start)
-        // First do minFullRotations complete cycles, then stop at the random point
-        const stopTimes = [0.3333, 0.6666, 1.0];
-        const stopTime =
-          minFullRotations * totalDuration +
-          stopTimes[stopAfterCycles - 1] * totalDuration;
-
-        const frames = [
-          { time: 0, rotation: 0, color: "#00ffff" },
-          { time: 0.08, rotation: 0, color: "#00ffff" },
-          { time: 0.2, rotation: 60, color: "#00ffff" },
-          { time: 0.3333, rotation: 120, color: "#6efe00" },
-          { time: 0.4133, rotation: 120, color: "#6efe00" },
-          { time: 0.54, rotation: 180, color: "#6efe00" },
-          { time: 0.6666, rotation: 240, color: "#ffff00" },
-          { time: 0.7466, rotation: 240, color: "#ffff00" },
-          { time: 0.87, rotation: 300, color: "#ffff00" },
-          { time: 1.0, rotation: 360, color: "#00ffff" },
-        ];
-
-        const favicon = document.getElementById("dynamicFavicon");
-        if (!favicon) return;
-
-        let startTime = null;
-        let stopped = false;
-
-        function setFavicon(rotation, color) {
-          const svgContent = `
-                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
-                        <g transform='rotate(${rotation}, 12, 12)'>
-                            <polygon points='12,2 21,20 3,20' fill='none' stroke='${color}' stroke-width='2.5'/>
-                        </g>
-                    </svg>
-                `
-            .replace(/\s+/g, " ")
-            .trim();
-          favicon.href = "data:image/svg+xml," + encodeURIComponent(svgContent);
-        }
-
-        function setFaviconDeltaWithI(rotation, color) {
-          // Show delta (full size) with "I" letter next to it when stopped
-          // CAD-ΔI branding: favicon shows ΔI, tab title shows "API Settings"
-          const svgContent = `
-                    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 24'>
-                        <g transform='rotate(${rotation}, 12, 12)'>
-                            <polygon points='12,2 21,20 3,20' fill='none' stroke='${color}' stroke-width='2.5'/>
-                        </g>
-                        <text x='30' y='19' text-anchor='middle' font-family='Arial, sans-serif' font-size='18' font-weight='bold' fill='${color}'>I</text>
-                    </svg>
-                `
-            .replace(/\s+/g, " ")
-            .trim();
-          favicon.href = "data:image/svg+xml," + encodeURIComponent(svgContent);
-        }
-
-        function updateFavicon(currentTime) {
-          if (!startTime) startTime = currentTime;
-          const elapsed = currentTime - startTime;
-
-          // Check if we should stop
-          if (elapsed >= stopTime && !stopped) {
-            stopped = true;
-            // Show delta with "I" next to it in the final color
-            setFaviconDeltaWithI(finalPosition.rotation, finalPosition.color);
-
-            // Update header title "I" to match the delta color
-            const titleI = document.getElementById("titleDeltaI");
-            if (titleI) {
-              titleI.style.color = finalPosition.color;
-              titleI.style.textShadow = `0 0 15px ${finalPosition.color}80`;
-            }
-
-            // Tab title - "I" is now in favicon, so remove from title
-            // CAD-ΔI: favicon shows ΔI + tab shows "API Settings" = complete branding
-            document.title = "API Settings";
-
-            console.log(
-              `🔺 Delta favicon stopped at ${finalPosition.name} (${finalPosition.rotation}°)`,
-            );
-            return; // Stop animation
-          }
-
-          const progress = (elapsed % totalDuration) / totalDuration;
-
-          // Find current frame
-          let currentFrame = frames[0];
-          let nextFrame = frames[1];
-
-          for (let i = 0; i < frames.length - 1; i++) {
-            if (progress >= frames[i].time && progress < frames[i + 1].time) {
-              currentFrame = frames[i];
-              nextFrame = frames[i + 1];
-              break;
-            }
-          }
-
-          // Interpolate rotation
-          const frameProgress =
-            (progress - currentFrame.time) /
-            (nextFrame.time - currentFrame.time);
-          const rotation =
-            currentFrame.rotation +
-            (nextFrame.rotation - currentFrame.rotation) *
-              Math.min(frameProgress, 1);
-
-          setFavicon(rotation, currentFrame.color);
-          requestAnimationFrame(updateFavicon);
-        }
-
-        requestAnimationFrame(updateFavicon);
-        console.log(
-          `🔺 Delta favicon will stop at ${stopAfterCycles}/3 (${finalPosition.name})`,
-        );
-      }
-
       // Cleanup on unload
       window.addEventListener("beforeunload", () => {
         if (widgetSyncChannel) {

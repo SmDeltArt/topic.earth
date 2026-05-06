@@ -9,8 +9,8 @@ const EUROPE_BOUNDS = {
 };
 
 const EUROPE_CENTER = [50.5, 10.5];
-const LEAFLET_CSS_URL = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-const LEAFLET_JS_URL = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+const LEAFLET_CSS_URL = './vendor/leaflet/leaflet.css';
+const LEAFLET_JS_URL = './vendor/leaflet/leaflet.js';
 const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const NOMINATIM_SEARCH_URL = 'https://nominatim.openstreetmap.org/search';
 const METEO_CLOUD_LAYER_ID = 'meteo-clouds';
