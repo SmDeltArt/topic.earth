@@ -1,0 +1,42 @@
+{
+  "name": "topic.earth animated logo kit",
+  "brand": "topic.earth",
+  "description": "Four animated topic.earth logo modes for main, regional, space, and fever contexts.",
+  "website": "https://topic.earth/",
+  "repository": "https://github.com/SmDeltArt/topic.earth",
+  "license": "EUPL-1.2-or-later for source code and documentation; see ASSET-LICENSES.md for media and brand assets.",
+  "source": {
+    "html": "./topic-earth-logo-kit.html",
+    "cloudinaryMark64": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg",
+    "cloudinaryFavicon24": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg",
+    "localMark64": "../icons/topic.earth_64x64.svg",
+    "localFavicon24": "../icons/topic.earth_24x24.svg"
+  },
+  "preferredExports": ["svg", "webp", "webm", "gif"],
+  "modes": [
+    {
+      "id": "main",
+      "label": "Main",
+      "description": "Calm global intelligence signal.",
+      "colors": ["#00d4ff", "#7cffd6", "#81d4ff"]
+    },
+    {
+      "id": "regional",
+      "label": "Regional",
+      "description": "Locality and map-focus signal.",
+      "colors": ["#00d4ff", "#7cff6b", "#d4ff72"]
+    },
+    {
+      "id": "space",
+      "label": "Space",
+      "description": "Orbital and planetary context signal.",
+      "colors": ["#7c83ff", "#00d4ff", "#ffd166"]
+    },
+    {
+      "id": "fever",
+      "label": "Fever",
+      "description": "Climate warning and tipping-point signal.",
+      "colors": ["#ff5f57", "#ffb020", "#ff2d55"]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+topic.earth
+
+Interactive Earth intelligence dashboard for climate systems, regional initiatives,
+space context, tipping points, AMOC, and AI-assisted topic research.
+
+Repository: https://github.com/SmDeltArt/topic.earth
+Website: https://topic.earth/
+License: EUPL-1.2-or-later
+Stewardship: intended to be stewarded by a Belgian ASBL.

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>topic.earth | Global Intelligence Dashboard</title>
-    <meta name="description" content="topic.earth is an interactive Earth intelligence dashboard for climate systems, regional initiatives, space context, and AI-assisted topic research.">
+    <meta name="description" content="topic.earth is an interactive Earth intelligence dashboard for climate systems, regional initiatives, space context, and curated topic research.">
     <meta name="keywords" content="topic.earth, topic earth, climate dashboard, Earth intelligence, climate globe, regional initiatives, tipping points, AMOC, open source">
     <meta name="author" content="topic.earth project">
     <meta name="creator" content="topic.earth project">
@@ -22,7 +22,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://topic.earth/">
     <meta property="og:title" content="topic.earth | Global Intelligence Dashboard">
-    <meta property="og:description" content="Explore climate systems, regional initiatives, space context, tipping points, and AI-assisted topic research on an interactive Earth dashboard.">
+    <meta property="og:description" content="Explore climate systems, regional initiatives, space context, tipping points, and curated topic research on an interactive Earth dashboard.">
     <meta property="og:image" content="https://res.cloudinary.com/dsbfcgtdv/image/upload/w_1200,h_630,c_pad,b_rgb:0a0e1a/f_png/v1778010556/topic.earth_64x64_frtsvs.svg">
     <meta property="og:image:secure_url" content="https://res.cloudinary.com/dsbfcgtdv/image/upload/w_1200,h_630,c_pad,b_rgb:0a0e1a/f_png/v1778010556/topic.earth_64x64_frtsvs.svg">
     <meta property="og:image:type" content="image/png">
@@ -31,7 +31,7 @@
     <meta property="og:image:alt" content="topic.earth animated Earth mark on a dark interface background">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="topic.earth | Global Intelligence Dashboard">
-    <meta name="twitter:description" content="Interactive Earth intelligence for climate, regional, space, and AI-assisted topic research.">
+    <meta name="twitter:description" content="Interactive Earth intelligence for climate, regional, space, and curated topic research.">
     <meta name="twitter:image" content="https://res.cloudinary.com/dsbfcgtdv/image/upload/w_1200,h_630,c_pad,b_rgb:0a0e1a/f_png/v1778010556/topic.earth_64x64_frtsvs.svg">
     <meta name="twitter:image:alt" content="topic.earth animated Earth mark">
     <script type="application/ld+json">
@@ -65,7 +65,7 @@
             "applicationCategory": "EducationalApplication",
             "operatingSystem": "Any",
             "browserRequirements": "Requires a modern browser with WebGL support.",
-            "description": "Interactive Earth intelligence dashboard for climate systems, regional initiatives, space context, tipping points, AMOC, and AI-assisted topic research.",
+            "description": "Interactive Earth intelligence dashboard for climate systems, regional initiatives, space context, tipping points, AMOC, and curated topic research.",
             "image": "https://res.cloudinary.com/dsbfcgtdv/image/upload/w_1200,h_630,c_pad,b_rgb:0a0e1a/f_png/v1778010556/topic.earth_64x64_frtsvs.svg",
             "license": "https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12",
             "isAccessibleForFree": true,
@@ -88,7 +88,7 @@
     <link rel="preload" as="image" href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg">
     <script src="./shared/topic-favicon.js?v=topic-earth-svg-groups-20260506"></script>
     <link rel="stylesheet" href="./assets/fonts/space-mono.css?v=topic-earth-local-vendor-20260506">
-  <link rel="stylesheet" href="styles.css?v=topic-earth-local-vendor-20260506">
+  <link rel="stylesheet" href="styles.css?v=topic-earth-settings-tutorial-20260516">
     <script src="./vendor/chart/chart.umd.min.js?v=4.4.0"></script>
 </head>
 <body>
@@ -104,12 +104,12 @@
                 <span class="status-dot"></span>
                 <span>Live Data Stream</span>
             </div>
-            <button id="news-update-btn" class="news-update-btn" title="Update Daily News">
+            <button id="news-update-btn" class="news-update-btn" title="Search or add source">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M14 8C14 4.686 11.314 2 8 2C4.686 2 2 4.686 2 8C2 11.314 4.686 14 8 14C11.314 14 14 11.314 14 8Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
                     <path d="M8 5V8L10.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
-                Update
+                Search
             </button>
         </header>
 
@@ -120,10 +120,20 @@
         </aside>
 
         <!-- Globe Container -->
-        <main id="globe-container"></main>
+        <main id="globe-container" data-tutorial-id="globe-container"></main>
 
         <!-- Right Detail Panel -->
-        <aside id="detail-panel" class="hidden">
+        <aside id="detail-panel" class="hidden" data-tutorial-id="detail-panel">
+            <button class="detail-nav-btn detail-nav-prev" data-action="navigate-topic" data-direction="previous" aria-label="Previous topic" title="Previous topic" disabled>
+                <svg class="smart-triangle-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                    <path d="M9 13.5L3.5 5.5H14.5L9 13.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <button class="detail-nav-btn detail-nav-next" data-action="navigate-topic" data-direction="next" aria-label="Next topic" title="Next topic" disabled>
+                <svg class="smart-triangle-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                    <path d="M9 13.5L3.5 5.5H14.5L9 13.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                </svg>
+            </button>
             <button class="close-btn" id="close-detail" aria-label="Close" title="Close">&times;</button>
             <button class="detail-collapse-btn" data-action="toggle-detail-compact" aria-label="Collapse detail panel" title="Short view">
                 <svg class="smart-triangle-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -144,13 +154,12 @@
         </div>
     </div>
 
-    <script src="./shared/widget-bridge.js"></script>
     <script src="./shared/smart-widget-sync.js"></script>
-    <script src="./shared/smart-ai-api-bridge.js"></script>
+    <script src="./shared/smart-ai-api-bridge.js?v=topic-earth-api-url-sync-20260519"></script>
     <script>
       window.TOPIC_EARTH_PROFILE = window.TOPIC_EARTH_PROFILE || (['localhost', '127.0.0.1'].includes(location.hostname) ? 'admin' : 'demo');
     </script>
-  <script type="module" src="./app.main.js?v=topic-earth-boot-fix-20260506"></script>
+  <script type="module" src="./app.main.js?v=topic-earth-access-toggle-20260517"></script>
   
   <style>
     /* Mobile panel visibility rules */

@@ -1,21 +1,23 @@
-import { GlobeRenderer } from './lib/globe.js?v=topic-earth-local-vendor-20260506';
-import { AppAccess } from './lib/capabilities.js?v=topic-earth-access-20260423';
-import { LAYERS } from './data/layers.js?v=topic-earth-regional-proposal-20260423';
+import { GlobeRenderer } from './lib/globe.js?v=topic-earth-globe-vignette-20260516';
+import { AppAccess } from './lib/capabilities.js?v=topic-earth-access-toggle-20260517';
+import { LAYERS } from './data/layers.js?v=topic-earth-carbon-history-20260515';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-cloud-over-20260423';
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-regional-hub-20260423';
 import { FEVER_TOPICS } from './data/fever-topics.js';
 import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-regional-hub-20260423';
 import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-topics-20260505';
+import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=topic-earth-logo-modes-20260505';
-import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-local-vendor-20260506';
-import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-space-topics-20260505';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-warning-panel-collapse-20260430';
-import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-initiative-20260424';
-import { Settings } from './lib/settings.js?v=topic-earth-regional-proposal-20260423';
-import { LanguageManager } from './lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
+import { TopBar } from './components/TopBar.js?v=topic-earth-tutorial-bubbles-20260516';
+import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-access-toggle-20260517';
+import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-access-toggle-20260517';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-access-toggle-20260517';
+import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-20260506';
+import { Settings } from './lib/settings.js?v=topic-earth-api-settings-widget-20260516';
+import { LanguageManager } from './lib/language.js?v=topic-earth-tab-layers-20260507';
 import { ReadTranslationService } from './lib/read-translation.js?v=topic-earth-warning-panel-collapse-20260430';
 import { TTSManager } from './lib/tts.js?v=topic-earth-language-voice-menu-20260430';
+import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-access-toggle-20260517';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
 import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-warning-panel-collapse-20260430';
 import { installAiApiBridge } from './lib/ai-api-bridge.js';
@@ -24,7 +26,7 @@ const TOPIC_EARTH_FAVICON_URL = 'https://res.cloudinary.com/dsbfcgtdv/image/uplo
 const TOPIC_EARTH_FAVICON_FALLBACK_URL = './assets/icons/topic.earth_24x24.svg?v=topic-earth-icons-20260505';
 const DEFAULT_BROWSER_TITLE = 'topic.earth | Global Intelligence Dashboard';
 const BROWSER_MODE_TITLES = {
-  main: DEFAULT_BROWSER_TITLE,
+  main: 'topic.earth | World',
   regional: 'topic.earth | Regional',
   space: 'topic.earth | Space',
   fever: 'topic.earth | Fever Monitor'
@@ -71,6 +73,9 @@ class TopicEarthApp {
     this.regionalContext = null;
     this.regionalAutoLocateRequested = false;
     this.regionalAutoLocatePending = null;
+    this.tutorialGuide = null;
+    this.modeTransitionToken = 0;
+    this.modeTransitionTimer = null;
     this.aiApiBridge = installAiApiBridge({ appName: 'topic-earth' });
     this.loadingWatchdog = window.setTimeout(() => {
       console.warn('[App Init] Loading screen watchdog released the startup overlay.');
@@ -103,28 +108,32 @@ class TopicEarthApp {
   }
 
   rebuildAllPoints() {
-    const mergedCustomPoints = [...this.customPoints];
+    const customPointById = new Map(
+      this.customPoints
+        .filter(Boolean)
+        .map(point => [String(point.id), point])
+    );
+    const basePoints = [...MOCK_POINTS, ...SPACE_TOPICS, ...CARBON_HISTORY_TOPICS, ...FEVER_TOPICS, ...TIPPING_POINT_TOPICS];
 
-    TIPPING_POINT_TOPICS.forEach(tippingTopic => {
-      const existingIndex = mergedCustomPoints.findIndex(p => p.id === tippingTopic.id);
-      if (existingIndex === -1) {
-        mergedCustomPoints.push(tippingTopic);
-      } else {
-        mergedCustomPoints[existingIndex] = { ...mergedCustomPoints[existingIndex], ...tippingTopic };
-      }
+    const mergedBasePoints = basePoints.map(point => {
+      const customPoint = customPointById.get(String(point.id));
+      return customPoint ? { ...point, ...customPoint } : point;
     });
+    const baseIds = new Set(basePoints.map(point => String(point.id)));
+    const customOnlyPoints = this.customPoints.filter(point => point && !baseIds.has(String(point.id)));
 
-    this.allPoints = [...MOCK_POINTS, ...SPACE_TOPICS, ...FEVER_TOPICS, ...mergedCustomPoints, ...this.realtimeMeteoPoints];
+    this.allPoints = [...mergedBasePoints, ...customOnlyPoints, ...this.realtimeMeteoPoints];
     return this.allPoints;
   }
 
   async init() {
-      await LanguageManager.loadTranslationCatalog('./shared/topic-earth-ui.csv?v=topic-earth-warning-panel-collapse-20260430');
+      await LanguageManager.loadTranslationCatalog('./shared/topic-earth-ui.csv?v=topic-earth-settings-tutorial-20260516');
 
     // Initialize settings early
     await this.initSettings();
     this.applyDocumentLanguage();
     AppAccess.enforceProfile();
+    AppAccess.restoreLocalDevelopmentAdminMode();
     this.applyAdminMode();
     
     // Initialize UI components
@@ -188,7 +197,7 @@ class TopicEarthApp {
     
     // Setup fever warning history access
     this.setupFeverWarningAccess();
-    
+
     // Initialize debug tools if admin
     this.initDebugTools();
 
@@ -197,6 +206,8 @@ class TopicEarthApp {
 
     // Hide loading screen
     this.hideLoadingScreen();
+
+    this.initTutorialGuide();
   }
 
   getCurrentUiLanguage(settings = Settings.get()) {
@@ -237,8 +248,93 @@ class TopicEarthApp {
     return AppAccess.isAdminMode();
   }
 
+  normalizeLayerFilter(filter = 'main') {
+    return filter === 'world' ? 'main' : (filter || 'main');
+  }
+
+  getLayerModeTabs(layer) {
+    if (!layer) return ['main'];
+    if (Array.isArray(layer.modeTabs) && layer.modeTabs.length > 0) {
+      return layer.modeTabs;
+    }
+    if (layer.feverOnly) return ['fever'];
+    if (layer.id === 'space') return ['space'];
+    return ['main'];
+  }
+
+  layerBelongsToFilter(layer, filter = 'main') {
+    return this.getLayerModeTabs(layer).includes(this.normalizeLayerFilter(filter));
+  }
+
   isRegionalLayerId(layerId) {
-    return Boolean(this.getLayerById(layerId)?.sortByRegionalContext);
+    return this.layerBelongsToFilter(this.getLayerById(layerId), 'regional');
+  }
+
+  isRegionalTopic(point = null) {
+    return Boolean(point && (
+      AppAccess.isRegionalProposalTopic(point)
+      || this.isRegionalLayerId(point.category)
+    ));
+  }
+
+  hasRestorableRegionalTopicState(point = null) {
+    if (!point?.regionalState || point.isCluster) return false;
+    const stateLayerId = point.regionalState.layerId || point.category;
+    return this.isRegionalTopic(point) || this.isRegionalLayerId(stateLayerId);
+  }
+
+  ensureRegionalTopicLayerActive(point = null) {
+    const layerId = point?.regionalState?.layerId || point?.category;
+    if (!layerId || !this.isRegionalLayerId(layerId)) return false;
+    if (!this.layerPanel?.activeLayers?.has(layerId)) {
+      this.layerPanel?.setLayerActive?.(layerId, true);
+      this.layerPanel?.updateData?.(this.allLayers, this.allPoints);
+    }
+    return true;
+  }
+
+  isTopicVisibleInFilter(point = null, filter = this.currentLayerFilter) {
+    if (!point) return false;
+    const normalizedFilter = this.normalizeLayerFilter(filter);
+    if (normalizedFilter === 'regional') {
+      return this.isRegionalTopic(point);
+    }
+    if (normalizedFilter === 'space') {
+      return Boolean(point.isSpaceTopic || point.isPlanet || point.solarSystemObject || point.category === 'space');
+    }
+    if (normalizedFilter === 'fever') {
+      return Boolean(
+        point.isFeverWarning
+        || point.isTippingPoint
+        || point.isAMOC
+        || this.layerBelongsToFilter(this.getLayerById(point.category), 'fever')
+      );
+    }
+    return this.layerBelongsToFilter(this.getLayerById(point.category), 'main')
+      && !point.isSpaceTopic
+      && !point.isPlanet
+      && !point.isFeverWarning
+      && !point.isTippingPoint
+      && !point.isAMOC;
+  }
+
+  reconcileDetailPanelForFilter(filter = this.currentLayerFilter) {
+    const point = this.detailPanel?.currentPoint;
+    if (this.detailPanel?.mode === 'detail' && point && !this.isTopicVisibleInFilter(point, filter)) {
+      this.detailPanel.hide();
+    }
+  }
+
+  getActiveLayersForFilter(filter = this.currentLayerFilter) {
+    if (this.layerPanel?.getActiveLayersForFilter) {
+      return this.layerPanel.getActiveLayersForFilter(filter);
+    }
+    const activeLayers = this.layerPanel?.getActiveLayers?.()
+      || new Set(this.allLayers.filter(layer => layer.enabled).map(layer => layer.id));
+    return new Set(
+      Array.from(activeLayers)
+        .filter(layerId => this.layerBelongsToFilter(this.getLayerById(layerId), filter))
+    );
   }
 
   switchLayerFilter(filter, options = {}) {
@@ -264,6 +360,7 @@ class TopicEarthApp {
   revealRegionalTopic(topic) {
     if (!topic) return;
 
+    this.ensureRegionalTopicLayerActive(topic);
     if (this.currentLayerFilter !== 'regional') {
       this.switchLayerFilter('regional');
     }
@@ -272,6 +369,19 @@ class TopicEarthApp {
     if (Number.isFinite(Number(topic.lat)) && Number.isFinite(Number(topic.lon))) {
       this.focusRegionalTopic(topic, { openDetail: false });
     }
+  }
+
+  openRegionalTopicState(point, options = {}) {
+    if (!this.hasRestorableRegionalTopicState(point)) return false;
+
+    this.ensureRegionalTopicLayerActive(point);
+    if (this.currentLayerFilter !== 'regional' || !this.regionalMap?.visible) {
+      this.switchLayerFilter('regional', { force: this.currentLayerFilter === 'regional' });
+    } else {
+      this.refreshRegionalMap(true);
+    }
+
+    return this.focusRegionalTopic(point, { openDetail: options.openDetail !== false });
   }
 
   humanizeInitiativeToken(value = '') {
@@ -428,7 +538,7 @@ class TopicEarthApp {
         initiativeSourceTitle: sourcePoint?.title || '',
         matchLevels: ['local', 'regional', 'country'],
         communityFeatures: ['comment', 'post'],
-        autoResearch: true
+        manualReview: true
       },
       researchSettings: {
         sources: existingTopic?.researchSettings?.sources || ['official', 'scientific', 'media'],
@@ -462,13 +572,7 @@ class TopicEarthApp {
     }
 
     this.revealRegionalTopic(proposal);
-    this.detailPanel.pendingResearchAutoApply = true;
-    this.detailPanel.showResearch(proposal);
-    setTimeout(() => {
-      if (this.detailPanel?.mode === 'research' && String(this.detailPanel.currentPoint?.id) === String(proposal.id)) {
-        this.detailPanel.generateResearch();
-      }
-    }, 180);
+    this.detailPanel.show(proposal);
   }
 
   applyAdminMode(isAdmin = this.isAdminMode()) {
@@ -630,6 +734,14 @@ class TopicEarthApp {
     document.body.classList.toggle('tutorial-mode-off', settings.tutorialModeEnabled === false);
   }
 
+  initTutorialGuide() {
+    this.tutorialGuide?.destroy?.();
+    this.tutorialGuide = new TutorialGuide({
+      getLanguage: () => this.getCurrentUiLanguage()
+    });
+    this.tutorialGuide.start();
+  }
+
   updateBrowserTabState(filter = this.currentLayerFilter) {
     const mode = filter || 'main';
     const nextTitle = BROWSER_MODE_TITLES[mode] || DEFAULT_BROWSER_TITLE;
@@ -675,10 +787,47 @@ class TopicEarthApp {
     document.body.style.setProperty('--logo-boundary-c', colors[2]);
   }
 
+  beginModeTransition(nextMode = 'main', previousMode = this.currentLayerFilter) {
+    const token = ++this.modeTransitionToken;
+    document.body.classList.add('mode-transitioning');
+    this.clearTransientModeUi();
+    if (previousMode !== nextMode && previousMode === 'regional') {
+      this.regionalMap?.closeSearchPanel?.();
+    }
+    if (this.modeTransitionTimer) {
+      window.clearTimeout(this.modeTransitionTimer);
+    }
+    this.modeTransitionTimer = window.setTimeout(() => {
+      if (this.modeTransitionToken === token) {
+        document.body.classList.remove('mode-transitioning');
+        this.modeTransitionTimer = null;
+      }
+    }, 650);
+    return token;
+  }
+
+  isCurrentModeTransition(token) {
+    return token === this.modeTransitionToken;
+  }
+
+  clearCountryTooltip() {
+    if (this.currentCountryTooltip?.parentNode) {
+      this.currentCountryTooltip.remove();
+    }
+    this.currentCountryTooltip = null;
+  }
+
+  clearTransientModeUi() {
+    this.globe?.clearTransientOverlays?.();
+    this.clearCountryTooltip();
+    this.tutorialGuide?.hide?.();
+  }
+
   setupViewToggle() {
     window.addEventListener('layerFilterChanged', (e) => {
       const filter = e.detail.filter;
       const previous = e.detail.previous;
+      const transitionToken = this.beginModeTransition(filter, previous);
       
       // Store current filter
       this.currentLayerFilter = filter;
@@ -715,14 +864,16 @@ class TopicEarthApp {
       
       // Handle scene mode changes based on filter
       if (filter === 'space' && !this.globe.inSolarSystemView) {
-        this.enterSpaceMode();
+        this.enterSpaceMode(transitionToken);
       } else if (filter === 'fever' && !this.globe.inFeverMode) {
-        this.enterFeverMode();
+        this.enterFeverMode(transitionToken);
       } else if (filter === 'regional') {
-        this.enterRegionalMode();
+        this.enterRegionalMode(transitionToken);
       } else if (filter === 'main') {
         this.exitSpecialModes();
       }
+
+      this.reconcileDetailPanelForFilter(filter);
       
       // Update marker visibility based on filter
       this.updateMarkersByFilter(filter);
@@ -818,12 +969,14 @@ class TopicEarthApp {
     }
   }
   
-  enterSpaceMode() {
+  enterSpaceMode(transitionToken = this.modeTransitionToken) {
     if (!this.globe.solarSystemLoaded) {
       this.globe.loadSolarSystem().then(() => {
+        if (!this.isCurrentModeTransition(transitionToken) || this.currentLayerFilter !== 'space') return;
         this.globe.transitionToSolarSystem();
       });
     } else {
+      if (!this.isCurrentModeTransition(transitionToken) || this.currentLayerFilter !== 'space') return;
       this.globe.transitionToSolarSystem();
     }
     
@@ -836,12 +989,21 @@ class TopicEarthApp {
     }
   }
   
-  async enterFeverMode() {
+  async enterFeverMode(transitionToken = this.modeTransitionToken) {
     const wasAlreadyInFever = this.globe.inFeverMode;
     if (!wasAlreadyInFever && this.globe.getFeverSoundEnabled?.()) {
       this.detailPanel.primeFeverAudioFromGesture?.();
     }
     await this.globe.toggleFeverMode();
+    if (!this.isCurrentModeTransition(transitionToken) || this.currentLayerFilter !== 'fever') {
+      if (this.globe.inFeverMode) {
+        this.globe.exitFeverMode();
+      }
+      if (this.feverSimulationActive) {
+        this.hideFeverSimulation();
+      }
+      return;
+    }
     
     // Mobile: keep both panels available; CSS prevents overlap.
     if (window.innerWidth <= 768) {
@@ -866,7 +1028,9 @@ class TopicEarthApp {
     }
   }
 
-  enterRegionalMode() {
+  enterRegionalMode(transitionToken = this.modeTransitionToken) {
+    if (!this.isCurrentModeTransition(transitionToken) || this.currentLayerFilter !== 'regional') return;
+    this.clearTransientModeUi();
     this.exitSpecialModes();
 
     if (this.globe && typeof this.regionalPreviousAutoRotate !== 'boolean') {
@@ -884,8 +1048,7 @@ class TopicEarthApp {
     if (!this.regionalMap) return;
     if (!force && (this.currentLayerFilter !== 'regional' || !this.regionalMap.visible)) return;
 
-    const activeLayers = this.layerPanel?.getActiveLayers?.()
-      || new Set(this.allLayers.filter(layer => layer.enabled).map(layer => layer.id));
+    const activeLayers = this.getActiveLayersForFilter('regional');
     this.regionalMap.show(this.allPoints, this.allLayers, activeLayers, {
       preserveView: !force && this.regionalMap.visible
     });
@@ -939,6 +1102,96 @@ class TopicEarthApp {
       regionalContext: normalizedContext,
       defaultLayerId: 'community-projects'
     });
+  }
+
+  requestRegionalTopicMove() {
+    if (this.currentLayerFilter !== 'regional' || !this.regionalMap?.visible) {
+      return false;
+    }
+
+    const point = this.detailPanel?.currentPoint;
+    if (!point || !this.isRegionalTopic(point)) {
+      this.regionalMap.setAuthorMode('drag');
+      this.maybeAutoLocateRegionalMode(true);
+      return false;
+    }
+
+    this.focusRegionalTopic(point, { openDetail: false });
+    this.regionalMap.setAuthorMode('move-topic');
+    return true;
+  }
+
+  handleRegionalTopicMove(point = null, context = {}) {
+    const sourcePoint = point || this.detailPanel?.currentPoint;
+    const lat = Number(context.lat);
+    const lon = Number(context.lon);
+    if (!sourcePoint || !Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return false;
+    }
+
+    const updatedTopic = {
+      ...sourcePoint,
+      lat: Number(lat.toFixed(6)),
+      lon: Number(lon.toFixed(6)),
+      locationPrecision: context.precision || 'address',
+      storageMeta: {
+        ...(sourcePoint.storageMeta || {}),
+        regionalLabel: context.label || `${lat.toFixed(5)}, ${lon.toFixed(5)}`,
+        mapPrecision: context.precision || 'address',
+        mapZoom: context.zoom || sourcePoint.storageMeta?.mapZoom || ''
+      }
+    };
+
+    if (!AppAccess.canModifyTopic(updatedTopic)) {
+      this.detailPanel?.blockUserMutation?.('move topic coordinates');
+      return false;
+    }
+
+    this.handleRegionalContextChange(this.normalizeRegionalInitiativeContext({
+      ...context,
+      lat: updatedTopic.lat,
+      lon: updatedTopic.lon,
+      precision: updatedTopic.locationPrecision,
+      label: updatedTopic.storageMeta.regionalLabel,
+      source: context.source || 'topic-move'
+    }, updatedTopic));
+
+    this.handleUpdateTopic(updatedTopic);
+    if (this.detailPanel?.mode === 'detail') {
+      this.detailPanel.show(updatedTopic);
+    }
+    return true;
+  }
+
+  handleRegionalTopicStateRecord(point = null, state = null) {
+    const sourcePoint = point || this.detailPanel?.currentPoint;
+    if (!sourcePoint || !state || typeof state !== 'object') {
+      return false;
+    }
+
+    const updatedTopic = {
+      ...sourcePoint,
+      regionalState: state,
+      storageMeta: {
+        ...(sourcePoint.storageMeta || {}),
+        regionalStateSavedAt: state.capturedAt || new Date().toISOString(),
+        regionalRestoreMode: state.restoreMode || ''
+      }
+    };
+
+    if (!AppAccess.canModifyTopic(updatedTopic)) {
+      this.detailPanel?.blockUserMutation?.('save regional pathway');
+      return false;
+    }
+
+    this.handleUpdateTopic(updatedTopic);
+    if (
+      this.detailPanel?.currentPoint
+      && String(this.detailPanel.currentPoint.id) === String(sourcePoint.id)
+    ) {
+      this.detailPanel.currentPoint = updatedTopic;
+    }
+    return true;
   }
 
   maybeAutoLocateRegionalMode(force = false) {
@@ -1741,12 +1994,17 @@ class TopicEarthApp {
     window.addEventListener('interactionModeChanged', (e) => {
       this.setInteractionMode(e.detail.mode);
     });
+
+    window.addEventListener('regionalMoveTopicRequested', () => {
+      this.requestRegionalTopicMove();
+    });
     
     // Listen for admin mode changes to update layer panel and initialize debug tools
     window.addEventListener('adminModeChanged', (e) => {
       const accessState = AppAccess.enforceProfile();
       const isAdmin = accessState.isAdminMode;
       this.applyAdminMode(isAdmin);
+      this.topBar?.render?.();
       this.layerPanel?.updateData(this.allLayers, this.allPoints);
       this.detailPanel?.handleAdminModeChanged?.(isAdmin);
       if (isAdmin) {
@@ -1782,8 +2040,10 @@ class TopicEarthApp {
             this.globe.setAMOCOverlayVisible(visible);
           }
         } else {
-          this.globe.updateMarkerVisibility(layerId, visible);
-          this.refreshRegionalMap();
+          this.updateMarkersByFilter(this.currentLayerFilter);
+          if (this.currentLayerFilter === 'regional') {
+            this.refreshRegionalMap();
+          }
         }
       },
       onPointSelect: (point) => {
@@ -1822,7 +2082,12 @@ class TopicEarthApp {
   }
 
   selectPointFromPanel(point) {
-    if (this.currentLayerFilter === 'regional' && this.regionalMap?.visible) {
+    if (this.hasRestorableRegionalTopicState(point)) {
+      this.openRegionalTopicState(point, { openDetail: true });
+      return;
+    }
+
+    if (this.currentLayerFilter === 'regional' && this.regionalMap?.visible && this.isRegionalTopic(point)) {
       this.focusRegionalTopic(point, { openDetail: true });
       return;
     }
@@ -1846,37 +2111,113 @@ class TopicEarthApp {
       }
 
       if (!focused) {
-        this.globe.focusOnPoint(lat, lon);
+        this.globe.focusOnPoint(lat, lon, this.getGlobeFocusOptions());
       }
     }
 
     if (shouldOpenDetail) {
-      this.showPointDetail(point);
+      this.detailPanel?.show(point);
+    }
+
+    if (focused) {
+      this.restoreRegionalTopicState(point);
     }
 
     return focused;
+  }
+
+  restoreRegionalTopicState(point = {}) {
+    if (!point?.regionalState || this.currentLayerFilter !== 'regional' || !this.regionalMap?.visible) {
+      return false;
+    }
+
+    return this.regionalMap.restoreTopicState(point.regionalState);
+  }
+
+  getGlobeFocusOptions() {
+    const compactViewport = window.matchMedia?.('(max-width: 768px), (max-height: 650px)').matches
+      || window.innerWidth <= 768
+      || window.innerHeight <= 650;
+    const detailOpen = document.body.classList.contains('detail-panel-open');
+
+    return {
+      preferUpperViewport: compactViewport || (detailOpen && window.innerWidth <= 1024)
+    };
+  }
+
+  focusGlobePoint(point = {}) {
+    const lat = Number(point?.lat);
+    const lon = Number(point?.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
+    this.globe.focusOnPoint(lat, lon, this.getGlobeFocusOptions());
+    return true;
+  }
+
+  getLayerTopicsForNavigation(point = {}) {
+    const layer = this.allLayers.find(item => item.id === point?.category);
+    if (!layer) return [];
+
+    return this.allPoints
+      .filter(item => item && item.category === point.category && item.id && !item.isCluster && !item.isCountry)
+      .slice()
+      .sort((a, b) => {
+        if (layer.id === 'space') {
+          const orderDelta = (a.spaceOrder ?? Number.POSITIVE_INFINITY) - (b.spaceOrder ?? Number.POSITIVE_INFINITY);
+          if (orderDelta !== 0) return orderDelta;
+        }
+        const dateA = new Date(a.date || 0).getTime();
+        const dateB = new Date(b.date || 0).getTime();
+        const safeDateA = Number.isFinite(dateA) ? dateA : 0;
+        const safeDateB = Number.isFinite(dateB) ? dateB : 0;
+        const dateDelta = safeDateA - safeDateB;
+        const direction = layer.chronologySort === 'asc' ? 1 : -1;
+        if (dateDelta !== 0) return direction * dateDelta;
+        return String(a.title || '').localeCompare(String(b.title || ''));
+      });
+  }
+
+  getAdjacentTopic(point = {}, direction = 'next') {
+    const topics = this.getLayerTopicsForNavigation(point);
+    const currentIndex = topics.findIndex(item => String(item.id) === String(point?.id));
+    if (currentIndex === -1) return null;
+
+    const offset = direction === 'previous' ? -1 : 1;
+    return topics[currentIndex + offset] || null;
+  }
+
+  getRegionalTopicState(options = {}) {
+    if (!this.regionalMap?.visible) return null;
+
+    return this.regionalMap.getTopicRegionalState({
+      ...options,
+      activeLayers: Array.from(this.layerPanel?.getActiveLayers?.() || [])
+    });
   }
 
   initDetailPanel() {
     const container = document.getElementById('detail-panel');
     this.detailPanel = new DetailPanel(container, this.allLayers, {
       onShow: (point) => {
-        if (this.currentLayerFilter === 'regional' && this.regionalMap?.visible) {
+        if (this.currentLayerFilter === 'regional' && this.regionalMap?.visible && this.isRegionalTopic(point)) {
           const lat = Number(point?.lat);
           const lon = Number(point?.lon);
           const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lon);
           const focused = this.regionalMap.focusTopic(point)
             || (hasCoordinates && this.regionalMap.focusCoordinate(lat, lon, point.title || 'Topic coordinate'));
+          if (focused) {
+            this.restoreRegionalTopicState(point);
+          }
           if (!focused && hasCoordinates) {
-            this.globe.focusOnPoint(lat, lon);
+            this.globe.focusOnPoint(lat, lon, this.getGlobeFocusOptions());
           }
         } else {
-          this.globe.focusOnPoint(point.lat, point.lon);
+          this.focusGlobePoint(point);
         }
         // Mobile: hide layer panel when detail opens
         document.getElementById('layer-panel')?.classList.remove('mobile-hidden');
       },
       onHide: () => {
+        this.globe.clearCurrentTopic?.();
         this.globe.resetView();
         // Remove location marker when panel closes
         if (this.currentLocationMarker) {
@@ -1898,10 +2239,19 @@ class TopicEarthApp {
         this.handleDeleteTopic(topic);
       },
       onCheckTopicUpdate: (topic) => {
-        this.detailPanel.showNewsUpdate(this.allPoints, { topic });
+        this.detailPanel.showNewsUpdate([topic], { topic, scoped: true });
       },
       onRegionalInitiativeAction: (point, actionRequest) => {
         this.handleRegionalInitiativeAction(point, actionRequest);
+      },
+      getAdjacentTopic: (point, direction) => {
+        return this.getAdjacentTopic(point, direction);
+      },
+      onNavigateTopic: (topic) => {
+        this.showPointDetail(topic);
+      },
+      getRegionalTopicState: (options = {}) => {
+        return this.getRegionalTopicState(options);
       }
     });
   }
@@ -1952,7 +2302,9 @@ class TopicEarthApp {
     this.regionalMap = new RegionalMap(globeContainer, {
       onTopicSelect: (point) => this.focusRegionalTopic(point, { openDetail: true }),
       onLocationFocus: (context) => this.handleRegionalContextChange(context),
-      onMapPointDraft: (context) => this.handleRegionalMapPointDraft(context)
+      onMapPointDraft: (context) => this.handleRegionalMapPointDraft(context),
+      onTopicMove: (point, context) => this.handleRegionalTopicMove(point, context),
+      onTopicRegionalStateChange: (point, state) => this.handleRegionalTopicStateRecord(point, state)
     });
   }
 
@@ -1993,7 +2345,7 @@ class TopicEarthApp {
     // - Space mode remains restricted to space markers only
     // - Main mode hides fever-only markers/overlays but otherwise respects layer toggles
 
-    const activeLayers = this.layerPanel ? this.layerPanel.getActiveLayers() : new Set();
+    const activeLayers = this.getActiveLayersForFilter(filter);
 
     this.globe.markers.forEach(marker => {
       const category = marker.userData.category;
@@ -2018,8 +2370,9 @@ class TopicEarthApp {
         if (isFeverOnly) {
           marker.visible = false;
         } else {
-          // Respect layer panel toggle state for standard categories
-          const isActive = activeLayers.has(category);
+          // Respect the current tab's layer ownership and toggle state.
+          const isActive = activeLayers.has(category)
+            && this.layerBelongsToFilter(this.getLayerById(category), filter);
           marker.visible = isActive;
         }
       }
@@ -2058,7 +2411,7 @@ class TopicEarthApp {
   syncRealtimeMeteoLayers(filter = this.currentLayerFilter, activeLayers = null) {
     if (!this.globe) return;
 
-    const active = activeLayers || this.layerPanel?.getActiveLayers?.() || new Set();
+    const active = activeLayers || this.getActiveLayersForFilter(filter);
     const inMainMode = filter === 'main';
     const cloudLayer = this.getLayerById(METEO_CLOUD_LAYER_ID);
     const showClouds = inMainMode && active.has(METEO_CLOUD_LAYER_ID);
@@ -2224,24 +2577,19 @@ class TopicEarthApp {
     } else {
       // Add markers and update visibility for regular topics
       this.updateMarkers();
-      
-      // Sync marker visibility with active layers for non-overlay layers
-      const activeLayers = this.layerPanel.getActiveLayers();
-      this.allLayers.forEach(layer => {
-        if (layer.id === 'amoc-watch') return; // overlay handled separately
-        const isActive = activeLayers.has(layer.id);
-        this.globe.updateMarkerVisibility(layer.id, isActive);
-      });
+      this.updateMarkersByFilter(this.currentLayerFilter);
     }
     
-    const shouldRevealRegional = this.isRegionalLayerId(topic.category) || AppAccess.isRegionalProposalTopic(topic);
-    if (shouldRevealRegional) {
-      this.revealRegionalTopic(topic);
-    } else if (this.currentLayerFilter === 'regional' && this.regionalMap?.visible) {
+      const shouldRevealRegional = AppAccess.isRegionalProposalTopic(topic)
+        || this.hasRestorableRegionalTopicState(topic)
+        || (this.currentLayerFilter === 'regional' && this.isRegionalTopic(topic));
+      if (shouldRevealRegional) {
+        this.revealRegionalTopic(topic);
+      } else if (this.currentLayerFilter === 'regional' && this.regionalMap?.visible && this.isRegionalTopic(topic)) {
       this.refreshRegionalMap(true);
       this.focusRegionalTopic(topic, { openDetail: false });
     } else if (topic.lat && topic.lon && !isNaN(topic.lat) && !isNaN(topic.lon)) {
-      this.globe.focusOnPoint(topic.lat, topic.lon);
+      this.focusGlobePoint(topic);
     }
     this.showPointDetail(topic);
   }
@@ -2308,7 +2656,10 @@ class TopicEarthApp {
     this.layerPanel.updateData(this.allLayers, this.allPoints);
     this.detailPanel.updateLayers(this.allLayers);
     this.updateMarkers();
-    this.refreshRegionalMap(true);
+    this.updateMarkersByFilter(this.currentLayerFilter);
+    if (this.currentLayerFilter === 'regional') {
+      this.refreshRegionalMap(true);
+    }
   }
 
   handleUpdateTopic(topic) {
@@ -2402,6 +2753,15 @@ class TopicEarthApp {
         this.customPoints[index] = topic;
         this.persistCustomPoints('the topic update');
         this.rebuildAllPoints();
+      } else {
+        this.customPoints.push({
+          ...topic,
+          isCustom: true,
+          originalTopicId: topic.originalTopicId || topic.id,
+          originalTitle: topic.originalTitle || topic.title || ''
+        });
+        this.persistCustomPoints('the topic update');
+        this.rebuildAllPoints();
       }
     }
     
@@ -2410,6 +2770,7 @@ class TopicEarthApp {
     if (allIndex !== -1) {
       const oldTopic = this.allPoints[allIndex];
       const coordsChanged = oldTopic.lat !== topic.lat || oldTopic.lon !== topic.lon;
+      this.allPoints[allIndex] = topic;
       
       // Update UI and globe
       this.layerPanel.updateData(this.allLayers, this.allPoints);
@@ -2419,25 +2780,19 @@ class TopicEarthApp {
         this.updateMarkers();
       }
       
-      // Sync visibility: special-case AMOC overlay (overlay layer), don't treat it as markers
-      const activeLayers = this.layerPanel.getActiveLayers();
-      this.allLayers.forEach(layer => {
-        const isActive = activeLayers.has(layer.id);
-        if (layer.id === 'amoc-watch') {
-          // Use overlay API for AMOC
-          this.globe.setAMOCOverlayVisible(isActive);
-          window.dispatchEvent(new CustomEvent('amocToggled', { detail: { visible: isActive } }));
-        } else {
-          this.globe.updateMarkerVisibility(layer.id, isActive);
-        }
-      });
+      this.globe.setAMOCOverlayVisible(
+        this.currentLayerFilter === 'fever' && this.getActiveLayersForFilter('fever').has('amoc-watch')
+      );
+      this.updateMarkersByFilter(this.currentLayerFilter);
       
       // Focus on updated point
-      const shouldRevealRegional = this.isRegionalLayerId(topic.category) || AppAccess.isRegionalProposalTopic(topic);
+      const shouldRevealRegional = AppAccess.isRegionalProposalTopic(topic)
+        || this.hasRestorableRegionalTopicState(topic)
+        || (this.currentLayerFilter === 'regional' && this.isRegionalTopic(topic));
       if (shouldRevealRegional) {
         this.revealRegionalTopic(topic);
       } else if (topic.lat && topic.lon && !isNaN(topic.lat) && !isNaN(topic.lon)) {
-        this.globe.focusOnPoint(topic.lat, topic.lon);
+        this.focusGlobePoint(topic);
       }
     }
   }
@@ -2472,6 +2827,14 @@ class TopicEarthApp {
         showAndFocusSpaceObject();
       }
       return;
+    }
+
+    if (
+      Number.isFinite(Number(point?.lat))
+      && Number.isFinite(Number(point?.lon))
+      && !point?.isCluster
+    ) {
+      this.globe.setCurrentTopic?.(point);
     }
 
     if (point?.isTippingPoint && point.boundary) {
@@ -2569,6 +2932,11 @@ class TopicEarthApp {
         this.globe.seekToYear(point.year);
         this.detailPanel.show(point);
       }
+      return;
+    }
+
+    if (this.hasRestorableRegionalTopicState(point)) {
+      this.openRegionalTopicState(point, { openDetail: true });
       return;
     }
     
@@ -2678,7 +3046,7 @@ class TopicEarthApp {
   }
 
   showPointResearch(point) {
-    this.detailPanel.showResearch(point);
+    this.detailPanel.showNewsUpdate([point], { topic: point, scoped: true });
   }
 
   async showLocationInfo(latLon) {

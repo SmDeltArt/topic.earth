@@ -22,6 +22,8 @@ The app is currently an advanced static prototype deployed from this repository 
   styles.css                 App styling
   fever-scenarios.json       Fever scenario data and texture references
   assets/
+    icons/                   topic.earth SVG icon source and favicon fallback
+    logo/                    Portable animated logo kit and metadata
     models/                  GLB models and overlays
     textures/
       main/                  Main Earth material maps
@@ -29,8 +31,12 @@ The app is currently an advanced static prototype deployed from this repository 
   components/                UI panels and controls
   data/                      Topic, layer, point, and research data
   lib/                       Runtime services and Three.js renderer
-  shared/                    Shared bridge, API sync, CSV, and widget helpers
-  docs/                      Flow and maintenance notes
+  shared/                    Shared AI bridge, widget sync, CSV, and favicon helpers
+  site.webmanifest           Web app metadata
+  robots.txt                 Crawler policy
+  sitemap.xml                Public URL map for search crawlers
+  codemeta.json              Repository/software metadata
+  CITATION.cff               Citation metadata
 ```
 
 ## Local Development
@@ -51,7 +57,20 @@ http://127.0.0.1:8123
 
 The repo is ready for static hosting on Vercel. Keep runtime asset URLs relative to the repository root, for example `./assets/textures/fever/earth_2025_1k.png`.
 
-Cloudinary CDN delivery is bridged through [lib/asset-bridge.js](lib/asset-bridge.js), so code can keep stable local asset names while selected assets resolve to Cloudinary. See [docs/CLOUDINARY_ASSET_BRIDGE.md](docs/CLOUDINARY_ASSET_BRIDGE.md).
+Cloudinary CDN delivery is bridged through [lib/asset-bridge.js](lib/asset-bridge.js), so code can keep stable local asset names while selected assets resolve to Cloudinary.
+
+## Public Metadata
+
+The homepage includes canonical SEO tags, Open Graph/Twitter previews, a web
+app manifest, and Schema.org JSON-LD for `topic.earth`. Repository and reuse
+metadata are also exposed through:
+
+- [site.webmanifest](site.webmanifest)
+- [robots.txt](robots.txt)
+- [sitemap.xml](sitemap.xml)
+- [codemeta.json](codemeta.json)
+- [CITATION.cff](CITATION.cff)
+- [assets/logo/metadata.json](assets/logo/metadata.json)
 
 ## Product Flow
 
@@ -67,7 +86,7 @@ For admin and AI features, the preferred internal model is:
 Topic Draft -> Sources -> Media -> AI Assist -> Review -> Save / Export / Submit / Publish
 ```
 
-See [docs/FLOW.md](docs/FLOW.md) for the current flow analysis.
+Internal planning docs stay in the `_actual_vs_y1` development folder rather than the public app bundle.
 
 ## License
 

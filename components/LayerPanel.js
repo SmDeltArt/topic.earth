@@ -3,7 +3,7 @@
  * Manages data layer toggles and news items
  */
 import { Settings } from '../lib/settings.js';
-import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-20260423';
+import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-shortcuts-20260517';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
 
 const REGIONAL_GROUP_ID = 'regional-live';

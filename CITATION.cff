@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+title: "topic.earth"
+message: "If you use topic.earth, please cite the project repository."
+type: software
+abstract: "Interactive Earth intelligence dashboard for climate systems, regional initiatives, space context, tipping points, AMOC, and AI-assisted topic research."
+repository-code: "https://github.com/SmDeltArt/topic.earth"
+url: "https://topic.earth/"
+license: "EUPL-1.2"
+keywords:
+  - "topic.earth"
+  - "climate dashboard"
+  - "Earth intelligence"
+  - "regional initiatives"
+  - "tipping points"
+  - "AMOC"
+  - "WebGL"
+date-released: "2026-05-05"
+authors:
+  - name: "topic.earth project"

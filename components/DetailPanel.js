@@ -1,9 +1,16 @@
-import { Settings } from '../lib/settings.js';
-import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-20260423';
-import { LanguageManager } from '../lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
+import { Settings } from '../lib/settings.js?v=topic-earth-api-settings-widget-20260516';
+import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-shortcuts-20260517';
+import { LanguageManager } from '../lib/language.js?v=topic-earth-tab-layers-20260507';
 import { ReadTranslationService } from '../lib/read-translation.js';
 import { getFeverWarmingTranslation } from '../lib/fever-warming-translations.js?v=topic-earth-fever-json-i18n-20260422';
 import { LocalStorage } from '../lib/storage.js?v=topic-earth-regional-initiative-20260424';
+import {
+  createMediaToken as createTopicMediaToken,
+  getDirectImageUrl as getTopicDirectImageUrl,
+  getHostFromUrl as getTopicHostFromUrl,
+  getMediaTokensForPoint as getTopicMediaTokensForPoint,
+  normalizeMediaToken as normalizeTopicMediaToken
+} from '../lib/media-utils.js';
 import {
   downloadAdminTopicPackage,
   downloadTopicAdminSubmission,
@@ -34,6 +41,10 @@ export class DetailPanel {
     this.topicDraftStatus = null;
     this.topicBuilderContext = null;
     this.pendingResearchAutoApply = false;
+    this.composerSmartInput = '';
+    this.showMediaUrlInput = false;
+    this.mediaUrlDraftUrl = '';
+    this.mediaUrlPreviewToken = null;
     this.isCompact = false;
     this.panelSize = 'middle';
     
@@ -77,6 +88,20 @@ export class DetailPanel {
     return values
       ? LanguageManager.formatLabel(key, langCode, values)
       : LanguageManager.getLabel(key, langCode);
+  }
+
+  emitTutorialEvent(name, detail = {}, delay = 0) {
+    window.setTimeout(() => {
+      window.dispatchEvent(new CustomEvent(name, {
+        detail: {
+          mode: this.mode,
+          tab: this.topicBuilderTab,
+          sourceCount: (this.topicSources || []).filter(source => source?.name || source?.url).length,
+          mediaCount: this.getMediaTokensForPoint(this.currentPoint || {}).length,
+          ...detail
+        }
+      }));
+    }, delay);
   }
 
   getLocalizedFeverWarming(scenario, year, fallbackTitle, fallbackMessage) {
@@ -190,9 +215,114 @@ export class DetailPanel {
     if (!window.ttsManager) return;
 
     const localized = await this.translateFeverText(text);
-    window.ttsManager.speak(localized.text, this.getFeverTtsLanguage(localized), {
-      forceBrowser: true
+    this.speakFeverNarration(localized.text, this.getFeverTtsLanguage(localized));
+  }
+
+  speakFeverNarration(text, language, extraOptions = {}) {
+    if (!window.ttsManager) return;
+
+    window.ttsManager.speak(text, language, {
+      forceBrowser: true,
+      ...extraOptions
     });
+  }
+
+  getFeverSegmentSeconds() {
+    const speed = Number(this.currentGlobe?.feverSpeed || 2 / 3);
+    const safeSpeed = Math.max(speed, 0.01);
+    return 3 / (safeSpeed * safeSpeed);
+  }
+
+  getFeverNarrationWordBudget() {
+    const segmentSeconds = this.getFeverSegmentSeconds();
+    return Math.max(7, Math.min(58, Math.floor(segmentSeconds * 2.15)));
+  }
+
+  firstSentence(text) {
+    return String(text || '').trim().split(/(?<=[.!?])\s+/)[0] || '';
+  }
+
+  trimWords(text, maxWords) {
+    const words = String(text || '').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean);
+    if (words.length <= maxWords) return words.join(' ');
+    return `${words.slice(0, Math.max(1, maxWords)).join(' ')}...`;
+  }
+
+  getWordCount(text) {
+    return String(text || '').replace(/\s+/g, ' ').trim().split(' ').filter(Boolean).length;
+  }
+
+  normalizeNarrationSentence(text) {
+    const sentence = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!sentence) return '';
+    return /[.!?]$/.test(sentence) ? sentence : `${sentence}.`;
+  }
+
+  appendNarrationSentence(parts, sentence, maxWords) {
+    const normalized = this.normalizeNarrationSentence(sentence);
+    if (!normalized) return false;
+
+    const next = [...parts, normalized].join(' ');
+    if (this.getWordCount(next) > maxWords) return false;
+
+    parts.push(normalized);
+    return true;
+  }
+
+  getFeverMetricSentence(year, scenario) {
+    const data = this.getScenarioMilestoneData(year, scenario);
+    if (!data) return '';
+
+    const metrics = [];
+    if (Number.isFinite(Number(data.temperatureDeltaC))) {
+      metrics.push(`warming is plus ${Number(data.temperatureDeltaC).toFixed(1)} degrees`);
+    }
+    if (Number.isFinite(Number(data.amocStrengthPct))) {
+      metrics.push(`AMOC strength is ${Math.round(Number(data.amocStrengthPct))} percent`);
+    }
+    if (Number.isFinite(Number(data.tippingRiskPct))) {
+      metrics.push(`tipping risk is ${Math.round(Number(data.tippingRiskPct))} percent`);
+    }
+
+    if (!metrics.length) return '';
+    return `The signal reads: ${metrics.join(', ')}.`;
+  }
+
+  getFeverBridgeSentence(scenario) {
+    return 'The signal continues into the next twenty-five year step.';
+  }
+
+  getFeverNarrationText({ year, scenario, title, text }) {
+    const speed = Number(this.currentGlobe?.feverSpeed || 2 / 3);
+    const maxWords = this.getFeverNarrationWordBudget();
+    const lead = this.normalizeNarrationSentence(title || this.firstSentence(text) || text);
+    const firstMessage = this.normalizeNarrationSentence(this.firstSentence(text));
+    const fullMessage = this.normalizeNarrationSentence(text);
+    const metricSentence = this.getFeverMetricSentence(year, scenario);
+    const bridgeSentence = this.getFeverBridgeSentence(scenario);
+    const parts = [];
+
+    if (speed >= 0.99) {
+      return this.trimWords(title || this.firstSentence(text) || text, maxWords);
+    }
+
+    this.appendNarrationSentence(parts, lead, maxWords);
+
+    if (speed >= 0.6) {
+      if (firstMessage && firstMessage !== lead) {
+        this.appendNarrationSentence(parts, firstMessage, maxWords);
+      }
+      this.appendNarrationSentence(parts, metricSentence, maxWords);
+      return parts.join(' ') || this.trimWords(lead, maxWords);
+    }
+
+    if (fullMessage && fullMessage !== lead) {
+      this.appendNarrationSentence(parts, fullMessage, maxWords);
+    }
+    this.appendNarrationSentence(parts, metricSentence, maxWords);
+    this.appendNarrationSentence(parts, bridgeSentence, maxWords);
+
+    return parts.join(' ') || this.trimWords(lead, maxWords);
   }
 
   async localizeFeverWarning(warning) {
@@ -297,6 +427,17 @@ export class DetailPanel {
     
     // Delegate event handling for dynamic content
     this.container.addEventListener('click', (e) => {
+      const disclosureSummary = e.target.closest('#monitoring-tab-content details > summary');
+      if (disclosureSummary) {
+        const details = disclosureSummary.closest('details');
+        if (details) {
+          e.preventDefault();
+          e.stopPropagation();
+          details.open = !details.open;
+        }
+        return;
+      }
+
       const externalLink = e.target.closest('.research-output-content a[href], .source-link[href]');
       if (externalLink) {
         const safeHref = this.sanitizeUrl(externalLink.getAttribute('href') || externalLink.href || '');
@@ -347,11 +488,13 @@ export class DetailPanel {
       } else if (action === 'save-topic') {
         this.submitTopic('save');
       } else if (action === 'save-and-research') {
-        this.submitTopic('research');
+        this.submitTopic('save');
       } else if (action === 'cancel-topic') {
         this.hide();
       } else if (action === 'copy-output') {
         this.copyOutput();
+      } else if (action === 'apply-composer-input') {
+        this.applyComposerInput();
       } else if (action === 'generate-summary') {
         this.generateSummary();
       } else if (action === 'generate-insight') {
@@ -382,14 +525,33 @@ export class DetailPanel {
         this.aiGenerateImage();
       } else if (action === 'import-media') {
         this.importMedia();
+      } else if (action === 'import-file') {
+        this.importFile();
+      } else if (action === 'import-url') {
+        this.importURL();
+      } else if (action === 'show-media-url-input') {
+        this.showMediaUrlInput = true;
+        this.saveFormState();
+        this.renderCreateTopic();
+        this.emitTutorialEvent('topicMediaUrlOpened', { source: 'media-action' }, 60);
+      } else if (action === 'add-media-url') {
+        this.addMediaUrlFromInput(target);
+      } else if (action === 'preview-media-url') {
+        this.previewMediaUrlFromInput(target);
       } else if (action === 'source-media-search') {
         this.findMediaFromSources();
       } else if (action === 'ai-gen-update') {
-        this.aiGenAndUpdate();
+        this.submitTopic('save');
       } else if (action === 'manage-sources') {
         this.manageSources();
       } else if (action === 'check-topic-update') {
         this.checkTopicUpdate();
+      } else if (action === 'apply-topic-window-update') {
+        this.applyTopicWindowUpdate();
+      } else if (action === 'add-topic-window-source') {
+        this.applyTopicWindowUpdate({ sourceOnly: true });
+      } else if (action === 'cancel-topic-update') {
+        this.show(this.newsUpdateTargetTopic || this.currentPoint);
       } else if (action === 'submit-topic-package') {
         this.submitCurrentTopicPackage(target);
       } else if (action === 'delete-topic') {
@@ -414,6 +576,8 @@ export class DetailPanel {
         this.toggleAMOCOverlay();
       } else if (action === 'toggle-detail-compact') {
         this.toggleCompactMode();
+      } else if (action === 'navigate-topic') {
+        this.navigateTopic(target.dataset.direction || 'next');
       } else if (action === 'jump-to-year') {
         this.jumpToFeverYear(target);
       } else if (action === 'search-topic-update') {
@@ -487,6 +651,56 @@ export class DetailPanel {
     document.body.classList.toggle('detail-panel-top', !this.container.classList.contains('hidden') && this.panelSize === 'top');
 
     this.updateCompactSummary();
+  }
+
+  getAdjacentTopic(direction = 'next') {
+    if (this.mode !== 'detail' || !this.currentPoint || this.currentPoint.isCluster || this.currentPoint.isCountry) {
+      return null;
+    }
+    return this.callbacks.getAdjacentTopic?.(this.currentPoint, direction) || null;
+  }
+
+  navigateTopic(direction = 'next') {
+    const topic = this.getAdjacentTopic(direction);
+    if (!topic) return;
+
+    if (this.callbacks.onNavigateTopic) {
+      this.callbacks.onNavigateTopic(topic);
+    } else {
+      this.show(topic);
+    }
+  }
+
+  updateTopicNavigation() {
+    const buttons = [
+      {
+        direction: 'previous',
+        selector: '.detail-nav-prev',
+        labelKey: 'detail.previousTopic',
+        emptyKey: 'detail.noPreviousTopic'
+      },
+      {
+        direction: 'next',
+        selector: '.detail-nav-next',
+        labelKey: 'detail.nextTopic',
+        emptyKey: 'detail.noNextTopic'
+      }
+    ];
+
+    buttons.forEach(config => {
+      const button = this.container.querySelector(config.selector);
+      if (!button) return;
+
+      const topic = this.getAdjacentTopic(config.direction);
+      const hasTopic = Boolean(topic);
+      const label = hasTopic
+        ? `${this.t(config.labelKey)}: ${topic.title || this.t(config.labelKey)}`
+        : this.t(config.emptyKey);
+
+      button.disabled = !hasTopic;
+      button.setAttribute('aria-label', label);
+      button.title = label;
+    });
   }
 
   updateCompactSummary() {
@@ -573,8 +787,28 @@ export class DetailPanel {
     return AppAccess.isRegionalProposalTopic(point);
   }
 
+  getCurrentRegionalTopicState(topic = {}) {
+    const category = topic.category || this.topicFormState.category || this.currentPoint?.category || '';
+    const shouldCapture = this.isRegionalProposalWorkspace()
+      || this.isRegionalResearchLayer(category)
+      || Boolean(topic.regionalState || this.currentPoint?.regionalState);
+
+    if (!shouldCapture) return topic.regionalState || this.currentPoint?.regionalState || null;
+
+    try {
+      return this.callbacks.getRegionalTopicState?.({
+        topic,
+        layerId: category,
+        restoreMode: category === 'bike-ways' ? 'route' : ''
+      }) || topic.regionalState || this.currentPoint?.regionalState || null;
+    } catch (error) {
+      console.warn('[Regional] Could not capture topic path state:', error);
+      return topic.regionalState || this.currentPoint?.regionalState || null;
+    }
+  }
+
   getRegionalProposalLayerOptions() {
-    const regionalLayers = this.layers.filter(layer => layer.sortByRegionalContext);
+    const regionalLayers = this.layers.filter(layer => this.isRegionalResearchLayer(layer.id));
     return regionalLayers.length > 0 ? regionalLayers : this.layers;
   }
 
@@ -669,14 +903,82 @@ export class DetailPanel {
               data-initiative-key="${this.escapeHtml(item.key)}"
               data-initiative-label="${this.escapeHtml(item.label)}"
               data-initiative-type="${this.escapeHtml(item.type)}"
-              title="Switch to Regional 2D, save a local proposal, and run AI matching around your detected or chosen area"
+              title="Switch to Regional 2D and save a local proposal around your detected or chosen area"
             >
               ${this.escapeHtml(item.label)}
             </button>
           `).join('')}
         </div>
         <div class="initiative-match-note">
-          Switches to Regional 2D, keeps a local proposal on this device, and prepares it for later community or admin review flows.
+          Switches to Regional 2D and keeps a local proposal on this device for later community or admin review flows.
+        </div>
+      </div>
+    `;
+  }
+
+  formatMetadataLabel(value = '') {
+    return String(value || '')
+      .trim()
+      .replace(/[-_]+/g, ' ')
+      .replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  getTopicYear(point = {}) {
+    const dateValue = point.carbonHistory?.periodStart || point.date || '';
+    const match = String(dateValue || '').match(/^(\d{4})/);
+    return match ? match[1] : '';
+  }
+
+  getDetailTitle(point = {}) {
+    const title = String(point.title || 'Untitled topic').trim();
+    if (!point?.isCarbonHistory && !point?.carbonHistory) return title;
+
+    const year = this.getTopicYear(point);
+    if (!year || title.startsWith(`${year}:`) || title.startsWith(`${year} -`)) {
+      return title;
+    }
+
+    return `${year}: ${title}`;
+  }
+
+  renderGeneratedCarbonHistoryBanner(point = {}) {
+    if (!point?.isCarbonHistory && !point?.carbonHistory) return '';
+
+    const meta = point.carbonHistory || {};
+    const year = this.getTopicYear(point) || 'History';
+    const track = this.formatMetadataLabel(meta.track || 'Carbon history');
+    const title = point.title || 'Carbon History';
+
+    return `
+      <div class="carbon-history-banner carbon-history-banner-generated" aria-label="Generated visual banner">
+        <div class="carbon-history-generated-orbit"></div>
+        <div class="carbon-history-generated-copy">
+          <span>${this.escapeHtml(year)}</span>
+          <strong>${this.escapeHtml(title)}</strong>
+          <small>${this.escapeHtml(track)}</small>
+        </div>
+      </div>
+    `;
+  }
+
+  renderCarbonHistorySection(point) {
+    if (!point?.isCarbonHistory && !point?.carbonHistory) return '';
+
+    const meta = point.carbonHistory || {};
+    const chips = [
+      meta.track,
+      meta.confidence ? `confidence: ${meta.confidence}` : '',
+      meta.sensitivity ? `sensitivity: ${meta.sensitivity}` : '',
+      meta.reviewStatus ? `review: ${meta.reviewStatus}` : ''
+    ].filter(Boolean);
+    return `
+      <div class="detail-section carbon-history-review">
+        <div class="section-label">Chronology Review</div>
+        <div class="carbon-history-chip-grid">
+          ${chips.map(chip => `<span class="carbon-history-chip">${this.escapeHtml(this.formatMetadataLabel(chip))}</span>`).join('')}
+        </div>
+        <div class="initiative-match-note">
+          Source-led history marker. Keep fact, interpretation, and sensitive accountability claims separated.
         </div>
       </div>
     `;
@@ -713,7 +1015,7 @@ export class DetailPanel {
       'delete-topic': 'remove topics',
       'edit-source': 'edit topic sources',
       'show-fever-history': 'view admin warning history',
-      'post-to-topic': 'apply AI output to a topic',
+      'post-to-topic': 'apply generated output to a topic',
       'export-admin-topic-zip': 'download admin review packages'
     };
 
@@ -721,7 +1023,7 @@ export class DetailPanel {
   }
 
   blockUserMutation(actionLabel = 'modify published topics') {
-    alert(`User mode can run AI search and save local drafts on this device, but only admin mode can ${actionLabel}.`);
+    alert(`User mode can save local drafts on this device, but only admin mode can ${actionLabel}.`);
   }
 
   handleAdminModeChanged(isAdmin = this.isAdminMode()) {
@@ -753,6 +1055,7 @@ export class DetailPanel {
     this.mode = 'location-info';
     this.renderLocationInfo(locationData);
     this.container.classList.remove('hidden');
+    this.updateTopicNavigation();
 
     if (this.callbacks.onShow && locationData.lat && locationData.lon) {
       this.callbacks.onShow(locationData);
@@ -765,6 +1068,7 @@ export class DetailPanel {
     this.feverYears = this.getFeverYearsFromConfig();
     this.renderFeverSimulation();
     this.container.classList.remove('hidden');
+    this.updateTopicNavigation();
     
     // Hide year overlay when monitoring panel is visible
     if (this.currentGlobe) {
@@ -803,6 +1107,7 @@ export class DetailPanel {
         this.pendingHeartbeatAutostart = false;
         this.playHeartbeatBeep();
       }
+      this.startFeverHeartbeatAudioLoop();
     }
   }
   
@@ -823,13 +1128,14 @@ export class DetailPanel {
     this.feverAudioUnlockInstalled = true;
 
     this.handleFeverAudioUnlock = () => {
-      if (this.mode !== 'fever-simulation') return;
+      if (this.mode !== 'fever-simulation' && !this.currentGlobe?.inFeverMode) return;
       if (!this.currentGlobe?.getFeverSoundEnabled()) return;
 
       this.pendingHeartbeatAutostart = true;
       if (this.ensureAudioContext()) {
         this.pendingHeartbeatAutostart = false;
         this.playHeartbeatBeep();
+        this.startFeverHeartbeatAudioLoop();
       }
     };
 
@@ -863,9 +1169,10 @@ export class DetailPanel {
           this.audioContextReady = this.audioContext?.state === 'running';
           if (this.audioContextReady) {
             console.log('[Fever Sound] AudioContext resumed from suspended state');
-            if (this.pendingHeartbeatAutostart && this.mode === 'fever-simulation' && this.currentGlobe?.getFeverSoundEnabled()) {
+            if (this.pendingHeartbeatAutostart && this.currentGlobe?.inFeverMode && this.currentGlobe?.getFeverSoundEnabled()) {
               this.pendingHeartbeatAutostart = false;
               this.playHeartbeatBeep();
+              this.startFeverHeartbeatAudioLoop();
             }
           }
         })
@@ -951,6 +1258,41 @@ export class DetailPanel {
     
     this.lastHeartbeatSound = Date.now();
   }
+
+  startFeverHeartbeatAudioLoop() {
+    if (this.heartbeatAudioTimer) return;
+
+    const getBeatInterval = () => {
+      const progress = this.currentGlobe?.getFeverProgress?.() || 0;
+      const bpm = 60 + progress * 120;
+      return Math.max(280, (60 / bpm) * 1000);
+    };
+
+    const tick = () => {
+      this.heartbeatAudioTimer = null;
+      if (!this.currentGlobe?.inFeverMode || !this.currentGlobe.getFeverSoundEnabled()) {
+        return;
+      }
+
+      this.playHeartbeatBeep();
+      this.heartbeatAudioTimer = window.setTimeout(tick, getBeatInterval());
+    };
+
+    this.heartbeatAudioTimer = window.setTimeout(tick, getBeatInterval());
+  }
+
+  stopFeverHeartbeatAudioLoop({ closeContext = false } = {}) {
+    if (this.heartbeatAudioTimer) {
+      window.clearTimeout(this.heartbeatAudioTimer);
+      this.heartbeatAudioTimer = null;
+    }
+
+    if (!closeContext || !this.audioContext) return;
+
+    this.audioContext.close();
+    this.audioContext = null;
+    this.audioContextReady = false;
+  }
   
   renderFeverSimulation() {
     if (this.currentGlobe) {
@@ -968,7 +1310,8 @@ export class DetailPanel {
     const currentYear = this.currentGlobe ? this.currentGlobe.getFeverCurrentYear() : 1950;
     const progress = this.currentGlobe ? this.currentGlobe.getFeverProgress() : 0;
     const scenario = this.currentGlobe ? this.currentGlobe.getFeverScenario() : 'objective';
-    const speed = this.currentGlobe ? this.currentGlobe.feverSpeed : 0.5;
+    const speed = this.currentGlobe ? this.currentGlobe.feverSpeed : 2 / 3;
+    const isFeverSpeedActive = (target) => Math.abs(speed - target) < 0.001;
     const soundEnabled = this.currentGlobe ? this.currentGlobe.getFeverSoundEnabled() : true;
     const voiceEnabled = this.currentGlobe ? this.currentGlobe.getFeverVoiceEnabled() : true;
     const isPaused = this.currentGlobe ? this.currentGlobe.isFeverPaused() : false;
@@ -983,7 +1326,7 @@ export class DetailPanel {
     }
     
     content.innerHTML = `
-      <div class="detail-header">
+      <div class="detail-header fever-detail-header" data-tutorial-id="topic-composer-header">
         <div class="fever-monitor-header">
           <div class="fever-monitor-title">
             <div class="fever-monitor-icon">&#127777;&#65039;</div>
@@ -1006,12 +1349,17 @@ export class DetailPanel {
                 <path d="M10 2L4 7L10 12V2Z" fill="currentColor"/>
               </svg>
             </button>
-            <button class="fever-control-btn ${soundEnabled ? 'active' : ''}" data-action="toggle-fever-sound" title="${this.escapeHtml(this.t('fever.sound'))}">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M2 5L2 9L5 9L9 12L9 2L5 5L2 5Z" fill="currentColor"/>
-                ${soundEnabled ? '<path d="M11 4C12 5 12 9 11 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' : '<path d="M10 4L12 10M12 4L10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'}
-              </svg>
-            </button>
+            <span class="fever-sound-control">
+              <button class="fever-control-btn ${soundEnabled ? 'active' : ''}" data-action="toggle-fever-sound" title="${this.escapeHtml(this.t('fever.sound'))}">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M2 5L2 9L5 9L9 12L9 2L5 5L2 5Z" fill="currentColor"/>
+                  ${soundEnabled ? '<path d="M11 4C12 5 12 9 11 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' : '<path d="M10 4L12 10M12 4L10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'}
+                </svg>
+              </button>
+              <span id="fever-volume-bars" class="fever-volume-bars ${soundEnabled ? '' : 'muted'}" aria-hidden="true">
+                <span></span><span></span><span></span><span></span>
+              </span>
+            </span>
             <button class="fever-control-btn ${voiceEnabled ? 'active' : ''}" data-action="toggle-fever-voice" title="${this.escapeHtml(this.t('fever.voice'))}">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M7 2L4 5H2V9H4L7 12V2Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
@@ -1041,9 +1389,9 @@ export class DetailPanel {
           </div>
           <div class="fever-scenario-group">
             <span style="font-size: 10px; opacity: 0.7; margin-right: 6px;">${this.escapeHtml(this.t('fever.speedLabel'))}</span>
-            <button class="speed-btn ${speed === 0.25 ? 'active' : ''}" data-action="set-fever-speed" data-speed="0.25">0.25x</button>
-            <button class="speed-btn ${speed === 0.5 ? 'active' : ''}" data-action="set-fever-speed" data-speed="0.5">0.5x</button>
-            <button class="speed-btn ${speed === 1 ? 'active' : ''}" data-action="set-fever-speed" data-speed="1">1x</button>
+            <button class="speed-btn ${isFeverSpeedActive(1 / 3) ? 'active' : ''}" data-action="set-fever-speed" data-speed="0.3333333333">1/3</button>
+            <button class="speed-btn ${isFeverSpeedActive(2 / 3) ? 'active' : ''}" data-action="set-fever-speed" data-speed="0.6666666667">2/3</button>
+            <button class="speed-btn ${isFeverSpeedActive(1) ? 'active' : ''}" data-action="set-fever-speed" data-speed="1">3/3</button>
           </div>
         </div>
       </div>
@@ -1407,9 +1755,6 @@ export class DetailPanel {
       if (!this.lastHeartbeat || now - this.lastHeartbeat > beatInterval) {
         this.lastHeartbeat = now;
         this.heartbeatData.push({ time: now, value: 1 });
-        
-        // Play heartbeat sound
-        this.playHeartbeatBeep();
       }
       
       // Add normal data points
@@ -1780,9 +2125,12 @@ export class DetailPanel {
     
     // Speak warning if voice enabled
     if (this.currentGlobe && this.currentGlobe.getFeverVoiceEnabled() && window.ttsManager) {
-      window.ttsManager.speak(localizedWarning.text, this.getFeverTtsLanguage(localizedWarning), {
-        forceBrowser: true
+      const spokenWarning = this.getFeverNarrationText({
+        year,
+        scenario,
+        text: localizedWarning.text
       });
+      this.speakFeverNarration(spokenWarning, this.getFeverTtsLanguage(localizedWarning));
     }
   }
   
@@ -1877,9 +2225,13 @@ export class DetailPanel {
     
     // Read warning with TTS if enabled
     if (this.currentGlobe && this.currentGlobe.getFeverVoiceEnabled() && window.ttsManager) {
-      window.ttsManager.speak(localizedWarning.full, localizedWarning.ttsLanguage, {
-        forceBrowser: true
+      const spokenWarning = this.getFeverNarrationText({
+        year,
+        scenario,
+        title: localizedWarning.title,
+        text: localizedWarning.full
       });
+      this.speakFeverNarration(spokenWarning, localizedWarning.ttsLanguage);
     }
   }
   
@@ -2027,6 +2379,7 @@ export class DetailPanel {
     
     this.mode = 'fever-warning-history';
     this.container.classList.remove('hidden');
+    this.updateTopicNavigation();
     
     // Add event listeners
     content.addEventListener('click', (e) => {
@@ -2080,9 +2433,13 @@ export class DetailPanel {
       } else if (this.currentGlobe.inFeverMode) {
         this.playHeartbeatBeep();
       }
+      this.startFeverHeartbeatAudioLoop();
+      this.showFeverVolumeBars(newState);
       console.log('[Fever Sound] User enabled sound');
     } else {
       // Turn sound OFF
+      this.stopFeverHeartbeatAudioLoop();
+      this.showFeverVolumeBars(newState);
       if (this.audioContext && this.audioContext.state === 'running') {
         this.audioContext.suspend().then(() => {
           console.log('[Fever Sound] AudioContext suspended on toggle OFF');
@@ -2090,6 +2447,19 @@ export class DetailPanel {
       }
       console.log('[Fever Sound] User disabled sound');
     }
+  }
+
+  showFeverVolumeBars(enabled) {
+    const indicator = this.container.querySelector('#fever-volume-bars');
+    if (!indicator) return;
+
+    indicator.classList.toggle('muted', !enabled);
+    indicator.classList.add('active');
+
+    window.clearTimeout(this.feverVolumeBarsTimer);
+    this.feverVolumeBarsTimer = window.setTimeout(() => {
+      indicator.classList.remove('active');
+    }, 1300);
   }
   
   toggleFeverVoice() {
@@ -2320,6 +2690,7 @@ Keep response concise (3-4 sentences).`;
     this.pendingResearchAutoApply = false;
     this.renderDetail(point);
     this.container.classList.remove('hidden');
+    this.updateTopicNavigation();
 
     // Show pause notice after render
     if (point.isFeverWarning && this.currentGlobe && this.currentGlobe.inFeverMode) {
@@ -2333,6 +2704,8 @@ Keep response concise (3-4 sentences).`;
     if (this.callbacks.onShow && point.lat && point.lon) {
       this.callbacks.onShow(point);
     }
+
+    window.dispatchEvent(new CustomEvent('topicDetailOpened', { detail: { point } }));
   }
 
   renderDetail(point) {
@@ -2365,15 +2738,35 @@ Keep response concise (3-4 sentences).`;
     const canDeleteTopic = AppAccess.canDeleteTopic(point);
     const isRegionalProposal = AppAccess.isRegionalProposalTopic(point);
     const initiativeRegionalHtml = this.renderInitiativeRegionalSection(point);
+    const carbonHistoryHtml = this.renderCarbonHistorySection(point);
 
     let mediaHtml = '';
     const mediaTokens = this.getMediaTokensForPoint(point);
-    if (mediaTokens.length > 0) {
+    const hasCarbonHistory = point.isCarbonHistory || point.carbonHistory;
+    const hasCarbonHistoryBanner = hasCarbonHistory && mediaTokens.length > 0;
+    const bannerToken = hasCarbonHistoryBanner ? mediaTokens[0] : null;
+    const mediaGridTokens = hasCarbonHistoryBanner ? mediaTokens.slice(1) : mediaTokens;
+    const carbonHistoryBannerHtml = bannerToken ? `
+      <div class="carbon-history-banner">
+        <button
+          type="button"
+          class="carbon-history-banner-zoom"
+          data-action="zoom-topic-media"
+          data-media-url="${this.escapeHtml(bannerToken.url)}"
+          data-media-caption="${this.escapeHtml(bannerToken.watermarkText || `${point.title || 'Carbon History'} banner`)}"
+          title="Zoom image inside the detail panel"
+        >
+          ${this.renderMediaTokenImage(bannerToken, 'carbon-history-banner-image', `${point.title || 'Carbon History'} banner`)}
+        </button>
+      </div>
+    ` : (hasCarbonHistory ? this.renderGeneratedCarbonHistoryBanner(point) : '');
+
+    if (mediaGridTokens.length > 0) {
       mediaHtml = `
         <div class="detail-section">
           <div class="section-label">Media</div>
           <div class="topic-media-grid">
-            ${mediaTokens.map((token, index) => `
+            ${mediaGridTokens.map((token, index) => `
               <div class="topic-media-item">
                 <button 
                   type="button" 
@@ -2396,7 +2789,7 @@ Keep response concise (3-4 sentences).`;
     let sourcesHtml = '';
     if (point.researchSources && point.researchSources.length > 0) {
       sourcesHtml = `
-        <div class="detail-section">
+        <div class="detail-section" data-tutorial-id="topic-evidence">
           <div class="section-label" style="display: flex; justify-content: space-between; align-items: center;">
             <span>Sources (${point.researchSources.length})</span>
             ${canManageTopicSources ? `<button class="manage-sources-btn" data-action="manage-sources" title="Manage this topic draft's evidence and media">Evidence</button>` : ''}
@@ -2459,7 +2852,7 @@ Keep response concise (3-4 sentences).`;
         ` : ''}
         ${!isAdmin && !canModifyTopic ? `
       <div class="readonly-user-note">
-        User mode is read-only for published posts. Use AI search, then save any proposal as a browser draft.
+        User mode is read-only for published posts. Save proposals as browser drafts, then let admin review them.
       </div>
         ` : ''}
         ${!isAdmin && isRegionalProposal ? `
@@ -2476,23 +2869,26 @@ Keep response concise (3-4 sentences).`;
       : `<div class="section-content compact">${point.insight || 'No analysis available.'}</div>`;
 
     content.innerHTML = `
-      <div class="detail-header">
+      <div class="detail-header" data-tutorial-id="topic-detail">
         <div class="detail-category" style="background: ${layer.color}33; color: ${layer.color}">
           ${layer.icon} ${layer.name}
         </div>
-        <h2 class="detail-title">${point.title}</h2>
+        <h2 class="detail-title">${this.escapeHtml(this.getDetailTitle(point))}</h2>
         <div class="detail-meta">
           <span>&#128205; ${point.region}, ${point.country}</span>
           <span>&#128197; ${point.date}</span>
         </div>
       </div>
 
+      ${carbonHistoryBannerHtml}
       ${mediaHtml}
 
       <div class="detail-section">
         <div class="section-label">Summary</div>
         <div class="section-content compact">${point.summary}</div>
       </div>
+
+      ${carbonHistoryHtml}
 
       ${initiativeRegionalHtml}
 
@@ -2748,16 +3144,9 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
   }
 
   showResearch(point) {
+    if (!point) return;
     this.currentPoint = point;
-    this.mode = 'research';
-    this.setCompactMode(false);
-    this.researchContext = this.buildResearchContext(point);
-    this.renderResearch();
-    this.container.classList.remove('hidden');
-
-    if (this.callbacks.onShow) {
-      this.callbacks.onShow(point);
-    }
+    this.showNewsUpdate([point], { topic: point, scoped: true });
   }
 
   buildResearchContext(point) {
@@ -2931,6 +3320,7 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
       LAYER_SOURCE_MAPPING: {
         'meteo': ['scientific', 'official'],
         'climate': ['scientific', 'official'],
+        'carbon-history': ['official', 'scientific', 'media'],
         'eu': ['official', 'media'],
         'country-news': ['media', 'official'],
         'regional-news': ['media', 'official'],
@@ -2992,7 +3382,11 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
 
   isRegionalResearchLayer(layerId = '') {
     const layer = this.layers.find(item => item.id === layerId);
-    return Boolean(layer?.sortByRegionalContext);
+    if (!layer) return false;
+    if (Array.isArray(layer.modeTabs)) {
+      return layer.modeTabs.includes('regional');
+    }
+    return false;
   }
 
   getResearchTemporalStrategy(context = {}) {
@@ -3834,6 +4228,7 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
     this.setCompactMode(false);
     this.renderCreateLayer();
     this.container.classList.remove('hidden');
+    this.updateTopicNavigation();
   }
 
   renderCreateLayer() {
@@ -3900,27 +4295,192 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
   }
 
   showNewsUpdate(existingPoints = [], options = {}) {
+    if (!options.topic) {
+      this.showSourceSearchTopic();
+      return;
+    }
+
     this.mode = 'news-update';
     this.setCompactMode(false);
     this.renderNewsUpdate(existingPoints, options);
     this.container.classList.remove('hidden');
+    this.updateTopicNavigation();
   }
 
   checkTopicUpdate() {
     if (!this.currentPoint) return;
 
-    if (this.callbacks.onCheckTopicUpdate) {
-      this.callbacks.onCheckTopicUpdate(this.currentPoint);
+    this.showNewsUpdate([this.currentPoint], { topic: this.currentPoint, scoped: true });
+  }
+
+  renderTopicUpdateEditor(topic) {
+    const content = this.container.querySelector('#detail-content');
+    if (!content || !topic) return;
+
+    const locationLabel = [topic.region, topic.country].filter(Boolean).join(', ') || 'Global';
+    const canModifyTopic = AppAccess.canModifyTopic(topic);
+    const sourceRecords = Array.isArray(topic.researchSources) ? topic.researchSources : [];
+    const sourceCount = sourceRecords.filter(source => source?.name || source?.url).length;
+    const applyLabel = canModifyTopic ? 'Update this topic' : 'Save as draft update';
+
+    content.innerHTML = `
+      <div class="detail-header">
+        <h2 class="detail-title">Update Topic</h2>
+        <div class="detail-meta">
+          <span>${this.escapeHtml(topic.title || 'Untitled topic')}</span>
+        </div>
+      </div>
+
+      <div class="topic-check-context">
+        <div class="context-label">Current topic only</div>
+        <div class="context-topic">${this.escapeHtml(topic.title || 'Untitled topic')}</div>
+        <div class="context-items">
+          <span class="context-chip">&#128197; ${this.escapeHtml(topic.date || 'No date')}</span>
+          <span class="context-chip">&#128205; ${this.escapeHtml(locationLabel)}</span>
+          <span class="context-chip">${sourceCount} source${sourceCount === 1 ? '' : 's'}</span>
+        </div>
+      </div>
+
+      <div class="web-search-notice">
+        <div class="notice-icon">&#128221;</div>
+        <div class="notice-content">
+          <div class="notice-title">Manual scoped update</div>
+          <div class="notice-text">
+            This window updates only the opened topic. Add a source link, adjust the summary, or keep a short note without scanning other topics.
+          </div>
+        </div>
+      </div>
+
+      <div class="news-search-panel topic-update-editor">
+        <div class="form-group">
+          <label>Summary</label>
+          <textarea id="topic-update-summary" rows="5" class="news-search-input" placeholder="Update the public summary">${this.escapeHtml(topic.summary || '')}</textarea>
+          <div class="setting-hint">Edit only what should appear on the topic card/details.</div>
+        </div>
+        <div class="form-group">
+          <label>Source URL</label>
+          <input type="url" id="topic-update-source-url" placeholder="https://example.com/article-or-source" class="news-search-input">
+          <div class="setting-hint">Optional. The link is stored as evidence for this topic.</div>
+        </div>
+        <div class="form-group">
+          <label>Source name</label>
+          <input type="text" id="topic-update-source-name" placeholder="Publisher, official source, document title..." class="news-search-input">
+        </div>
+        <div class="form-group">
+          <label>Internal note / analysis</label>
+          <textarea id="topic-update-note" rows="3" class="news-search-input" placeholder="Optional admin or draft note"></textarea>
+        </div>
+        <div class="topic-builder-actions">
+          <button type="button" class="btn-secondary" data-action="cancel-topic-update">Cancel</button>
+          <div class="primary-actions">
+            <button type="button" class="btn-primary-alt" data-action="add-topic-window-source">Add source only</button>
+            <button type="button" class="btn-primary" data-action="apply-topic-window-update">${applyLabel}</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  applyTopicWindowUpdate(options = {}) {
+    const topic = this.newsUpdateTargetTopic || this.currentPoint;
+    if (!topic) return;
+
+    const content = this.container.querySelector('#detail-content');
+    const summary = String(content?.querySelector('#topic-update-summary')?.value || '').trim();
+    const sourceUrlRaw = String(content?.querySelector('#topic-update-source-url')?.value || '').trim();
+    const sourceUrl = sourceUrlRaw ? this.sanitizeUrl(sourceUrlRaw) : '';
+    const sourceName = String(content?.querySelector('#topic-update-source-name')?.value || '').trim();
+    const note = String(content?.querySelector('#topic-update-note')?.value || '').trim();
+    const sourceOnly = Boolean(options.sourceOnly);
+
+    if (sourceUrlRaw && !sourceUrl) {
+      alert('Please enter a valid http(s) source URL.');
       return;
     }
 
-    this.showNewsUpdate([this.currentPoint], { topic: this.currentPoint });
+    if (sourceOnly && !sourceUrl && !sourceName) {
+      alert('Add a source URL or name first.');
+      return;
+    }
+
+    if (!sourceOnly && !summary && !sourceUrl && !sourceName && !note) {
+      alert('Add a summary update, source, or note first.');
+      return;
+    }
+
+    const existingSources = Array.isArray(topic.researchSources) ? [...topic.researchSources] : [];
+    const hasSource = sourceUrl || sourceName;
+    if (hasSource) {
+      const sourceKey = sourceUrl || sourceName.toLowerCase();
+      const sourceExists = existingSources.some(source => (
+        sourceUrl
+          ? String(source.url || '') === sourceUrl
+          : String(source.name || '').toLowerCase() === sourceKey
+      ));
+
+      if (!sourceExists) {
+        existingSources.push({
+          name: sourceName || this.getHostFromUrl(sourceUrl) || 'Topic update source',
+          url: sourceUrl,
+          category: 'source',
+          reliability: 'unknown',
+          verified: Boolean(sourceUrl),
+          addedAt: new Date().toISOString()
+        });
+      }
+    }
+
+    const nextInsight = note
+      ? [topic.insight, note].map(value => String(value || '').trim()).filter(Boolean).join('\n\n')
+      : topic.insight;
+    const canModifyTopic = AppAccess.canModifyTopic(topic);
+    const updatedTopic = {
+      ...topic,
+      summary: sourceOnly ? (topic.summary || '') : (summary || topic.summary || ''),
+      insight: nextInsight,
+      source: sourceName || topic.source || this.getHostFromUrl(sourceUrl) || '',
+      sourceUrl: sourceUrl || topic.sourceUrl || '',
+      researchSources: existingSources,
+      updatedAt: new Date().toISOString(),
+      ...this.buildTopicWorkflowMetadata(topic, {
+        status: canModifyTopic ? (topic.topicStatus || 'saved-topic') : 'browser-draft',
+        reviewStage: canModifyTopic ? (topic.review?.stage || 'local-edit') : 'browser-draft',
+        storageOrigin: 'browser-localStorage'
+      })
+    };
+
+    if (canModifyTopic) {
+      if (this.callbacks.onTopicUpdate) {
+        this.callbacks.onTopicUpdate(updatedTopic);
+      }
+      this.show(updatedTopic);
+      return;
+    }
+
+    const draftTopic = {
+      ...updatedTopic,
+      id: `topic-update-${Date.now()}`,
+      isCustom: true,
+      originalTopicId: topic.originalTopicId || topic.id,
+      originalTitle: topic.originalTitle || topic.title || ''
+    };
+
+    if (this.callbacks.onTopicCreate) {
+      this.callbacks.onTopicCreate(draftTopic);
+    }
+    this.show(draftTopic);
   }
 
   async renderNewsUpdate(existingPoints = [], options = {}) {
     const content = this.container.querySelector('#detail-content');
     const targetTopic = options.topic || null;
     this.newsUpdateTargetTopic = targetTopic;
+    if (targetTopic) {
+      this.currentPoint = targetTopic;
+      this.renderTopicUpdateEditor(targetTopic);
+      return;
+    }
+
     const headerTitle = targetTopic ? 'Find Recent Updates' : 'Find Recent Updates';
     const safeTopicTitle = targetTopic ? this.escapeHtml(targetTopic.title || '') : '';
     const topicContextHtml = targetTopic ? `
@@ -4022,7 +4582,7 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
     newsContent.innerHTML = `
       <div class="research-output-content">
         <div class="spinner-small"></div>
-        <span style="margin-left: 8px;">Checking latest news${safeSearchQuery ? ` about "${safeSearchQuery}"` : ''} and matching existing topics...</span>
+        <span style="margin-left: 8px;">Checking latest news${safeSearchQuery ? ` about "${safeSearchQuery}"` : ''}...</span>
       </div>
     `;
 
@@ -4165,19 +4725,8 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       return;
     }
     
-    // Count total updates
-    let totalUpdates = 0;
-    layersWithNews.forEach(layerData => {
-      totalUpdates += layerData.items.filter(item => item.isUpdate).length;
-    });
-    
     newsContent.innerHTML = `
       <div class="news-update-results">
-        ${totalUpdates > 0 ? `
-          <div class="update-highlight-banner">
-            &#9889; ${totalUpdates} update${totalUpdates > 1 ? 's' : ''} to existing topics
-          </div>
-        ` : ''}
         ${layersWithNews.map(layerData => {
           const layer = this.layers.find(l => l.id === layerData.id);
           if (!layer) return '';
@@ -4271,7 +4820,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
 
     const sourceUrl = item.sourceUrl || this.newsUpdateContext?.urlSource || originalTopic?.sourceUrl || '';
     const sourceHost = this.getHostFromUrl(sourceUrl);
-    const sourceName = item.sourceName || item.source || sourceHost || 'AI-assisted source';
+    const sourceName = item.sourceName || item.source || sourceHost || 'Topic source';
 
     return {
       ...item,
@@ -4467,6 +5016,8 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     });
     this.renderCreateTopic();
     this.container.classList.remove('hidden');
+    this.updateTopicNavigation();
+    this.emitTutorialEvent('topicComposerOpened', { source: options.source || 'update-candidate' }, 80);
   }
 
   buildTopicWorkflowMetadata(existingTopic = {}, options = {}) {
@@ -4521,6 +5072,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       insight: formState.insight || '',
       media: mediaTokens.map(token => token.url),
       mediaTokens,
+      regionalState: draft.currentPoint.regionalState || null,
       isCustom: true,
       originalTopicId: draft.currentPoint.originalTopicId || '',
       originalTitle: draft.currentPoint.originalTitle || '',
@@ -4663,6 +5215,8 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     };
     this.renderCreateTopic();
     this.container.classList.remove('hidden');
+    this.updateTopicNavigation();
+    this.emitTutorialEvent('topicComposerOpened', { source: 'manual-topic' }, 80);
   }
 
   showRegionalProposal(options = {}) {
@@ -4745,6 +5299,8 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     this.autoSetupForLayer(defaultLayerId);
     this.renderCreateTopic();
     this.container.classList.remove('hidden');
+    this.updateTopicNavigation();
+    this.emitTutorialEvent('topicComposerOpened', { source: 'regional-proposal' }, 80);
 
     if (Number.isFinite(lat) && Number.isFinite(lon) && this.callbacks.onShow) {
       this.callbacks.onShow({ lat, lon });
@@ -4776,6 +5332,8 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     };
     this.renderCreateTopic();
     this.container.classList.remove('hidden');
+    this.updateTopicNavigation();
+    this.emitTutorialEvent('topicComposerOpened', { source: 'source-search' }, 80);
   }
 
   manageSources() {
@@ -4793,6 +5351,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       this.topicBuilderTab = 'evidence';
       this.showSourceEditor = true;
       this.renderCreateTopic();
+      this.emitTutorialEvent('topicComposerTabChanged', { tab: 'evidence', source: 'manage-sources' }, 60);
     }, 100);
   }
 
@@ -4905,6 +5464,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     }
     
     this.renderCreateTopic();
+    this.emitTutorialEvent('topicComposerOpened', { source: isRegionalProposal ? 'regional-proposal-edit' : 'topic-edit' }, 80);
   }
 
   saveFormState() {
@@ -4931,6 +5491,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       outputIntent: form.querySelector('#output-intent')?.value || this.topicResearchSettings.outputIntent,
       trustedOnly: form.querySelector('#trusted-only')?.checked ?? this.topicResearchSettings.trustedOnly
     };
+    this.composerSmartInput = form.querySelector('#topic-smart-input')?.value || this.composerSmartInput || '';
   }
 
   normalizeTopicBuilderTab(tab = '') {
@@ -5054,14 +5615,15 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       ? (isEditing ? 'Update Local Action' : 'Propose Local Action')
       : (isEditing ? 'Edit Topic Draft' : 'Propose a Topic');
     const recordingNote = isRegionalProposal
-      ? '<strong>Local proposal:</strong> describe the action, add proof if you have it, then save it on this device before any later review.'
-      : '<strong>Draft flow:</strong> describe the topic, add evidence, review what will be saved, then keep it on this device.';
+      ? '<strong>Local proposal:</strong> type or paste once, edit the preview, add proof when useful, then save it on this device.'
+      : '<strong>Topic Composer:</strong> type or paste once, edit the preview, add evidence when useful, then save it on this device.';
     const saveLabel = isRegionalProposal
       ? (isEditing ? 'Update Local Action' : 'Save Local Action')
       : (isEditing ? 'Update Saved Topic' : 'Save on this device');
-    const assistLabel = isRegionalProposal
-      ? (isEditing ? 'Update, then improve' : 'Save, then improve')
-      : (isEditing ? 'Save, then improve' : 'Save, then improve');
+    const selectedLayer = regionalLayerOptions.find(layer => layer.id === this.topicFormState.category)
+      || regionalLayerOptions.find(layer => layer.id === this.topicBuilderContext?.defaultLayerId)
+      || regionalLayerOptions[0]
+      || { id: '', name: 'Topic', icon: '&#128204;', color: 'var(--accent)' };
     
     // Initialize sources if not set
     if (!this.topicSources) {
@@ -5084,9 +5646,9 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
         ` : ''}
         ${this.renderTopicDraftStatusBanner(isEditing)}
         ${this.renderTopicManagementSummary(isEditing)}
-        <div class="topic-builder-tabs">
+        <div class="topic-builder-tabs" data-tutorial-id="topic-composer-tabs">
           <button class="tab-btn ${this.topicBuilderTab === 'describe' ? 'active' : ''}" data-action="switch-tab" data-tab="describe">
-            Describe
+            Compose
           </button>
           <button class="tab-btn ${this.topicBuilderTab === 'evidence' ? 'active' : ''}" data-action="switch-tab" data-tab="evidence">
             Evidence
@@ -5099,102 +5661,155 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       
       <form class="modal-form" id="topic-form">
         <div class="tab-content ${this.topicBuilderTab === 'describe' ? 'active' : ''}">
-          <div class="proposal-step-intro">
-            <div class="proposal-step-kicker">Step 1</div>
-            <div class="proposal-step-title">${isRegionalProposal ? 'What local action should be added here?' : 'Tell topic.earth what happened'}</div>
-            <div class="proposal-step-text">A title, place, short description, and date are enough to start. Evidence and AI help can come next.</div>
-          </div>
-          <div class="form-group">
-            <label>${isRegionalProposal ? 'Initiative or update name *' : 'Title *'}</label>
-            <input type="text" name="title" id="topic-title" placeholder="${isRegionalProposal ? 'e.g., Community solar group in Brussels' : 'Event, update, or topic title'}" value="${this.topicFormState.title || ''}" required>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label>Category *</label>
-              <select name="category" id="topic-category" required>
-                <option value="">Select a layer...</option>
-                ${regionalLayerOptions.map(layer => `
-                  <option value="${layer.id}" ${this.topicFormState.category === layer.id ? 'selected' : ''}>${layer.icon} ${layer.name}</option>
-                `).join('')}
-              </select>
+          <div class="topic-composer-shell">
+            <div class="topic-smart-input-card" data-tutorial-id="topic-composer-input">
+              <label for="topic-smart-input" class="topic-smart-input-label">${isRegionalProposal ? 'Local action input' : 'Topic input'}</label>
+              <textarea
+                id="topic-smart-input"
+                rows="3"
+                placeholder="Type or paste a topic, URL, media link, or source note"
+              >${this.escapeHtml(this.composerSmartInput || '')}</textarea>
+              <div class="topic-smart-input-actions">
+                <button type="button" class="btn-primary-alt" data-action="apply-composer-input">Use in draft</button>
+                <button type="button" class="simple-ai-btn" data-action="import-file">Add media</button>
+              </div>
+              <div class="topic-smart-chips" aria-label="Accepted input types">
+                <span>Search</span>
+                <span>Source</span>
+                <span>Media</span>
+                <span>Location</span>
+              </div>
             </div>
-            <div class="form-group">
-              <label>Date *</label>
-              <input type="date" name="date" id="topic-date" value="${this.topicFormState.date || today}" required>
-            </div>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label>Country</label>
-              <input type="text" name="country" id="topic-country" placeholder="e.g., France" value="${this.topicFormState.country || ''}">
-            </div>
-            <div class="form-group">
-              <label>Region / City</label>
-              <input type="text" name="region" id="topic-region" placeholder="e.g., Ile-de-France" value="${this.topicFormState.region || ''}">
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>Short description *</label>
-            <textarea name="summary" id="topic-summary" rows="4" placeholder="${isRegionalProposal ? 'What is happening locally, and why should people know about it?' : 'Briefly describe the event, update, or topic...'}" required>${this.topicFormState.summary || ''}</textarea>
-            <button type="button" class="generate-field-btn" data-action="generate-summary">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M6 1L11 6L6 11M11 6H1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-              Help me improve this
-            </button>
-          </div>
-          
-          ${isRegionalProposal ? `
-            <div class="form-group">
-              <label>What should help look for?</label>
-              <textarea name="searchHint" id="topic-search-hint" rows="2" placeholder="Optional: grants, volunteers, nearby actors, bike lanes, charging points, local news, climate impact...">${this.escapeHtml(this.topicFormState.searchHint || '')}</textarea>
-              <div class="setting-hint">Optional. Used later when you ask AI to improve or research this local proposal.</div>
-            </div>
-          ` : ''}
-          
-          <details class="advanced-section">
-            <summary class="advanced-toggle">Advanced location and analysis</summary>
-            <div class="advanced-content">
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Latitude</label>
-                  <input type="number" name="lat" id="topic-lat" step="0.0001" min="-90" max="90" placeholder="48.8566" value="${this.topicFormState.lat || ''}">
+
+            <div class="topic-composer-preview" data-tutorial-id="topic-composer-preview" aria-label="Editable topic preview">
+              <div class="topic-preview-category" style="--preview-layer-color: ${this.escapeHtml(selectedLayer.color || 'var(--accent)')}">
+                <span class="topic-preview-layer-icon">${selectedLayer.icon || '+'}</span>
+                <select name="category" id="topic-category" required>
+                  <option value="">Select a layer...</option>
+                  ${regionalLayerOptions.map(layer => `
+                    <option value="${this.escapeHtml(layer.id)}" ${this.topicFormState.category === layer.id ? 'selected' : ''}>${layer.icon} ${this.escapeHtml(layer.name)}</option>
+                  `).join('')}
+                </select>
+              </div>
+
+              <textarea
+                name="title"
+                id="topic-title"
+                class="topic-preview-title-input"
+                placeholder="${isRegionalProposal ? 'Local action title' : 'Topic title'}"
+                required
+                rows="2"
+              >${this.escapeHtml(this.topicFormState.title || '')}</textarea>
+
+              <div class="topic-preview-meta-grid">
+                <label>
+                  <span>Date</span>
+                  <input type="date" name="date" id="topic-date" value="${this.escapeHtml(this.topicFormState.date || today)}" required>
+                </label>
+                <label>
+                  <span>Country</span>
+                  <input type="text" name="country" id="topic-country" placeholder="Country" value="${this.escapeHtml(this.topicFormState.country || '')}">
+                </label>
+                <label>
+                  <span>Region / City</span>
+                  <input type="text" name="region" id="topic-region" placeholder="Region or city" value="${this.escapeHtml(this.topicFormState.region || '')}">
+                </label>
+              </div>
+
+              <div class="topic-preview-block">
+                <div class="section-label">Summary</div>
+                <textarea
+                  name="summary"
+                  id="topic-summary"
+                  rows="5"
+                  placeholder="${isRegionalProposal ? 'What is happening locally, and why should people know about it?' : 'Briefly describe the event, update, or topic'}"
+                  required
+                >${this.escapeHtml(this.topicFormState.summary || '')}</textarea>
+              </div>
+
+              ${isRegionalProposal ? `
+                <div class="topic-preview-block">
+                  <div class="section-label">Local focus</div>
+                  <textarea name="searchHint" id="topic-search-hint" rows="2" placeholder="Grants, volunteers, nearby actors, bike lanes, charging points, local news...">${this.escapeHtml(this.topicFormState.searchHint || '')}</textarea>
                 </div>
-                <div class="form-group">
-                  <label>Longitude</label>
-                  <input type="number" name="lon" id="topic-lon" step="0.0001" min="-180" max="180" placeholder="2.3522" value="${this.topicFormState.lon || ''}">
+              ` : ''}
+
+              <details class="advanced-section">
+                <summary class="advanced-toggle">Location and analysis</summary>
+                <div class="advanced-content">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Latitude</label>
+                      <input type="number" name="lat" id="topic-lat" step="0.0001" min="-90" max="90" placeholder="48.8566" value="${this.escapeHtml(this.topicFormState.lat || '')}">
+                    </div>
+                    <div class="form-group">
+                      <label>Longitude</label>
+                      <input type="number" name="lon" id="topic-lon" step="0.0001" min="-180" max="180" placeholder="2.3522" value="${this.escapeHtml(this.topicFormState.lon || '')}">
+                    </div>
+                  </div>
+                  <button type="button" class="generate-field-btn" data-action="generate-coordinates">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                      <circle cx="6" cy="6" r="1" fill="currentColor"/>
+                    </svg>
+                    Find place
+                  </button>
+                  <div class="form-group">
+                    <label>Source note</label>
+                    <input type="text" name="source" id="topic-source" placeholder="Official release, community note, local observation" value="${this.escapeHtml(this.topicFormState.source || '')}">
+                  </div>
+                  <div class="form-group">
+                    <label>Analysis</label>
+                    <textarea name="insight" id="topic-insight" rows="2" placeholder="Optional extra context or analysis">${this.escapeHtml(this.topicFormState.insight || '')}</textarea>
+                  </div>
+                </div>
+              </details>
+            </div>
+
+            <div class="topic-composer-evidence-lane" data-tutorial-id="topic-composer-evidence-lane" aria-label="Evidence and media">
+              <div class="topic-composer-lane-header">
+                <div>
+                  <div class="section-label">Evidence</div>
+                  <div class="setting-hint">Sources and media stay attached to this same draft.</div>
+                </div>
+                <div class="topic-composer-counts">
+                  <span>${sourceCount} source${sourceCount === 1 ? '' : 's'}</span>
+                  <span>${mediaCount}/3 media</span>
                 </div>
               </div>
-              <button type="button" class="generate-field-btn" data-action="generate-coordinates">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                  <circle cx="6" cy="6" r="1" fill="currentColor"/>
-                </svg>
-                Find Coordinates with AI
-              </button>
-              <div class="form-group">
-                <label>Source note</label>
-                <input type="text" name="source" id="topic-source" placeholder="e.g., official release, community note, local observation" value="${this.topicFormState.source || ''}">
-              </div>
-              <div class="form-group">
-                <label>Extra context</label>
-                <textarea name="insight" id="topic-insight" rows="2" placeholder="Optional extra context or analysis...">${this.topicFormState.insight || ''}</textarea>
-                <button type="button" class="generate-field-btn" data-action="generate-insight">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M6 1L11 6L6 11M11 6H1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                  </svg>
-                  Generate Insight with AI
+
+              <div class="topic-composer-lane-actions">
+                <button type="button" class="btn-primary-alt" data-action="toggle-source-editor">
+                  ${this.showSourceEditor || sourceCount > 0 ? 'Edit evidence' : 'Add evidence'}
                 </button>
               </div>
+
+              ${this.showSourceEditor || sourceCount > 0 ? this.renderSourceEditor() : `
+                <div class="topic-composer-empty-lane">
+                  Paste a URL above, or add evidence here when you have proof.
+                </div>
+              `}
+
+              <div class="topic-composer-media-row">
+                <button type="button" class="btn-media-action" data-action="import-file">Add file</button>
+                <button type="button" class="btn-media-action" data-action="show-media-url-input">Add URL</button>
+              </div>
+              ${this.showMediaUrlInput ? this.renderMediaUrlInput('topic-composer-media-url-input') : ''}
+              ${mediaTokens.length > 0 ? `
+                <div class="topic-builder-media-preview">
+                  ${mediaTokens.map((token, index) => `
+                    <div class="topic-builder-media-token">
+                      ${this.renderMediaTokenImage(token, 'topic-builder-media-image', `Topic media ${index + 1}`)}
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
             </div>
-          </details>
+          </div>
         </div>
 
         <div class="tab-content ${this.topicBuilderTab === 'evidence' ? 'active' : ''}">
-          <div class="proposal-step-intro">
+          <div class="proposal-step-intro" data-tutorial-id="topic-evidence-tab">
             <div class="proposal-step-kicker">Step 2</div>
             <div class="proposal-step-title">Add proof</div>
             <div class="proposal-step-text">One link, source note, image, or video is enough. Admin can verify details later.</div>
@@ -5211,7 +5826,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
             </div>
           </div>
 
-          <div class="research-settings-section">
+          <div class="research-settings-section" data-tutorial-id="topic-evidence-editor">
             <div class="section-label">Evidence Links</div>
             <button type="button" class="btn-primary-alt" data-action="toggle-source-editor" style="margin-top: 12px; width: 100%;">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="display: inline-block; margin-right: 6px;">
@@ -5224,30 +5839,19 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
             <div class="preset-hint" id="preset-hint"></div>
           </div>
 
-          <div class="research-settings-section">
+          <div class="research-settings-section" data-tutorial-id="topic-media-section">
             <div class="section-label">Photos / Videos</div>
-            <div class="media-actions-grid">
-              <button type="button" class="btn-media-action" data-action="ai-generate-image">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M7 1L11 6L7 11M11 6H1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                Generate image
-              </button>
-              <button type="button" class="btn-media-action" data-action="import-media">
+            <div class="media-actions-grid" data-tutorial-id="topic-media-actions">
+              <button type="button" class="btn-media-action" data-action="import-file">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <path d="M7 11V3M7 3L4 6M7 3L10 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                   <path d="M2 11H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
-                Add file / URL
+                Add file
               </button>
-              <button type="button" class="btn-media-action" data-action="source-media-search">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                  <path d="M9 9L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                Find from sources
-              </button>
+              <button type="button" class="btn-media-action" data-action="show-media-url-input">Add URL</button>
             </div>
+            ${this.showMediaUrlInput ? this.renderMediaUrlInput('topic-media-url-input') : ''}
             ${mediaTokens.length > 0 ? `
               <div class="topic-builder-media-preview">
                 ${mediaTokens.map((token, index) => `
@@ -5260,112 +5864,10 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
             ` : '<div class="setting-hint">Optional. A topic can be saved with evidence links only.</div>'}
           </div>
 
-          <div class="research-settings-section simple-ai-section">
-            <div class="section-label">Help me improve</div>
-            <div class="simple-ai-actions">
-              <button type="button" class="simple-ai-btn" data-action="generate-summary">Improve wording</button>
-              <button type="button" class="simple-ai-btn" data-action="ai-suggest-sources">Suggest sources</button>
-              <button type="button" class="simple-ai-btn" data-action="generate-coordinates">Find place</button>
-            </div>
-          </div>
-
-          <details class="advanced-section expert-controls-section">
-            <summary class="advanced-toggle">Expert controls</summary>
-            <div class="advanced-content">
-              <div class="auto-setup-hint">
-                <span class="hint-icon">&#10024;</span>
-                <span>Source, media, and AI presets follow the selected layer</span>
-              </div>
-
-              <div class="research-settings-section">
-                <div class="section-label">Source Search Types</div>
-                <div class="source-categories-grid">
-                  ${this.getResearchData().SOURCE_CATEGORIES.map(cat => `
-                    <button 
-                      type="button"
-                      class="source-toggle-builder ${this.topicResearchSettings.sources.has(cat.id) ? 'active' : ''}"
-                      data-action="toggle-research-source"
-                      data-source-id="${cat.id}"
-                      style="--source-color: ${cat.color}"
-                    >
-                      <span class="source-icon">${cat.icon}</span>
-                      <span class="source-name">${cat.name}</span>
-                    </button>
-                  `).join('')}
-                </div>
-              </div>
-
-              <div class="research-settings-section">
-                <div class="section-label">AI Mode</div>
-                <div class="research-mode-grid">
-                  ${this.getResearchData().AI_ACTIONS.map(action => `
-                    <button 
-                      type="button"
-                      class="research-mode-card ${this.topicResearchSettings.researchMode === action.id ? 'active' : ''}"
-                      data-action="select-research-mode"
-                      data-mode-id="${action.id}"
-                    >
-                      <div class="mode-icon">${action.icon}</div>
-                      <div class="mode-label">${action.label}</div>
-                    </button>
-                  `).join('')}
-                </div>
-              </div>
-
-              <div class="research-settings-section">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label>Search area</label>
-                    <select id="geographic-scope">
-                      <option value="local" ${(this.topicFormState.geographicScope || this.topicResearchSettings.geographicScope) === 'local' ? 'selected' : ''}>Local</option>
-                      <option value="regional" ${(this.topicFormState.geographicScope || this.topicResearchSettings.geographicScope) === 'regional' ? 'selected' : ''}>Regional</option>
-                      <option value="national" ${(this.topicFormState.geographicScope || this.topicResearchSettings.geographicScope) === 'national' ? 'selected' : ''}>National</option>
-                      <option value="international" ${(this.topicFormState.geographicScope || this.topicResearchSettings.geographicScope) === 'international' ? 'selected' : ''}>International</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label>Time window</label>
-                    <select id="time-scope">
-                      <option value="today" ${(this.topicFormState.timeScope || this.topicResearchSettings.timeScope) === 'today' ? 'selected' : ''}>Today</option>
-                      <option value="recent" ${(this.topicFormState.timeScope || this.topicResearchSettings.timeScope) === 'recent' ? 'selected' : ''}>Recent (7 days)</option>
-                      <option value="month" ${(this.topicFormState.timeScope || this.topicResearchSettings.timeScope) === 'month' ? 'selected' : ''}>This Month</option>
-                      <option value="custom" ${(this.topicFormState.timeScope || this.topicResearchSettings.timeScope) === 'custom' ? 'selected' : ''}>Custom Range</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="research-settings-section">
-                <div class="form-group">
-                  <label>Writing style</label>
-                  <select id="output-intent">
-                    <option value="social-post" ${(this.topicFormState.outputIntent || this.topicResearchSettings.outputIntent) === 'social-post' ? 'selected' : ''}>Social Media Post</option>
-                    <option value="article" ${(this.topicFormState.outputIntent || this.topicResearchSettings.outputIntent) === 'article' ? 'selected' : ''}>Article Draft</option>
-                    <option value="brief" ${(this.topicFormState.outputIntent || this.topicResearchSettings.outputIntent) === 'brief' ? 'selected' : ''}>Research Brief</option>
-                    <option value="analysis" ${(this.topicFormState.outputIntent || this.topicResearchSettings.outputIntent) === 'analysis' ? 'selected' : ''}>Deep Analysis</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="research-settings-section">
-                <div class="checkbox-group">
-                  <label>
-                    <input type="checkbox" id="trusted-only" ${(this.topicFormState.trustedOnly !== undefined ? this.topicFormState.trustedOnly : this.topicResearchSettings.trustedOnly) ? 'checked' : ''}>
-                    <span>Prefer reliable sources</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="research-settings-section">
-                <div class="section-label">Advanced prompt</div>
-                <textarea class="prompt-preview-area" id="prompt-preview" rows="6" readonly>${this.generateTopicPromptPreview()}</textarea>
-              </div>
-            </div>
-          </details>
         </div>
 
         <div class="tab-content ${this.topicBuilderTab === 'review' ? 'active' : ''}">
-          <div class="proposal-step-intro">
+          <div class="proposal-step-intro" data-tutorial-id="topic-review-tab">
             <div class="proposal-step-kicker">Step 3</div>
             <div class="proposal-step-title">Review before saving</div>
             <div class="proposal-step-text">This is still a local draft. Saving keeps it on this device; publishing remains an admin review step.</div>
@@ -5402,8 +5904,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
         <div class="topic-builder-actions">
           <button type="button" class="btn-secondary" data-action="cancel-topic">Cancel</button>
           <div class="primary-actions">
-            <button type="button" class="btn-primary-alt" data-action="save-topic">${saveLabel}</button>
-            <button type="button" class="btn-primary" data-action="${isEditing ? 'ai-gen-update' : 'save-and-research'}">${assistLabel}</button>
+            <button type="button" class="btn-primary" data-action="save-topic" data-tutorial-id="topic-save-button">${saveLabel}</button>
           </div>
         </div>
       </form>
@@ -5467,6 +5968,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     this.saveFormState(); // Save before switching
     this.topicBuilderTab = this.normalizeTopicBuilderTab(tab);
     this.renderCreateTopic();
+    this.emitTutorialEvent('topicComposerTabChanged', { tab: this.topicBuilderTab }, 80);
   }
 
   updateLayerPresets() {
@@ -5490,22 +5992,140 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     this.renderCreateTopic();
   }
 
+  extractComposerUrls(text = '') {
+    const matches = String(text || '').match(/https?:\/\/[^\s<>"')]+/gi) || [];
+    return Array.from(new Set(matches.map(url => url.replace(/[.,;:!?]+$/g, ''))));
+  }
+
+  getComposerTextWithoutUrls(text = '', urls = []) {
+    let cleanText = String(text || '');
+    urls.forEach(url => {
+      cleanText = cleanText.replace(url, ' ');
+    });
+    return cleanText
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  addComposerUrl(url = '') {
+    if (!url) return false;
+
+    const directImageUrl = this.getDirectImageUrl(url);
+    const host = this.getHostFromUrl(url);
+    const isVideoOrSiteMedia = /(?:youtube\.com|youtu\.be|vimeo\.com|cloudinary\.com)/i.test(url);
+    const existingSource = this.topicSources.some(source => String(source.url || '') === url);
+    let added = false;
+
+    if (directImageUrl) {
+      const mediaToken = this.createMediaToken({
+        url,
+        sourceUrl: url,
+        sourceName: host || 'Imported media',
+        provider: 'composer-url'
+      });
+      added = this.addMediaTokenToCurrentPoint(mediaToken) || added;
+
+      if (!existingSource) {
+        this.topicSources.push({
+          name: host || 'Imported media',
+          url,
+          category: 'media',
+          reliability: 'unknown',
+          verified: true,
+          mediaTokenId: mediaToken.id
+        });
+      }
+      return true;
+    }
+
+    if (!existingSource) {
+      this.topicSources.push({
+        name: host || (isVideoOrSiteMedia ? 'Linked media' : 'Source link'),
+        url,
+        category: isVideoOrSiteMedia ? 'media' : 'source',
+        reliability: 'unknown',
+        verified: true,
+        linkOnly: true
+      });
+      added = true;
+    }
+
+    return added;
+  }
+
+  applyComposerInput() {
+    const form = this.container.querySelector('#topic-form');
+    if (!form) return;
+
+    const input = form.querySelector('#topic-smart-input');
+    const rawText = String(input?.value || '').trim();
+    if (!rawText) return;
+
+    this.saveFormState();
+
+    const urls = this.extractComposerUrls(rawText);
+    const cleanText = this.getComposerTextWithoutUrls(rawText, urls);
+    const firstLine = cleanText.split(/[.!?]\s|\n/).map(part => part.trim()).find(Boolean) || '';
+    const conciseTitle = firstLine.length > 92 ? `${firstLine.slice(0, 89).trim()}...` : firstLine;
+
+    if (conciseTitle && !String(this.topicFormState.title || '').trim()) {
+      this.topicFormState.title = conciseTitle;
+    }
+
+    if (cleanText && !String(this.topicFormState.summary || '').trim()) {
+      this.topicFormState.summary = cleanText;
+    } else if (cleanText && !String(this.topicFormState.insight || '').trim()) {
+      this.topicFormState.insight = cleanText;
+    } else if (cleanText && this.isRegionalProposalWorkspace() && !String(this.topicFormState.searchHint || '').trim()) {
+      this.topicFormState.searchHint = cleanText;
+    }
+
+    if (!this.topicFormState.category) {
+      this.topicFormState.category = this.topicBuilderContext?.defaultLayerId
+        || this.getRegionalProposalDefaultLayerId()
+        || this.layers.find(layer => !layer.isGroup)?.id
+        || '';
+      if (this.topicFormState.category) this.autoSetupForLayer(this.topicFormState.category);
+    }
+
+    urls.forEach(url => this.addComposerUrl(url));
+    if (urls.length > 0) this.showSourceEditor = true;
+
+    this.composerSmartInput = '';
+    if (input) input.value = '';
+    const syncedFields = {
+      '#topic-title': this.topicFormState.title,
+      '#topic-category': this.topicFormState.category,
+      '#topic-summary': this.topicFormState.summary,
+      '#topic-insight': this.topicFormState.insight,
+      '#topic-search-hint': this.topicFormState.searchHint
+    };
+    Object.entries(syncedFields).forEach(([selector, value]) => {
+      const field = form.querySelector(selector);
+      if (field) field.value = value || '';
+    });
+    this.setTopicDraftStatus({
+      ...(this.topicDraftStatus || {}),
+      state: this.topicDraftStatus?.state || 'unsaved',
+      title: this.topicFormState.title || this.topicDraftStatus?.title || 'Topic draft',
+      message: urls.length > 0
+        ? 'Input added to the draft and evidence lane. Review, then save it on this device.'
+        : 'Input added to the editable preview. Review, then save it on this device.'
+    });
+    this.renderCreateTopic();
+    this.emitTutorialEvent('topicComposerApplied', { urlCount: urls.length }, 80);
+  }
+
   renderSourceEditor() {
     return `
-      <div class="source-editor-panel">
+      <div class="source-editor-panel" data-tutorial-id="topic-source-editor">
         <div class="source-editor-header">
           <div class="section-label" style="margin: 0;">Evidence</div>
-          <button type="button" class="btn-primary-alt" data-action="ai-suggest-sources" style="padding: 6px 12px; font-size: 11px;">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display: inline-block; margin-right: 4px;">
-              <path d="M6 1L11 6L6 11M11 6H1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            Suggest Sources
-          </button>
         </div>
         <div class="sources-list-editor">
           ${this.topicSources.length === 0 ? `
             <div style="text-align: center; padding: 20px; color: var(--text-secondary); font-size: 12px;">
-              No evidence added yet. Add a link, note, or ask for source suggestions.
+              No evidence added yet. Add a link or note.
             </div>
           ` : ''}
           ${this.topicSources.map((source, index) => `
@@ -5559,6 +6179,9 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
   toggleSourceEditor() {
     this.showSourceEditor = !this.showSourceEditor;
     this.renderCreateTopic();
+    if (this.showSourceEditor) {
+      this.emitTutorialEvent('topicEvidenceEditorOpened', { source: 'toggle-source-editor' }, 80);
+    }
   }
 
   async aiSuggestSources() {
@@ -5762,7 +6385,110 @@ Prioritize official sources, scientific journals, and reputable news outlets. In
     }
   }
 
+  renderMediaUrlInput(tutorialId = 'topic-media-url-input') {
+    const inputId = `${tutorialId}-field`;
+    return `
+      <div class="media-url-inline" data-tutorial-id="${this.escapeHtml(tutorialId)}">
+        <input
+          type="url"
+          id="${this.escapeHtml(inputId)}"
+          class="media-url-input"
+          placeholder="https://example.com/photo.jpg"
+          autocomplete="off"
+          value="${this.escapeHtml(this.mediaUrlDraftUrl || '')}"
+        >
+        <button type="button" class="btn-media-action" data-action="preview-media-url">Search img URL</button>
+        <button type="button" class="btn-media-action" data-action="add-media-url">Add URL</button>
+      </div>
+      ${this.renderMediaUrlPreview()}
+    `;
+  }
+
+  renderMediaUrlPreview() {
+    const token = normalizeTopicMediaToken(this.mediaUrlPreviewToken);
+    if (!token?.url) return '';
+
+    const sourceLabel = token.sourceName || this.getHostFromUrl(token.sourceUrl || token.url) || 'Image URL';
+
+    return `
+      <div class="media-url-preview" data-preview-source-url="${this.escapeHtml(token.sourceUrl || token.url)}">
+        <div class="media-url-preview-topic">
+          ${this.renderMediaTokenImage(token, 'media-url-preview-image', 'Image URL preview')}
+        </div>
+        <div class="media-url-preview-side">
+          <div class="media-url-preview-vignette">
+            ${this.renderMediaTokenImage(token, 'media-url-preview-vignette-image', 'Vignette preview')}
+          </div>
+          <div class="media-url-preview-copy">
+            <span>Preview</span>
+            <strong>${this.escapeHtml(sourceLabel)}</strong>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  getMediaUrlInputForAction(target = null) {
+    return target?.closest('.media-url-inline')?.querySelector('.media-url-input')
+      || this.container.querySelector('.tab-content.active .media-url-input')
+      || this.container.querySelector('.media-url-input');
+  }
+
+  async addMediaUrlFromInput(target = null) {
+    const input = this.getMediaUrlInputForAction(target);
+    const url = String(input?.value || '').trim();
+    if (!url) {
+      input?.focus();
+      return;
+    }
+    this.mediaUrlDraftUrl = url;
+    await this.importURL(url, { previewToken: this.mediaUrlPreviewToken, button: target });
+  }
+
+  async previewMediaUrlFromInput(target = null) {
+    const input = this.getMediaUrlInputForAction(target);
+    const url = String(input?.value || '').trim();
+    if (!url) {
+      input?.focus();
+      return;
+    }
+
+    this.saveFormState();
+    this.mediaUrlDraftUrl = url;
+    const btn = target || this.container.querySelector('.tab-content.active [data-action="preview-media-url"]');
+    const originalHTML = btn?.innerHTML;
+    if (btn) {
+      btn.innerHTML = '<div class="spinner-small"></div> Searching...';
+      btn.disabled = true;
+    }
+
+    try {
+      const token = await this.resolveImageUrlToken(url);
+      if (!token?.url) {
+        this.mediaUrlPreviewToken = null;
+        this.renderCreateTopic();
+        alert('No displayable image found for this URL yet. Try a direct image URL, or keep it as evidence only.');
+        return;
+      }
+
+      this.mediaUrlPreviewToken = token;
+      this.showMediaUrlInput = true;
+      this.renderCreateTopic();
+    } catch (error) {
+      console.error('Error previewing URL media:', error);
+      alert(this.getActionErrorMessage(error, 'Image URL preview'));
+      if (btn) {
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+      }
+    }
+  }
+
   async importMedia() {
+    await this.importFile();
+  }
+
+  ensureCurrentPointMedia() {
     if (!this.currentPoint) {
       this.currentPoint = { media: [], mediaTokens: [] };
     }
@@ -5773,19 +6499,13 @@ Prioritize official sources, scientific journals, and reputable news outlets. In
     if (!this.currentPoint.mediaTokens) {
       this.currentPoint.mediaTokens = [];
     }
-    
+
     if (this.currentPoint.media.length >= 3) {
       alert('Maximum 3 media items allowed');
-      return;
+      return false;
     }
-    
-    const choice = prompt('Enter "file" to upload, or "url" to add an image, YouTube, or site link:');
-    
-    if (choice?.toLowerCase() === 'file') {
-      await this.importFile();
-    } else if (choice?.toLowerCase() === 'url') {
-      await this.importURL();
-    }
+
+    return true;
   }
 
   async findMediaFromSources() {
@@ -5845,6 +6565,9 @@ Prioritize official sources, scientific journals, and reputable news outlets. In
   }
 
   async importFile() {
+    this.saveFormState();
+    if (!this.ensureCurrentPointMedia()) return;
+
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -5853,216 +6576,203 @@ Prioritize official sources, scientific journals, and reputable news outlets. In
       const file = e.target.files[0];
       if (!file) return;
       
-      const btn = this.container.querySelector('[data-action="import-media"]');
-      const originalHTML = btn.innerHTML;
-      btn.innerHTML = '<div class="spinner-small"></div> Uploading...';
-      btn.disabled = true;
+      const btn = this.container.querySelector('[data-action="import-file"]') || this.container.querySelector('[data-action="import-media"]');
+      const originalHTML = btn?.innerHTML;
+      if (btn) {
+        btn.innerHTML = '<div class="spinner-small"></div> Adding...';
+        btn.disabled = true;
+      }
       
       try {
-        // Upload file
-        const url = await window.ourEarthAI.uploadLocalFile(file);
-        
-        // AI content moderation
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          const base64 = reader.result;
-          
-          try {
-            const moderation = await window.ourEarthAI.createChatCompletion({
-              messages: [
-                {
-                  role: "user",
-                  content: [
-                    {
-                      type: "text",
-                      text: "Analyze this image. Is it appropriate for a professional news dashboard? Return ONLY JSON: {\"appropriate\": true/false, \"reason\": \"brief explanation\"}"
-                    },
-                    {
-                      type: "image_url",
-                      image_url: { url: base64 }
-                    }
-                  ]
-                }
-              ],
-              json: true
-            });
-            
-            const result = JSON.parse(moderation.content);
-            
-            if (!result.appropriate) {
-              alert(`Content not appropriate: ${result.reason}`);
-              btn.innerHTML = originalHTML;
-              btn.disabled = false;
-              return;
-            }
-            
-            const mediaToken = this.createMediaToken({
-              url,
-              sourceName: file.name || 'Uploaded File',
-              sourceUrl: url,
-              provider: 'browser-upload'
-            });
+        const url = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => reject(reader.error || new Error('Could not read this file.'));
+          reader.readAsDataURL(file);
+        });
 
-            this.addMediaTokenToCurrentPoint(mediaToken);
-            
-            this.topicSources.push({
-              name: 'Uploaded File',
-              url: url,
-              category: 'media',
-              verified: true,
-              mediaTokenId: mediaToken.id
-            });
-            
-            this.renderCreateTopic();
-            
-            btn.innerHTML = 'Added';
-            setTimeout(() => {
-              btn.innerHTML = originalHTML;
-              btn.disabled = false;
-            }, 2000);
-            
-          } catch (error) {
-            console.error('Error moderating content:', error);
-            alert(this.getActionErrorMessage(error, 'Media review'));
+        const mediaToken = this.createMediaToken({
+          url,
+          sourceName: file.name || 'Uploaded file',
+          sourceUrl: '',
+          provider: 'browser-file',
+          browserOnly: true
+        });
+
+        this.addMediaTokenToCurrentPoint(mediaToken);
+
+        this.topicSources.push({
+          name: file.name || 'Uploaded file',
+          url: '',
+          category: 'media',
+          verified: true,
+          mediaTokenId: mediaToken.id
+        });
+
+        this.renderCreateTopic();
+
+        if (btn) {
+          btn.innerHTML = 'Added';
+          setTimeout(() => {
             btn.innerHTML = originalHTML;
             btn.disabled = false;
-          }
-        };
-        
-        reader.readAsDataURL(file);
+          }, 1200);
+        }
         
       } catch (error) {
-        console.error('Error uploading file:', error);
-        alert(this.getActionErrorMessage(error, 'File upload'));
-        btn.innerHTML = originalHTML;
-        btn.disabled = false;
+        console.error('Error adding file:', error);
+        alert(this.getActionErrorMessage(error, 'File import'));
+        if (btn) {
+          btn.innerHTML = originalHTML;
+          btn.disabled = false;
+        }
       }
     };
     
     input.click();
   }
 
-  async importURL() {
-    const url = prompt('Enter image, YouTube, or site URL:');
-    if (!url) return;
+  probeImageUrl(url = '') {
+    const imageUrl = String(url || '').trim();
+    if (!imageUrl) return Promise.resolve(false);
 
-    if (!this.getDirectImageUrl(url) && !url.startsWith('data:image/')) {
+    return new Promise((resolve) => {
+      const image = new Image();
+      const timer = window.setTimeout(() => {
+        image.onload = null;
+        image.onerror = null;
+        resolve(false);
+      }, 5000);
+
+      image.onload = () => {
+        window.clearTimeout(timer);
+        resolve(true);
+      };
+      image.onerror = () => {
+        window.clearTimeout(timer);
+        resolve(false);
+      };
+      image.referrerPolicy = 'no-referrer';
+      image.src = imageUrl;
+    });
+  }
+
+  async resolveImageUrlToken(url = '') {
+    const rawUrl = String(url || '').trim();
+    if (!rawUrl) return null;
+
+    const safeUrl = rawUrl.startsWith('data:image/')
+      ? rawUrl
+      : this.sanitizeUrl(rawUrl);
+    if (!safeUrl) return null;
+
+    let imageUrl = safeUrl.startsWith('data:image/') ? safeUrl : this.getDirectImageUrl(safeUrl);
+    let provider = safeUrl.startsWith('data:image/') ? 'inline-url' : 'hosted-url';
+    let sourceUrl = safeUrl.startsWith('data:image/') ? '' : safeUrl;
+    const sourceName = this.getHostFromUrl(safeUrl) || 'Hosted image';
+
+    if (imageUrl && !safeUrl.startsWith('data:image/') && !await this.probeImageUrl(imageUrl)) {
+      imageUrl = '';
+    }
+
+    if (!imageUrl && await this.probeImageUrl(safeUrl)) {
+      imageUrl = safeUrl;
+      provider = 'hosted-image-probe';
+    }
+
+    if (!imageUrl && this.canFetchSourcePageMetadata(safeUrl)) {
+      imageUrl = await this.fetchSourcePageImage(safeUrl);
+      provider = imageUrl ? 'source-page-meta' : provider;
+    }
+
+    if (!imageUrl) return null;
+
+    return this.createMediaToken({
+      url: imageUrl,
+      sourceName,
+      sourceUrl,
+      provider
+    });
+  }
+
+  async importURL(url = '', options = {}) {
+    this.saveFormState();
+    if (!this.ensureCurrentPointMedia()) return;
+
+    const rawUrl = String(url || '').trim();
+    if (!rawUrl) {
+      this.showMediaUrlInput = true;
+      this.renderCreateTopic();
+      this.emitTutorialEvent('topicMediaUrlOpened', { source: 'empty-url' }, 60);
+      return;
+    }
+
+    const safeUrl = rawUrl.startsWith('data:image/')
+      ? rawUrl
+      : this.sanitizeUrl(rawUrl);
+    if (!safeUrl) {
+      alert('Invalid URL format');
+      return;
+    }
+
+    const previewToken = normalizeTopicMediaToken(options.previewToken);
+    const mediaToken = previewToken?.sourceUrl === safeUrl || previewToken?.url === safeUrl
+      ? previewToken
+      : await this.resolveImageUrlToken(safeUrl);
+
+    if (!mediaToken?.url) {
       this.topicSources.push({
-        name: this.getHostFromUrl(url) || 'Linked media',
-        url,
+        name: this.getHostFromUrl(safeUrl) || 'Linked media',
+        url: safeUrl,
         category: 'media',
         reliability: 'unknown',
         verified: true,
         linkOnly: true
       });
       this.showSourceEditor = true;
+      this.showMediaUrlInput = false;
       this.renderCreateTopic();
       alert('Linked media URL added to Source Manager. Add a direct image URL or upload a file when you need a cover image.');
       return;
     }
     
-    const btn = this.container.querySelector('[data-action="import-media"]');
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<div class="spinner-small"></div> Importing...';
-    btn.disabled = true;
+    const btn = options.button
+      || this.container.querySelector('.tab-content.active [data-action="add-media-url"]')
+      || this.container.querySelector('[data-action="import-media"]');
+    const originalHTML = btn?.innerHTML;
+    if (btn) {
+      btn.innerHTML = '<div class="spinner-small"></div> Adding...';
+      btn.disabled = true;
+    }
     
     try {
-      // Fetch and convert to base64 for moderation
-      const response = await fetch(url);
-      const blob = await response.blob();
-      
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64 = reader.result;
-        
-        try {
-          const moderation = await window.ourEarthAI.createChatCompletion({
-            messages: [
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text: "Analyze this image. Is it appropriate for a professional news dashboard? Return ONLY JSON: {\"appropriate\": true/false, \"reason\": \"brief explanation\"}"
-                  },
-                  {
-                    type: "image_url",
-                    image_url: { url: base64 }
-                  }
-                ]
-              }
-            ],
-            json: true
-          });
-          
-          const result = JSON.parse(moderation.content);
-          
-          if (!result.appropriate) {
-            alert(`Content not appropriate: ${result.reason}`);
-            btn.innerHTML = originalHTML;
-            btn.disabled = false;
-            return;
-          }
-          
-          const mediaToken = this.createMediaToken({
-            url,
-            sourceName: this.getHostFromUrl(url) || 'Imported URL',
-            sourceUrl: url,
-            provider: 'manual-url'
-          });
-
-          this.addMediaTokenToCurrentPoint(mediaToken);
-          
-          this.topicSources.push({
-            name: 'Imported URL',
-            url: url,
-            category: 'media',
-            verified: true,
-            mediaTokenId: mediaToken.id
-          });
-          
-          this.renderCreateTopic();
-          
-          btn.innerHTML = 'Added';
-          setTimeout(() => {
-            btn.innerHTML = originalHTML;
-            btn.disabled = false;
-          }, 2000);
-          
-        } catch (error) {
-          console.error('Error moderating content:', error);
-          alert(this.getActionErrorMessage(error, 'Media review'));
-          btn.innerHTML = originalHTML;
-          btn.disabled = false;
-        }
-      };
-      
-      reader.readAsDataURL(blob);
-      
-    } catch (error) {
-      console.warn('Could not fetch URL for moderation, storing direct hosted image reference:', error);
-      const mediaToken = this.createMediaToken({
-        url,
-        sourceName: this.getHostFromUrl(url) || 'Hosted image',
-        sourceUrl: url,
-        provider: 'hosted-url'
-      });
-
       this.addMediaTokenToCurrentPoint(mediaToken);
       this.topicSources.push({
-        name: 'Hosted Image URL',
-        url,
+        name: mediaToken.sourceName || 'Hosted Image URL',
+        url: safeUrl.startsWith('data:image/') ? '' : (mediaToken.sourceUrl || safeUrl),
         category: 'media',
         verified: true,
         mediaTokenId: mediaToken.id
       });
 
+      this.showMediaUrlInput = false;
+      this.mediaUrlDraftUrl = '';
+      this.mediaUrlPreviewToken = null;
       this.renderCreateTopic();
-      btn.innerHTML = 'Added';
-      setTimeout(() => {
+      if (btn) {
+        btn.innerHTML = 'Added';
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.disabled = false;
+        }, 1200);
+      }
+    } catch (error) {
+      console.error('Error adding URL media:', error);
+      alert(this.getActionErrorMessage(error, 'URL import'));
+      if (btn) {
         btn.innerHTML = originalHTML;
         btn.disabled = false;
-      }, 1800);
+      }
     }
   }
 
@@ -6072,22 +6782,13 @@ Prioritize official sources, scientific journals, and reputable news outlets. In
       return;
     }
 
-    // Combine save and research in one action
     const form = this.container.querySelector('#topic-form');
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
     }
     
-    // First save the topic
     this.submitTopic('save');
-    
-    // Then open AI Assist; generation stays explicit so the draft is not changed silently.
-    setTimeout(() => {
-      if (this.currentPoint) {
-        this.showResearch(this.currentPoint);
-      }
-    }, 300);
   }
 
   updatePromptPreview() {
@@ -6422,6 +7123,14 @@ Return ONLY a JSON object with this exact format, no other text:
       userMessage: searchHint,
       storageOrigin: 'browser-localStorage'
     });
+    const regionalState = this.getCurrentRegionalTopicState({
+      ...(this.currentPoint || {}),
+      title: this.topicFormState.title,
+      category: this.topicFormState.category,
+      lat,
+      lon,
+      locationPrecision
+    });
 
     // Preserve fever warning properties if editing a fever topic
     const topic = {
@@ -6448,6 +7157,7 @@ Return ONLY a JSON object with this exact format, no other text:
       engagementTypes: Array.isArray(this.currentPoint?.engagementTypes) ? [...this.currentPoint.engagementTypes] : [],
       communityStatus: this.currentPoint?.communityStatus || '',
       regionalScope: this.currentPoint?.regionalScope || '',
+      regionalState,
       ...workflowMetadata,
       storageMeta: {
         ...(this.currentPoint?.storageMeta || {}),
@@ -6488,13 +7198,7 @@ Return ONLY a JSON object with this exact format, no other text:
         this.callbacks.onTopicCreate(topic);
       }
 
-      // Handle different modes
-      if (mode === 'research') {
-        // Show research panel immediately
-        this.showResearch(topic);
-      } else {
-        this.hide();
-      }
+      this.hide();
     }
   }
 
@@ -6631,18 +7335,11 @@ Return ONLY a JSON object with this exact format, no other text:
   }
 
   getHostFromUrl(url = '') {
-    if (!url) return '';
-
-    try {
-      return new URL(url).hostname.replace(/^www\./, '');
-    } catch {
-      return '';
-    }
+    return getTopicHostFromUrl(url);
   }
 
   getDirectImageUrl(url = '') {
-    if (!url) return '';
-    return /\.(png|jpe?g|webp|gif|avif)(\?.*)?$/i.test(url) ? url : '';
+    return getTopicDirectImageUrl(url);
   }
 
   canFetchSourcePageMetadata(url = '') {
@@ -6676,26 +7373,7 @@ Return ONLY a JSON object with this exact format, no other text:
   }
 
   createMediaToken(input = {}) {
-    const sourceHost = input.sourceHost || this.getHostFromUrl(input.sourceUrl || '');
-    const sourceName = input.sourceName || sourceHost || 'Media source';
-    const watermarkText = input.watermarkText || `${sourceHost || sourceName} | topic.earth research`;
-
-    return {
-      id: input.id || `media_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      url: input.url || '',
-      sourceUrl: input.sourceUrl || '',
-      sourceName,
-      sourceHost,
-      watermarkText,
-      query: input.query || '',
-      generated: Boolean(input.generated),
-      provider: input.provider || '',
-      createdAt: input.createdAt || new Date().toISOString(),
-      browserAssetKey: input.browserAssetKey || '',
-      browserAssetMime: input.browserAssetMime || '',
-      storage: input.storage || '',
-      browserOnly: Boolean(input.browserOnly)
-    };
+    return createTopicMediaToken(input);
   }
 
   renderTopicManagementSummary(isEditing = false) {
@@ -6711,7 +7389,7 @@ Return ONLY a JSON object with this exact format, no other text:
     const reviewReady = completedRequired === requiredFields.length && sourceCount > 0;
     const items = [
       {
-        label: 'Describe',
+        label: 'Compose',
         value: `${completedRequired}/${requiredFields.length}`,
         state: completedRequired === requiredFields.length ? 'ready' : 'pending'
       },
@@ -6726,7 +7404,7 @@ Return ONLY a JSON object with this exact format, no other text:
         state: mediaCount > 0 ? 'ready' : 'optional'
       },
       {
-        label: 'Help',
+        label: 'AI',
         value: 'Optional',
         state: 'optional'
       },
@@ -6750,25 +7428,11 @@ Return ONLY a JSON object with this exact format, no other text:
   }
 
   normalizeMediaToken(input) {
-    if (!input) return null;
-
-    if (typeof input === 'string') {
-      return this.createMediaToken({
-        url: input,
-        sourceName: this.getHostFromUrl(input) || 'Legacy media',
-        sourceUrl: this.getDirectImageUrl(input) ? input : ''
-      });
-    }
-
-    return this.createMediaToken(input);
+    return normalizeTopicMediaToken(input);
   }
 
   getMediaTokensForPoint(point = {}) {
-    if (Array.isArray(point.mediaTokens) && point.mediaTokens.length > 0) {
-      return point.mediaTokens.map(token => this.normalizeMediaToken(token)).filter(Boolean);
-    }
-
-    return (point.media || []).map(url => this.normalizeMediaToken(url)).filter(Boolean);
+    return getTopicMediaTokensForPoint(point);
   }
 
   renderMediaTokenImage(token, imageClass = 'generated-image', alt = 'Media image') {
@@ -6853,6 +7517,8 @@ Return ONLY a JSON object with this exact format, no other text:
       linked: settings.aiApiLinked,
       textProviderName: settings.aiApiTextProvider,
       textModel: settings.aiApiTextModel,
+      textMaxModel: settings.aiApiTextMaxModel,
+      textMaxDetectedAt: settings.aiApiTextMaxDetectedAt,
       imageProviderName: settings.aiApiImageProvider,
       imageModel: settings.aiApiImageModel,
       lastSyncedAt: settings.aiApiLastSyncedAt,
@@ -6869,9 +7535,29 @@ Return ONLY a JSON object with this exact format, no other text:
     }
   }
 
+  renderAiApiModelBadges(summary = this.getAiApiSummary()) {
+    const currentModel = summary.textModel || 'None';
+    const maxModel = summary.textMaxModel || 'Check';
+    const maxTitle = summary.textMaxDetectedAt
+      ? `Detected ${this.formatAiApiTimestamp(summary.textMaxDetectedAt)}`
+      : 'Use Refresh to detect available OpenAI text models';
+
+    return `
+      <div id="ai-api-model-badges" class="ai-api-model-badges">
+        <span class="ai-api-model-badge current" title="Current linked text model">
+          <b>Current</b>${this.escapeHtml(currentModel)}
+        </span>
+        <span class="ai-api-model-badge max" title="${this.escapeHtml(maxTitle)}">
+          <b>Max</b>${this.escapeHtml(maxModel)}
+        </span>
+      </div>
+    `;
+  }
+
   updateAiApiStatus(summary = this.getAiApiSummary()) {
     const statusPill = this.container.querySelector('#ai-api-link-status');
     const meta = this.container.querySelector('#ai-api-link-meta');
+    const badges = this.container.querySelector('#ai-api-model-badges');
     const syncTime = this.container.querySelector('#ai-api-sync-time');
 
     if (!statusPill || !meta || !summary) return;
@@ -6882,7 +7568,7 @@ Return ONLY a JSON object with this exact format, no other text:
     const textProvider = summary.textProviderName || summary.textProvider || 'No text provider selected';
     const textModel = summary.textModel || 'No model selected';
     const imageProvider = summary.imageProviderName || summary.imageProvider || 'No image provider selected';
-    const webSearchMode = summary.webSearchCapable ? 'Live web-search capable' : 'AI-assisted search/update';
+    const webSearchMode = summary.webSearchCapable ? 'Live web-search capable' : 'Manual search/update';
 
     meta.innerHTML = `
       <span><strong>Text:</strong> ${this.escapeHtml(textProvider)}${textModel ? ` / ${this.escapeHtml(textModel)}` : ''}</span>
@@ -6890,29 +7576,59 @@ Return ONLY a JSON object with this exact format, no other text:
       <span><strong>Mode:</strong> ${this.escapeHtml(webSearchMode)}</span>
     `;
 
+    if (badges) {
+      badges.outerHTML = this.renderAiApiModelBadges(summary);
+    }
+
     if (syncTime) {
       syncTime.textContent = this.formatAiApiTimestamp(summary.lastSyncedAt);
     }
   }
 
-  refreshAiApiSettingsStatus(button = null) {
+  async refreshAiApiSettingsStatus(button = null) {
     const summary = window.ourEarthAI?.syncFromStorage
       ? window.ourEarthAI.syncFromStorage('settings-refresh')
       : this.getAiApiSummary();
 
     this.updateAiApiStatus(summary);
 
+    let detectedMaxModel = false;
+    if (window.ourEarthAI?.detectOpenAiTextModelCeiling) {
+      try {
+        const status = await window.ourEarthAI.detectOpenAiTextModelCeiling();
+        detectedMaxModel = Boolean(status?.openaiTextMaxModel);
+        Settings.set({
+          aiApiTextMaxModel: status?.openaiTextMaxModel || '',
+          aiApiTextMaxDetectedAt: status?.openaiTextMaxDetectedAt || null
+        });
+        this.updateAiApiStatus(this.getAiApiSummary());
+      } catch (error) {
+        console.warn('[Settings] Could not detect OpenAI max model:', error);
+      }
+    }
+
     if (button) {
       const originalText = button.textContent;
-      button.textContent = summary.linked ? 'Link refreshed' : 'No saved API settings';
+      button.textContent = detectedMaxModel
+        ? 'Models refreshed'
+        : summary.linked ? 'Link refreshed' : 'No saved API settings';
       setTimeout(() => {
         button.textContent = originalText;
       }, 1600);
     }
   }
 
+  getApiSettingsWidgetUrl() {
+    const settingsUrl = Settings.get().aiApiSettingsFrameUrl;
+    if (settingsUrl) return settingsUrl;
+
+    return AppAccess.isAdminMode()
+      ? Settings.API_SETTINGS_WIDGET_URLS.ADMIN
+      : Settings.API_SETTINGS_WIDGET_URLS.USER;
+  }
+
   getApiSettingsFrameSrc() {
-    const configuredSrc = Settings.get().aiApiSettingsFrameUrl || 'api-settings.html?embed=true';
+    const configuredSrc = this.getApiSettingsWidgetUrl();
 
     try {
       const url = new URL(configuredSrc, window.location.href);
@@ -6920,12 +7636,18 @@ Return ONLY a JSON object with this exact format, no other text:
       url.searchParams.set('source', 'topic-earth');
       return url.href;
     } catch {
-      return 'api-settings.html?embed=true&source=topic-earth';
+      return configuredSrc;
     }
   }
 
   openApiSettingsWindow() {
-    this.closeApiSettingsOverlay();
+    const existingOverlay = document.getElementById('api-settings-overlay');
+    if (existingOverlay) {
+      existingOverlay.classList.remove('api-settings-overlay-hidden');
+      existingOverlay.setAttribute('aria-hidden', 'false');
+      return;
+    }
+
     const frameSrc = this.getApiSettingsFrameSrc();
 
     const overlay = document.createElement('div');
@@ -6959,7 +7681,8 @@ Return ONLY a JSON object with this exact format, no other text:
   closeApiSettingsOverlay() {
     const overlay = document.getElementById('api-settings-overlay');
     if (overlay) {
-      overlay.remove();
+      overlay.classList.add('api-settings-overlay-hidden');
+      overlay.setAttribute('aria-hidden', 'true');
       this.refreshAiApiSettingsStatus();
     }
   }
@@ -7024,7 +7747,13 @@ Return ONLY a JSON object with this exact format, no other text:
     }
 
     try {
-      const result = await downloadTopicAdminSubmission(this.currentPoint);
+      const topicForSubmission = { ...this.currentPoint };
+      const regionalState = this.getCurrentRegionalTopicState(topicForSubmission);
+      if (regionalState) {
+        topicForSubmission.regionalState = regionalState;
+      }
+
+      const result = await downloadTopicAdminSubmission(topicForSubmission);
       const status = this.container.querySelector('#topic-submit-status');
 
       if (status) {
@@ -7113,6 +7842,8 @@ Return ONLY a JSON object with this exact format, no other text:
     this.ttsManager = ttsManager;
     this.renderSettings();
     this.container.classList.remove('hidden');
+    this.updateTopicNavigation();
+    window.dispatchEvent(new CustomEvent('settingsOpened'));
   }
 
   getSettingsLanguageState(settings) {
@@ -7299,6 +8030,32 @@ Return ONLY a JSON object with this exact format, no other text:
       detail: { settings: updatedSettings || Settings.get(), feverResolutionChanged: false }
     }));
   }
+
+  setSettingsAccessMode(mode = 'user', content = this.container.querySelector('#detail-content')) {
+    const nextMode = mode === 'admin' ? 'admin' : 'user';
+    if (!AppAccess.can('admin:ui-toggle')) return;
+
+    const state = AppAccess.setMode(nextMode);
+    window.dispatchEvent(new CustomEvent('adminModeChanged', { detail: state }));
+
+    content?.querySelectorAll('[data-action="set-settings-access-mode"]').forEach(button => {
+      const active = button.dataset.mode === state.mode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-checked', active ? 'true' : 'false');
+    });
+
+    const source = content?.querySelector('[data-api-settings-source]');
+    if (source) {
+      const langCode = content.lang || this.getCurrentLanguage();
+      source.textContent = `${LanguageManager.getLabel('topic.source', langCode)}: ${this.getApiSettingsWidgetUrl()}`;
+    }
+
+    const status = content?.querySelector('#settings-access-status');
+    if (status) {
+      const activeLabel = state.isAdminMode ? 'Admin mode active' : 'User mode active';
+      status.textContent = `${activeLabel}. ${state.isAdminMode ? 'Layer and topic editing are unlocked.' : 'Published content stays protected; local drafts remain available.'}`;
+    }
+  }
   
   renderSettings() {
     const content = this.container.querySelector('#detail-content');
@@ -7316,22 +8073,80 @@ Return ONLY a JSON object with this exact format, no other text:
     const aiSummary = this.getAiApiSummary();
     const aiTextProvider = aiSummary.textProviderName || aiSummary.textProvider || t('settings.noTextProvider');
     const aiTextModel = aiSummary.textModel || t('settings.noModelSelected');
+    const aiModelBadges = this.renderAiApiModelBadges(aiSummary);
     const aiImageProvider = aiSummary.imageProviderName || aiSummary.imageProvider || t('settings.noImageProvider');
     const aiSearchMode = aiSummary.webSearchCapable ? t('settings.liveWebSearchCapable') : t('settings.aiAssistedSearchUpdate');
     const isAdmin = AppAccess.isAdminMode();
+    const accessState = AppAccess.getState();
+    const canToggleAdmin = AppAccess.can('admin:ui-toggle');
     const topicExportSummary = getAdminTopicExportSummary();
     const aiVoiceEnabled = Boolean(settings.aiVoiceEnabled);
+    const apiSettingsWidgetUrl = this.getApiSettingsWidgetUrl();
     const safePreferredBrowserVoice = this.getLanguageSafePreferredVoice(
       currentLang,
       settings.preferredBrowserVoice || ''
     );
+    const frenchUi = LanguageManager.normalizeLanguageCode(currentLang).startsWith('fr');
+    const accessCopy = frenchUi
+      ? {
+          label: 'Mode d acces',
+          hint: 'Le mode utilisateur protege reste actif au chargement. Admin local passe par le raccourci volontaire.',
+          userHint: 'Explorer et enregistrer des brouillons locaux sans modifier les donnees publiees.',
+          adminHint: 'Creer des couches, creer des sujets, modifier les brouillons et exporter les packages admin.'
+        }
+      : {
+          label: 'Access mode',
+          hint: 'Protected user mode stays active on load. Local admin is available only through the deliberate shortcut.',
+          userHint: 'Explore and save local drafts without changing published data.',
+          adminHint: 'Create layers, create topics, edit saved drafts, and export admin packages.'
+        };
 
     content.innerHTML = `
       <div class="detail-header">
         <h2 class="detail-title">${this.escapeHtml(t('common.settings'))}</h2>
       </div>
+
+      ${canToggleAdmin ? `
+        <div class="detail-section settings-access-section" data-tutorial-id="settings-access">
+          <div class="section-label">${this.escapeHtml(accessCopy.label)}</div>
+          <div class="settings-mode-switch" role="radiogroup" aria-label="${this.escapeHtml(accessCopy.label)}">
+            <button
+              type="button"
+              class="settings-mode-option ${!isAdmin ? 'active' : ''}"
+              data-action="set-settings-access-mode"
+              data-mode="user"
+              role="radio"
+              aria-checked="${!isAdmin ? 'true' : 'false'}"
+            >
+              <span class="settings-mode-icon">&#128065;</span>
+              <span>
+                <strong>${this.escapeHtml(t('common.user'))}</strong>
+                <small>${this.escapeHtml(accessCopy.userHint)}</small>
+              </span>
+            </button>
+            <button
+              type="button"
+              class="settings-mode-option ${isAdmin ? 'active' : ''}"
+              data-action="set-settings-access-mode"
+              data-mode="admin"
+              role="radio"
+              aria-checked="${isAdmin ? 'true' : 'false'}"
+            >
+              <span class="settings-mode-icon">&#9733;</span>
+              <span>
+                <strong>${this.escapeHtml(t('common.admin'))}</strong>
+                <small>${this.escapeHtml(accessCopy.adminHint)}</small>
+              </span>
+            </button>
+          </div>
+          <div id="settings-access-status" class="setting-hint">
+            ${this.escapeHtml(accessCopy.hint)}
+            <span class="settings-access-profile">${this.escapeHtml(accessState.profile)}</span>
+          </div>
+        </div>
+      ` : ''}
       
-      <div class="detail-section">
+      <div class="detail-section" data-tutorial-id="settings-language">
         <div class="section-label">${this.escapeHtml(t('settings.language'))}</div>
         <div class="form-group language-picker">
           <div class="language-choice-grid" role="listbox" aria-label="${this.escapeHtml(t('settings.uiLanguage'))}">
@@ -7343,9 +8158,9 @@ Return ONLY a JSON object with this exact format, no other text:
           <div id="language-current-status" class="language-current-status">
             ${this.escapeHtml(`${t('settings.using')}: ${currentLanguageName}`)}
           </div>
-          <div class="setting-hint">${this.escapeHtml(t('settings.languagePickerHint'))}</div>
+          <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.languagePickerHint'))}</div>
         </div>
-        <div class="form-group" style="margin-top: 12px;">
+        <div class="form-group" style="margin-top: 12px;" data-tutorial-id="tutorial-toggle">
           <label>
             <input 
               type="checkbox" 
@@ -7354,11 +8169,20 @@ Return ONLY a JSON object with this exact format, no other text:
             >
             <span style="margin-left: 8px;">${this.escapeHtml(t('settings.tutorialTips'))}</span>
           </label>
-          <div class="setting-hint">${this.escapeHtml(t('settings.tutorialTipsHint'))}</div>
+          <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.tutorialTipsHint'))}</div>
+        </div>
+        <div class="form-group" style="margin-top: 12px;" data-tutorial-id="settings-tutorial-level">
+          <label for="tutorial-level">${this.escapeHtml(t('settings.tutorialLevel'))}</label>
+          <select id="tutorial-level">
+            <option value="essential" ${settings.tutorialLevel === 'essential' ? 'selected' : ''}>${this.escapeHtml(t('settings.tutorialLevelEssential'))}</option>
+            <option value="guided" ${settings.tutorialLevel === 'guided' || !settings.tutorialLevel ? 'selected' : ''}>${this.escapeHtml(t('settings.tutorialLevelGuided'))}</option>
+            <option value="expert" ${settings.tutorialLevel === 'expert' ? 'selected' : ''}>${this.escapeHtml(t('settings.tutorialLevelExpert'))}</option>
+          </select>
+          <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.tutorialLevelHint'))}</div>
         </div>
       </div>
 
-      <div class="detail-section">
+      <div class="detail-section" data-tutorial-id="settings-tts">
         <div class="section-label">${this.escapeHtml(t('settings.textToSpeech'))}</div>
         <div class="form-group">
           <label>
@@ -7425,7 +8249,7 @@ Return ONLY a JSON object with this exact format, no other text:
 
       <div class="detail-section">
         <div class="section-label">${this.escapeHtml(t('settings.globeSettings'))}</div>
-        <div class="form-group">
+        <div class="form-group" data-tutorial-id="settings-country-hover">
           <label>
             <input 
               type="checkbox" 
@@ -7436,7 +8260,7 @@ Return ONLY a JSON object with this exact format, no other text:
           </label>
           <div class="setting-hint">${this.escapeHtml(t('settings.showCountryLabelsHint'))}</div>
         </div>
-        <div class="form-group" style="margin-top: 12px;">
+        <div class="form-group" style="margin-top: 12px;" data-tutorial-id="settings-main-texture">
           <label>${this.escapeHtml(t('settings.mainTextureResolution'))}</label>
           <select id="base-texture-quality">
             <option value="auto" ${settings.baseTextureQuality === 'auto' ? 'selected' : ''}>${this.escapeHtml(t('settings.qualityAuto'))}</option>
@@ -7444,24 +8268,32 @@ Return ONLY a JSON object with this exact format, no other text:
             <option value="4k" ${settings.baseTextureQuality === '4k' ? 'selected' : ''}>${this.escapeHtml(t('settings.quality4k'))}</option>
             <option value="8k" ${settings.baseTextureQuality === '8k' ? 'selected' : ''}>${this.escapeHtml(t('settings.quality8k'))}</option>
           </select>
-          <div class="setting-hint">${this.escapeHtml(t('settings.mainTextureHint'))}</div>
+          <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.mainTextureHint'))}</div>
         </div>
       </div>
 
       <div class="detail-section">
-        <div class="section-label">${this.escapeHtml(t('settings.feverLoopResolution'))}</div>
-        <div class="form-group">
+        <div class="form-group" data-tutorial-id="settings-fever-loop">
           <label>${this.escapeHtml(t('settings.feverLoopResolution'))}</label>
           <select id="fever-loop-resolution">
             <option value="auto" ${settings.feverLoopResolution === 'auto' ? 'selected' : ''}>${this.escapeHtml(t('settings.qualityAuto'))}</option>
             <option value="1k" ${settings.feverLoopResolution === '1k' ? 'selected' : ''}>${this.escapeHtml(t('settings.quality1k'))}</option>
             <option value="4k" ${settings.feverLoopResolution === '4k' ? 'selected' : ''}>${this.escapeHtml(t('settings.quality4k'))}</option>
           </select>
-          <div class="setting-hint">${this.escapeHtml(t('settings.feverLoopHint'))}</div>
+          <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.feverLoopHint'))}</div>
         </div>
       </div>
 
-      <div class="detail-section ai-api-settings-section">
+      <div class="detail-section settings-build-section" data-tutorial-id="settings-build">
+        <div class="section-label">${this.escapeHtml(t('settings.aboutBuild'))}</div>
+        <div class="ai-api-status-card">
+          <div class="ai-api-link-meta">
+            <span><strong>${this.escapeHtml(t('settings.developmentAssistant'))}:</strong> Codex</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section ai-api-settings-section" data-tutorial-id="settings-ai-api">
         <div class="section-label">${this.escapeHtml(t('settings.aiApiSettings'))}</div>
         <div class="ai-api-status-card">
           <div class="ai-api-status-topline">
@@ -7475,7 +8307,8 @@ Return ONLY a JSON object with this exact format, no other text:
             <span><strong>${this.escapeHtml(t('settings.aiImage'))}:</strong> ${this.escapeHtml(aiImageProvider)}</span>
             <span><strong>${this.escapeHtml(t('settings.aiMode'))}:</strong> ${this.escapeHtml(aiSearchMode)}</span>
           </div>
-          <div class="setting-hint">
+          ${aiModelBadges}
+          <div class="setting-hint settings-tutorialized-hint">
             ${this.escapeHtml(t('settings.aiApiHint'))}
           </div>
         </div>
@@ -7506,13 +8339,13 @@ Return ONLY a JSON object with this exact format, no other text:
             <span style="margin-left: 8px;">${this.escapeHtml(t('settings.useLinkedTtsBridge'))}</span>
           </label>
         </div>
-        <div class="setting-hint">${this.escapeHtml(t('settings.ttsBridgeHint'))}</div>
+        <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.ttsBridgeHint'))}</div>
 
         <div class="api-settings-launch-card">
           <div>
             <div class="api-settings-launch-title">${this.escapeHtml(t('settings.apiSettingsWidget'))}</div>
-            <div class="setting-hint">${this.escapeHtml(t('settings.apiSettingsWidgetHint'))}</div>
-            <div class="setting-hint">${this.escapeHtml(t('topic.source'))}: ${this.escapeHtml(settings.aiApiSettingsFrameUrl || 'api-settings.html?embed=true')}</div>
+            <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.apiSettingsWidgetHint'))}</div>
+            <div class="setting-hint settings-tutorialized-hint" data-api-settings-source>${this.escapeHtml(t('topic.source'))}: ${this.escapeHtml(apiSettingsWidgetUrl)}</div>
           </div>
           <button class="btn-primary" data-action="open-api-settings-window">${this.escapeHtml(t('settings.apiSettingsButton'))}</button>
         </div>
@@ -7522,7 +8355,7 @@ Return ONLY a JSON object with this exact format, no other text:
         </div>
       </div>
 
-      <div class="detail-section regional-settings-section">
+      <div class="detail-section regional-settings-section" data-tutorial-id="settings-regional">
         <div class="section-label">${this.escapeHtml(t('settings.regional'))}</div>
         <div class="form-group">
           <label>
@@ -7533,7 +8366,7 @@ Return ONLY a JSON object with this exact format, no other text:
             >
             <span style="margin-left: 8px;">${this.escapeHtml(t('settings.regionalAutoLocate'))}</span>
           </label>
-          <div class="setting-hint">${this.escapeHtml(t('settings.regionalAutoLocateHint'))}</div>
+          <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.regionalAutoLocateHint'))}</div>
         </div>
         <div class="form-group" style="margin-top: 12px;">
           <label for="regional-location-precision">${this.escapeHtml(t('settings.regionalLocationPrecision'))}</label>
@@ -7544,7 +8377,7 @@ Return ONLY a JSON object with this exact format, no other text:
             <option value="city" ${settings.regionalLocationPrecision === 'city' ? 'selected' : ''}>${this.escapeHtml(t('settings.regionalPrecisionCity'))}</option>
             <option value="address" ${settings.regionalLocationPrecision === 'address' ? 'selected' : ''}>${this.escapeHtml(t('settings.regionalPrecisionAddress'))}</option>
           </select>
-          <div class="setting-hint">${this.escapeHtml(t('settings.regionalLocationPrecisionHint'))}</div>
+          <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.regionalLocationPrecisionHint'))}</div>
         </div>
       </div>
 
@@ -7587,6 +8420,8 @@ Return ONLY a JSON object with this exact format, no other text:
 
       if (action === 'set-ui-language') {
         this.applySettingsLanguageChoice(content, target.dataset.language, { autoDetect: false });
+      } else if (action === 'set-settings-access-mode') {
+        this.setSettingsAccessMode(target.dataset.mode, content);
       } else if (action === 'save-settings') {
         this.saveSettings();
       } else if (action === 'reset-settings') {
@@ -7650,6 +8485,7 @@ Return ONLY a JSON object with this exact format, no other text:
       autoDetectLanguage,
       uiLanguage: autoDetectLanguage ? null : selectedLang,
       tutorialModeEnabled: content.querySelector('#tutorial-mode-enabled')?.checked ?? true,
+      tutorialLevel: content.querySelector('#tutorial-level')?.value || 'guided',
       ttsEnabled: content.querySelector('#tts-enabled')?.checked ?? true,
       preferredBrowserVoice,
       speechRate: parseFloat(content.querySelector('#speech-rate')?.value || 1),
@@ -7719,6 +8555,7 @@ Return ONLY a JSON object with this exact format, no other text:
         this.mode = 'fever-simulation';
         
         this.showFeverSimulation(this.currentGlobe);
+        this.updateTopicNavigation();
         
         if (selectedBoundary) {
           this.currentGlobe.selectBoundary(selectedBoundary);
@@ -7735,10 +8572,16 @@ Return ONLY a JSON object with this exact format, no other text:
     this.researchContext = null;
     this.topicDraftStatus = null;
     this.pendingResearchAutoApply = false;
+    this.updateTopicNavigation();
     
     if (this.currentGlobe && this.currentGlobe.inFeverMode) {
       this.currentGlobe.showFeverYearOverlay();
       console.log('[Fever Year] Monitoring panel closed -> year overlay shown');
+      if (this.currentGlobe.getFeverSoundEnabled()) {
+        this.startFeverHeartbeatAudioLoop();
+      }
+    } else {
+      this.stopFeverHeartbeatAudioLoop({ closeContext: true });
     }
     
     // Clean up fever simulation
@@ -7758,11 +8601,6 @@ Return ONLY a JSON object with this exact format, no other text:
       window.removeEventListener('boundaryMonitorUpdate', this.boundaryMonitorListener);
       this.boundaryMonitorListener = null;
     }
-    if (this.audioContext) {
-      this.audioContext.close();
-      this.audioContext = null;
-    }
-
     if (this.callbacks.onHide) {
       this.callbacks.onHide();
     }

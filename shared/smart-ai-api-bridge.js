@@ -11,6 +11,32 @@
 (function initSmartAiApiBridge(global) {
   'use strict';
 
+  const WIDGET_ALLOWED_PROD_ORIGINS = [
+    'https://smdeltart.com',
+    'https://portal.smdeltart.com',
+    'https://api.smdeltart.com',
+    'https://clipboard.smdeltart.com',
+    'https://cloudinary.smdeltart.com',
+    'https://studio.smdeltart.com',
+    'https://images.smdeltart.com',
+    'https://widgets.smdeltart.com'
+  ];
+  const WIDGET_ALLOWED_DEV_ORIGINS = [
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:8080',
+    'http://127.0.0.1:8080',
+    'http://localhost:8765',
+    'http://127.0.0.1:8765',
+    'http://localhost:8766',
+    'http://127.0.0.1:8766',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000'
+  ];
+  const WIDGET_ALLOWED_VERCEL_PATTERN = /^https:\/\/smdeltart[a-z0-9-]*\.vercel\.app$/;
+
   const TEXT_PROVIDER_ALIASES = {
     'deepseek-free': 'deepseek',
     'google-free': 'google',
@@ -138,6 +164,35 @@
     return messages.some((message) => Array.isArray(message?.content) && message.content.some((part) => part?.type === 'image_url'));
   }
 
+  function isOpenAiTextModelId(id = '') {
+    const value = String(id || '').toLowerCase();
+    return /^gpt-/.test(value)
+      && !/(image|audio|realtime|transcribe|tts|whisper|embedding|moderation)/.test(value);
+  }
+
+  function getOpenAiTextModelRank(id = '') {
+    const value = String(id || '').toLowerCase();
+    const familyMatch = value.match(/^gpt-(\d+(?:\.\d+)?)/);
+    const family = familyMatch ? Number(familyMatch[1]) : 0;
+    const miniPenalty = /\b(mini|nano|small|lite)\b/.test(value) ? -0.2 : 0;
+    const previewPenalty = /\b(preview|beta|experimental)\b/.test(value) ? -0.04 : 0;
+    const dated = value.match(/(?:-|_)(20\d{2})(?:-|_)?(\d{2})?(?:-|_)?(\d{2})?/);
+    const dateScore = dated
+      ? (Number(dated[1]) * 10000 + Number(dated[2] || 0) * 100 + Number(dated[3] || 0)) / 100000000
+      : 0;
+
+    if (family > 0) return family + miniPenalty + previewPenalty + dateScore;
+    if (value.includes('4o')) return 4.05 + miniPenalty + previewPenalty + dateScore;
+    return 0 + miniPenalty + previewPenalty + dateScore;
+  }
+
+  function pickHighestOpenAiTextModel(modelIds = []) {
+    return modelIds
+      .filter(isOpenAiTextModelId)
+      .sort((a, b) => getOpenAiTextModelRank(b) - getOpenAiTextModelRank(a) || String(a).localeCompare(String(b)))
+      [0] || '';
+  }
+
   function createProviderError(providerName, response, payload = {}) {
     const errorData = payload.error || {};
     const message = errorData.message || `${providerName} failed with ${response.status}`;
@@ -218,12 +273,22 @@
       global.addEventListener?.('message', (event) => {
         if (!this.isAllowedMessageOrigin(event.origin)) return;
 
-        const { type, action } = event.data || {};
+        const { type, action, widgetId } = event.data || {};
+        const isApiSettingsWidget = widgetId === 'api-settings'
+          || event.data?.data?.widgetId === 'api-settings'
+          || type === 'smart-widget'
+          || type === 'smdeltart-widget-sync';
+
         if (
           (type === 'smart-widget' && action === 'settings-saved') ||
-          (event.data?.widgetId === 'api-settings' && ['settings-updated', 'settings-response', 'widget-ready'].includes(type))
+          (isApiSettingsWidget && ['settings-updated', 'settings-response', 'widget-ready', 'smdeltart-widget-sync'].includes(type))
         ) {
-          this.applyIncomingSettings(event.data?.settings || event.data?.data?.settings);
+          this.applyIncomingSettings(
+            event.data?.settings
+            || event.data?.data?.settings
+            || event.data?.data,
+            event.origin
+          );
           this.syncFromStorage('message');
         }
       });
@@ -232,24 +297,45 @@
     isAllowedMessageOrigin(origin) {
       if (origin === 'null' || origin === global.location?.origin) return true;
 
-      const widgetBridge = global.WidgetBridge;
-      if (widgetBridge?.PROD_ORIGINS?.includes(origin)) return true;
-      if (widgetBridge?.DEV_ORIGINS?.includes(origin)) return true;
-      if (widgetBridge?.VERCEL_PATTERN?.test(origin)) return true;
+      if (WIDGET_ALLOWED_PROD_ORIGINS.includes(origin)) return true;
+      if (WIDGET_ALLOWED_DEV_ORIGINS.includes(origin)) return true;
+      if (WIDGET_ALLOWED_VERCEL_PATTERN.test(origin)) return true;
 
       return false;
     }
 
-    applyIncomingSettings(incomingSettings) {
+    canAcceptSecretSettings(origin) {
+      return Boolean(origin && origin === global.location?.origin);
+    }
+
+    stripSecretSettings(settings = {}) {
+      return Object.fromEntries(
+        Object.entries(settings || {}).filter(([key]) => !/ApiKey$/i.test(key))
+      );
+    }
+
+    applyIncomingSettings(incomingSettings, origin = '') {
       const parsedSettings = typeof incomingSettings === 'string'
         ? safeJsonParse(incomingSettings)
         : incomingSettings;
 
       if (!parsedSettings || typeof parsedSettings !== 'object') return false;
+      const hasSecrets = Object.keys(parsedSettings).some((key) => /ApiKey$/i.test(key) && parsedSettings[key]);
+      const settingsToImport = hasSecrets && !this.canAcceptSecretSettings(origin)
+        ? this.stripSecretSettings(parsedSettings)
+        : parsedSettings;
+      const storageKey = hasSecrets && !this.canAcceptSecretSettings(origin)
+        ? 'smdeltartPreferences'
+        : 'smdeltartApiSettings';
 
       try {
-        global.localStorage?.setItem('smdeltartApiSettings', JSON.stringify(parsedSettings));
-        global.localStorage?.setItem('smartApiSettings', JSON.stringify(parsedSettings));
+        global.localStorage?.setItem(storageKey, JSON.stringify(settingsToImport));
+        if (storageKey === 'smdeltartApiSettings') {
+          global.localStorage?.setItem('smartApiSettings', JSON.stringify(settingsToImport));
+        }
+        if (storageKey === 'smdeltartPreferences') {
+          console.warn('[Smart AI API] Ignored API keys from cross-origin api-settings message; imported preferences only.');
+        }
         return true;
       } catch (error) {
         console.warn('[Smart AI API] Could not import posted API settings:', error);
@@ -294,6 +380,8 @@
         textProvider: textConfig.provider,
         textProviderName: textConfig.providerName,
         textModel: textConfig.model,
+        textMaxModel: getStorageObject('smdeltartApiModelStatus')?.openaiTextMaxModel || '',
+        textMaxDetectedAt: getStorageObject('smdeltartApiModelStatus')?.openaiTextMaxDetectedAt || null,
         textHasKey: Boolean(textConfig.apiKey),
         imageProvider: imageConfig.provider,
         imageProviderName: imageConfig.providerName,
@@ -310,6 +398,41 @@
 
     getSummary() {
       return this.lastSummary || this.syncFromStorage('summary');
+    }
+
+    async detectOpenAiTextModelCeiling() {
+      const textConfig = this.getTextConfig();
+      if (textConfig.provider !== 'openai') {
+        throw new Error('Current text provider is not OpenAI.');
+      }
+
+      if (!textConfig.apiKey) {
+        throw new Error('OpenAI API key is missing.');
+      }
+
+      const response = await fetch('https://api.openai.com/v1/models', {
+        headers: { Authorization: `Bearer ${textConfig.apiKey}` }
+      });
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw createProviderError('OpenAI models', response, payload);
+      }
+
+      const modelIds = Array.isArray(payload.data)
+        ? payload.data.map((model) => model?.id).filter(Boolean)
+        : [];
+      const now = new Date().toISOString();
+      const status = {
+        openaiTextCurrentModel: textConfig.model,
+        openaiTextMaxModel: pickHighestOpenAiTextModel(modelIds),
+        openaiTextModelCount: modelIds.length,
+        openaiTextMaxDetectedAt: now
+      };
+
+      global.localStorage?.setItem('smdeltartApiModelStatus', JSON.stringify(status));
+      this.syncFromStorage('openai-model-detect');
+      return status;
     }
 
     getTextConfig(apiSettings = this.readApiSettings()) {

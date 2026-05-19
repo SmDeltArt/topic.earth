@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>topic.earth animated logo kit</title>
+  <meta name="description" content="Portable animated topic.earth logo kit with main, regional, space, and fever modes.">
+  <meta name="robots" content="noindex,follow">
+  <meta property="og:title" content="topic.earth animated logo kit">
+  <meta property="og:description" content="Four animated topic.earth logo modes for reuse and export.">
+  <meta property="og:image" content="https://res.cloudinary.com/dsbfcgtdv/image/upload/w_1200,h_630,c_pad,b_rgb:0a0e1a/f_png/v1778010556/topic.earth_64x64_frtsvs.svg">
+  <link rel="icon" type="image/svg+xml" href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0e1a;
+      --text: #e8eaed;
+      --muted: #9aa0a6;
+      --mark-url: url("https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg");
+      font-family: "Space Mono", Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(circle at 22% 24%, rgba(0, 212, 255, 0.15), transparent 32%),
+        radial-gradient(circle at 82% 70%, rgba(255, 176, 32, 0.11), transparent 34%),
+        var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 40px;
+    }
+
+    main {
+      width: min(920px, 100%);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 28px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .logo-card {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(20, 24, 36, 0.72);
+      padding: 20px;
+    }
+
+    .mode-label {
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .topic-logo {
+      --cycle: 6s;
+      --topic: #00d4ff;
+      --earth: #9ff5ff;
+      --line-a: #00d4ff;
+      --line-b: #7cffd6;
+      --line-c: #81d4ff;
+      width: max-content;
+      min-height: 56px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      position: relative;
+      isolation: isolate;
+      padding: 0 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .topic-logo::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 4px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, var(--line-a), var(--line-b), var(--line-c), transparent);
+      box-shadow: 0 0 12px color-mix(in srgb, var(--line-b) 45%, transparent);
+      animation: rail var(--cycle) ease-in-out infinite;
+    }
+
+    .topic-logo::after {
+      content: "";
+      position: absolute;
+      inset: 4px 0;
+      border: 1px solid color-mix(in srgb, var(--line-a) 28%, transparent);
+      border-radius: 8px;
+      z-index: -1;
+      animation: frame var(--cycle) steps(6, end) infinite;
+    }
+
+    .mark {
+      width: 50px;
+      height: 50px;
+      background-image: var(--mark-url);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      filter: drop-shadow(0 0 10px color-mix(in srgb, var(--line-b) 45%, transparent));
+      animation: mark var(--cycle) steps(6, end) infinite;
+    }
+
+    .word {
+      --word-color: var(--topic);
+      font-size: 22px;
+      transform: scaleY(1.16);
+      transform-origin: center;
+      background:
+        linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--word-color) 80%, white) 18%, var(--word-color) 44%, rgba(232, 234, 237, 0.14) 58%, transparent 76%, color-mix(in srgb, var(--word-color) 86%, white) 100%);
+      background-size: 240% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: word var(--cycle) ease-in-out infinite, vanish calc(var(--cycle) * 1.35) ease-in-out infinite;
+    }
+
+    .word-earth {
+      --word-color: var(--earth);
+      animation-delay: -3s;
+    }
+
+    .topic-logo.regional {
+      --cycle: 7s;
+      --topic: #7cffd6;
+      --earth: #d4ff72;
+      --line-a: #00d4ff;
+      --line-b: #7cff6b;
+      --line-c: #d4ff72;
+    }
+
+    .topic-logo.space {
+      --cycle: 8s;
+      --topic: #8fb2ff;
+      --earth: #ffd166;
+      --line-a: #7c83ff;
+      --line-b: #00d4ff;
+      --line-c: #ffd166;
+    }
+
+    .topic-logo.fever {
+      --cycle: 4.8s;
+      --topic: #ffb020;
+      --earth: #ff5f57;
+      --line-a: #ff5f57;
+      --line-b: #ffb020;
+      --line-c: #ff2d55;
+    }
+
+    .topic-logo.fever::before {
+      animation: feverRail var(--cycle) steps(6, end) infinite;
+    }
+
+    @keyframes frame {
+      0%, 100% { opacity: 0.42; box-shadow: 0 0 12px transparent; }
+      50% { opacity: 0.82; box-shadow: 0 0 20px color-mix(in srgb, var(--line-b) 22%, transparent); }
+    }
+
+    @keyframes rail {
+      0%, 100% { transform: scaleX(0.42); opacity: 0.36; }
+      50% { transform: scaleX(1); opacity: 0.8; }
+    }
+
+    @keyframes mark {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-1px) scale(1.025); }
+    }
+
+    @keyframes word {
+      0%, 100% { opacity: 0.84; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes vanish {
+      0%, 100% { background-position: 0% 50%; opacity: 0.86; }
+      45% { background-position: 72% 50%; opacity: 1; }
+      72% { background-position: 150% 50%; opacity: 0.58; }
+    }
+
+    @keyframes feverRail {
+      0%, 100% { background: linear-gradient(90deg, transparent, #ff5f57, #ffb020, #ff2d55, transparent); }
+      16.66% { background: linear-gradient(90deg, transparent, #ff5eea, #b777ff, #00d4ff, transparent); }
+      33.33% { background: linear-gradient(90deg, transparent, #00d4ff, #2ee6c9, #7cf7ff, transparent); }
+      50% { background: linear-gradient(90deg, transparent, #ffe066, #8dff7c, #ff9f1c, transparent); }
+      66.66% { background: linear-gradient(90deg, transparent, #55d6ff, #6f9cff, #b6f7ff, transparent); }
+      83.33% { background: linear-gradient(90deg, transparent, #64ff9b, #00d4ff, #b8ff72, transparent); }
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 22px; }
+      .logo-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>topic.earth animated logo kit</h1>
+    <p>Portable HTML/CSS source for the four active logo modes. Use this page as the master for WebP, WebM, GIF, or SVG-oriented export workflows.</p>
+    <section class="logo-grid" aria-label="topic.earth logo modes">
+      <article class="logo-card">
+        <div class="mode-label">Main</div>
+        <div class="topic-logo main" aria-label="topic.earth main logo">
+          <span class="word">topic</span><span class="mark" aria-hidden="true"></span><span class="word word-earth">earth</span>
+        </div>
+      </article>
+      <article class="logo-card">
+        <div class="mode-label">Regional</div>
+        <div class="topic-logo regional" aria-label="topic.earth regional logo">
+          <span class="word">topic</span><span class="mark" aria-hidden="true"></span><span class="word word-earth">earth</span>
+        </div>
+      </article>
+      <article class="logo-card">
+        <div class="mode-label">Space</div>
+        <div class="topic-logo space" aria-label="topic.earth space logo">
+          <span class="word">topic</span><span class="mark" aria-hidden="true"></span><span class="word word-earth">earth</span>
+        </div>
+      </article>
+      <article class="logo-card">
+        <div class="mode-label">Fever</div>
+        <div class="topic-logo fever" aria-label="topic.earth fever logo">
+          <span class="word">topic</span><span class="mark" aria-hidden="true"></span><span class="word word-earth">earth</span>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

@@ -3,7 +3,7 @@
  * Displays app branding and live status indicator
  */
 import { Settings } from '../lib/settings.js';
-import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-20260423';
+import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-toggle-20260517';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
 
 const TOPIC_EARTH_MARK_URL = 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg';
@@ -37,7 +37,7 @@ export class TopBar {
       // Open settings in detail panel instead of modal
       window.dispatchEvent(new CustomEvent('openSettings'));
     } else if (target.id === 'admin-toggle-btn') {
-      if (!AppAccess.can('admin:toggle')) return;
+      if (!AppAccess.can('admin:ui-toggle')) return;
       const state = AppAccess.setAdminMode(!AppAccess.isAdminMode());
       this.render();
       window.dispatchEvent(new CustomEvent('adminModeChanged', { detail: state }));
@@ -163,7 +163,7 @@ export class TopBar {
 
   render() {
     const isAdmin = AppAccess.isAdminMode();
-    const canToggleAdmin = AppAccess.can('admin:toggle');
+    const canToggleAdmin = AppAccess.can('admin:ui-toggle');
     const activeModeTab = this.layerFilter || this.mapViewModeToModeTab(this.viewMode) || 'main';
     const isRegionalMode = activeModeTab === 'regional';
     const interactionLabel = isRegionalMode
