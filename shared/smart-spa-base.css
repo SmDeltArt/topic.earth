@@ -1,0 +1,582 @@
+/**
+ * SmΔrt SPA Base Styles v1.0
+ * Unified CSS for all SmΔrt SPAs
+ * Style reference: api-settings.html
+ */
+
+/* ============================================================
+   ROOT VARIABLES - API-SETTINGS STYLE
+   ============================================================ */
+:root {
+  /* === Core Colors === */
+  --spa-primary: #6d9eeb;
+  --spa-secondary: #8bb0f0;
+  --spa-accent: #5a87d6;
+
+  /* === Background System === */
+  --spa-bg-dark: #151620;
+  --spa-bg-body: linear-gradient(135deg, #151620, #0f1419);
+  --spa-bg-card: #1a1d2e;
+  --spa-bg-header: linear-gradient(135deg, #2d3a5a, #1a2332);
+  --spa-bg-section: #2d3a5a;
+  --spa-bg-footer: #1a2332;
+
+  /* === Text Colors === */
+  --spa-text: #e0e0e0;
+  --spa-text-muted: #888;
+  --spa-text-heading: #ffffff;
+
+  /* === Status Colors === */
+  --spa-success: #4ade80;
+  --spa-error: #f87171;
+  --spa-warning: #fbbf24;
+  --spa-info: #60a5fa;
+
+  /* === Delta Brand Colors === */
+  --delta-cyan: #00ffff;
+  --delta-green: #1dff00;
+  --delta-yellow: #fcf20a;
+  --delta-purple: #6366f1;
+
+  /* === Borders & Shadows === */
+  --spa-border: #333;
+  --spa-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  --spa-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+  /* === Dimensions === */
+  --spa-width: 420px;
+  --spa-max-width: 95vw;
+  --spa-max-height: 650px;
+  --spa-radius: 8px;
+  --spa-radius-sm: 4px;
+  --spa-radius-lg: 12px;
+
+  /* === Typography === */
+  --spa-font: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --spa-font-size: 14px;
+  --spa-line-height: 1.5;
+
+  /* === Transitions === */
+  --spa-transition: 0.2s ease;
+  --spa-transition-slow: 0.3s ease;
+
+  /* === Scrollbar === */
+  --scrollbar-width: 6px;
+  --scrollbar-track: #1a2332;
+  --scrollbar-thumb: #4a5568;
+  --scrollbar-thumb-hover: #6b7280;
+}
+
+/* ============================================================
+   LIGHT THEME OVERRIDE
+   ============================================================ */
+[data-theme="light"] {
+  --spa-primary: #0284c7;
+  --spa-secondary: #38bdf8;
+  --spa-accent: #0369a1;
+
+  --spa-bg-dark: #f8fafc;
+  --spa-bg-body: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  --spa-bg-card: #ffffff;
+  --spa-bg-header: linear-gradient(135deg, #e0f2fe, #bae6fd);
+  --spa-bg-section: #f0f9ff;
+  --spa-bg-footer: #e0f2fe;
+
+  --spa-text: #0c4a6e;
+  --spa-text-muted: #64748b;
+  --spa-text-heading: #075985;
+
+  --spa-border: #bae6fd;
+  --spa-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
+
+  --scrollbar-track: #e0f2fe;
+  --scrollbar-thumb: #7dd3fc;
+  --scrollbar-thumb-hover: #38bdf8;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: var(--spa-font-size);
+}
+
+body {
+  font-family: var(--spa-font);
+  background: var(--spa-bg-body);
+  color: var(--spa-text);
+  line-height: var(--spa-line-height);
+  min-height: 100dvh;
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* ============================================================
+   SPA CONTAINER
+   ============================================================ */
+.spa-container {
+  width: 100%;
+  height: 100%;
+  max-width: var(--spa-width);
+  max-height: 100dvh;
+  margin: 0 auto;
+  background: var(--spa-bg-card);
+  border-radius: 0;
+  box-shadow: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Standalone/Detached mode */
+.detached-mode .spa-container {
+  max-height: var(--spa-max-height);
+  border-radius: var(--spa-radius);
+  box-shadow: var(--spa-shadow);
+  margin-top: 10px;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.spa-header {
+  background: var(--spa-bg-header);
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid var(--spa-border);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.spa-header h1 {
+  font-size: 1.5rem;
+  color: var(--spa-text-heading);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.spa-header p {
+  color: var(--spa-text-muted);
+  font-size: 0.85em;
+  margin-top: 8px;
+}
+
+/* Delta symbol in title */
+.delta-symbol {
+  color: var(--delta-cyan);
+  font-weight: 700;
+  transition:
+    color var(--spa-transition-slow),
+    text-shadow var(--spa-transition-slow);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* ============================================================
+   NAVIGATION BUTTONS
+   ============================================================ */
+.spa-nav-back {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(109, 158, 235, 0.2);
+  border: none;
+  color: var(--spa-primary);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--spa-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--spa-transition);
+  z-index: 10;
+}
+
+.spa-nav-back:hover {
+  background: rgba(109, 158, 235, 0.3);
+  transform: scale(1.1);
+}
+
+.spa-nav-back svg {
+  width: 14px;
+  height: 14px;
+}
+
+.spa-nav-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(248, 113, 113, 0.1);
+  border: none;
+  color: var(--spa-error);
+  width: 20px;
+  height: 20px;
+  border-radius: var(--spa-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--spa-transition);
+  z-index: 10;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.spa-nav-close:hover {
+  background: rgba(248, 113, 113, 0.2);
+  transform: scale(1.1);
+}
+
+/* Hide close in iframe mode */
+.in-iframe .spa-nav-close,
+.widget-mode .spa-nav-close {
+  display: none !important;
+}
+
+/* ============================================================
+   CONTENT AREA
+   ============================================================ */
+.spa-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+}
+
+/* ============================================================
+   COLLAPSIBLE SECTIONS
+   ============================================================ */
+.spa-section {
+  margin-bottom: 12px;
+  border: 1px solid var(--spa-border);
+  border-radius: var(--spa-radius);
+  overflow: hidden;
+  background: var(--spa-bg-section);
+}
+
+.spa-section-btn {
+  width: 100%;
+  padding: 12px 15px;
+  background: var(--spa-bg-section);
+  border: none;
+  color: var(--spa-text);
+  font-size: 0.95em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color var(--spa-transition);
+}
+
+.spa-section-btn:hover {
+  background: #3a4a6a;
+}
+
+.spa-section-btn span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Delta triangle collapse indicator */
+.spa-collapse-arrow {
+  width: 16px;
+  height: 16px;
+  transition: transform var(--spa-transition-slow);
+}
+
+.spa-collapse-arrow svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: var(--delta-cyan);
+  stroke-width: 2;
+}
+
+.spa-section.collapsed .spa-collapse-arrow {
+  transform: rotate(180deg);
+}
+
+.spa-section-content {
+  padding: 15px;
+  border-top: 1px solid var(--spa-border);
+  max-height: 1000px;
+  overflow: hidden;
+  transition:
+    max-height var(--spa-transition-slow),
+    padding var(--spa-transition-slow);
+}
+
+.spa-section.collapsed .spa-section-content {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.spa-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--spa-radius-sm);
+  font-size: 0.85em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--spa-transition);
+  text-align: center;
+}
+
+.spa-btn:hover {
+  transform: translateY(-1px);
+}
+
+.spa-btn-primary {
+  background: var(--spa-primary);
+  color: #1e3a5f;
+}
+
+.spa-btn-success {
+  background: var(--spa-success);
+  color: #1e3a5f;
+}
+
+.spa-btn-warning {
+  background: var(--spa-warning);
+  color: #1e3a5f;
+}
+
+.spa-btn-info {
+  background: var(--spa-info);
+  color: #1e3a5f;
+}
+
+.spa-btn-purple {
+  background: #a78bfa;
+  color: #1e3a5f;
+}
+
+.spa-btn:disabled {
+  background: #444;
+  color: #888;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================================
+   FOOTER ACTIONS
+   ============================================================ */
+.spa-footer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 15px;
+  background: var(--spa-bg-footer);
+  border-top: 1px solid var(--spa-border);
+  flex-shrink: 0;
+}
+
+.spa-footer.cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.spa-footer.cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+.spa-input,
+.spa-select {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--spa-border);
+  border-radius: var(--spa-radius-sm);
+  color: var(--spa-text);
+  font-size: 0.9em;
+  transition: all var(--spa-transition);
+}
+
+.spa-input:focus,
+.spa-select:focus {
+  outline: none;
+  border-color: var(--spa-primary);
+  box-shadow: 0 0 0 2px rgba(109, 158, 235, 0.2);
+}
+
+.spa-input::placeholder {
+  color: var(--spa-text-muted);
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+   ============================================================ */
+.spa-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--spa-bg-section);
+  color: var(--spa-text);
+  padding: 12px 24px;
+  border-radius: var(--spa-radius);
+  box-shadow: var(--spa-shadow);
+  opacity: 0;
+  transition: all var(--spa-transition-slow);
+  z-index: 9999;
+}
+
+.spa-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.spa-toast.success {
+  border-left: 4px solid var(--spa-success);
+}
+
+.spa-toast.error {
+  border-left: 4px solid var(--spa-error);
+}
+
+.spa-toast.warning {
+  border-left: 4px solid var(--spa-warning);
+}
+
+.spa-toast.info {
+  border-left: 4px solid var(--spa-info);
+}
+
+/* ============================================================
+   STATUS INDICATORS
+   ============================================================ */
+.spa-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 600;
+}
+
+.spa-status-success {
+  background: rgba(74, 222, 128, 0.2);
+  color: var(--spa-success);
+}
+
+.spa-status-error {
+  background: rgba(248, 113, 113, 0.2);
+  color: var(--spa-error);
+}
+
+.spa-status-warning {
+  background: rgba(251, 191, 36, 0.2);
+  color: var(--spa-warning);
+}
+
+.spa-status-info {
+  background: rgba(96, 165, 250, 0.2);
+  color: var(--spa-info);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 480px) {
+  :root {
+    --spa-font-size: 13px;
+  }
+
+  .spa-header {
+    padding: 15px;
+  }
+
+  .spa-header h1 {
+    font-size: 1.3rem;
+  }
+
+  .spa-content {
+    padding: 15px;
+  }
+
+  .spa-footer {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ============================================================
+   ANIMATION UTILITIES
+   ============================================================ */
+@keyframes spa-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spa-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.spa-animate-in {
+  animation: spa-fadeIn var(--spa-transition-slow) ease-out;
+}
+
+.spa-pulse {
+  animation: spa-pulse 2s infinite;
+}
