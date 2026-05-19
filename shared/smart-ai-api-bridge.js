@@ -125,6 +125,20 @@
     }
   };
 
+  const TTS_PROVIDERS = {
+    'openai-tts': {
+      name: 'OpenAI TTS',
+      defaultModel: 'tts-1',
+      defaultVoice: 'alloy'
+    },
+    'edge-tts': {
+      name: 'Edge TTS'
+    },
+    elevenlabs: {
+      name: 'ElevenLabs'
+    }
+  };
+
   function safeJsonParse(value) {
     if (!value || typeof value !== 'string') return null;
     try {
@@ -364,13 +378,15 @@
       const apiSettings = this.readApiSettings();
       const textConfig = this.getTextConfig(apiSettings);
       const imageConfig = this.getImageConfig(apiSettings);
+      const ttsConfig = this.getTtsConfig(apiSettings);
       const textReady = Boolean(
         textConfig.provider &&
         textConfig.config?.endpoint &&
         (textConfig.apiKey || textConfig.config?.noKey)
       );
       const imageReady = Boolean(imageConfig.provider && (imageConfig.apiKey || imageConfig.provider === 'pollinations'));
-      const linked = Boolean(apiSettings.hasSavedSettings && (textReady || imageReady));
+      const ttsReady = Boolean(ttsConfig.activeMode === 'external' && ttsConfig.provider === 'openai-tts' && ttsConfig.apiKey);
+      const linked = Boolean(apiSettings.hasSavedSettings && (textReady || imageReady || ttsReady));
       const now = new Date().toISOString();
 
       const summary = {
@@ -387,6 +403,12 @@
         imageProviderName: imageConfig.providerName,
         imageModel: imageConfig.model,
         imageHasKey: Boolean(imageConfig.apiKey),
+        ttsActiveMode: ttsConfig.activeMode,
+        ttsProvider: ttsConfig.provider,
+        ttsProviderName: ttsConfig.providerName,
+        ttsModel: ttsConfig.model,
+        ttsVoice: ttsConfig.voice,
+        ttsHasKey: Boolean(ttsConfig.apiKey),
         webSearchCapable: textConfig.provider === 'perplexity'
       };
 
@@ -488,6 +510,35 @@
         providerName: providerConfig?.name || rawProvider || '',
         apiKey,
         model: apiSettings.openaiImageModel || providerConfig?.defaultModel || '',
+        config: providerConfig
+      };
+    }
+
+    getTtsConfig(apiSettings = this.readApiSettings()) {
+      const activeMode = apiSettings.activeTtsProvider ||
+        (apiSettings.externalTtsApiRadio ? 'external' : apiSettings.browserTtsRadio ? 'browser' : 'websim');
+      const rawProvider = activeMode === 'external' ? apiSettings.externalTtsApi : activeMode;
+      const provider = rawProvider || '';
+      const providerConfig = TTS_PROVIDERS[provider];
+      const apiKey =
+        activeMode === 'external'
+          ? apiSettings.externalTtsApiKey ||
+            (provider === 'openai-tts' ? apiSettings.paidTextApiKey || apiSettings.freeTextApiKey || '' : '')
+          : '';
+
+      return {
+        activeMode,
+        provider,
+        providerName: providerConfig?.name || rawProvider || '',
+        apiKey,
+        model: provider === 'openai-tts' ? apiSettings.openaiTtsModel || providerConfig?.defaultModel || 'tts-1' : '',
+        voice: provider === 'openai-tts'
+          ? apiSettings.openaiTtsVoice || providerConfig?.defaultVoice || 'alloy'
+          : provider === 'edge-tts'
+            ? apiSettings.edgeTtsVoice || ''
+            : provider === 'elevenlabs'
+              ? apiSettings.elevenlabsVoice || ''
+              : apiSettings.browserTtsVoice || '',
         config: providerConfig
       };
     }
