@@ -3,7 +3,7 @@
  * Displays app branding and live status indicator
  */
 import { Settings } from '../lib/settings.js';
-import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-toggle-20260517';
+import { AppAccess } from '../lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
 
 const TOPIC_EARTH_MARK_URL = 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg';

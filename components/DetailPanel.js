@@ -1,5 +1,5 @@
 import { Settings } from '../lib/settings.js?v=topic-earth-api-settings-widget-20260516';
-import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-shortcuts-20260517';
+import { AppAccess } from '../lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-tab-layers-20260507';
 import { ReadTranslationService } from '../lib/read-translation.js';
 import { getFeverWarmingTranslation } from '../lib/fever-warming-translations.js?v=topic-earth-fever-json-i18n-20260422';

@@ -1,4 +1,4 @@
-﻿// Domain and CDN guard for production and shared embeds.
+// Domain and CDN guard for production and shared embeds.
 function enforceDomainAndCdnPolicy() {
   const domainConfig = window.SMART_DOMAIN_GUARD_CONFIG || {
     enabled: true,
@@ -313,7 +313,7 @@ const API_PROVIDERS = {
 
 // DEBUG: Add global debugging function
 window.debugApiProviders = function () {
-  console.log("ðŸ” API_PROVIDERS Debug Info:");
+  console.log("🔍 API_PROVIDERS Debug Info:");
   console.log("Total providers:", Object.keys(API_PROVIDERS).length);
   console.log("Available providers:", Object.keys(API_PROVIDERS));
   console.log("openai-tts exists:", "openai-tts" in API_PROVIDERS);
@@ -325,27 +325,27 @@ window.debugApiProviders = function () {
 window.manualSyncTest = function () {
   const textKey = document.getElementById("paidTextApiKey")?.value;
   if (textKey) {
-    console.log("ðŸ§ª Manual sync test triggered");
+    console.log("🧪 Manual sync test triggered");
     syncOpenAIKeys("paidTextApiKey", textKey);
   } else {
-    console.log("âŒ No text API key found for manual sync test");
+    console.log("❌ No text API key found for manual sync test");
   }
 };
 
 // Test connection to a specific API provider
 async function testProviderConnection(provider, apiKey) {
-  console.log(`ðŸ” Testing provider: "${provider}"`);
+  console.log(`🔍 Testing provider: "${provider}"`);
   console.log(
-    `ðŸ” Provider exists in API_PROVIDERS:`,
+    `🔍 Provider exists in API_PROVIDERS:`,
     provider in API_PROVIDERS,
   );
-  console.log(`ðŸ” Available providers:`, Object.keys(API_PROVIDERS));
+  console.log(`🔍 Available providers:`, Object.keys(API_PROVIDERS));
 
   const config = API_PROVIDERS[provider];
-  console.log(`ðŸ” Config for ${provider}:`, config);
+  console.log(`🔍 Config for ${provider}:`, config);
 
   if (!config) {
-    console.log(`âŒ Config is undefined for provider: ${provider}`);
+    console.log(`❌ Config is undefined for provider: ${provider}`);
     return {
       success: false,
       error: "UNSUPPORTED_PROVIDER",
@@ -546,7 +546,7 @@ function getErrorMessage(status, providerName) {
 function updateApiStatus(elementId, isSuccess, message = "") {
   const element = document.getElementById(elementId);
   if (element) {
-    element.textContent = isSuccess ? "âœ…" : "âŒ";
+    element.textContent = isSuccess ? "✅" : "❌";
     element.title = message;
     element.style.color = isSuccess ? "#4ade80" : "#f87171";
   }
@@ -556,9 +556,9 @@ function updateApiStatus(elementId, isSuccess, message = "") {
 function updateCategoryStatus() {
   // Text API category status
   const paidTextStatus =
-    document.getElementById("paidTextStatus")?.textContent === "âœ…";
+    document.getElementById("paidTextStatus")?.textContent === "✅";
   const freeTextStatus =
-    document.getElementById("freeTextStatus")?.textContent === "âœ…";
+    document.getElementById("freeTextStatus")?.textContent === "✅";
   const textCategoryStatus = paidTextStatus || freeTextStatus;
   updateApiStatus(
     "textApiStatus",
@@ -568,9 +568,9 @@ function updateCategoryStatus() {
 
   // Image API category status
   const paidImageStatus =
-    document.getElementById("paidImageStatus")?.textContent === "âœ…";
+    document.getElementById("paidImageStatus")?.textContent === "✅";
   const freeImageStatus =
-    document.getElementById("freeImageStatus")?.textContent === "âœ…";
+    document.getElementById("freeImageStatus")?.textContent === "✅";
   const imageCategoryStatus = paidImageStatus || freeImageStatus;
   updateApiStatus(
     "imageApiStatus",
@@ -580,9 +580,9 @@ function updateCategoryStatus() {
 
   // Video API category status
   const paidVideoStatus =
-    document.getElementById("paidVideoStatus")?.textContent === "âœ…";
+    document.getElementById("paidVideoStatus")?.textContent === "✅";
   const freeVideoStatus =
-    document.getElementById("freeVideoStatus")?.textContent === "âœ…";
+    document.getElementById("freeVideoStatus")?.textContent === "✅";
   const videoCategoryStatus = paidVideoStatus || freeVideoStatus;
   updateApiStatus(
     "videoApiStatus",
@@ -592,7 +592,7 @@ function updateCategoryStatus() {
 
   // TTS API category status
   const externalTtsStatus =
-    document.getElementById("externalTtsStatus")?.textContent === "âœ…";
+    document.getElementById("externalTtsStatus")?.textContent === "✅";
   updateApiStatus(
     "ttsApiStatus",
     externalTtsStatus,
@@ -655,7 +655,7 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
       provider !== "openai" &&
       openaiTextApi === "openai" &&
       openaiTextKey === apiKey &&
-      openaiTextStatus?.textContent === "âœ…"
+      openaiTextStatus?.textContent === "✅"
     ) {
       syncedSuccess = true;
       syncedMessage = "OpenAI API key valid (synchronized with text API)";
@@ -663,7 +663,7 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
       provider !== "openai-dalle" &&
       dalleImageApi === "openai-dalle" &&
       dalleImageKey === apiKey &&
-      document.getElementById("paidImageStatus")?.textContent === "âœ…"
+      document.getElementById("paidImageStatus")?.textContent === "✅"
     ) {
       syncedSuccess = true;
       syncedMessage = "OpenAI API key valid (synchronized with image API)";
@@ -671,7 +671,7 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
       provider !== "openai-whisper" &&
       sttApi === "openai-whisper" &&
       sttKey === apiKey &&
-      document.getElementById("externalSttStatus")?.textContent === "âœ…"
+      document.getElementById("externalSttStatus")?.textContent === "✅"
     ) {
       syncedSuccess = true;
       syncedMessage = "OpenAI API key valid (synchronized with STT API)";
@@ -679,7 +679,7 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
       provider !== "openai-tts" &&
       ttsApi === "openai-tts" &&
       ttsKey === apiKey &&
-      document.getElementById("externalTtsStatus")?.textContent === "âœ…"
+      document.getElementById("externalTtsStatus")?.textContent === "✅"
     ) {
       syncedSuccess = true;
       syncedMessage = "OpenAI API key valid (synchronized with TTS API)";
@@ -738,15 +738,15 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
       updateApiStatus(statusElementId, result.success, result.message);
 
       if (result.success) {
-        addLogEntry(`âœ… ${result.providerName}: ${result.message}`, "success");
+        addLogEntry(`✅ ${result.providerName}: ${result.message}`, "success");
       } else {
-        addLogEntry(`âŒ ${result.providerName}: ${result.message}`, "error");
+        addLogEntry(`❌ ${result.providerName}: ${result.message}`, "error");
       }
 
       return result.success;
     } catch (error) {
       updateApiStatus(statusElementId, false, `Test failed: ${error.message}`);
-      addLogEntry(`âŒ ${config.name}: Test failed - ${error.message}`, "error");
+      addLogEntry(`❌ ${config.name}: Test failed - ${error.message}`, "error");
       return false;
     } finally {
       updateCategoryStatus();
@@ -756,7 +756,7 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
   // Handle APIs that need keys
   if (!apiKey || apiKey.trim() === "") {
     updateApiStatus(statusElementId, false, "No API key provided");
-    addLogEntry(`âš ï¸ ${config.name}: No API key provided`, "warning");
+    addLogEntry(`⚠️ ${config.name}: No API key provided`, "warning");
     return false;
   }
 
@@ -767,15 +767,15 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
     updateApiStatus(statusElementId, result.success, result.message);
 
     if (result.success) {
-      addLogEntry(`âœ… ${result.providerName}: ${result.message}`, "success");
+      addLogEntry(`✅ ${result.providerName}: ${result.message}`, "success");
     } else {
-      addLogEntry(`âŒ ${result.providerName}: ${result.message}`, "error");
+      addLogEntry(`❌ ${result.providerName}: ${result.message}`, "error");
     }
 
     return result.success;
   } catch (error) {
     updateApiStatus(statusElementId, false, `Test failed: ${error.message}`);
-    addLogEntry(`âŒ ${config.name}: Test failed - ${error.message}`, "error");
+    addLogEntry(`❌ ${config.name}: Test failed - ${error.message}`, "error");
     return false;
   } finally {
     // Update category-level status indicators after any test
@@ -785,7 +785,7 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
 
 // Real API testing function to replace the mock one
 async function testAllApisReal() {
-  addLogEntry("ðŸ§ª Starting comprehensive API tests...", "info");
+  addLogEntry("🧪 Starting comprehensive API tests...", "info");
 
   let successCount = 0;
   let totalTests = 0;
@@ -795,7 +795,7 @@ async function testAllApisReal() {
     'input[name="textApiProvider"]:checked',
   )?.value;
   addLogEntry(
-    `[1/5] ðŸ“ Checking text API configuration (Provider: ${textProvider})...`,
+    `[1/5] 📝 Checking text API configuration (Provider: ${textProvider})...`,
     "info",
   );
 
@@ -814,12 +814,12 @@ async function testAllApisReal() {
         if (success) successCount++;
       } catch (error) {
         addLogEntry(
-          `âŒ Error testing ${paidTextApi}: ${error.message}`,
+          `❌ Error testing ${paidTextApi}: ${error.message}`,
           "error",
         );
       }
     } else {
-      addLogEntry("âš ï¸ No paid text API selected", "warning");
+      addLogEntry("⚠️ No paid text API selected", "warning");
     }
   } else if (textProvider === "free") {
     const freeTextApi = document.getElementById("freeTextApi").value;
@@ -836,20 +836,20 @@ async function testAllApisReal() {
         if (success) successCount++;
       } catch (error) {
         addLogEntry(
-          `âŒ Error testing ${freeTextApi}: ${error.message}`,
+          `❌ Error testing ${freeTextApi}: ${error.message}`,
           "error",
         );
       }
     } else {
-      addLogEntry("âš ï¸ No free text API selected", "warning");
+      addLogEntry("⚠️ No free text API selected", "warning");
     }
   } else if (textProvider === "vercel") {
     addLogEntry(
-      "â„¹ï¸ Using Vercel AI Gateway (configure in Vercel dashboard)",
+      "ℹ️ Using Vercel AI Gateway (configure in Vercel dashboard)",
       "info",
     );
   } else {
-    addLogEntry("âš ï¸ No text API provider selected", "warning");
+    addLogEntry("⚠️ No text API provider selected", "warning");
   }
 
   // Test Image APIs
@@ -857,7 +857,7 @@ async function testAllApisReal() {
     'input[name="imageApiProvider"]:checked',
   )?.value;
   addLogEntry(
-    `[2/5] ðŸŽ¨ Checking image API configuration (Provider: ${imageProvider})...`,
+    `[2/5] 🎨 Checking image API configuration (Provider: ${imageProvider})...`,
     "info",
   );
 
@@ -876,12 +876,12 @@ async function testAllApisReal() {
         if (success) successCount++;
       } catch (error) {
         addLogEntry(
-          `âŒ Error testing ${paidImageApi}: ${error.message}`,
+          `❌ Error testing ${paidImageApi}: ${error.message}`,
           "error",
         );
       }
     } else {
-      addLogEntry("âš ï¸ No paid image API selected", "warning");
+      addLogEntry("⚠️ No paid image API selected", "warning");
     }
   } else if (imageProvider === "free") {
     const freeImageApi = document.getElementById("freeImageApi").value;
@@ -898,20 +898,20 @@ async function testAllApisReal() {
         if (success) successCount++;
       } catch (error) {
         addLogEntry(
-          `âŒ Error testing ${freeImageApi}: ${error.message}`,
+          `❌ Error testing ${freeImageApi}: ${error.message}`,
           "error",
         );
       }
     } else {
-      addLogEntry("âš ï¸ No free image API selected", "warning");
+      addLogEntry("⚠️ No free image API selected", "warning");
     }
   } else if (imageProvider === "vercel") {
     addLogEntry(
-      "â„¹ï¸ Using Vercel AI Gateway (configure in Vercel dashboard)",
+      "ℹ️ Using Vercel AI Gateway (configure in Vercel dashboard)",
       "info",
     );
   } else {
-    addLogEntry("âš ï¸ No image API provider selected", "warning");
+    addLogEntry("⚠️ No image API provider selected", "warning");
   }
 
   // Test TTS APIs
@@ -919,7 +919,7 @@ async function testAllApisReal() {
     'input[name="ttsApiProvider"]:checked',
   )?.value;
   addLogEntry(
-    `[3/5] ðŸ—£ï¸ Checking TTS API configuration (Provider: ${ttsProvider})...`,
+    `[3/5] 🗣️ Checking TTS API configuration (Provider: ${ttsProvider})...`,
     "info",
   );
 
@@ -939,22 +939,22 @@ async function testAllApisReal() {
         if (success) successCount++;
       } catch (error) {
         addLogEntry(
-          `âŒ Error testing ${externalTtsApi}: ${error.message}`,
+          `❌ Error testing ${externalTtsApi}: ${error.message}`,
           "error",
         );
       }
     } else {
-      addLogEntry("âš ï¸ No external TTS API selected", "warning");
+      addLogEntry("⚠️ No external TTS API selected", "warning");
     }
   } else if (ttsProvider === "vercel") {
     addLogEntry(
-      "â„¹ï¸ Using Vercel AI Gateway (configure in Vercel dashboard)",
+      "ℹ️ Using Vercel AI Gateway (configure in Vercel dashboard)",
       "info",
     );
   } else if (ttsProvider === "browser") {
-    addLogEntry("â„¹ï¸ Using Browser TTS (always available)", "info");
+    addLogEntry("ℹ️ Using Browser TTS (always available)", "info");
   } else {
-    addLogEntry("âš ï¸ No TTS provider selected", "warning");
+    addLogEntry("⚠️ No TTS provider selected", "warning");
   }
 
   // Test Video APIs
@@ -962,7 +962,7 @@ async function testAllApisReal() {
     'input[name="videoApiProvider"]:checked',
   )?.value;
   addLogEntry(
-    `[4/5] ðŸŽ¥ Checking Video API configuration (Provider: ${videoProvider})...`,
+    `[4/5] 🎥 Checking Video API configuration (Provider: ${videoProvider})...`,
     "info",
   );
 
@@ -981,12 +981,12 @@ async function testAllApisReal() {
         if (success) successCount++;
       } catch (error) {
         addLogEntry(
-          `âŒ Error testing ${paidVideoApi}: ${error.message}`,
+          `❌ Error testing ${paidVideoApi}: ${error.message}`,
           "error",
         );
       }
     } else {
-      addLogEntry("âš ï¸ No paid video API selected", "warning");
+      addLogEntry("⚠️ No paid video API selected", "warning");
     }
   } else if (videoProvider === "free") {
     const freeVideoApi = document.getElementById("freeVideoApi").value;
@@ -1003,53 +1003,53 @@ async function testAllApisReal() {
         if (success) successCount++;
       } catch (error) {
         addLogEntry(
-          `âŒ Error testing ${freeVideoApi}: ${error.message}`,
+          `❌ Error testing ${freeVideoApi}: ${error.message}`,
           "error",
         );
       }
     } else {
-      addLogEntry("âš ï¸ No free video API selected", "warning");
+      addLogEntry("⚠️ No free video API selected", "warning");
     }
   } else {
-    addLogEntry("â„¹ï¸ Video API disabled (none selected)", "info");
+    addLogEntry("ℹ️ Video API disabled (none selected)", "info");
   }
 
   // Summary
-  addLogEntry("[5/5] ðŸ“Š Generating test summary...", "info");
-  addLogEntry("â”€".repeat(50), "info");
+  addLogEntry("[5/5] 📊 Generating test summary...", "info");
+  addLogEntry("─".repeat(50), "info");
   addLogEntry(
-    `ðŸ“‹ Categories checked: 5/5 (Text, Image, TTS, Video, Summary)`,
+    `📋 Categories checked: 5/5 (Text, Image, TTS, Video, Summary)`,
     "info",
   );
   if (totalTests === 0) {
-    addLogEntry("â„¹ï¸ No external APIs configured to test", "info");
-    addLogEntry("ðŸ’¡ Configure APIs above or use Vercel AI Gateway", "info");
+    addLogEntry("ℹ️ No external APIs configured to test", "info");
+    addLogEntry("💡 Configure APIs above or use Vercel AI Gateway", "info");
   } else {
     addLogEntry(
-      `ðŸŽ¯ External APIs tested: ${successCount}/${totalTests} working`,
+      `🎯 External APIs tested: ${successCount}/${totalTests} working`,
       successCount === totalTests ? "success" : "warning",
     );
     if (successCount === totalTests) {
       addLogEntry(
-        "ðŸŽ‰ All configured external APIs are working correctly!",
+        "🎉 All configured external APIs are working correctly!",
         "success",
       );
     } else if (successCount > 0) {
       addLogEntry(
-        "âš ï¸ Some APIs failed - check your keys and try again",
+        "⚠️ Some APIs failed - check your keys and try again",
         "warning",
       );
     } else {
       addLogEntry(
-        "âŒ All external API tests failed - check your configuration",
+        "❌ All external API tests failed - check your configuration",
         "error",
       );
-      addLogEntry("ðŸ’¡ Try Vercel AI Gateway for managed API access", "info");
+      addLogEntry("💡 Try Vercel AI Gateway for managed API access", "info");
     }
   }
 }
 
-// ðŸŽ¥ Video API Connection Test Function
+// 🎥 Video API Connection Test Function
 async function testVideoApiConnection(apiName, apiKey, statusElementId) {
   const statusElement = document.getElementById(statusElementId);
 
@@ -1148,8 +1148,8 @@ async function testVideoApiConnection(apiName, apiKey, statusElementId) {
   const endpoint = videoApiEndpoints[apiName];
 
   if (!endpoint) {
-    addLogEntry(`âš ï¸ Unknown video API: ${apiName}`, "warning");
-    if (statusElement) statusElement.textContent = "âš ï¸";
+    addLogEntry(`⚠️ Unknown video API: ${apiName}`, "warning");
+    if (statusElement) statusElement.textContent = "⚠️";
     return false;
   }
 
@@ -1157,28 +1157,28 @@ async function testVideoApiConnection(apiName, apiKey, statusElementId) {
   if (endpoint.noKey) {
     if (endpoint.local) {
       addLogEntry(
-        `âœ… ${apiName} is a local/open-source model - no API key required`,
+        `✅ ${apiName} is a local/open-source model - no API key required`,
         "success",
       );
     } else {
       addLogEntry(
-        `âœ… ${apiName} is web-based - login to their website to use`,
+        `✅ ${apiName} is web-based - login to their website to use`,
         "success",
       );
     }
-    if (statusElement) statusElement.textContent = "âœ…";
+    if (statusElement) statusElement.textContent = "✅";
     return true;
   }
 
   // Require API key for cloud APIs
   if (!apiKey) {
-    addLogEntry(`âš ï¸ ${apiName} requires an API key`, "warning");
-    if (statusElement) statusElement.textContent = "âš ï¸";
+    addLogEntry(`⚠️ ${apiName} requires an API key`, "warning");
+    if (statusElement) statusElement.textContent = "⚠️";
     return false;
   }
 
   try {
-    addLogEntry(`ðŸ”„ Testing ${apiName} connection...`, "info");
+    addLogEntry(`🔄 Testing ${apiName} connection...`, "info");
 
     // Attempt API connection test
     const headers = {};
@@ -1191,24 +1191,24 @@ async function testVideoApiConnection(apiName, apiKey, statusElementId) {
     }).catch(() => null);
 
     if (response && response.ok) {
-      addLogEntry(`âœ… ${apiName} video API connected successfully!`, "success");
-      if (statusElement) statusElement.textContent = "âœ…";
+      addLogEntry(`✅ ${apiName} video API connected successfully!`, "success");
+      if (statusElement) statusElement.textContent = "✅";
       return true;
     } else if (response && response.status === 401) {
-      addLogEntry(`âŒ ${apiName} API key invalid or expired`, "error");
-      if (statusElement) statusElement.textContent = "âŒ";
+      addLogEntry(`❌ ${apiName} API key invalid or expired`, "error");
+      if (statusElement) statusElement.textContent = "❌";
       return false;
     } else if (response && response.status === 403) {
-      addLogEntry(`âš ï¸ ${apiName} API key lacks permissions`, "warning");
-      if (statusElement) statusElement.textContent = "âš ï¸";
+      addLogEntry(`⚠️ ${apiName} API key lacks permissions`, "warning");
+      if (statusElement) statusElement.textContent = "⚠️";
       return false;
     } else {
       // CORS blocked - assume key format is valid
       addLogEntry(
-        `âœ… ${apiName} API key format valid (CORS prevented full test)`,
+        `✅ ${apiName} API key format valid (CORS prevented full test)`,
         "success",
       );
-      if (statusElement) statusElement.textContent = "âœ…";
+      if (statusElement) statusElement.textContent = "✅";
       return true;
     }
   } catch (error) {
@@ -1217,24 +1217,24 @@ async function testVideoApiConnection(apiName, apiKey, statusElementId) {
       ?.dataset.keyFormat;
     if (keyFormat && apiKey.startsWith(keyFormat)) {
       addLogEntry(
-        `âœ… ${apiName} API key format valid: ${keyFormat}...`,
+        `✅ ${apiName} API key format valid: ${keyFormat}...`,
         "success",
       );
-      if (statusElement) statusElement.textContent = "âœ…";
+      if (statusElement) statusElement.textContent = "✅";
       return true;
     } else if (!keyFormat) {
       addLogEntry(
-        `âœ… ${apiName} API key saved (format not verified)`,
+        `✅ ${apiName} API key saved (format not verified)`,
         "success",
       );
-      if (statusElement) statusElement.textContent = "âœ…";
+      if (statusElement) statusElement.textContent = "✅";
       return true;
     } else {
       addLogEntry(
-        `âš ï¸ ${apiName} key should start with "${keyFormat}"`,
+        `⚠️ ${apiName} key should start with "${keyFormat}"`,
         "warning",
       );
-      if (statusElement) statusElement.textContent = "âš ï¸";
+      if (statusElement) statusElement.textContent = "⚠️";
       return false;
     }
   }
@@ -1290,10 +1290,10 @@ const apiList = [
     quality: 4.2,
     notes: "Free, fast",
   },
-  // ðŸŽ¥ Video APIs (integrated)
+  // 🎥 Video APIs (integrated)
   {
     key: "runway",
-    name: "ðŸŽ¥ Runway",
+    name: "🎥 Runway",
     model: "Gen-3 Alpha",
     pricePer1K: 50,
     quality: 5.0,
@@ -1301,7 +1301,7 @@ const apiList = [
   },
   {
     key: "luma",
-    name: "ðŸŽ¥ Luma",
+    name: "🎥 Luma",
     model: "Dream Machine",
     pricePer1K: 32,
     quality: 4.5,
@@ -1309,7 +1309,7 @@ const apiList = [
   },
   {
     key: "replicate",
-    name: "ðŸŽ¥ Replicate",
+    name: "🎥 Replicate",
     model: "Multi-Model",
     pricePer1K: 10,
     quality: 4.0,
@@ -1318,7 +1318,7 @@ const apiList = [
 ];
 
 function logExplain(msg) {
-  console.log("ðŸ“Š Dashboard log:", msg);
+  console.log("📊 Dashboard log:", msg);
   addLogEntry(msg, "info");
 }
 
@@ -1408,7 +1408,7 @@ function fillPriceTable() {
   });
 }
 
-// ðŸŽ¥ Setup Video API handlers - Radio buttons show menu, menu selection shows URL & info
+// 🎥 Setup Video API handlers - Radio buttons show menu, menu selection shows URL & info
 function setupVideoApiHandlers() {
   // Radio button handlers - show/hide scrolling menu
   const videoRadios = document.querySelectorAll(
@@ -1477,8 +1477,8 @@ function setupVideoApiHandlers() {
         if (keyHint) {
           if (hasValue) {
             let hint = "";
-            if (keyFormat) hint += `ðŸ”‘ Key: ${keyFormat}...`;
-            if (pricing) hint += (hint ? " | " : "") + `ðŸ’° ${pricing}`;
+            if (keyFormat) hint += `🔑 Key: ${keyFormat}...`;
+            if (pricing) hint += (hint ? " | " : "") + `💰 ${pricing}`;
             keyHint.textContent = hint || "";
             keyHint.style.display = hint ? "block" : "none";
           } else {
@@ -1490,7 +1490,7 @@ function setupVideoApiHandlers() {
         if (apiLink) {
           apiLink.href = url;
           apiLink.textContent = hasValue
-            ? `ðŸ”— ${url.replace("https://", "").split("/")[0]}`
+            ? `🔗 ${url.replace("https://", "").split("/")[0]}`
             : "";
           apiLink.style.display = hasValue ? "inline-block" : "none";
         }
@@ -1512,25 +1512,25 @@ function updateVideoApiStatus() {
 
   // Update individual statuses
   document.getElementById("noVideoStatus").textContent = noVideoRadio?.checked
-    ? "âœ…"
-    : "âšª";
+    ? "✅"
+    : "⚪";
   document.getElementById("paidVideoStatus").textContent =
-    paidVideoRadio?.checked && paidVideoApi?.value ? "âœ…" : "âŒ";
+    paidVideoRadio?.checked && paidVideoApi?.value ? "✅" : "❌";
   document.getElementById("freeVideoStatus").textContent =
-    freeVideoRadio?.checked && freeVideoApi?.value ? "âœ…" : "âŒ";
+    freeVideoRadio?.checked && freeVideoApi?.value ? "✅" : "❌";
 
   // Update category status
   const videoApiStatus = document.getElementById("videoApiStatus");
   if (videoApiStatus) {
     if (noVideoRadio?.checked) {
-      videoApiStatus.textContent = "âšª";
+      videoApiStatus.textContent = "⚪";
     } else if (
       (paidVideoRadio?.checked && paidVideoApi?.value) ||
       (freeVideoRadio?.checked && freeVideoApi?.value)
     ) {
-      videoApiStatus.textContent = "âœ…";
+      videoApiStatus.textContent = "✅";
     } else {
-      videoApiStatus.textContent = "âŒ";
+      videoApiStatus.textContent = "❌";
     }
   }
 }
@@ -1578,45 +1578,45 @@ function showSmartRecommendation() {
 
   if (purpose === "text")
     rec =
-      "ðŸ† Groq: Fastest. OpenAI GPT-4o: Best quality. DeepSeek-V3: Ultra-cheap coding.";
+      "🏆 Groq: Fastest. OpenAI GPT-4o: Best quality. DeepSeek-V3: Ultra-cheap coding.";
   else if (purpose === "image")
     rec =
-      "ðŸ† Google Gemini 2.0: Best value. OpenAI DALL-E 3: Best quality. FLUX 1.1: Fast.";
+      "🏆 Google Gemini 2.0: Best value. OpenAI DALL-E 3: Best quality. FLUX 1.1: Fast.";
   else if (purpose === "video")
     rec =
-      "ðŸ† Runway Gen-3: Best quality ($0.05/s). Luma Dream: Best value ($0.032/s). Replicate: Free tier.";
+      "🏆 Runway Gen-3: Best quality ($0.05/s). Luma Dream: Best value ($0.032/s). Replicate: Free tier.";
   else if (purpose === "doc")
     rec =
-      "ðŸ† Claude 3.5 Sonnet: Best for analysis. DeepSeek: Long context. Gemini 2.0: Fast.";
+      "🏆 Claude 3.5 Sonnet: Best for analysis. DeepSeek: Long context. Gemini 2.0: Fast.";
   else if (purpose === "tts")
     rec =
-      "ðŸ† ElevenLabs: Best quality. OpenAI TTS: Good value. Browser TTS: Free.";
+      "🏆 ElevenLabs: Best quality. OpenAI TTS: Good value. Browser TTS: Free.";
   else if (purpose === "transcribe")
     rec =
-      "ðŸ† OpenAI Whisper: Best accuracy. Groq Whisper: Fastest. AssemblyAI: Real-time.";
+      "🏆 OpenAI Whisper: Best accuracy. Groq Whisper: Fastest. AssemblyAI: Real-time.";
 
   if (qty === "high" && purpose === "video")
-    rec += " âš¡ High volume: Haiper ($0.02/s) or FAL.ai for budget.";
+    rec += " ⚡ High volume: Haiper ($0.02/s) or FAL.ai for budget.";
   else if (qty === "high" && purpose !== "tts")
-    rec += " âš¡ High volume: DeepSeek or Gemini for cost efficiency.";
+    rec += " ⚡ High volume: DeepSeek or Gemini for cost efficiency.";
   else if (qty === "high" && purpose === "tts")
-    rec += " âš¡ High volume: Google TTS or Azure for enterprise scale.";
+    rec += " ⚡ High volume: Google TTS or Azure for enterprise scale.";
   if (qty === "low" && purpose === "video")
-    rec += " âœ¨ Low volume: Runway or Sora for best cinematic quality.";
+    rec += " ✨ Low volume: Runway or Sora for best cinematic quality.";
   else if (qty === "low" && purpose === "text")
-    rec += " âœ¨ Low volume: GPT-4o or Claude for best quality.";
+    rec += " ✨ Low volume: GPT-4o or Claude for best quality.";
   if (purpose === "doc" && qty === "high")
-    rec += " ðŸ“š Long docs: Claude 3.5 or DeepSeek for 200K+ context.";
+    rec += " 📚 Long docs: Claude 3.5 or DeepSeek for 200K+ context.";
 
   recDiv.innerHTML = rec;
 }
 
 async function testApiSpeed() {
-  logExplain("ðŸ”„ Starting API speed test across multiple providers...");
+  logExplain("🔄 Starting API speed test across multiple providers...");
   const speedResults = document.getElementById("speedResults");
   if (!speedResults) return;
 
-  speedResults.innerHTML = "â³ Testing API speeds...";
+  speedResults.innerHTML = "⏳ Testing API speeds...";
   const testApis = [
     { name: "Groq", expected: "~0.5s", color: "#4CAF50" },
     { name: "DeepSeek", expected: "~1.2s", color: "#FF6B6B" },
@@ -1642,16 +1642,16 @@ async function testApiSpeed() {
     speedResults.innerHTML = resultsHtml;
   }
   logExplain(
-    "âœ… Speed test completed. Results show response times for 6 API providers.",
+    "✅ Speed test completed. Results show response times for 6 API providers.",
   );
 }
 
 async function testApiQuality() {
-  logExplain("ðŸ”„ Running API quality assessment tests...");
+  logExplain("🔄 Running API quality assessment tests...");
   const qualityResults = document.getElementById("qualityResults");
   if (!qualityResults) return;
 
-  qualityResults.innerHTML = "ðŸ§  Testing response quality...";
+  qualityResults.innerHTML = "🧠 Testing response quality...";
   const qualityScores = [
     { name: "OpenAI GPT-4", score: 95, color: "#4CAF50" },
     { name: "Groq", score: 88, color: "#FF9800" },
@@ -1675,12 +1675,12 @@ async function testApiQuality() {
     qualityResults.innerHTML = resultsHtml;
   }
   logExplain(
-    "âœ… Quality test completed. Scores reflect current AI model capabilities (95% max = non-AGI).",
+    "✅ Quality test completed. Scores reflect current AI model capabilities (95% max = non-AGI).",
   );
 }
 
 // ====================================================================
-// ðŸ”„ API REVISION DETECTOR - Check for latest AI API updates
+// 🔄 API REVISION DETECTOR - Check for latest AI API updates
 // ====================================================================
 const SMDELTART_API_REVISION = {
   version: "2025.11",
@@ -1785,7 +1785,7 @@ function checkApiUpdates() {
 
   if (!statusEl) return;
 
-  statusEl.innerHTML = "ðŸ”„ Checking for API updates...";
+  statusEl.innerHTML = "🔄 Checking for API updates...";
 
   // Simulate checking (in real app, this would fetch from a server)
   setTimeout(() => {
@@ -1799,12 +1799,12 @@ function checkApiUpdates() {
 
     if (storedRev !== SMDELTART_API_REVISION.version) {
       // Updates available
-      statusEl.innerHTML = `âœ¨ Updates available! Current: v${storedRev} â†’ New: v${SMDELTART_API_REVISION.version}`;
+      statusEl.innerHTML = `✨ Updates available! Current: v${storedRev} → New: v${SMDELTART_API_REVISION.version}`;
       statusEl.style.color = "#22c55e";
 
       // Show what's new
       let changesHtml =
-        '<strong>ðŸ†• New APIs in this revision:</strong><ul style="margin: 4px 0 0 16px; padding: 0;">';
+        '<strong>🆕 New APIs in this revision:</strong><ul style="margin: 4px 0 0 16px; padding: 0;">';
       newApis.forEach(([key, api]) => {
         changesHtml += `<li>${key}: ${api.model}</li>`;
       });
@@ -1814,12 +1814,12 @@ function checkApiUpdates() {
 
       if (applyBtn) applyBtn.style.display = "inline-block";
       if (badgeEl) {
-        badgeEl.textContent = "â¬†ï¸ Update";
+        badgeEl.textContent = "⬆️ Update";
         badgeEl.style.background = "#f59e0b";
       }
     } else {
       // Already up to date
-      statusEl.innerHTML = `âœ… Up to date! v${SMDELTART_API_REVISION.version} (${newApis.length} new APIs)`;
+      statusEl.innerHTML = `✅ Up to date! v${SMDELTART_API_REVISION.version} (${newApis.length} new APIs)`;
       statusEl.style.color = "#22c55e";
       changesEl.style.display = "none";
       if (applyBtn) applyBtn.style.display = "none";
@@ -1842,7 +1842,7 @@ function applyApiUpdates() {
 
   if (!statusEl) return;
 
-  statusEl.innerHTML = "â¬†ï¸ Applying API updates...";
+  statusEl.innerHTML = "⬆️ Applying API updates...";
 
   setTimeout(() => {
     // Update API URLs in dropdowns
@@ -1860,7 +1860,7 @@ function applyApiUpdates() {
     );
 
     // Update UI
-    statusEl.innerHTML = `âœ… Updated to v${SMDELTART_API_REVISION.version}! All API endpoints refreshed.`;
+    statusEl.innerHTML = `✅ Updated to v${SMDELTART_API_REVISION.version}! All API endpoints refreshed.`;
     statusEl.style.color = "#22c55e";
     changesEl.style.display = "none";
     if (applyBtn) applyBtn.style.display = "none";
@@ -1870,7 +1870,7 @@ function applyApiUpdates() {
     }
 
     logMessage(
-      "â¬†ï¸ API revision updated to v" + SMDELTART_API_REVISION.version,
+      "⬆️ API revision updated to v" + SMDELTART_API_REVISION.version,
       "success",
     );
   }, 500);
@@ -1888,20 +1888,20 @@ function scrollToLogs() {
 }
 
 function updateAllTablesAndChart() {
-  logExplain("ðŸ”„ Updating all tables and charts...");
+  logExplain("🔄 Updating all tables and charts...");
   fillPriceTable();
   showPriceComparatif();
-  logExplain("âœ… All tables and charts updated successfully!");
+  logExplain("✅ All tables and charts updated successfully!");
 }
 
 function openLlamaQuickSetup() {
-  logExplain("âš¡ Opening Llama Quick Setup Widget...");
+  logExplain("⚡ Opening Llama Quick Setup Widget...");
 
   // Use centralized widget paths config
   const llamaUrl =
     window.parent.SMART_WIDGET_PATHS?.getWidgetUrl("llama-guide") ||
     "../widgets/llama31-install-guide.html";
-  console.log("ðŸ“ Llama URL:", llamaUrl);
+  console.log("📍 Llama URL:", llamaUrl);
 
   // FIRST: Try to access SmartPopup from parent window (portal context)
   try {
@@ -1910,19 +1910,19 @@ function openLlamaQuickSetup() {
       window.parent.SmartPopup &&
       window.parent.SmartPopup.widget
     ) {
-      console.log("âœ… Portal context detected");
+      console.log("✅ Portal context detected");
       window.parent.SmartPopup.widget({
-        title: "Llama Quick Setup ðŸ¦™",
-        icon: "ðŸ¦™",
+        title: "Llama Quick Setup 🦙",
+        icon: "🦙",
         url: llamaUrl,
         width: "420px", // Match API Settings size
         height: "650px", // Match API Settings size
         keepOthersOpen: true, // Keep clipboard & API settings open
         onClose: () => {
-          console.log("ðŸ¦™ Llama guide closed");
+          console.log("🦙 Llama guide closed");
         },
       });
-      console.log("ðŸŽ‰ Llama guide opened via portal (stacked on top)");
+      console.log("🎉 Llama guide opened via portal (stacked on top)");
       return;
     }
   } catch (error) {
@@ -1931,24 +1931,24 @@ function openLlamaQuickSetup() {
 
   // SECOND: Try local SmartPopup (standalone context)
   if (typeof SmartPopup !== "undefined" && SmartPopup.widget) {
-    console.log("âœ… SmartPopup library detected, opening Llama guide widget");
+    console.log("✅ SmartPopup library detected, opening Llama guide widget");
     SmartPopup.widget({
-      title: "Llama Quick Setup ðŸ¦™",
-      icon: "ðŸ¦™",
+      title: "Llama Quick Setup 🦙",
+      icon: "🦙",
       url: "llama31-install-guide.html",
       width: "420px", // Match API Settings size
       height: "650px", // Match API Settings size
       keepOthersOpen: true, // Keep API settings open underneath
       onClose: () => {
-        console.log("ðŸ¦™ Llama guide closed");
+        console.log("🦙 Llama guide closed");
       },
     });
-    console.log("ðŸŽ‰ Llama guide opened (stacked on API settings)");
+    console.log("🎉 Llama guide opened (stacked on API settings)");
     return;
   }
 
   // THIRD: Fallback - Use SmartNav for proper SPA navigation (no iframe trapping)
-  console.log("âš ï¸ SmartPopup not available, using SmartNav...");
+  console.log("⚠️ SmartPopup not available, using SmartNav...");
   if (typeof SmartNav !== "undefined" && SmartNav.navigateTo) {
     SmartNav.navigateTo("llama31-install-guide.html");
   } else {
@@ -1961,7 +1961,7 @@ function openLlamaQuickSetup() {
 document.addEventListener("DOMContentLoaded", () => {
   fillPriceTable();
   showPriceComparatif();
-  setupVideoApiHandlers(); // ðŸŽ¥ Setup Video API select handlers
+  setupVideoApiHandlers(); // 🎥 Setup Video API select handlers
 
   // NOTE: Category toggles are handled by initializeApiSettingsFixed()
   // Do NOT add duplicate event listeners here
@@ -1988,14 +1988,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if (applyApiUpdatesBtn)
     applyApiUpdatesBtn.addEventListener("click", applyApiUpdates);
   if (llamaQuickSetupBtn) {
-    console.log("âœ… Llama button found, adding event listener...");
+    console.log("✅ Llama button found, adding event listener...");
     llamaQuickSetupBtn.addEventListener("click", function (e) {
       e.preventDefault();
-      console.log("ðŸ¦™ Llama button clicked!");
+      console.log("🦙 Llama button clicked!");
       openLlamaQuickSetup();
     });
   } else {
-    console.log("âŒ Llama button not found!");
+    console.log("❌ Llama button not found!");
   }
   if (purposeSel)
     purposeSel.addEventListener("change", showSmartRecommendation);
@@ -2066,11 +2066,11 @@ async function exportToClipboard() {
     const result = await clipboardManager.saveToClipboard(settings);
 
     showClipboardStatus(result.message, result.success ? "success" : "error");
-    addLogEntry(`ðŸ“‹ ${result.message}`, result.success ? "success" : "error");
+    addLogEntry(`📋 ${result.message}`, result.success ? "success" : "error");
   } catch (error) {
     const message = "Failed to export to clipboard: " + error.message;
     showClipboardStatus(message, "error");
-    addLogEntry(`âŒ ${message}`, "error");
+    addLogEntry(`❌ ${message}`, "error");
   }
 }
 
@@ -2082,16 +2082,16 @@ async function importFromClipboard() {
     if (result.success) {
       applyApiSettings(result.settings);
       showClipboardStatus(result.message, "success");
-      addLogEntry(`ðŸ“¥ ${result.message}`, "success");
-      addLogEntry("ðŸ”„ Settings applied successfully", "info");
+      addLogEntry(`📥 ${result.message}`, "success");
+      addLogEntry("🔄 Settings applied successfully", "info");
     } else {
       showClipboardStatus(result.message, "error");
-      addLogEntry(`âŒ ${result.message}`, "error");
+      addLogEntry(`❌ ${result.message}`, "error");
     }
   } catch (error) {
     const message = "Failed to import from clipboard: " + error.message;
     showClipboardStatus(message, "error");
-    addLogEntry(`âŒ ${message}`, "error");
+    addLogEntry(`❌ ${message}`, "error");
   }
 }
 
@@ -2112,7 +2112,7 @@ function showClipboardStatus(message, type) {
 // SmartAPIClipboardManager Class (Inline for standalone operation)
 class SmartAPIClipboardManager {
   constructor() {
-    this.encryptionKey = "SmÎ”rt-API-Studio-2025";
+    this.encryptionKey = "SmΔrt-API-Studio-2025";
     this.versionTag = "SMART_API_V2.0";
   }
 
@@ -2121,7 +2121,7 @@ class SmartAPIClipboardManager {
       const data = {
         version: this.versionTag,
         timestamp: new Date().toISOString(),
-        source: "SmÎ”rt Streaming Studio - CAD-AI Professional Tools",
+        source: "SmΔrt Streaming Studio - CAD-AI Professional Tools",
         settings: settings,
       };
 
@@ -2217,9 +2217,9 @@ function exportApiSettings() {
     link.download = `cad-ai-api-settings-${new Date().toISOString().split("T")[0]}.scs`;
     link.click();
 
-    logExplain("âœ… API settings exported successfully as encrypted file");
+    logExplain("✅ API settings exported successfully as encrypted file");
   } catch (error) {
-    logExplain("âŒ Export failed: " + error.message);
+    logExplain("❌ Export failed: " + error.message);
   }
 }
 
@@ -2236,22 +2236,22 @@ function importApiSettings(file) {
         try {
           settings = JSON.parse(atob(fileContent.encrypted));
           logExplain(
-            `âœ… Decrypted settings from ${fileContent.app || "Unknown app"} (${fileContent.version})`,
+            `✅ Decrypted settings from ${fileContent.app || "Unknown app"} (${fileContent.version})`,
           );
         } catch (decryptError) {
-          logExplain("âŒ Failed to decrypt file - invalid encryption");
+          logExplain("❌ Failed to decrypt file - invalid encryption");
           return;
         }
       } else {
         // Assume unencrypted format
         settings = fileContent;
-        logExplain("âš ï¸ Imported unencrypted settings file");
+        logExplain("⚠️ Imported unencrypted settings file");
       }
 
       applyApiSettings(settings);
-      logExplain("âœ… API settings imported and applied successfully");
+      logExplain("✅ API settings imported and applied successfully");
     } catch (error) {
-      logExplain("âŒ Import failed: Invalid file format or corrupted data");
+      logExplain("❌ Import failed: Invalid file format or corrupted data");
     }
   };
   reader.readAsText(file);
@@ -2264,26 +2264,26 @@ async function testAllApis() {
 
   // Disable button and show testing state
   testBtn.disabled = true;
-  testBtn.textContent = "ðŸ”„ Testing APIs...";
+  testBtn.textContent = "🔄 Testing APIs...";
 
   try {
     // Use real API testing instead of mock
     await testAllApisReal();
-    testBtn.textContent = "âœ… Test Complete";
+    testBtn.textContent = "✅ Test Complete";
 
     // Reset button after 2 seconds
     setTimeout(() => {
-      testBtn.textContent = "ðŸ§ª Test APIs";
+      testBtn.textContent = "🧪 Test APIs";
       testBtn.disabled = false;
     }, 2000);
   } catch (error) {
     console.error("Test All APIs failed:", error);
-    addLogEntry(`âŒ Test All APIs failed: ${error.message}`, "error");
-    testBtn.textContent = "âŒ Test Failed";
+    addLogEntry(`❌ Test All APIs failed: ${error.message}`, "error");
+    testBtn.textContent = "❌ Test Failed";
 
     // Reset button after 3 seconds
     setTimeout(() => {
-      testBtn.textContent = "ðŸ§ª Test APIs";
+      testBtn.textContent = "🧪 Test APIs";
       testBtn.disabled = false;
     }, 3000);
   }
@@ -2297,7 +2297,7 @@ function saveApiSettingsLocally() {
     localStorage.setItem("cadAiApiSettings", JSON.stringify(settings));
     // Also save to smartApiSettings for SVG editor compatibility
     localStorage.setItem("smartApiSettings", JSON.stringify(settings));
-    logExplain("âœ… API settings saved to local storage");
+    logExplain("✅ API settings saved to local storage");
 
     // Notify parent window (if in iframe) via widget-bridge protocol
     if (window.parent !== window) {
@@ -2311,7 +2311,7 @@ function saveApiSettingsLocally() {
       );
     }
   } catch (error) {
-    logExplain("âŒ Local save failed: " + error.message);
+    logExplain("❌ Local save failed: " + error.message);
   }
 }
 
@@ -2323,7 +2323,7 @@ function loadApiSettingsFromStorage() {
     if (savedSettings) {
       const settings = JSON.parse(savedSettings);
       applyApiSettings(settings);
-      logExplain("ðŸ”„ Previous API settings restored from local storage");
+      logExplain("🔄 Previous API settings restored from local storage");
 
       // Ensure UI visibility is updated after settings restoration
       setTimeout(() => {
@@ -2335,14 +2335,14 @@ function loadApiSettingsFromStorage() {
       setTimeout(() => {
         const testAllBtn = document.getElementById("testAllApisBtn");
         if (testAllBtn) {
-          // logExplain('ðŸ§ª Auto-testing restored API keys...');
+          // logExplain('🧪 Auto-testing restored API keys...');
           // testAllBtn.click(); // Disabled auto-testing
-          logExplain('âœ… API keys loaded - click "Test All APIs" to validate');
+          logExplain('✅ API keys loaded - click "Test All APIs" to validate');
         }
       }, 1500);
     }
   } catch (error) {
-    logExplain("âš ï¸ Could not load previous settings: " + error.message);
+    logExplain("⚠️ Could not load previous settings: " + error.message);
   }
 }
 
@@ -2400,7 +2400,7 @@ function applyApiSettings(settings) {
 
 function syncOpenAIKeys(sourceInputId, apiKey) {
   console.log(
-    `ðŸ”„ syncOpenAIKeys called: sourceInputId=${sourceInputId}, apiKey=${maskApiKey(apiKey)}`,
+    `🔄 syncOpenAIKeys called: sourceInputId=${sourceInputId}, apiKey=${maskApiKey(apiKey)}`,
   );
 
   // Map input IDs to their corresponding API provider selectors
@@ -2433,11 +2433,11 @@ function syncOpenAIKeys(sourceInputId, apiKey) {
     !apiKey.trim() ||
     !apiKey.match(/^sk-(proj-)?[a-zA-Z0-9_-]{20,}$/)
   ) {
-    console.log(`âŒ Sync blocked: invalid key format or empty`);
+    console.log(`❌ Sync blocked: invalid key format or empty`);
     return;
   }
 
-  console.log(`âœ… Valid OpenAI key detected, proceeding with sync...`);
+  console.log(`✅ Valid OpenAI key detected, proceeding with sync...`);
 
   // First, check if we should auto-enable OpenAI providers for empty sections
   Object.keys(openaiMappings).forEach((inputId) => {
@@ -2449,7 +2449,7 @@ function syncOpenAIKeys(sourceInputId, apiKey) {
       const radioElement = document.getElementById(mapping.radioId);
 
       console.log(
-        `ðŸ” Checking target: ${inputId}, current value: ${maskApiKey(targetInput?.value)}`,
+        `🔍 Checking target: ${inputId}, current value: ${maskApiKey(targetInput?.value)}`,
       );
 
       // If target input is empty and we have a valid OpenAI key
@@ -2459,7 +2459,7 @@ function syncOpenAIKeys(sourceInputId, apiKey) {
         (!targetInput.value || targetInput.value.trim() === "")
       ) {
         console.log(
-          `ðŸ”„ Syncing to ${inputId}: setting provider to ${mapping.provider}`,
+          `🔄 Syncing to ${inputId}: setting provider to ${mapping.provider}`,
         );
 
         // Auto-select the correct OpenAI provider
@@ -2468,7 +2468,7 @@ function syncOpenAIKeys(sourceInputId, apiKey) {
 
         // Auto-enable the radio button (paid APIs)
         if (radioElement && !radioElement.checked) {
-          console.log(`ðŸ“» Enabling radio button: ${mapping.radioId}`);
+          console.log(`📻 Enabling radio button: ${mapping.radioId}`);
           radioElement.checked = true;
           radioElement.dispatchEvent(new Event("change"));
         }
@@ -2480,11 +2480,11 @@ function syncOpenAIKeys(sourceInputId, apiKey) {
 
         // Log the sync action
         console.log(
-          `ðŸŽ‰ Auto-synced OpenAI: ${mapping.provider} enabled with shared key`,
+          `🎉 Auto-synced OpenAI: ${mapping.provider} enabled with shared key`,
         );
       } else {
         console.log(
-          `â­ï¸ Skipping ${inputId}: already has value or elements not found`,
+          `⏭️ Skipping ${inputId}: already has value or elements not found`,
         );
       }
     }
@@ -2557,7 +2557,7 @@ function updateApiSectionVisibility() {
   if (edgeTtsVoiceSelector && externalTtsApi) {
     edgeTtsVoiceSelector.style.display =
       externalTtsApi.value === "edge-tts" ? "block" : "none";
-    console.log(`ðŸ”Š edge-tts voices loaded: 12`);
+    console.log(`🔊 edge-tts voices loaded: 12`);
   }
   if (elevenlabsVoiceSelector && externalTtsApi) {
     elevenlabsVoiceSelector.style.display =
@@ -2572,7 +2572,7 @@ function updateApiSectionVisibility() {
       paidVideoApi.value === "openai-sora" ? "block" : "none";
   }
 
-  // ðŸ§ª Show test buttons when APIs are configured
+  // 🧪 Show test buttons when APIs are configured
   const testPaidTextBtn = document.getElementById("testPaidTextBtn");
   const testPaidImageBtn = document.getElementById("testPaidImageBtn");
   const paidTextApiKey = document.getElementById("paidTextApiKey");
@@ -2660,14 +2660,14 @@ function setupRealTimeValidation() {
 
         // Auto-sync OpenAI keys across TEXT, IMAGE, and TTS
         console.log(
-          `ðŸ” Checking for OpenAI sync: provider=${provider}, inputId=${config.inputId}, apiKey length=${apiKey.length}`,
+          `🔍 Checking for OpenAI sync: provider=${provider}, inputId=${config.inputId}, apiKey length=${apiKey.length}`,
         );
         if (
           provider === "openai" ||
           provider === "openai-dalle" ||
           provider === "openai-tts"
         ) {
-          console.log(`ðŸ”„ Triggering OpenAI sync from ${config.inputId}`);
+          console.log(`🔄 Triggering OpenAI sync from ${config.inputId}`);
           syncOpenAIKeys(config.inputId, apiKey);
         }
 
@@ -2692,7 +2692,7 @@ function setupRealTimeValidation() {
         // Debounced full API test
         timeout = setTimeout(async () => {
           if (provider && apiKey && API_PROVIDERS[provider]) {
-            addLogEntry(`ðŸ” Testing ${provider} API key...`, "info");
+            addLogEntry(`🔍 Testing ${provider} API key...`, "info");
             await testAndUpdateApiStatus(provider, apiKey, config.statusId);
           } else {
             updateApiStatus(
@@ -2719,7 +2719,7 @@ function setupRealTimeValidation() {
 
         if (provider && apiKey) {
           if (API_PROVIDERS[provider]) {
-            addLogEntry(`ðŸ” Testing ${provider} with existing key...`, "info");
+            addLogEntry(`🔍 Testing ${provider} with existing key...`, "info");
             await testAndUpdateApiStatus(provider, apiKey, config.statusId);
           } else {
             updateApiStatus(
@@ -2767,7 +2767,7 @@ function updateProviderUIElements(config, provider) {
       hintElement.style.display = "block";
       hintElement.style.color = "#94a3b8";
     } else if (providerConfig.isFree) {
-      hintElement.textContent = "âœ… No API key required - Free to use!";
+      hintElement.textContent = "✅ No API key required - Free to use!";
       hintElement.style.display = "block";
       hintElement.style.color = "#22c55e";
     } else {
@@ -2828,8 +2828,8 @@ function updateProviderUIElements(config, provider) {
       linkElement.href = links[provider];
       const providerName = API_PROVIDERS[provider]?.name || provider;
       linkElement.textContent = API_PROVIDERS[provider]?.isFree
-        ? `ðŸ“– ${providerName} Docs`
-        : `ðŸ”‘ Get ${providerName} API Key`;
+        ? `📖 ${providerName} Docs`
+        : `🔑 Get ${providerName} API Key`;
       linkElement.style.display = "inline-block";
       linkElement.style.color = "#3b82f6";
       linkElement.style.textDecoration = "none";
@@ -2942,7 +2942,7 @@ function setupTTSAPIHandlers() {
         edgeTtsVoiceSelector.style.display =
           apiValue === "edge-tts" ? "block" : "none";
         if (apiValue === "edge-tts") {
-          console.log(`%cðŸ”Š edge-tts voices loaded: 12`, "color: #22c55e;");
+          console.log(`%c🔊 edge-tts voices loaded: 12`, "color: #22c55e;");
         }
       }
       if (elevenlabsVoiceSelector) {
@@ -3008,22 +3008,22 @@ async function testExternalTTSAPI() {
     const result = await testTTSProvider(selectedApi, apiKey);
 
     if (result.success) {
-      updateTTSStatus(`âœ… ${result.message}`, "success");
+      updateTTSStatus(`✅ ${result.message}`, "success");
       // Update the main status indicator using proper function
       updateApiStatus("externalTtsStatus", true, result.message);
     } else {
-      updateTTSStatus(`âŒ ${result.message}`, "error");
+      updateTTSStatus(`❌ ${result.message}`, "error");
       updateApiStatus("externalTtsStatus", false, result.message);
     }
   } catch (error) {
-    updateTTSStatus(`âŒ Test failed: ${error.message}`, "error");
+    updateTTSStatus(`❌ Test failed: ${error.message}`, "error");
     updateApiStatus(
       "externalTtsStatus",
       false,
       `Test failed: ${error.message}`,
     );
   } finally {
-    testBtn.textContent = "ðŸ§ª Test TTS API";
+    testBtn.textContent = "🧪 Test TTS API";
     testBtn.disabled = false;
     // Update category status after TTS test
     updateCategoryStatus();
@@ -3255,7 +3255,7 @@ async function testOpenAITTS(text, apiKey) {
     });
 
     console.log(
-      `%cðŸ”Š OpenAI TTS test: model=${model}, voice=${voice}`,
+      `%c🔊 OpenAI TTS test: model=${model}, voice=${voice}`,
       "color: #22c55e;",
     );
     return {
@@ -3435,10 +3435,10 @@ function setupPaidTextAPIHandlers() {
     }
   });
 
-  // ðŸ”§ Add change handler for OpenAI Text Model selector
+  // 🔧 Add change handler for OpenAI Text Model selector
   const openaiTextModel = document.getElementById("openaiTextModel");
   openaiTextModel?.addEventListener("change", () => {
-    console.log("ðŸ“ Text model changed to:", openaiTextModel.value);
+    console.log("📝 Text model changed to:", openaiTextModel.value);
     updateOpenAIModelStatus();
     // Model change is saved when Save Locally is clicked
   });
@@ -3472,7 +3472,7 @@ async function testFreeTextAPI() {
     return;
   }
 
-  updateTextStatus("ðŸ§ª Testing Text API...", "info");
+  updateTextStatus("🧪 Testing Text API...", "info");
 
   try {
     let result;
@@ -3521,12 +3521,12 @@ async function testFreeTextAPI() {
     }
 
     if (result.success) {
-      updateTextStatus(`âœ… ${result.message}`, "success");
+      updateTextStatus(`✅ ${result.message}`, "success");
     } else {
-      updateTextStatus(`âŒ ${result.message}`, "error");
+      updateTextStatus(`❌ ${result.message}`, "error");
     }
   } catch (error) {
-    updateTextStatus(`âŒ Test failed: ${error.message}`, "error");
+    updateTextStatus(`❌ Test failed: ${error.message}`, "error");
   }
 }
 
@@ -3578,7 +3578,7 @@ async function testOllama(prompt) {
     const ollamaModel = ollamaModelInput?.value?.trim() || "llama3.1:8b";
 
     addLogEntry(
-      `ðŸ” Testing Ollama: Checking server status... (Model: ${ollamaModel})`,
+      `🔍 Testing Ollama: Checking server status... (Model: ${ollamaModel})`,
       "info",
     );
 
@@ -3590,7 +3590,7 @@ async function testOllama(prompt) {
 
     if (!versionResponse.ok) {
       addLogEntry(
-        `âŒ Ollama server not responding (status: ${versionResponse.status})`,
+        `❌ Ollama server not responding (status: ${versionResponse.status})`,
         "error",
       );
       return {
@@ -3600,7 +3600,7 @@ async function testOllama(prompt) {
     }
 
     addLogEntry(
-      `âœ… Ollama server is running, testing ${ollamaModel}...`,
+      `✅ Ollama server is running, testing ${ollamaModel}...`,
       "info",
     );
 
@@ -3624,7 +3624,7 @@ async function testOllama(prompt) {
     if (!generateResponse.ok) {
       const errorText = await generateResponse.text().catch(() => "");
       addLogEntry(
-        `âŒ Ollama generation failed (status: ${generateResponse.status})`,
+        `❌ Ollama generation failed (status: ${generateResponse.status})`,
         "error",
       );
 
@@ -3633,7 +3633,7 @@ async function testOllama(prompt) {
         errorText.includes("pull model")
       ) {
         const message = `Ollama model "${ollamaModel}" not found. Run: ollama pull ${ollamaModel}`;
-        addLogEntry(`ðŸ’¡ ${message}`, "warning");
+        addLogEntry(`💡 ${message}`, "warning");
         return { success: false, message };
       }
       return {
@@ -3645,12 +3645,12 @@ async function testOllama(prompt) {
     const result = await generateResponse.json();
     if (result.response && result.response.trim()) {
       addLogEntry(
-        `âœ… Ollama ${ollamaModel} text generation successful!`,
+        `✅ Ollama ${ollamaModel} text generation successful!`,
         "success",
       );
 
       // DEBUG: Manually update status to ensure it works
-      console.log("ðŸ”§ Ollama test succeeded, updating UI status...");
+      console.log("🔧 Ollama test succeeded, updating UI status...");
       updateApiStatus(
         "freeTextStatus",
         true,
@@ -3663,7 +3663,7 @@ async function testOllama(prompt) {
         message: `Ollama local server running with ${ollamaModel} model`,
       };
     } else {
-      addLogEntry("âš ï¸ Ollama responded but generated no text", "warning");
+      addLogEntry("⚠️ Ollama responded but generated no text", "warning");
       return {
         success: false,
         message: "Ollama responded but no text generated",
@@ -3674,27 +3674,27 @@ async function testOllama(prompt) {
     if (error.name === "TimeoutError") {
       errorMessage =
         "Ollama server timeout - check if localhost:11434 is accessible";
-      addLogEntry(`â±ï¸ ${errorMessage}`, "error");
+      addLogEntry(`⏱️ ${errorMessage}`, "error");
     } else if (error.message.includes("CORS")) {
       errorMessage =
         "CORS error - Ollama server needs CORS headers for browser access";
-      addLogEntry(`ðŸš« ${errorMessage}`, "error");
+      addLogEntry(`🚫 ${errorMessage}`, "error");
       addLogEntry(
-        'ðŸ’¡ Try running: ollama serve --cors-allow-origin="*"',
+        '💡 Try running: ollama serve --cors-allow-origin="*"',
         "info",
       );
     } else if (error.message.includes("Failed to fetch")) {
       errorMessage =
         "Cannot connect to Ollama server - is it running on localhost:11434?";
-      addLogEntry(`ðŸ”Œ ${errorMessage}`, "error");
-      addLogEntry("ðŸ’¡ Start Ollama with: ollama serve", "info");
+      addLogEntry(`🔌 ${errorMessage}`, "error");
+      addLogEntry("💡 Start Ollama with: ollama serve", "info");
     } else {
       errorMessage = `Ollama error: ${error.message}`;
-      addLogEntry(`âŒ ${errorMessage}`, "error");
+      addLogEntry(`❌ ${errorMessage}`, "error");
     }
 
     // DEBUG: Update failed status
-    console.log("ðŸ”§ Ollama test failed, updating UI status...");
+    console.log("🔧 Ollama test failed, updating UI status...");
     updateApiStatus("freeTextStatus", false, errorMessage);
     updateCategoryStatus();
 
@@ -3710,7 +3710,7 @@ async function testOllamaVision() {
       ollamaVisionModelInput?.value?.trim() || "llama3.2-vision";
 
     addLogEntry(
-      `ðŸ” Testing Ollama Vision: Checking server status... (Model: ${ollamaVisionModel})`,
+      `🔍 Testing Ollama Vision: Checking server status... (Model: ${ollamaVisionModel})`,
       "info",
     );
 
@@ -3722,7 +3722,7 @@ async function testOllamaVision() {
 
     if (!versionResponse.ok) {
       addLogEntry(
-        `âŒ Ollama server not responding (status: ${versionResponse.status})`,
+        `❌ Ollama server not responding (status: ${versionResponse.status})`,
         "error",
       );
       return {
@@ -3732,7 +3732,7 @@ async function testOllamaVision() {
     }
 
     addLogEntry(
-      `âœ… Ollama server is running, checking ${ollamaVisionModel} model...`,
+      `✅ Ollama server is running, checking ${ollamaVisionModel} model...`,
       "info",
     );
 
@@ -3752,13 +3752,13 @@ async function testOllamaVision() {
 
       if (!modelExists) {
         const message = `Vision model "${ollamaVisionModel}" not found. Run: ollama pull ${ollamaVisionModel}`;
-        addLogEntry(`âš ï¸ ${message}`, "warning");
+        addLogEntry(`⚠️ ${message}`, "warning");
         return { success: false, message };
       }
     }
 
     addLogEntry(
-      `âœ… Ollama Vision ${ollamaVisionModel} model available!`,
+      `✅ Ollama Vision ${ollamaVisionModel} model available!`,
       "success",
     );
 
@@ -3779,15 +3779,15 @@ async function testOllamaVision() {
     if (error.name === "TimeoutError") {
       errorMessage =
         "Ollama server timeout - check if localhost:11434 is accessible";
-      addLogEntry(`â±ï¸ ${errorMessage}`, "error");
+      addLogEntry(`⏱️ ${errorMessage}`, "error");
     } else if (error.message.includes("Failed to fetch")) {
       errorMessage =
         "Cannot connect to Ollama server - is it running on localhost:11434?";
-      addLogEntry(`ðŸ”Œ ${errorMessage}`, "error");
-      addLogEntry("ðŸ’¡ Start Ollama with: ollama serve", "info");
+      addLogEntry(`🔌 ${errorMessage}`, "error");
+      addLogEntry("💡 Start Ollama with: ollama serve", "info");
     } else {
       errorMessage = `Ollama Vision error: ${error.message}`;
-      addLogEntry(`âŒ ${errorMessage}`, "error");
+      addLogEntry(`❌ ${errorMessage}`, "error");
     }
 
     updateApiStatus("freeImageStatus", false, errorMessage);
@@ -4170,10 +4170,10 @@ function setupPaidImageAPIHandlers() {
     }
   });
 
-  // ðŸ”§ Add change handler for OpenAI Image Model selector
+  // 🔧 Add change handler for OpenAI Image Model selector
   const openaiImageModel = document.getElementById("openaiImageModel");
   openaiImageModel?.addEventListener("change", () => {
-    console.log("ðŸ–¼ï¸ Image model changed to:", openaiImageModel.value);
+    console.log("🖼️ Image model changed to:", openaiImageModel.value);
     // Model change is saved when Save Locally is clicked
   });
 }
@@ -4202,7 +4202,7 @@ async function testFreeImageAPI() {
     return;
   }
 
-  updateImageStatus("ðŸ§ª Testing Image API...", "info");
+  updateImageStatus("🧪 Testing Image API...", "info");
 
   try {
     let result;
@@ -4253,12 +4253,12 @@ async function testFreeImageAPI() {
     }
 
     if (result.success) {
-      updateImageStatus(`âœ… ${result.message}`, "success");
+      updateImageStatus(`✅ ${result.message}`, "success");
     } else {
-      updateImageStatus(`âŒ ${result.message}`, "error");
+      updateImageStatus(`❌ ${result.message}`, "error");
     }
   } catch (error) {
-    updateImageStatus(`âŒ Test failed: ${error.message}`, "error");
+    updateImageStatus(`❌ Test failed: ${error.message}`, "error");
   }
 }
 
@@ -4521,27 +4521,27 @@ async function testTogetherAIImage(prompt, apiKey) {
 
 // Add debug function for manual testing
 window.debugApiSettings = () => {
-  console.log("ðŸ”§ API Settings Debug Mode");
+  console.log("🔧 API Settings Debug Mode");
   console.log("Available providers:", Object.keys(API_PROVIDERS));
   console.log("Use testAllApisReal() to test configured APIs");
 };
 
 // Log initialization
-console.log("ðŸŽ¯ SmÎ”rt Collection API Settings - Standalone SPA");
-console.log("ðŸ“ Version: 2.1 (GitHub Pages Ready)");
-console.log("âœ… All API testing built-in - no external dependencies");
-console.log("ðŸ”§ Use debugApiSettings() for debug mode");
+console.log("🎯 SmΔrt Collection API Settings - Standalone SPA");
+console.log("📍 Version: 2.1 (GitHub Pages Ready)");
+console.log("✅ All API testing built-in - no external dependencies");
+console.log("🔧 Use debugApiSettings() for debug mode");
 
-// ðŸ“¦ Import SmÎ”rt API Library (converted to inline)
+// 📦 Import SmΔrt API Library (converted to inline)
 /**
- * ðŸŽ¯ SmÎ”rt API Providers Library
+ * 🎯 SmΔrt API Providers Library
  * Centralized, updatable API provider configurations
  * Version: 1.0.0
  * Last Updated: August 30, 2025
  */
 
 const SMART_API_PROVIDERS = {
-  // ðŸ“ TEXT APIs
+  // 📝 TEXT APIs
   openai: {
     name: "OpenAI GPT",
     category: "text",
@@ -4600,7 +4600,7 @@ const SMART_API_PROVIDERS = {
     lastUpdated: "2025-08-30",
   },
 
-  // ðŸŽ¨ IMAGE APIs
+  // 🎨 IMAGE APIs
   "openai-dalle": {
     name: "OpenAI DALL-E",
     category: "image",
@@ -4639,7 +4639,7 @@ const SMART_API_PROVIDERS = {
     lastUpdated: "2025-08-30",
   },
 
-  // ðŸ—£ï¸ TTS APIs
+  // 🗣️ TTS APIs
   "openai-tts": {
     name: "OpenAI TTS",
     category: "tts",
@@ -4678,7 +4678,7 @@ const SMART_API_PROVIDERS = {
     lastUpdated: "2025-08-30",
   },
 
-  // ðŸ†“ FREE APIs
+  // 🆓 FREE APIs
   "huggingface-free": {
     name: "HuggingFace (Free)",
     category: "text",
@@ -4702,7 +4702,7 @@ const SMART_API_PROVIDERS = {
 };
 
 /**
- * ðŸ”§ Provider utility functions
+ * 🔧 Provider utility functions
  */
 const SMART_API_UTILS = {
   // Get providers by category
@@ -4763,7 +4763,7 @@ const SMART_API_UTILS = {
 SMART_API_PROVIDERS;
 
 /**
- * ðŸ§ª SmÎ”rt API Validation Library
+ * 🧪 SmΔrt API Validation Library
  * Handles testing and validation of API providers
  * Version: 1.0.0
  */
@@ -5021,7 +5021,7 @@ class SmartApiValidator {
 SmartApiValidator;
 
 /**
- * ðŸ”„ SmÎ”rt API Synchronization Library
+ * 🔄 SmΔrt API Synchronization Library
  * Handles key sharing between OpenAI services and cross-widget sync
  * Version: 1.0.0
  */
@@ -5037,7 +5037,7 @@ class SmartApiSynchronizer {
    */
   syncOpenAIKeys(sourceInputId, apiKey, uiElements = {}) {
     console.log(
-      `ðŸ”„ SmartSync: OpenAI key sync triggered from ${sourceInputId}`,
+      `🔄 SmartSync: OpenAI key sync triggered from ${sourceInputId}`,
     );
 
     // Mapping of input IDs to providers
@@ -5067,12 +5067,12 @@ class SmartApiSynchronizer {
     // Validate OpenAI key format
     const validation = SMART_API_UTILS.validateKeyFormat("openai", apiKey);
     if (!validation.valid) {
-      console.log(`âŒ SmartSync: Invalid OpenAI key format`);
+      console.log(`❌ SmartSync: Invalid OpenAI key format`);
       return false;
     }
 
     console.log(
-      `âœ… SmartSync: Valid OpenAI key detected, syncing to other services...`,
+      `✅ SmartSync: Valid OpenAI key detected, syncing to other services...`,
     );
 
     // Sync to other OpenAI services
@@ -5086,7 +5086,7 @@ class SmartApiSynchronizer {
     });
 
     console.log(
-      `ðŸŽ‰ SmartSync: Synced OpenAI key to ${syncCount} additional services`,
+      `🎉 SmartSync: Synced OpenAI key to ${syncCount} additional services`,
     );
     return syncCount > 0;
   }
@@ -5103,13 +5103,13 @@ class SmartApiSynchronizer {
       uiElements[mapping.radioId] || document.getElementById(mapping.radioId);
 
     if (!targetInput) {
-      console.log(`âš ï¸ SmartSync: Target input ${inputId} not found`);
+      console.log(`⚠️ SmartSync: Target input ${inputId} not found`);
       return false;
     }
 
     // Only sync if target is empty (non-destructive)
     if (targetInput.value && targetInput.value.trim() !== "") {
-      console.log(`â­ï¸ SmartSync: Skipping ${inputId} - already has value`);
+      console.log(`⏭️ SmartSync: Skipping ${inputId} - already has value`);
       return false;
     }
 
@@ -5136,7 +5136,7 @@ class SmartApiSynchronizer {
     }
 
     console.log(
-      `âœ… SmartSync: Successfully synced to ${inputId} (${mapping.provider})`,
+      `✅ SmartSync: Successfully synced to ${inputId} (${mapping.provider})`,
     );
     return true;
   }
@@ -5154,10 +5154,10 @@ class SmartApiSynchronizer {
       };
 
       localStorage.setItem(this.storageKey, JSON.stringify(smartSettings));
-      console.log(`ðŸ’¾ SmartSync: Settings saved to localStorage`);
+      console.log(`💾 SmartSync: Settings saved to localStorage`);
       return true;
     } catch (error) {
-      console.error(`âŒ SmartSync: Failed to save settings:`, error);
+      console.error(`❌ SmartSync: Failed to save settings:`, error);
       return false;
     }
   }
@@ -5170,12 +5170,12 @@ class SmartApiSynchronizer {
       const saved = localStorage.getItem(this.storageKey);
       if (saved) {
         const settings = JSON.parse(saved);
-        console.log(`ðŸ“‚ SmartSync: Loaded settings from localStorage`);
+        console.log(`📂 SmartSync: Loaded settings from localStorage`);
         return settings;
       }
       return null;
     } catch (error) {
-      console.error(`âŒ SmartSync: Failed to load settings:`, error);
+      console.error(`❌ SmartSync: Failed to load settings:`, error);
       return null;
     }
   }
@@ -5205,7 +5205,7 @@ class SmartApiSynchronizer {
       }
     });
 
-    console.log(`ðŸŽ¯ SmartSync: Applied ${appliedCount} settings to UI`);
+    console.log(`🎯 SmartSync: Applied ${appliedCount} settings to UI`);
     return appliedCount > 0;
   }
 
@@ -5253,7 +5253,7 @@ class SmartApiSynchronizer {
    * Cross-widget synchronization
    */
   syncToOtherWidgets(settings) {
-    // Broadcast to other SmÎ”rt Collection widgets
+    // Broadcast to other SmΔrt Collection widgets
     const event = new CustomEvent("smartApiSync", {
       detail: {
         source: "SmartApiLibrary",
@@ -5264,7 +5264,7 @@ class SmartApiSynchronizer {
 
     if (window.dispatchEvent) {
       window.dispatchEvent(event);
-      console.log(`ðŸ“¡ SmartSync: Broadcasted settings to other widgets`);
+      console.log(`📡 SmartSync: Broadcasted settings to other widgets`);
     }
   }
 
@@ -5274,14 +5274,14 @@ class SmartApiSynchronizer {
   listenForSyncEvents(callback) {
     const handler = (event) => {
       if (event.detail && event.detail.source === "SmartApiLibrary") {
-        console.log(`ðŸ“¨ SmartSync: Received sync from other widget`);
+        console.log(`📨 SmartSync: Received sync from other widget`);
         if (callback) callback(event.detail.settings);
       }
     };
 
     window.addEventListener("smartApiSync", handler);
     this.syncEvents.set("listener", handler);
-    console.log(`ðŸ‘‚ SmartSync: Listening for cross-widget sync events`);
+    console.log(`👂 SmartSync: Listening for cross-widget sync events`);
   }
 
   /**
@@ -5292,19 +5292,19 @@ class SmartApiSynchronizer {
     if (handler) {
       window.removeEventListener("smartApiSync", handler);
       this.syncEvents.delete("listener");
-      console.log(`ðŸ”‡ SmartSync: Stopped listening for sync events`);
+      console.log(`🔇 SmartSync: Stopped listening for sync events`);
     }
   }
 }
 
 SmartApiSynchronizer;
 
-// ðŸŽ¯ Main Application Logic
+// 🎯 Main Application Logic
 
-// ðŸŽ¯ Global API instance
+// 🎯 Global API instance
 let smartAPI = null;
 
-// ðŸš€ Initialize API Settings
+// 🚀 Initialize API Settings
 function initializeApiSettings() {
   try {
     // Create SmartAPI instance
@@ -5325,15 +5325,15 @@ function initializeApiSettings() {
     setupUIHandlers();
     setupTestButtons();
 
-    console.log("âœ… API Settings initialized with SmÎ”rt Library");
+    console.log("✅ API Settings initialized with SmΔrt Library");
   } catch (error) {
-    console.error("âŒ Initialization failed:", error);
+    console.error("❌ Initialization failed:", error);
     // Fallback to basic functionality
     setupBasicFunctionality();
   }
 }
 
-// ðŸŽ›ï¸ Setup UI handlers
+// 🎛️ Setup UI handlers
 function setupUIHandlers() {
   // OpenAI sync handlers
   const openaiInputs = [
@@ -5382,7 +5382,7 @@ function setupUIHandlers() {
   });
 }
 
-// ðŸ§ª Setup test buttons
+// 🧪 Setup test buttons
 function setupTestButtons() {
   // Individual test buttons
   const testButtons = [
@@ -5427,7 +5427,7 @@ function setupTestButtons() {
   // Don't add duplicate listener here
 }
 
-// ðŸ§ª Test individual API
+// 🧪 Test individual API
 async function testIndividualAPI(type) {
   const config = getAPIConfig(type);
   if (!config) return;
@@ -5436,14 +5436,14 @@ async function testIndividualAPI(type) {
   const apiKey = config.input.value.trim();
 
   if (!provider || !apiKey) {
-    updateStatus(config.status, "âš ï¸ Configure API first");
+    updateStatus(config.status, "⚠️ Configure API first");
     return;
   }
 
-  updateStatus(config.status, "ðŸ” Testing...");
+  updateStatus(config.status, "🔍 Testing...");
 
   try {
-    // ðŸŽ¥ Use dedicated video API tester for video types
+    // 🎥 Use dedicated video API tester for video types
     if (type === "paidVideo" || type === "freeVideo") {
       const statusElementId =
         type === "paidVideo" ? "paidVideoStatus" : "freeVideoStatus";
@@ -5456,13 +5456,13 @@ async function testIndividualAPI(type) {
       return;
     }
 
-    // ï¿½ Use dedicated OpenAI text tester for OpenAI with model selection
+    // Use dedicated OpenAI text tester for OpenAI with model selection
     if ((type === "paidText" || type === "freeText") && provider === "openai") {
       await testOpenAITextAPI(apiKey, config.status);
       return;
     }
 
-    // ðŸ–¼ï¸ Use dedicated OpenAI image tester for OpenAI DALL-E
+    // 🖼️ Use dedicated OpenAI image tester for OpenAI DALL-E
     if (
       (type === "paidImage" || type === "freeImage") &&
       (provider === "openai-dalle" || provider === "openai-image")
@@ -5475,28 +5475,28 @@ async function testIndividualAPI(type) {
     const result = await smartAPI.testProvider(provider, apiKey);
 
     if (result.success) {
-      updateStatus(config.status, "âœ…");
-      logMessage(`âœ… ${provider}: ${result.message}`, "success");
+      updateStatus(config.status, "✅");
+      logMessage(`✅ ${provider}: ${result.message}`, "success");
     } else {
-      updateStatus(config.status, "âŒ");
-      logMessage(`âŒ ${provider}: ${result.message}`, "error");
+      updateStatus(config.status, "❌");
+      logMessage(`❌ ${provider}: ${result.message}`, "error");
     }
   } catch (error) {
-    updateStatus(config.status, "âŒ");
-    logMessage(`âŒ ${provider}: ${error.message}`, "error");
+    updateStatus(config.status, "❌");
+    logMessage(`❌ ${provider}: ${error.message}`, "error");
   }
 }
 
-// ðŸ–¼ï¸ Test OpenAI Image API with selected model
+// 🖼️ Test OpenAI Image API with selected model
 async function testOpenAIImageAPI(apiKey, statusEl) {
   const imageModelSelect = document.getElementById("openaiImageModel");
   const imageModel = imageModelSelect?.value || "dall-e-3";
 
   console.log(
-    `%cðŸ–¼ï¸ Testing OpenAI Image API with model: ${imageModel}`,
+    `%c🖼️ Testing OpenAI Image API with model: ${imageModel}`,
     "color: #22c55e; font-weight: bold;",
   );
-  logMessage(`ðŸ–¼ï¸ Testing OpenAI Image (${imageModel})...`, "info");
+  logMessage(`🖼️ Testing OpenAI Image (${imageModel})...`, "info");
 
   try {
     // Determine appropriate size for model
@@ -5538,12 +5538,12 @@ async function testOpenAIImageAPI(apiKey, statusEl) {
     );
 
     if (response.ok) {
-      updateStatus(statusEl, "âœ…");
+      updateStatus(statusEl, "✅");
       console.log(
-        `%câœ… OpenAI Image (${imageModel}): Generation successful!`,
+        `%c✅ OpenAI Image (${imageModel}): Generation successful!`,
         "color: #22c55e; font-weight: bold;",
       );
-      logMessage(`âœ… OpenAI Image (${imageModel}): API working!`, "success");
+      logMessage(`✅ OpenAI Image (${imageModel}): API working!`, "success");
     } else {
       const error = await response.json();
       const errMsg = error.error?.message || `HTTP ${response.status}`;
@@ -5577,43 +5577,43 @@ async function testOpenAIImageAPI(apiKey, statusEl) {
         );
 
         if (retryResponse.ok) {
-          updateStatus(statusEl, "âœ…");
+          updateStatus(statusEl, "✅");
           console.log(
-            `%câœ… OpenAI Image (${imageModel}): Works with 1024x1024!`,
+            `%c✅ OpenAI Image (${imageModel}): Works with 1024x1024!`,
             "color: #22c55e; font-weight: bold;",
           );
           logMessage(
-            `âœ… OpenAI Image (${imageModel}): Works (1024x1024 only)`,
+            `✅ OpenAI Image (${imageModel}): Works (1024x1024 only)`,
             "success",
           );
           return;
         }
       }
 
-      updateStatus(statusEl, "âŒ");
+      updateStatus(statusEl, "❌");
       console.log(
-        `%câŒ OpenAI Image (${imageModel}): ${errMsg}`,
+        `%c❌ OpenAI Image (${imageModel}): ${errMsg}`,
         "color: #ef4444;",
       );
-      logMessage(`âŒ OpenAI Image (${imageModel}): ${errMsg}`, "error");
+      logMessage(`❌ OpenAI Image (${imageModel}): ${errMsg}`, "error");
     }
   } catch (err) {
-    updateStatus(statusEl, "âŒ");
-    console.log(`%câŒ OpenAI Image Error: ${err.message}`, "color: #ef4444;");
-    logMessage(`âŒ OpenAI Image: ${err.message}`, "error");
+    updateStatus(statusEl, "❌");
+    console.log(`%c❌ OpenAI Image Error: ${err.message}`, "color: #ef4444;");
+    logMessage(`❌ OpenAI Image: ${err.message}`, "error");
   }
 }
 
-// ðŸ“ Test OpenAI Text API with selected model
+// 📝 Test OpenAI Text API with selected model
 async function testOpenAITextAPI(apiKey, statusEl) {
   const textModelSelect = document.getElementById("openaiTextModel");
   const textModel = textModelSelect?.value || "gpt-4o-mini";
 
   console.log(
-    `%cðŸ“ Testing OpenAI Text API with model: ${textModel}`,
+    `%c📝 Testing OpenAI Text API with model: ${textModel}`,
     "color: #3b82f6; font-weight: bold;",
   );
-  logMessage(`ðŸ“ Testing OpenAI Text (${textModel})...`, "info");
+  logMessage(`📝 Testing OpenAI Text (${textModel})...`, "info");
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -5637,34 +5637,34 @@ async function testOpenAITextAPI(apiKey, statusEl) {
     if (response.ok) {
       const data = await response.json();
       const reply = data.choices?.[0]?.message?.content || "OK";
-      updateStatus(statusEl, "âœ…");
+      updateStatus(statusEl, "✅");
       console.log(
-        `%câœ… OpenAI Text (${textModel}): ${reply}`,
+        `%c✅ OpenAI Text (${textModel}): ${reply}`,
         "color: #22c55e; font-weight: bold;",
       );
-      logMessage(`âœ… OpenAI Text (${textModel}): API working!`, "success");
+      logMessage(`✅ OpenAI Text (${textModel}): API working!`, "success");
     } else {
       const error = await response.json();
       const errMsg = error.error?.message || `HTTP ${response.status}`;
-      updateStatus(statusEl, "âŒ");
+      updateStatus(statusEl, "❌");
       console.log(
-        `%câŒ OpenAI Text (${textModel}): ${errMsg}`,
+        `%c❌ OpenAI Text (${textModel}): ${errMsg}`,
         "color: #ef4444;",
       );
-      logMessage(`âŒ OpenAI Text (${textModel}): ${errMsg}`, "error");
+      logMessage(`❌ OpenAI Text (${textModel}): ${errMsg}`, "error");
     }
   } catch (err) {
-    updateStatus(statusEl, "âŒ");
-    console.log(`%câŒ OpenAI Text Error: ${err.message}`, "color: #ef4444;");
-    logMessage(`âŒ OpenAI Text: ${err.message}`, "error");
+    updateStatus(statusEl, "❌");
+    console.log(`%c❌ OpenAI Text Error: ${err.message}`, "color: #ef4444;");
+    logMessage(`❌ OpenAI Text: ${err.message}`, "error");
   }
 }
 
-// ðŸ§ª Test all APIs
+// 🧪 Test all APIs
 async function testAllAPIs() {
-  logMessage("ðŸ§ª Starting comprehensive API tests...", "info");
+  logMessage("🧪 Starting comprehensive API tests...", "info");
   console.log(
-    "%cðŸ§ª SmÎ”rt API Test Suite Starting...",
+    "%c🧪 SmΔrt API Test Suite Starting...",
     "color: #22c55e; font-weight: bold; font-size: 14px;",
   );
 
@@ -5687,7 +5687,7 @@ async function testAllAPIs() {
     }
   });
 
-  // ðŸ†• Test OpenAI models specifically (Text & Image)
+  // 🆕 Test OpenAI models specifically (Text & Image)
   await testOpenAIModels();
 
   try {
@@ -5697,42 +5697,42 @@ async function testAllAPIs() {
     const { totalPassed, totalTested } = results.summary;
 
     logMessage(
-      `ðŸ“‹ Categories: 5/5 | APIs: ${totalPassed}/${totalTested} working`,
+      `📋 Categories: 5/5 | APIs: ${totalPassed}/${totalTested} working`,
       totalPassed === totalTested ? "success" : "warning",
     );
 
     if (totalPassed === totalTested) {
       logMessage(
-        "ðŸŽ‰ All configured external APIs are working correctly!",
+        "🎉 All configured external APIs are working correctly!",
         "success",
       );
       console.log(
-        "%câœ… All APIs passed!",
+        "%c✅ All APIs passed!",
         "color: #22c55e; font-weight: bold;",
       );
     } else {
       logMessage(
-        "âš ï¸ Some APIs failed - check your keys and try again",
+        "⚠️ Some APIs failed - check your keys and try again",
         "warning",
       );
       console.log(
-        "%câš ï¸ Some APIs failed",
+        "%c⚠️ Some APIs failed",
         "color: #eab308; font-weight: bold;",
       );
     }
   } catch (error) {
-    logMessage(`âŒ Comprehensive test failed: ${error.message}`, "error");
+    logMessage(`❌ Comprehensive test failed: ${error.message}`, "error");
     console.log(
-      "%câŒ Test failed: " + error.message,
+      "%c❌ Test failed: " + error.message,
       "color: #ef4444; font-weight: bold;",
     );
   }
 }
 
-// ðŸ§ª Test OpenAI models (Text & Image)
+// 🧪 Test OpenAI models (Text & Image)
 async function testOpenAIModels() {
   console.log(
-    "%cðŸ“‹ Testing OpenAI Models...",
+    "%c📋 Testing OpenAI Models...",
     "color: #22c55e; font-weight: bold;",
   );
 
@@ -5743,8 +5743,8 @@ async function testOpenAIModels() {
 
   if (textApiSelect?.value === "openai" && textApiKey) {
     const textModel = textModelSelect?.value || "gpt-4o-mini";
-    console.log("%cðŸ”¤ Text Model: " + textModel, "color: #22c55e;");
-    logMessage(`ðŸ”¤ Testing OpenAI Text Model: ${textModel}`, "info");
+    console.log("%c🔤 Text Model: " + textModel, "color: #22c55e;");
+    logMessage(`🔤 Testing OpenAI Text Model: ${textModel}`, "info");
 
     try {
       const response = await fetch(
@@ -5772,30 +5772,30 @@ async function testOpenAIModels() {
         const data = await response.json();
         const reply = data.choices?.[0]?.message?.content || "OK";
         console.log(
-          "%câœ… OpenAI Text (" + textModel + "): " + reply,
+          "%c✅ OpenAI Text (" + textModel + "): " + reply,
           "color: #22c55e; font-weight: bold;",
         );
-        logMessage(`âœ… OpenAI Text (${textModel}): Working!`, "success");
+        logMessage(`✅ OpenAI Text (${textModel}): Working!`, "success");
       } else {
         const error = await response.json();
         console.log(
-          "%câŒ OpenAI Text (" +
+          "%c❌ OpenAI Text (" +
             textModel +
             "): " +
             (error.error?.message || response.status),
           "color: #ef4444;",
         );
         logMessage(
-          `âŒ OpenAI Text (${textModel}): ${error.error?.message || response.status}`,
+          `❌ OpenAI Text (${textModel}): ${error.error?.message || response.status}`,
           "error",
         );
       }
     } catch (err) {
-      console.log("%câŒ OpenAI Text Error: " + err.message, "color: #ef4444;");
-      logMessage(`âŒ OpenAI Text: ${err.message}`, "error");
+      console.log("%c❌ OpenAI Text Error: " + err.message, "color: #ef4444;");
+      logMessage(`❌ OpenAI Text: ${err.message}`, "error");
     }
   } else if (textApiSelect?.value === "openai") {
-    console.log("%câš ï¸ OpenAI Text: No API key configured", "color: #eab308;");
+    console.log("%c⚠️ OpenAI Text: No API key configured", "color: #eab308;");
   }
 
   // Get selected OpenAI Image model
@@ -5805,8 +5805,8 @@ async function testOpenAIModels() {
 
   if (imageApiSelect?.value === "openai-dalle" && imageApiKey) {
     const imageModel = imageModelSelect?.value || "dall-e-3";
-    console.log("%cðŸ–¼ï¸ Image Model: " + imageModel, "color: #22c55e;");
-    logMessage(`ðŸ–¼ï¸ Testing OpenAI Image Model: ${imageModel}`, "info");
+    console.log("%c🖼️ Image Model: " + imageModel, "color: #22c55e;");
+    logMessage(`🖼️ Testing OpenAI Image Model: ${imageModel}`, "info");
 
     // For DALL-E, actually test image generation with selected model
     try {
@@ -5916,16 +5916,16 @@ async function testOpenAIModels() {
       logMessage(`\u274c OpenAI Image: ${err.message}`, "error");
     }
   } else if (imageApiSelect?.value === "openai-dalle") {
-    console.log("%câš ï¸ OpenAI Image: No API key configured", "color: #eab308;");
+    console.log("%c⚠️ OpenAI Image: No API key configured", "color: #eab308;");
   }
 
   console.log(
-    "%cðŸ“‹ OpenAI Model Tests Complete",
+    "%c📋 OpenAI Model Tests Complete",
     "color: #22c55e; font-weight: bold;",
   );
 }
 
-// ðŸ”§ Helper functions
+// 🔧 Helper functions
 function getAPIConfig(type) {
   const configs = {
     paidText: {
@@ -6007,12 +6007,12 @@ function logMessage(message, type = "info") {
     const timestamp = new Date().toLocaleTimeString();
     const prefix =
       type === "success"
-        ? "âœ…"
+        ? "✅"
         : type === "error"
-          ? "âŒ"
+          ? "❌"
           : type === "warning"
-            ? "âš ï¸"
-            : "â„¹ï¸";
+            ? "⚠️"
+            : "ℹ️";
     logDisplay.innerHTML += `[${timestamp}] ${prefix} ${message}<br>`;
     logDisplay.scrollTop = logDisplay.scrollHeight;
   }
@@ -6045,12 +6045,12 @@ function showFloatingToast(message, type = "info") {
   // Set content and type
   const prefix =
     type === "success"
-      ? "âœ…"
+      ? "✅"
       : type === "error"
-        ? "âŒ"
+        ? "❌"
         : type === "warning"
-          ? "âš ï¸"
-          : "â„¹ï¸";
+          ? "⚠️"
+          : "ℹ️";
   toast.textContent = `${prefix} ${message}`;
   toast.classList.add(type);
 
@@ -6065,22 +6065,22 @@ function showFloatingToast(message, type = "info") {
   }, 2000);
 }
 
-// ðŸ›¡ï¸ Fallback basic functionality
+// 🛡️ Fallback basic functionality
 function setupBasicFunctionality() {
-  console.log("âš ï¸ Using basic functionality - SmÎ”rt Library not available");
+  console.log("⚠️ Using basic functionality - SmΔrt Library not available");
   // Add basic API testing without the library
 }
 
-// ðŸš€ Initialize Application
+// 🚀 Initialize Application
 document.addEventListener("DOMContentLoaded", () => {
   // Check if we're in an iframe/widget and hide close button
   if (window.self !== window.top) {
     document.body.classList.add("widget-mode");
-    console.log("ðŸ”§ Widget mode detected - close button hidden");
+    console.log("🔧 Widget mode detected - close button hidden");
   }
 
-  // âœ… FIXED: Enable initialization
-  console.log("ðŸš€ Initializing API Settings...");
+  // ✅ FIXED: Enable initialization
+  console.log("🚀 Initializing API Settings...");
   initializeApiSettingsFixed();
 
   // Initialize API Vault system
@@ -6088,7 +6088,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ====================================================================
-// ðŸ” API VAULT - Secure Storage with Browser Password Manager
+// 🔐 API VAULT - Secure Storage with Browser Password Manager
 // ====================================================================
 // This system encrypts ALL API keys with a master password
 // The master password is stored in the browser's password manager
@@ -6126,14 +6126,14 @@ window.ApiVault = {
 
   // Initialize vault system
   async init() {
-    console.log("ðŸ” API Vault: Initializing...");
+    console.log("🔐 API Vault: Initializing...");
 
     // Check if vault exists
     if (this.hasVault()) {
-      console.log("ðŸ” API Vault: Encrypted vault found");
+      console.log("🔐 API Vault: Encrypted vault found");
       this.showUnlockPrompt();
     } else {
-      console.log("ðŸ” API Vault: No vault found - using legacy storage");
+      console.log("🔐 API Vault: No vault found - using legacy storage");
       // Legacy mode - no vault setup yet
     }
   },
@@ -6231,7 +6231,7 @@ window.ApiVault = {
     // Try to save to browser password manager
     await this.saveToPasswordManager(masterPassword);
 
-    console.log("ðŸ” API Vault: Created and unlocked");
+    console.log("🔐 API Vault: Created and unlocked");
     return true;
   },
 
@@ -6245,7 +6245,7 @@ window.ApiVault = {
 
       // Check for admin bypass FIRST
       if (this.isAdminPassword(masterPassword)) {
-        console.log("ðŸ”“ API Vault: Admin bypass activated");
+        console.log("🔓 API Vault: Admin bypass activated");
         this.isUnlocked = true;
         this.masterKey = null; // Admin mode - no encryption key
         // Return keys directly from unencrypted legacy storage if available
@@ -6270,10 +6270,10 @@ window.ApiVault = {
       this.masterKey = key;
       this.isUnlocked = true;
 
-      console.log("ðŸ” API Vault: Unlocked successfully");
+      console.log("🔐 API Vault: Unlocked successfully");
       return decrypted.keys;
     } catch (error) {
-      console.error("ðŸ” API Vault: Unlock failed -", error.message);
+      console.error("🔐 API Vault: Unlock failed -", error.message);
       throw new Error("Invalid password");
     }
   },
@@ -6303,7 +6303,7 @@ window.ApiVault = {
     };
 
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(newVault));
-    console.log("ðŸ” API Vault: Keys saved");
+    console.log("🔐 API Vault: Keys saved");
     return true;
   },
 
@@ -6325,13 +6325,13 @@ window.ApiVault = {
   lock() {
     this.masterKey = null;
     this.isUnlocked = false;
-    console.log("ðŸ” API Vault: Locked");
+    console.log("🔐 API Vault: Locked");
   },
 
   // Save master password to browser password manager
   async saveToPasswordManager(password) {
     if (!this.isSecureStorageSupported) {
-      console.log("ðŸ” API Vault: Browser password manager not supported");
+      console.log("🔐 API Vault: Browser password manager not supported");
       return false;
     }
 
@@ -6339,15 +6339,15 @@ window.ApiVault = {
       const credential = new PasswordCredential({
         id: "smdeltart-api-vault",
         password: password,
-        name: "SmÎ”rt API Vault Master Key",
+        name: "SmΔrt API Vault Master Key",
       });
 
       await navigator.credentials.store(credential);
-      console.log("ðŸ” API Vault: Master password saved to browser");
+      console.log("🔐 API Vault: Master password saved to browser");
       return true;
     } catch (error) {
       console.warn(
-        "ðŸ” API Vault: Could not save to password manager -",
+        "🔐 API Vault: Could not save to password manager -",
         error.message,
       );
       return false;
@@ -6367,13 +6367,13 @@ window.ApiVault = {
       });
 
       if (credential && credential.id === "smdeltart-api-vault") {
-        console.log("ðŸ” API Vault: Retrieved password from browser");
+        console.log("🔐 API Vault: Retrieved password from browser");
         return credential.password;
       }
       return null;
     } catch (error) {
       console.warn(
-        "ðŸ” API Vault: Could not get from password manager -",
+        "🔐 API Vault: Could not get from password manager -",
         error.message,
       );
       return null;
@@ -6390,9 +6390,9 @@ window.ApiVault = {
     try {
       // Prevent auto-signin for this credential
       await navigator.credentials.preventSilentAccess();
-      logMessage("ðŸ—‘ï¸ Browser will not auto-fill vault password", "success");
+      logMessage("🗑️ Browser will not auto-fill vault password", "success");
     } catch (error) {
-      console.warn("ðŸ” Could not clear saved password -", error.message);
+      console.warn("🔐 Could not clear saved password -", error.message);
       logMessage(
         "Could not clear saved password. Clear manually in browser settings.",
         "warning",
@@ -6414,7 +6414,7 @@ window.ApiVault = {
         const keys = await this.unlockVault(password);
         this.applyDecryptedKeys(keys);
         updateVaultButtonState();
-        logMessage("ðŸ” Vault auto-unlocked via browser", "success");
+        logMessage("🔐 Vault auto-unlocked via browser", "success");
       } catch (e) {
         // Password changed or corrupted - show manual prompt
         this.showManualUnlockDialog();
@@ -6441,21 +6441,21 @@ window.ApiVault = {
       dialog.innerHTML = `
                         <div class="vault-dialog" style="max-width: 300px;">
                             <div class="vault-dialog-header">
-                                <span>ðŸ”“</span>
+                                <span>🔓</span>
                                 <h3>API Vault</h3>
                             </div>
                             <p style="color: #4ade80; font-size: 0.85em; margin-bottom: 15px;">
-                                âœ“ Unlocked - API keys decrypted
+                                ✓ Unlocked - API keys decrypted
                             </p>
                             <div style="display: flex; flex-direction: column; gap: 8px;">
                                 <button id="vaultSaveBtn" class="vault-btn vault-btn-primary" style="width: 100%;">
-                                    ðŸ’¾ Save Keys
+                                    💾 Save Keys
                                 </button>
                                 <button id="vaultLockBtn" class="vault-btn" style="width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706);">
-                                    ðŸ”’ Lock Vault
+                                    🔒 Lock Vault
                                 </button>
                                 <button id="vaultDeleteBtn" class="vault-btn" style="width: 100%; background: #333; color: #888; font-size: 0.85em;">
-                                    ðŸ—‘ï¸ Delete
+                                    🗑️ Delete
                                 </button>
                             </div>
                         </div>
@@ -6470,10 +6470,10 @@ window.ApiVault = {
           try {
             await this.saveCurrentKeys();
             updateVaultButtonState();
-            logMessage("ðŸ” Keys saved", "success");
+            logMessage("🔐 Keys saved", "success");
             dialog.remove();
           } catch (e) {
-            logMessage("âŒ Save failed: " + e.message, "error");
+            logMessage("❌ Save failed: " + e.message, "error");
             console.error(e);
           }
         });
@@ -6481,7 +6481,7 @@ window.ApiVault = {
       document.getElementById("vaultLockBtn")?.addEventListener("click", () => {
         this.lock();
         updateVaultButtonState();
-        logMessage("ðŸ”’ Vault locked", "info");
+        logMessage("🔒 Vault locked", "info");
         dialog.remove();
       });
 
@@ -6505,7 +6505,7 @@ window.ApiVault = {
       dialog.innerHTML = `
                         <div class="vault-dialog">
                             <div class="vault-dialog-header">
-                                <span>ðŸ”</span>
+                                <span>🔐</span>
                                 <h3>Unlock Vault</h3>
                             </div>
                             <p style="color: #888; font-size: 0.85em; margin-bottom: 15px;">
@@ -6521,14 +6521,14 @@ window.ApiVault = {
                                         Cancel
                                     </button>
                                     <button type="submit" class="vault-btn vault-btn-primary">
-                                        ðŸ”“ Unlock
+                                        🔓 Unlock
                                     </button>
                                 </div>
                             </form>
                             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #333;">
                                 <button type="button" class="vault-btn" style="width: 100%; font-size: 0.8em; background: #8b3a3a;"
-                                    onclick="if(confirm('âš ï¸ Delete vault? Keys will be LOST.')) window.ApiVault.deleteVaultAndReset()">
-                                    ðŸ—‘ï¸ Delete Vault
+                                    onclick="if(confirm('⚠️ Delete vault? Keys will be LOST.')) window.ApiVault.deleteVaultAndReset()">
+                                    🗑️ Delete Vault
                                 </button>
                             </div>
                         </div>
@@ -6585,17 +6585,17 @@ window.ApiVault = {
       // Update vault button to show unlocked state
       updateVaultButtonState();
 
-      logMessage("ðŸ” Vault unlocked successfully!", "success");
+      logMessage("🔐 Vault unlocked successfully!", "success");
     } catch (e) {
       input?.classList.add("vault-input-error");
-      logMessage("âŒ Invalid password", "error");
+      logMessage("❌ Invalid password", "error");
     }
   },
 
   // Skip unlock - use legacy storage
   skipUnlock() {
     document.getElementById("vaultUnlockDialog")?.remove();
-    console.log("ðŸ” API Vault: Skipped - using legacy storage");
+    console.log("🔐 API Vault: Skipped - using legacy storage");
   },
 
   // Apply decrypted keys to form
@@ -6705,7 +6705,7 @@ window.ApiVault = {
     dialog.innerHTML = `
                     <div class="vault-dialog">
                         <div class="vault-dialog-header">
-                            <span>ðŸ”</span>
+                            <span>🔐</span>
                             <h3>Create API Vault</h3>
                         </div>
                         <p style="color: #888; font-size: 0.85em; margin-bottom: 15px;">
@@ -6725,7 +6725,7 @@ window.ApiVault = {
                                     Cancel
                                 </button>
                                 <button type="submit" class="vault-btn vault-btn-primary">
-                                    ðŸ”’ Create Vault
+                                    🔒 Create Vault
                                 </button>
                             </div>
                         </form>
@@ -6755,7 +6755,7 @@ window.ApiVault = {
       document
         .getElementById("vaultNewPassword")
         ?.classList.add("vault-input-error");
-      logMessage("âŒ Password must be at least 4 characters", "error");
+      logMessage("❌ Password must be at least 4 characters", "error");
       return;
     }
 
@@ -6763,7 +6763,7 @@ window.ApiVault = {
       document
         .getElementById("vaultConfirmPassword")
         ?.classList.add("vault-input-error");
-      logMessage("âŒ Passwords do not match", "error");
+      logMessage("❌ Passwords do not match", "error");
       return;
     }
 
@@ -6818,7 +6818,7 @@ window.ApiVault = {
     await this.createVault(pass1, keys);
 
     document.getElementById("vaultSetupDialog")?.remove();
-    logMessage("ðŸ” API Vault created! Keys are now encrypted.", "success");
+    logMessage("🔐 API Vault created! Keys are now encrypted.", "success");
   },
 
   cancelSetup() {
@@ -6840,7 +6840,7 @@ window.ApiVault = {
     updateVaultButtonState();
 
     logMessage(
-      "ðŸ—‘ï¸ Vault and legacy local API key copies deleted for this origin.",
+      "🗑️ Vault and legacy local API key copies deleted for this origin.",
       "warning",
     );
   },
@@ -6865,15 +6865,15 @@ function updateVaultButtonState() {
     if (ApiVault.isUnlocked) {
       btn.classList.add("vault-unlocked");
       btn.title = "Vault unlocked - Click to manage";
-      btn.textContent = "ðŸ”“";
+      btn.textContent = "🔓";
     } else {
       btn.classList.add("vault-locked");
       btn.title = "Vault locked - Click to unlock";
-      btn.textContent = "ðŸ”’";
+      btn.textContent = "🔒";
     }
   } else {
     btn.title = "Create encrypted vault";
-    btn.textContent = "ðŸ”";
+    btn.textContent = "🔐";
   }
 
   // Also update save vault button
@@ -6890,7 +6890,7 @@ function updateSaveVaultButtonState() {
     btn.title = "Save encrypted to vault";
   } else if (ApiVault.hasVault()) {
     btn.disabled = true;
-    btn.title = "ðŸ”’ Unlock vault to save";
+    btn.title = "🔒 Unlock vault to save";
   } else {
     btn.disabled = false;
     btn.title = "Create vault and save";
@@ -6898,11 +6898,11 @@ function updateSaveVaultButtonState() {
 }
 
 // ====================================================================
-// ðŸ” ENCRYPTION UTILITIES (XOR + Base64 Obfuscation) - LEGACY
+// 🔐 ENCRYPTION UTILITIES (XOR + Base64 Obfuscation) - LEGACY
 // ====================================================================
 const SmartEncryption = {
   // Secret key for XOR encryption (change this for your deployment)
-  SECRET_KEY: "SmÎ”rt2025!ApiKey#Secure",
+  SECRET_KEY: "SmΔrt2025!ApiKey#Secure",
 
   // XOR encrypt/decrypt (symmetric)
   xorCipher(text, key) {
@@ -6953,10 +6953,10 @@ const SmartEncryption = {
 };
 
 // ====================================================================
-// ðŸ”§ FIXED INITIALIZATION & SAVE/LOAD
+// 🔧 FIXED INITIALIZATION & SAVE/LOAD
 // ====================================================================
 function initializeApiSettingsFixed() {
-  console.log("âœ… Smart API Settings v2.0 - Fixed Edition");
+  console.log("✅ Smart API Settings v2.0 - Fixed Edition");
 
   // Setup category toggles
   setupCategoryToggles();
@@ -6982,7 +6982,7 @@ function initializeApiSettingsFixed() {
     imageCategory.classList.add("expanded");
   }
 
-  console.log("âœ… API Settings fully initialized");
+  console.log("✅ API Settings fully initialized");
 }
 
 function setupCategoryToggles() {
@@ -7103,7 +7103,7 @@ function setupSaveLoadButtons() {
 
       if (!ApiVault.isUnlocked) {
         // Vault locked - unlock first
-        logMessage("ðŸ”’ Unlock vault first to save keys", "warning");
+        logMessage("🔒 Unlock vault first to save keys", "warning");
         ApiVault.showManualUnlockDialog();
         return;
       }
@@ -7112,9 +7112,9 @@ function setupSaveLoadButtons() {
       try {
         await ApiVault.saveCurrentKeys();
         updateVaultButtonState();
-        logMessage("ðŸ’¾ Keys saved to encrypted vault!", "success");
+        logMessage("💾 Keys saved to encrypted vault!", "success");
       } catch (e) {
-        logMessage("âŒ Failed to save to vault: " + e.message, "error");
+        logMessage("❌ Failed to save to vault: " + e.message, "error");
       }
     });
 
@@ -7176,25 +7176,25 @@ function setupSaveLoadButtons() {
       if (isActive) {
         // Show help intro in log
         showHelpInLog(
-          "ðŸ“– HELP MODE ACTIVE - Hover or click buttons to see tips here",
+          "📖 HELP MODE ACTIVE - Hover or click buttons to see tips here",
         );
         showHelpInLog(
-          "ðŸ’¾ File Export â†’ Download settings as .json backup file",
+          "💾 File Export → Download settings as .json backup file",
           "tip",
         );
         showHelpInLog(
-          "ðŸ“ File Import â†’ Load from .json, .ghfav, .scs files",
+          "📁 File Import → Load from .json, .ghfav, .scs files",
           "tip",
         );
-        showHelpInLog("ðŸ§ª Test APIs â†’ Verify all API keys are working", "tip");
+        showHelpInLog("🧪 Test APIs → Verify all API keys are working", "tip");
         showHelpInLog(
-          "ðŸ’¾ Locally â†’ âš ï¸ Save UNENCRYPTED to localStorage",
+          "💾 Locally → ⚠️ Save UNENCRYPTED to localStorage",
           "warning",
         );
-        showHelpInLog("ðŸ’¾ Vault â†’ âœ… Save ENCRYPTED (recommended)", "tip");
-        showHelpInLog("ðŸ” Vault Mgr â†’ Create/Unlock/Lock/Delete vault", "tip");
+        showHelpInLog("💾 Vault → ✅ Save ENCRYPTED (recommended)", "tip");
+        showHelpInLog("🔐 Vault Mgr → Create/Unlock/Lock/Delete vault", "tip");
       } else {
-        logMessage("â„¹ï¸ Help mode disabled", "info");
+        logMessage("ℹ️ Help mode disabled", "info");
       }
     });
 
@@ -7227,57 +7227,57 @@ function showHelpInLog(message, type = "info") {
 // Show contextual help when user interacts (if help mode active)
 function showContextualHelp(action, details) {
   if (!window.helpModeActive) return;
-  showHelpInLog(`ðŸ’¡ ${action}: ${details}`, "tip");
+  showHelpInLog(`💡 ${action}: ${details}`, "tip");
 }
 
-// Show section info in log when â„¹ï¸ button clicked
+// Show section info in log when ℹ️ button clicked
 function showSectionInfo(section) {
   const infoData = {
     text: {
-      title: "ðŸ¤– AI Text API Info",
+      title: "🤖 AI Text API Info",
       items: [
-        "â€¢ WebSim API - Free built-in, works in WebSim environment",
-        "â€¢ Paid APIs - OpenAI GPT-4o, Claude, Gemini (best quality)",
-        "â€¢ Free APIs - Groq, HuggingFace, Together AI (free tier limits)",
-        "âš¡ Pipeline: WebSim â†’ Paid â†’ Free â†’ Fallback chain",
+        "• WebSim API - Free built-in, works in WebSim environment",
+        "• Paid APIs - OpenAI GPT-4o, Claude, Gemini (best quality)",
+        "• Free APIs - Groq, HuggingFace, Together AI (free tier limits)",
+        "⚡ Pipeline: WebSim → Paid → Free → Fallback chain",
       ],
     },
     image: {
-      title: "ðŸŽ¨ AI Image Generation Info",
+      title: "🎨 AI Image Generation Info",
       items: [
-        "â€¢ WebSim API - Free built-in image generation",
-        "â€¢ OpenAI DALL-E 3 - Best quality, $0.04-0.12 per image",
-        "â€¢ Stable Diffusion - Free via HuggingFace/Replicate",
-        "â€¢ FLUX - Fast high-quality via Together/FAL",
-        "ðŸ“ Supports aspect ratios: 1:1, 16:9, 9:16, 4:3",
+        "• WebSim API - Free built-in image generation",
+        "• OpenAI DALL-E 3 - Best quality, $0.04-0.12 per image",
+        "• Stable Diffusion - Free via HuggingFace/Replicate",
+        "• FLUX - Fast high-quality via Together/FAL",
+        "📐 Supports aspect ratios: 1:1, 16:9, 9:16, 4:3",
       ],
     },
     tts: {
-      title: "ðŸ”Š Text-to-Speech Info",
+      title: "🔊 Text-to-Speech Info",
       items: [
-        "â€¢ Browser TTS - Free, uses Web Speech API (no API key)",
-        "â€¢ OpenAI TTS - Voices: alloy, echo, fable, onyx, nova, shimmer",
-        "â€¢ ElevenLabs - Most realistic voices, clone custom voices",
-        "ðŸŽ™ï¸ Supports multiple languages and voice genders",
+        "• Browser TTS - Free, uses Web Speech API (no API key)",
+        "• OpenAI TTS - Voices: alloy, echo, fable, onyx, nova, shimmer",
+        "• ElevenLabs - Most realistic voices, clone custom voices",
+        "🎙️ Supports multiple languages and voice genders",
       ],
     },
     video: {
-      title: "ðŸŽ¬ Video AI Info",
+      title: "🎬 Video AI Info",
       items: [
-        "â€¢ HuggingFace Spaces - Free! No API key needed ðŸ†“",
-        "â€¢ Replicate - Pay-per-use, many models available",
-        "â€¢ Runway Gen-3 - Cinema quality, best for pro use",
-        "âš ï¸ CORS Note: Most video APIs block browser requests",
-        "ðŸŽ¥ Text-to-video or Image-to-video animation",
+        "• HuggingFace Spaces - Free! No API key needed 🆓",
+        "• Replicate - Pay-per-use, many models available",
+        "• Runway Gen-3 - Cinema quality, best for pro use",
+        "⚠️ CORS Note: Most video APIs block browser requests",
+        "🎥 Text-to-video or Image-to-video animation",
       ],
     },
     comparison: {
-      title: "ðŸ“Š Comparison Dashboard Info",
+      title: "📊 Comparison Dashboard Info",
       items: [
-        "â€¢ Check Updates - Detect new API versions and model updates",
-        "â€¢ Price Comparison - Compare costs across providers (per 1M tokens)",
-        "â€¢ Model Benchmark - Quality ratings from community benchmarks",
-        'ðŸ’¡ Click "Update All" to fetch latest prices from official APIs',
+        "• Check Updates - Detect new API versions and model updates",
+        "• Price Comparison - Compare costs across providers (per 1M tokens)",
+        "• Model Benchmark - Quality ratings from community benchmarks",
+        '💡 Click "Update All" to fetch latest prices from official APIs',
       ],
     },
   };
@@ -7301,7 +7301,7 @@ function showSectionInfo(section) {
 }
 
 // ====================================================================
-// ðŸ’¾ SAVE & LOAD FUNCTIONS (with encryption)
+// 💾 SAVE & LOAD FUNCTIONS (with encryption)
 // ====================================================================
 function collectAllSettings() {
   const settings = {
@@ -7329,7 +7329,7 @@ function collectAllSettings() {
     "externalSttApiKey",
     "externalSttApi",
     "browserTtsVoice",
-    // ðŸ”§ Model selectors - IMPORTANT for proper model persistence
+    // 🔧 Model selectors - IMPORTANT for proper model persistence
     "openaiProjectLabel",
     "openaiKeyLabel",
     "openaiTextModel",
@@ -7452,8 +7452,8 @@ function updateOpenAIModelStatus(data = {}) {
   const testedAt = data.detectedAt || data.openaiTextMaxDetectedAt || "";
 
   status.innerHTML = [
-    `<strong>Project:</strong> ${escapeHtml(projectLabel)} Â· <strong>Key:</strong> ${escapeHtml(keyLabel)}`,
-    `<strong>Current:</strong> ${escapeHtml(selectedModel)} Â· <strong>Max:</strong> ${escapeHtml(maxModel)}${modelCount ? ` Â· ${modelCount} models` : ""}`,
+    `<strong>Project:</strong> ${escapeHtml(projectLabel)} · <strong>Key:</strong> ${escapeHtml(keyLabel)}`,
+    `<strong>Current:</strong> ${escapeHtml(selectedModel)} · <strong>Max:</strong> ${escapeHtml(maxModel)}${modelCount ? ` · ${modelCount} models` : ""}`,
     testedAt ? `<span style="color:#9ca3af">Detected: ${escapeHtml(new Date(testedAt).toLocaleString())}</span>` : "",
   ].filter(Boolean).join("<br>");
 }
@@ -7497,17 +7497,17 @@ function clearApiCredentialStorage({ includePreferences = false } = {}) {
 function saveSettingsToLocalStorage(skipWarning = false) {
   showContextualHelp(
     "Save Locally",
-    "âš ï¸ This saves UNENCRYPTED to localStorage - anyone can read it!",
+    "⚠️ This saves UNENCRYPTED to localStorage - anyone can read it!",
   );
 
   // Show safety warning for unencrypted storage
   if (
     !skipWarning &&
     !confirm(
-      "âš ï¸ SECURITY WARNING\n\nThis will save API keys in PLAIN TEXT to localStorage.\n\nAnyone with access to your browser can view these keys.\n\nFor better security, use the ðŸ” Vault button to encrypt your keys.\n\nContinue with unencrypted save?",
+      "⚠️ SECURITY WARNING\n\nThis will save API keys in PLAIN TEXT to localStorage.\n\nAnyone with access to your browser can view these keys.\n\nFor better security, use the 🔐 Vault button to encrypt your keys.\n\nContinue with unencrypted save?",
     )
   ) {
-    logMessage("ðŸ’¡ Tip: Use ðŸ” Vault for encrypted storage", "info");
+    logMessage("💡 Tip: Use 🔐 Vault for encrypted storage", "info");
     return;
   }
 
@@ -7678,17 +7678,17 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       JSON.stringify(preferencesOnly),
     );
 
-    // âš ï¸ LEGACY: Keep for backward compatibility (will be removed in v3.0)
+    // ⚠️ LEGACY: Keep for backward compatibility (will be removed in v3.0)
     // These contain keys - apps should migrate to reading from vault
     localStorage.setItem("cadAiApiSettings", JSON.stringify(plainSettings));
     localStorage.setItem("smartApiSettings", JSON.stringify(plainSettings));
     console.warn(
-      "âš ï¸ Legacy storage (cadAiApiSettings) still active - migrate apps to use smdeltartPreferences + vault",
+      "⚠️ Legacy storage (cadAiApiSettings) still active - migrate apps to use smdeltartPreferences + vault",
     );
 
-    logMessage("ðŸ’¾ Settings saved to localStorage!", "success");
+    logMessage("💾 Settings saved to localStorage!", "success");
     console.log(
-      "ðŸ’¾ Saved settings (plain for managers):",
+      "💾 Saved settings (plain for managers):",
       Object.keys(plainSettings),
     );
 
@@ -7708,7 +7708,7 @@ function saveSettingsToLocalStorage(skipWarning = false) {
     if (ApiVault.isUnlocked) {
       ApiVault.saveCurrentKeys()
         .then(() => {
-          logMessage("ðŸ” Also saved to encrypted vault", "success");
+          logMessage("🔐 Also saved to encrypted vault", "success");
           updateVaultButtonState();
         })
         .catch((e) => {
@@ -7719,7 +7719,7 @@ function saveSettingsToLocalStorage(skipWarning = false) {
     // Also save test status results
     saveTestResults();
   } catch (e) {
-    logMessage("âŒ Failed to save: " + e.message, "error");
+    logMessage("❌ Failed to save: " + e.message, "error");
   }
 }
 
@@ -7727,23 +7727,23 @@ function saveSettingsToLocalStorage(skipWarning = false) {
 function saveTestResults() {
   const testStatus = {
     paidTextStatus:
-      document.getElementById("paidTextStatus")?.textContent === "âœ…",
+      document.getElementById("paidTextStatus")?.textContent === "✅",
     freeTextStatus:
-      document.getElementById("freeTextStatus")?.textContent === "âœ…",
+      document.getElementById("freeTextStatus")?.textContent === "✅",
     paidImageStatus:
-      document.getElementById("paidImageStatus")?.textContent === "âœ…",
+      document.getElementById("paidImageStatus")?.textContent === "✅",
     freeImageStatus:
-      document.getElementById("freeImageStatus")?.textContent === "âœ…",
+      document.getElementById("freeImageStatus")?.textContent === "✅",
     paidVideoStatus:
-      document.getElementById("paidVideoStatus")?.textContent === "âœ…",
+      document.getElementById("paidVideoStatus")?.textContent === "✅",
     freeVideoStatus:
-      document.getElementById("freeVideoStatus")?.textContent === "âœ…",
+      document.getElementById("freeVideoStatus")?.textContent === "✅",
     externalTtsStatus:
-      document.getElementById("externalTtsStatus")?.textContent === "âœ…",
+      document.getElementById("externalTtsStatus")?.textContent === "✅",
     lastTested: new Date().toISOString(),
   };
   localStorage.setItem("smdeltartApiTestStatus", JSON.stringify(testStatus));
-  console.log("âœ… Test status saved:", testStatus);
+  console.log("✅ Test status saved:", testStatus);
 }
 
 // Restore test status from localStorage
@@ -7752,7 +7752,7 @@ function restoreTestResults() {
     const saved = localStorage.getItem("smdeltartApiTestStatus");
     if (saved) {
       const testStatus = JSON.parse(saved);
-      console.log("ðŸ“‹ Restoring test status:", testStatus);
+      console.log("📋 Restoring test status:", testStatus);
 
       // Restore individual status indicators
       if (testStatus.paidTextStatus)
@@ -7778,7 +7778,7 @@ function restoreTestResults() {
         const lastDate = new Date(testStatus.lastTested);
         const ago = Math.round((Date.now() - lastDate) / 60000);
         logMessage(
-          `âœ… API keys loaded - click "Test All APIs" to validate`,
+          `✅ API keys loaded - click "Test All APIs" to validate`,
           "info",
         );
       }
@@ -7797,7 +7797,7 @@ function loadSavedSettings() {
     if (saved) {
       const settings = JSON.parse(saved);
       applySettings(settings);
-      logMessage("ðŸ“‚ Loaded saved settings", "info");
+      logMessage("📂 Loaded saved settings", "info");
 
       // Restore test status after settings are applied
       setTimeout(() => restoreTestResults(), 100);
@@ -7825,9 +7825,9 @@ function exportSettingsToFile() {
     a.download = `smdeltart-api-settings.ghfav`;
     a.click();
     URL.revokeObjectURL(url);
-    logMessage("ðŸ“¤ Settings exported to .ghfav file", "success");
+    logMessage("📤 Settings exported to .ghfav file", "success");
   } catch (e) {
-    logMessage("âŒ Export failed: " + e.message, "error");
+    logMessage("❌ Export failed: " + e.message, "error");
   }
 }
 
@@ -7843,7 +7843,7 @@ function importSettingsFromFile(event) {
     !fileName.endsWith(".json")
   ) {
     logMessage(
-      "âŒ Invalid file type. Use .ghfav files from SmDeltArt apps.",
+      "❌ Invalid file type. Use .ghfav files from SmDeltArt apps.",
       "error",
     );
     return;
@@ -7858,7 +7858,7 @@ function importSettingsFromFile(event) {
       if (settings._ghfav) {
         if (settings._ghfav.collection !== "SmDeltArt") {
           logMessage(
-            "âŒ This .ghfav file is not from SmDeltArt collection",
+            "❌ This .ghfav file is not from SmDeltArt collection",
             "error",
           );
           return;
@@ -7869,16 +7869,16 @@ function importSettingsFromFile(event) {
 
       applySettings(settings);
       saveSettingsToLocalStorage();
-      logMessage("ðŸ“¥ Settings imported successfully", "success");
+      logMessage("📥 Settings imported successfully", "success");
     } catch (err) {
-      logMessage("âŒ Invalid settings file: " + err.message, "error");
+      logMessage("❌ Invalid settings file: " + err.message, "error");
     }
   };
   reader.readAsText(file);
 }
 
 // ====================================================================
-// ðŸ—£ï¸ BROWSER TTS SETUP
+// 🗣️ BROWSER TTS SETUP
 // ====================================================================
 function setupBrowserTTS() {
   const browserTtsRadio = document.getElementById("browserTtsRadio");
@@ -7886,7 +7886,7 @@ function setupBrowserTTS() {
 
   // Check if Web Speech API is available
   if ("speechSynthesis" in window) {
-    document.getElementById("browserTtsStatus").textContent = "âœ…";
+    document.getElementById("browserTtsStatus").textContent = "✅";
 
     // Create voice selector if it doesn't exist
     let voiceSelect = document.getElementById("browserTtsVoice");
@@ -7900,7 +7900,7 @@ function setupBrowserTTS() {
                             <option value="">Loading voices...</option>
                         </select>
                         <button id="testBrowserTtsBtn" class="dashboard-btn" style="background: #22c55e; color: white; font-size: 0.8em; padding: 6px 10px; margin-top: 8px;">
-                            ðŸ”Š Test Voice
+                            🔊 Test Voice
                         </button>
                     `;
       container.appendChild(voiceDiv);
@@ -7916,7 +7916,7 @@ function setupBrowserTTS() {
       voices.forEach((voice, i) => {
         const option = document.createElement("option");
         option.value = i;
-        option.textContent = `${voice.name} (${voice.lang})${voice.default ? " â˜…" : ""}`;
+        option.textContent = `${voice.name} (${voice.lang})${voice.default ? " ★" : ""}`;
         voiceSelect.appendChild(option);
       });
     }
@@ -7938,7 +7938,7 @@ function setupBrowserTTS() {
       }
     });
   } else {
-    document.getElementById("browserTtsStatus").textContent = "âŒ";
+    document.getElementById("browserTtsStatus").textContent = "❌";
   }
 }
 
@@ -7958,14 +7958,14 @@ function testBrowserTTS() {
   utterance.rate = 1;
   utterance.pitch = 1;
   speechSynthesis.speak(utterance);
-  logMessage("ðŸ”Š Testing Browser TTS...", "info");
+  logMessage("🔊 Testing Browser TTS...", "info");
 }
 
 // ====================================================================
-// ðŸ§ª API TESTING
+// 🧪 API TESTING
 // ====================================================================
 async function testAllConfiguredAPIs() {
-  logMessage("ðŸ§ª Starting API tests...", "info");
+  logMessage("🧪 Starting API tests...", "info");
   let passed = 0;
   let tested = 0;
 
@@ -7979,12 +7979,12 @@ async function testAllConfiguredAPIs() {
       });
       if (response.ok) {
         passed++;
-        logMessage("âœ… OpenAI API: Connected", "success");
+        logMessage("✅ OpenAI API: Connected", "success");
       } else {
-        logMessage("âŒ OpenAI API: " + response.status, "error");
+        logMessage("❌ OpenAI API: " + response.status, "error");
       }
     } catch (e) {
-      logMessage("âŒ OpenAI API: Network error", "error");
+      logMessage("❌ OpenAI API: Network error", "error");
     }
   }
 
@@ -7996,10 +7996,10 @@ async function testAllConfiguredAPIs() {
     });
     if (response.ok || response.status === 404) {
       passed++;
-      logMessage("âœ… Pollinations: Available (Free)", "success");
+      logMessage("✅ Pollinations: Available (Free)", "success");
     }
   } catch (e) {
-    logMessage("âš ï¸ Pollinations: May have CORS issues", "warning");
+    logMessage("⚠️ Pollinations: May have CORS issues", "warning");
     passed++; // Still count as available
   }
 
@@ -8007,21 +8007,21 @@ async function testAllConfiguredAPIs() {
   if ("speechSynthesis" in window) {
     tested++;
     passed++;
-    logMessage("âœ… Browser TTS: Available", "success");
+    logMessage("✅ Browser TTS: Available", "success");
   }
 
   logMessage(
-    `ðŸ“‹ Categories: 5/5 | APIs: ${passed}/${tested} working`,
+    `📋 Categories: 5/5 | APIs: ${passed}/${tested} working`,
     passed === tested ? "success" : "warning",
   );
 }
 
 // ====================================================================
-// ðŸ”— DETACHED WINDOW & CROSS-TAB SYNC
+// 🔗 DETACHED WINDOW & CROSS-TAB SYNC
 // ====================================================================
 
 /**
- * SmÎ”rt Widget Sync - BroadcastChannel for cross-tab/window communication
+ * SmΔrt Widget Sync - BroadcastChannel for cross-tab/window communication
  * Allows widget to stay synced with parent app even when detached
  */
 const WIDGET_CHANNEL_NAME = "smdeltart-api-settings-sync";
@@ -8045,16 +8045,16 @@ function initWidgetSync() {
       window.opener !== null || window.name === "smdeltart-api-settings";
 
     if (isDetachedWindow) {
-      console.log("ðŸ”— Running in detached window mode - sync enabled");
+      console.log("🔗 Running in detached window mode - sync enabled");
       document.body.classList.add("detached-mode");
 
       // Notify parent we're ready
       broadcastSync({ type: "widget-ready", source: "detached" });
     }
 
-    console.log("âœ… Widget sync channel initialized:", WIDGET_CHANNEL_NAME);
+    console.log("✅ Widget sync channel initialized:", WIDGET_CHANNEL_NAME);
   } catch (error) {
-    console.log("âš ï¸ BroadcastChannel not supported, using fallback:", error);
+    console.log("⚠️ BroadcastChannel not supported, using fallback:", error);
   }
 }
 
@@ -8101,14 +8101,14 @@ function broadcastSync(data) {
 
 // Handle incoming sync messages
 function handleSyncMessage(data) {
-  console.log("ðŸ“¨ Sync message received:", data.type);
+  console.log("📨 Sync message received:", data.type);
 
   switch (data.type) {
     case "settings-updated":
       // Reload settings from localStorage
       if (typeof loadSavedSettings === "function") {
         loadSavedSettings();
-        addLogEntry("ðŸ”„ Settings synced from another window", "info");
+        addLogEntry("🔄 Settings synced from another window", "info");
       }
       break;
 
@@ -8194,7 +8194,7 @@ function openDetachedWindow() {
   const top = Math.max(0, (window.screen.height - height) / 2 - 20);
 
   console.log(
-    `ðŸ” Browser zoom: ${zoomPercent}% â†’ Window size: ${width}x${height}, Content scale: ${contentScale}`,
+    `🔍 Browser zoom: ${zoomPercent}% → Window size: ${width}x${height}, Content scale: ${contentScale}`,
   );
 
   // Get current widget URL with scale parameter
@@ -8229,19 +8229,19 @@ function openDetachedWindow() {
       }
     }
 
-    addLogEntry("ðŸ”— Opened in detached window - stays synced!", "success");
+    addLogEntry("🔗 Opened in detached window - stays synced!", "success");
     return detachedWindow;
   } else {
-    addLogEntry("âš ï¸ Popup blocked - please allow popups", "warning");
+    addLogEntry("⚠️ Popup blocked - please allow popups", "warning");
     return null;
   }
 }
 
-// Î”I is no longer clickable - just a styled element that matches favicon color
+// ΔI is no longer clickable - just a styled element that matches favicon color
 // The color sync happens in initAnimatedFavicon() when favicon stops
 function setupHeaderLogoClick() {
-  // Nothing to do - Î”I is just styled text now, not a link
-  console.log("Î”I branding: color synced with favicon on stop");
+  // Nothing to do - ΔI is just styled text now, not a link
+  console.log("ΔI branding: color synced with favicon on stop");
 }
 
 // Sync settings when saved
@@ -8291,7 +8291,7 @@ function applyContentScale() {
     document.body.style.overflow = "auto";
 
     console.log(
-      `ðŸ“ Content zoomed to ${(scale * 100).toFixed(0)}% for zoom-adjusted window`,
+      `📐 Content zoomed to ${(scale * 100).toFixed(0)}% for zoom-adjusted window`,
     );
   } else if (scale && scale > 1.0) {
     // For scaling up, just adjust container size
@@ -8299,7 +8299,7 @@ function applyContentScale() {
     if (container) {
       container.style.maxWidth = `${420 * scale}px`;
     }
-    console.log(`ðŸ“ Container scaled up to ${(scale * 100).toFixed(0)}%`);
+    console.log(`📐 Container scaled up to ${(scale * 100).toFixed(0)}%`);
   }
 }
 
@@ -8335,18 +8335,18 @@ function disablePasswordManagers() {
 }
 
 // ====================================================================
-// ðŸ”º ANIMATED DELTA FAVICON
+// 🔺 ANIMATED DELTA FAVICON
 // ====================================================================
 
 /**
  * Creates an animated favicon with rotating delta triangle
- * Runs animation for at least 1 full 360Â° rotation, then stops at random point
+ * Runs animation for at least 1 full 360° rotation, then stops at random point
  * Each page load shows different final color: Cyan, Green, or Yellow
  * Syncs color with detached windows via sessionStorage
  */
 function initAnimatedFavicon() {
   const totalDuration = 4000; // 4 seconds per cycle
-  const minFullRotations = 1; // At least 1 full 360Â° before stopping
+  const minFullRotations = 1; // At least 1 full 360° before stopping
 
   // Check if we should use a synced color (from parent/detached window)
   const syncedColorIndex = sessionStorage.getItem("deltaColorIndex");
@@ -8406,7 +8406,7 @@ function initAnimatedFavicon() {
 
   function setFaviconDeltaWithI(rotation, color) {
     // Show delta (full size) with "I" letter next to it when stopped
-    // CAD-Î”I branding: favicon shows Î”I, tab title shows "API Settings"
+    // CAD-ΔI branding: favicon shows ΔI, tab title shows "API Settings"
     const svgContent = `
                     <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 24'>
                         <g transform='rotate(${rotation}, 12, 12)'>
@@ -8438,11 +8438,11 @@ function initAnimatedFavicon() {
       }
 
       // Tab title - "I" is now in favicon, so remove from title
-      // CAD-Î”I: favicon shows Î”I + tab shows "API Settings" = complete branding
+      // CAD-ΔI: favicon shows ΔI + tab shows "API Settings" = complete branding
       document.title = "API Settings";
 
       console.log(
-        `ðŸ”º Delta favicon stopped at ${finalPosition.name} (${finalPosition.rotation}Â°)`,
+        `🔺 Delta favicon stopped at ${finalPosition.name} (${finalPosition.rotation}°)`,
       );
       return; // Stop animation
     }
@@ -8474,7 +8474,7 @@ function initAnimatedFavicon() {
 
   requestAnimationFrame(updateFavicon);
   console.log(
-    `ðŸ”º Delta favicon will stop at ${stopAfterCycles}/3 (${finalPosition.name})`,
+    `🔺 Delta favicon will stop at ${stopAfterCycles}/3 (${finalPosition.name})`,
   );
 }
 

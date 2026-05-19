@@ -1,5 +1,5 @@
 import { GlobeRenderer } from './lib/globe.js?v=topic-earth-globe-vignette-20260516';
-import { AppAccess } from './lib/capabilities.js?v=topic-earth-access-toggle-20260517';
+import { AppAccess } from './lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
 import { LAYERS } from './data/layers.js?v=topic-earth-carbon-history-20260515';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-cloud-over-20260423';
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-regional-hub-20260423';
@@ -135,6 +135,7 @@ class TopicEarthApp {
     AppAccess.enforceProfile();
     AppAccess.restoreLocalDevelopmentAdminMode();
     this.applyAdminMode();
+    this.setupAdminUnlockShortcut();
     
     // Initialize UI components
     this.initTopBar();
@@ -578,6 +579,51 @@ class TopicEarthApp {
   applyAdminMode(isAdmin = this.isAdminMode()) {
     document.body.classList.toggle('admin-mode', isAdmin);
     document.body.classList.toggle('user-mode', !isAdmin);
+  }
+
+  setupAdminUnlockShortcut() {
+    let typedSequence = '';
+    let lastKeyAt = 0;
+    let chordArmedAt = 0;
+
+    const unlockAdmin = () => {
+      const state = AppAccess.unlockAdminAccess(true);
+      window.dispatchEvent(new CustomEvent('adminModeChanged', { detail: state }));
+    };
+
+    window.addEventListener('keydown', (event) => {
+      const target = event.target;
+      if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+      if (target?.isContentEditable) return;
+
+      const key = String(event.key || '').toLowerCase();
+      const now = Date.now();
+
+      if (event.altKey && event.shiftKey && key === 'a') {
+        event.preventDefault();
+        chordArmedAt = now;
+        return;
+      }
+
+      if (chordArmedAt && now - chordArmedAt < 1800 && key === 'd') {
+        event.preventDefault();
+        chordArmedAt = 0;
+        unlockAdmin();
+        return;
+      }
+
+      if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || key.length !== 1 || !/[a-z]/.test(key)) {
+        return;
+      }
+
+      typedSequence = now - lastKeyAt > 2200 ? key : `${typedSequence}${key}`.slice(-5);
+      lastKeyAt = now;
+
+      if (typedSequence === 'admin') {
+        typedSequence = '';
+        unlockAdmin();
+      }
+    });
   }
 
   async initSettings() {

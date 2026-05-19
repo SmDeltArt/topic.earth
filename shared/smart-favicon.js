@@ -1,6 +1,6 @@
-﻿/**
- * SmÎ”rt Animated Favicon v1.1
- * Rotating delta triangle that cycles through cyan â†’ green â†’ yellow
+/**
+ * SmΔrt Animated Favicon v1.1
+ * Rotating delta triangle that cycles through cyan → green → yellow
  * Stops randomly at 4/3, 5/3, or 6/3 rotations (like Portal loading)
  *
  * Usage: Just include this script in any HTML file
@@ -38,7 +38,7 @@
     function getSharedStopAt() {
         if (!window._smartAnimationStopAt) {
             window._smartAnimationStopAt = 4 + Math.floor(Math.random() * 3);
-            console.log(`ðŸŽ² SmÎ”rt animation stopAt set to ${window._smartAnimationStopAt}/3`);
+            console.log(`🎲 SmΔrt animation stopAt set to ${window._smartAnimationStopAt}/3`);
         }
         return window._smartAnimationStopAt;
     }
@@ -71,7 +71,7 @@
         // Rotate 10 degrees each frame
         rotation = (rotation + 10) % 360;
 
-        // Change color at each 120Â° position
+        // Change color at each 120° position
         if (rotation % 120 === 0) {
             thirdCount++;
             colorIndex = (colorIndex + 1) % 3;
@@ -86,10 +86,10 @@
                         intervalId = null;
                     }
                     updateFavicon();
-                    console.log(`âœ… SmÎ”rt favicon stopped at ${thirdCount}/3 (color: ${['cyan', 'green', 'yellow'][colorIndex]})`);
+                    console.log(`✅ SmΔrt favicon stopped at ${thirdCount}/3 (color: ${['cyan', 'green', 'yellow'][colorIndex]})`);
                 }, 400);
             } else {
-                // Brief pause at each 120Â°
+                // Brief pause at each 120°
                 isPaused = true;
                 setTimeout(function() {
                     isPaused = false;
@@ -125,7 +125,7 @@
 
         // Start animation loop
         intervalId = setInterval(animate, CONFIG.interval);
-        console.log(`âœ… SmÎ”rt animated favicon started (will stop at ${stopAt}/3)`);
+        console.log(`✅ SmΔrt animated favicon started (will stop at ${stopAt}/3)`);
     }
 
     /**
