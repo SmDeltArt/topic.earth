@@ -3443,8 +3443,21 @@ function setupPaidTextAPIHandlers() {
     // Model change is saved when Save Locally is clicked
   });
 
-  document.getElementById("openaiProjectLabel")?.addEventListener("input", updateOpenAIModelStatus);
-  document.getElementById("openaiKeyLabel")?.addEventListener("input", updateOpenAIModelStatus);
+  const _openaiProjectLabelEl = document.getElementById("openaiProjectLabel");
+  const _openaiKeyLabelEl = document.getElementById("openaiKeyLabel");
+
+  _openaiProjectLabelEl?.addEventListener("input", updateOpenAIModelStatus);
+  _openaiProjectLabelEl?.addEventListener("blur", () => {
+    clearTimeout(window.autoSaveTimeout);
+    window.autoSaveTimeout = setTimeout(() => saveApiSettingsLocally(), 400);
+  });
+
+  _openaiKeyLabelEl?.addEventListener("input", updateOpenAIModelStatus);
+  _openaiKeyLabelEl?.addEventListener("blur", () => {
+    clearTimeout(window.autoSaveTimeout);
+    window.autoSaveTimeout = setTimeout(() => saveApiSettingsLocally(), 400);
+  });
+
   updateOpenAIModelStatus();
 }
 
@@ -7698,11 +7711,21 @@ function saveSettingsToLocalStorage(skipWarning = false) {
         {
           type: "smart-widget",
           action: "settings-saved",
-          data: { provider: plainSettings.paidTextApi || "openai" },
+          settings,
+          data: {
+            widgetId: "api-settings",
+            provider: plainSettings.paidTextApi || "openai",
+            settings,
+          },
         },
         "*",
       );
     }
+
+    broadcastSync({
+      type: "settings-updated",
+      settings,
+    });
 
     // Also save to vault if unlocked (AES-256-GCM encrypted)
     if (ApiVault.isUnlocked) {
