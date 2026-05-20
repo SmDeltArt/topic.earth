@@ -3636,7 +3636,7 @@ body.regional-map-search-open #layer-panel {
 
 .topic-composer-shell {
     display: grid;
-    gap: 14px;
+    gap: 10px;
 }
 
 .topic-smart-input-card,
@@ -3647,7 +3647,7 @@ body.regional-map-search-open #layer-panel {
 }
 
 .topic-smart-input-card {
-    padding: 12px;
+    padding: 10px;
 }
 
 .topic-smart-input-label {
@@ -3662,8 +3662,8 @@ body.regional-map-search-open #layer-panel {
 
 #topic-smart-input {
     width: 100%;
-    min-height: 86px;
-    padding: 12px;
+    min-height: 72px;
+    padding: 10px;
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 8px;
     background: rgba(5, 10, 20, 0.42);
@@ -3695,7 +3695,7 @@ body.regional-map-search-open #layer-panel {
 }
 
 .topic-smart-chips {
-    display: flex;
+    display: none;
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 10px;
@@ -3712,11 +3712,11 @@ body.regional-map-search-open #layer-panel {
 }
 
 .topic-composer-preview {
-    padding: 16px;
+    padding: 14px;
 }
 
 .topic-composer-evidence-lane {
-    padding: 14px;
+    padding: 12px;
     border: 1px solid rgba(129, 199, 132, 0.22);
     border-radius: 8px;
     background: rgba(129, 199, 132, 0.055);

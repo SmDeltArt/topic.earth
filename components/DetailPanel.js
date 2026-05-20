@@ -5747,7 +5747,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       : (isEditing ? 'Edit Topic Draft' : 'Propose a Topic');
     const recordingNote = isRegionalProposal
       ? '<strong>Local proposal:</strong> type or paste once, edit the preview, add proof when useful, then save it on this device.'
-      : '<strong>Topic Composer:</strong> type or paste once, edit the preview, add evidence when useful, then save it on this device.';
+      : '';
     const saveLabel = isRegionalProposal
       ? (isEditing ? 'Update Local Action' : 'Save Local Action')
       : (isEditing ? 'Update Saved Topic' : 'Save on this device');
@@ -5766,9 +5766,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     content.innerHTML = `
       <div class="detail-header">
         <h2 class="detail-title">${workspaceTitle}</h2>
-        <div class="topic-recording-note">
-          ${recordingNote}
-        </div>
+        ${recordingNote ? `<div class="topic-recording-note">${recordingNote}</div>` : ''}
         ${isRegionalProposal ? `
           <div class="topic-recording-note regional-proposal-note">
             <strong>Regional focus:</strong> ${this.escapeHtml(regionalLabel || 'Current Regional map area')}
