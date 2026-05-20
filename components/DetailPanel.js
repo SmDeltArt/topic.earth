@@ -7521,6 +7521,12 @@ Return ONLY a JSON object with this exact format, no other text:
       textMaxDetectedAt: settings.aiApiTextMaxDetectedAt,
       imageProviderName: settings.aiApiImageProvider,
       imageModel: settings.aiApiImageModel,
+      ttsActiveMode: settings.aiVoiceEnabled ? 'external' : 'browser',
+      ttsProvider: settings.aiVoiceProvider,
+      ttsProviderName: settings.aiVoiceProvider === 'openai-tts' ? 'OpenAI TTS' : settings.aiVoiceProvider,
+      ttsModel: settings.aiVoiceModel,
+      ttsVoice: settings.aiVoiceVoice,
+      ttsHasKey: false,
       lastSyncedAt: settings.aiApiLastSyncedAt,
       webSearchCapable: false
     };
@@ -7538,6 +7544,11 @@ Return ONLY a JSON object with this exact format, no other text:
   renderAiApiModelBadges(summary = this.getAiApiSummary()) {
     const currentModel = summary.textModel || 'None';
     const maxModel = summary.textMaxModel || 'Check';
+    const ttsProvider = summary.ttsProviderName || summary.ttsProvider || 'Browser TTS';
+    const ttsModel = summary.ttsModel || '';
+    const ttsVoice = summary.ttsVoice || '';
+    const ttsReady = summary.ttsActiveMode === 'external' && summary.ttsProvider === 'openai-tts' && summary.ttsHasKey;
+    const ttsLabel = [ttsProvider, ttsModel, ttsVoice].filter(Boolean).join(' / ') || 'Browser voice';
     const maxTitle = summary.textMaxDetectedAt
       ? `Detected ${this.formatAiApiTimestamp(summary.textMaxDetectedAt)}`
       : 'Use Refresh to detect available OpenAI text models';
@@ -7549,6 +7560,9 @@ Return ONLY a JSON object with this exact format, no other text:
         </span>
         <span class="ai-api-model-badge max" title="${this.escapeHtml(maxTitle)}">
           <b>Max</b>${this.escapeHtml(maxModel)}
+        </span>
+        <span class="ai-api-model-badge tts ${ttsReady ? 'linked' : 'browser'}" title="Linked read-aloud voice">
+          <b>TTS</b>${this.escapeHtml(ttsLabel)}
         </span>
       </div>
     `;
@@ -7568,11 +7582,14 @@ Return ONLY a JSON object with this exact format, no other text:
     const textProvider = summary.textProviderName || summary.textProvider || 'No text provider selected';
     const textModel = summary.textModel || 'No model selected';
     const imageProvider = summary.imageProviderName || summary.imageProvider || 'No image provider selected';
+    const ttsProvider = summary.ttsProviderName || summary.ttsProvider || 'Browser TTS';
+    const ttsVoice = summary.ttsVoice || 'auto';
     const webSearchMode = summary.webSearchCapable ? 'Live web-search capable' : 'Manual search/update';
 
     meta.innerHTML = `
       <span><strong>Text:</strong> ${this.escapeHtml(textProvider)}${textModel ? ` / ${this.escapeHtml(textModel)}` : ''}</span>
       <span><strong>Image:</strong> ${this.escapeHtml(imageProvider)}</span>
+      <span><strong>TTS:</strong> ${this.escapeHtml(ttsProvider)} / ${this.escapeHtml(ttsVoice)}</span>
       <span><strong>Mode:</strong> ${this.escapeHtml(webSearchMode)}</span>
     `;
 
@@ -8075,6 +8092,8 @@ Return ONLY a JSON object with this exact format, no other text:
     const aiTextModel = aiSummary.textModel || t('settings.noModelSelected');
     const aiModelBadges = this.renderAiApiModelBadges(aiSummary);
     const aiImageProvider = aiSummary.imageProviderName || aiSummary.imageProvider || t('settings.noImageProvider');
+    const aiTtsProvider = aiSummary.ttsProviderName || aiSummary.ttsProvider || 'Browser TTS';
+    const aiTtsVoice = aiSummary.ttsVoice || 'auto';
     const aiSearchMode = aiSummary.webSearchCapable ? t('settings.liveWebSearchCapable') : t('settings.aiAssistedSearchUpdate');
     const isAdmin = AppAccess.isAdminMode();
     const accessState = AppAccess.getState();
@@ -8305,6 +8324,7 @@ Return ONLY a JSON object with this exact format, no other text:
           <div id="ai-api-link-meta" class="ai-api-link-meta">
             <span><strong>${this.escapeHtml(t('settings.aiText'))}:</strong> ${this.escapeHtml(aiTextProvider)}${aiTextModel ? ` / ${this.escapeHtml(aiTextModel)}` : ''}</span>
             <span><strong>${this.escapeHtml(t('settings.aiImage'))}:</strong> ${this.escapeHtml(aiImageProvider)}</span>
+            <span><strong>TTS:</strong> ${this.escapeHtml(aiTtsProvider)} / ${this.escapeHtml(aiTtsVoice)}</span>
             <span><strong>${this.escapeHtml(t('settings.aiMode'))}:</strong> ${this.escapeHtml(aiSearchMode)}</span>
           </div>
           ${aiModelBadges}

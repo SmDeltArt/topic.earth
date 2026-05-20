@@ -11,7 +11,7 @@ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js
 import { TopBar } from './components/TopBar.js?v=topic-earth-tutorial-bubbles-20260516';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-access-toggle-20260517';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-access-toggle-20260517';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-access-toggle-20260517';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-tts-read-sync-20260520';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-20260506';
 import { Settings } from './lib/settings.js?v=topic-earth-api-settings-widget-20260516';
 import { LanguageManager } from './lib/language.js?v=topic-earth-tab-layers-20260507';
@@ -650,6 +650,11 @@ class TopicEarthApp {
   }
   
   setupSettingsListener() {
+    window.addEventListener('aiApiSettingsChanged', () => {
+      const settings = Settings.get();
+      this.ttsManager?.updateSettings?.(settings);
+    });
+
     window.addEventListener('settingsChanged', async (e) => {
       const { settings, feverResolutionChanged } = e.detail;
       this.applyTutorialMode(settings);
@@ -1668,9 +1673,7 @@ class TopicEarthApp {
         } else {
           actionButton.querySelector('span').textContent = 'Reading...';
           this.removeTTSVignette({ stopAudio: true });
-          this.ttsManager?.speak(text, speechLang, {
-            forceBrowser: true
-          });
+          this.ttsManager?.speak(text, speechLang);
         }
 
         this.removeTTSButton();
