@@ -11,7 +11,7 @@ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js
 import { TopBar } from './components/TopBar.js?v=topic-earth-tutorial-bubbles-20260516';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-access-toggle-20260517';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-access-toggle-20260517';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-remove-tts-badge-20260520';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-api-settings-icon-20260520';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-20260506';
 import { Settings } from './lib/settings.js?v=topic-earth-stt-tts-badges-20260520';
 import { LanguageManager } from './lib/language.js?v=topic-earth-tab-layers-20260507';

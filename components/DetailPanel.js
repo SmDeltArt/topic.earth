@@ -8760,7 +8760,7 @@ Return ONLY a JSON object with this exact format, no other text:
           <div class="api-settings-launch-actions">
             <button class="btn-secondary" data-action="refresh-ai-api-settings">${this.escapeHtml(t('settings.refreshLinkedModels'))}</button>
             <button class="btn-primary api-settings-open-btn" data-action="open-api-settings-window">
-              <img src="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779289515/robot-tr_64x64_bcxyba.png" alt="" aria-hidden="true">
+              <img src="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779289516/robot-tr_64x64_lv1huc.svg" alt="" aria-hidden="true">
               <span>${this.escapeHtml(t('settings.apiSettingsButton'))}</span>
             </button>
           </div>
