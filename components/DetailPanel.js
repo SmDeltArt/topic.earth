@@ -7644,8 +7644,20 @@ Return ONLY a JSON object with this exact format, no other text:
     }
 
     const settings = Settings.get();
+    const hasLinkedProviderSummary = Boolean(
+      settings.aiApiTextProvider ||
+      settings.aiApiTextModel ||
+      settings.aiApiImageProvider ||
+      settings.aiApiImageModel ||
+      settings.aiApiSttProvider ||
+      settings.aiApiSttModel ||
+      settings.aiVoiceProvider ||
+      settings.aiVoiceModel ||
+      settings.aiVoiceVoice
+    );
     return {
-      linked: settings.aiApiLinked,
+      linked: settings.aiApiLinked || hasLinkedProviderSummary,
+      providerConfigured: hasLinkedProviderSummary,
       textProviderName: settings.aiApiTextProvider,
       textModel: settings.aiApiTextModel,
       textMaxModel: settings.aiApiTextMaxModel,

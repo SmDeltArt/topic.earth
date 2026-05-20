@@ -425,11 +425,13 @@
       const imageReady = Boolean(imageConfig.provider && (imageConfig.apiKey || imageConfig.provider === 'pollinations'));
       const sttReady = Boolean(sttConfig.provider && (sttConfig.apiKey || sttConfig.config?.noKey));
       const ttsReady = Boolean(ttsConfig.activeMode === 'external' && ttsConfig.provider === 'openai-tts' && ttsConfig.apiKey);
-      const linked = Boolean(apiSettings.hasSavedSettings && (textReady || imageReady || sttReady || ttsReady));
+      const providerConfigured = Boolean(textConfig.provider || imageConfig.provider || sttConfig.provider || ttsConfig.provider);
+      const linked = Boolean(apiSettings.hasSavedSettings && (providerConfigured || textReady || imageReady || sttReady || ttsReady));
       const now = new Date().toISOString();
 
       const summary = {
         linked,
+        providerConfigured,
         source,
         lastSyncedAt: now,
         textProvider: textConfig.provider,
