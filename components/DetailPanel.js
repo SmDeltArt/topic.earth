@@ -8326,7 +8326,7 @@ Return ONLY a JSON object with this exact format, no other text:
       <div class="detail-section" data-tutorial-id="settings-language">
         <div class="section-label">${this.escapeHtml(t('settings.language'))}</div>
         <div class="form-group language-picker">
-          <div class="language-choice-grid" role="listbox" aria-label="${this.escapeHtml(t('settings.uiLanguage'))}">
+          <div class="language-choice-grid language-choice-strip" role="listbox" aria-label="${this.escapeHtml(t('settings.uiLanguage'))}">
             ${this.renderLanguageChoiceButtons(languages, currentLang)}
           </div>
           <select id="ui-language" class="language-scroll-select language-hidden-select" aria-label="${this.escapeHtml(t('settings.uiLanguage'))}" tabindex="-1">
@@ -8373,45 +8373,81 @@ Return ONLY a JSON object with this exact format, no other text:
         </div>
 
         ${settings.ttsEnabled ? `
-          <div class="form-group" style="margin-top: 12px;">
-            <label for="browser-voice">${this.escapeHtml(t('settings.browserVoice'))}</label>
-            <select id="browser-voice">
-              ${this.renderBrowserVoiceOptions(voices, safePreferredBrowserVoice, currentLang)}
-            </select>
-            <div id="browser-voice-hint" class="setting-hint">${this.escapeHtml(this.getVoiceFilterHint(currentLang, matchingCount, allVoices.length))}</div>
+          <div class="tts-mode-switch" role="radiogroup" aria-label="Read voice mode">
+            <button
+              type="button"
+              class="tts-mode-option ${!aiVoiceEnabled ? 'active' : ''}"
+              data-action="set-tts-voice-mode"
+              data-mode="browser"
+              role="radio"
+              aria-checked="${!aiVoiceEnabled ? 'true' : 'false'}"
+            >
+              Browser
+            </button>
+            <button
+              type="button"
+              class="tts-mode-option ${aiVoiceEnabled ? 'active' : ''}"
+              data-action="set-tts-voice-mode"
+              data-mode="ai"
+              role="radio"
+              aria-checked="${aiVoiceEnabled ? 'true' : 'false'}"
+            >
+              Linked AI
+            </button>
           </div>
+          <input type="checkbox" id="ai-voice-enabled" class="tts-mode-state" ${aiVoiceEnabled ? 'checked' : ''} hidden>
 
-          <div class="form-group" style="margin-top: 12px;">
-            <label>${this.escapeHtml(t('settings.speechRate'))}</label>
-            <div class="slider-group">
-              <input 
-                type="range" 
-                id="speech-rate" 
-                min="0.5" 
-                max="2" 
-                step="0.1" 
-                value="${settings.speechRate}"
-              >
-              <span class="slider-value">${settings.speechRate}x</span>
+          <div id="browser-tts-settings" class="tts-mode-panel ${aiVoiceEnabled ? 'hidden' : ''}">
+            <div class="form-group">
+              <label for="browser-voice">${this.escapeHtml(t('settings.browserVoice'))}</label>
+              <select id="browser-voice">
+                ${this.renderBrowserVoiceOptions(voices, safePreferredBrowserVoice, currentLang)}
+              </select>
+              <div id="browser-voice-hint" class="setting-hint">${this.escapeHtml(this.getVoiceFilterHint(currentLang, matchingCount, allVoices.length))}</div>
+            </div>
+
+            <div class="form-group" style="margin-top: 12px;">
+              <label>${this.escapeHtml(t('settings.speechRate'))}</label>
+              <div class="slider-group">
+                <input
+                  type="range"
+                  id="speech-rate"
+                  min="0.5"
+                  max="2"
+                  step="0.1"
+                  value="${settings.speechRate}"
+                >
+                <span class="slider-value">${settings.speechRate}x</span>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 12px;">
+              <label>${this.escapeHtml(t('settings.speechPitch'))}</label>
+              <div class="slider-group">
+                <input
+                  type="range"
+                  id="speech-pitch"
+                  min="0.5"
+                  max="2"
+                  step="0.1"
+                  value="${settings.speechPitch}"
+                >
+                <span class="slider-value">${settings.speechPitch}x</span>
+              </div>
             </div>
           </div>
 
-          <div class="form-group" style="margin-top: 12px;">
-            <label>${this.escapeHtml(t('settings.speechPitch'))}</label>
-            <div class="slider-group">
-              <input 
-                type="range" 
-                id="speech-pitch" 
-                min="0.5" 
-                max="2" 
-                step="0.1" 
-                value="${settings.speechPitch}"
-              >
-              <span class="slider-value">${settings.speechPitch}x</span>
+          <div id="linked-tts-settings" class="tts-mode-panel ${aiVoiceEnabled ? '' : 'hidden'}">
+            <div class="ai-api-status-card compact">
+              <div class="ai-api-link-meta">
+                <span><strong>TTS:</strong> ${this.escapeHtml(aiTtsProvider)} / ${this.escapeHtml(aiTtsVoice)}</span>
+                <span><strong>STT:</strong> ${this.escapeHtml(aiSttProvider)} / ${this.escapeHtml(aiSttModel)}</span>
+              </div>
+              <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.ttsBridgeHint'))}</div>
             </div>
           </div>
 
-          <div class="form-group" style="margin-top: 12px;">
+          <div class="form-group tts-transcript-toggle">
             <label>
               <input 
                 type="checkbox" 
@@ -8509,16 +8545,7 @@ Return ONLY a JSON object with this exact format, no other text:
             >
             <span style="margin-left: 8px;">${this.escapeHtml(t('settings.allowFallbackAiSearch'))}</span>
           </label>
-          <label>
-            <input 
-              type="checkbox" 
-              id="ai-voice-enabled" 
-              ${aiVoiceEnabled ? 'checked' : ''}
-            >
-            <span style="margin-left: 8px;">${this.escapeHtml(t('settings.useLinkedTtsBridge'))}</span>
-          </label>
         </div>
-        <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.ttsBridgeHint'))}</div>
 
         <div class="api-settings-launch-card">
           <div>
@@ -8599,6 +8626,19 @@ Return ONLY a JSON object with this exact format, no other text:
 
       if (action === 'set-ui-language') {
         this.applySettingsLanguageChoice(content, target.dataset.language, { autoDetect: false });
+      } else if (action === 'set-tts-voice-mode') {
+        const useLinkedAiVoice = target.dataset.mode === 'ai';
+        const aiVoiceControl = content.querySelector('#ai-voice-enabled');
+        if (aiVoiceControl) {
+          aiVoiceControl.checked = useLinkedAiVoice;
+        }
+        content.querySelectorAll('[data-action="set-tts-voice-mode"]').forEach(button => {
+          const active = button.dataset.mode === target.dataset.mode;
+          button.classList.toggle('active', active);
+          button.setAttribute('aria-checked', active ? 'true' : 'false');
+        });
+        content.querySelector('#browser-tts-settings')?.classList.toggle('hidden', useLinkedAiVoice);
+        content.querySelector('#linked-tts-settings')?.classList.toggle('hidden', !useLinkedAiVoice);
       } else if (action === 'set-settings-access-mode') {
         this.setSettingsAccessMode(target.dataset.mode, content);
       } else if (action === 'save-settings') {
@@ -8640,7 +8680,7 @@ Return ONLY a JSON object with this exact format, no other text:
       } else if (e.target.id === 'ui-language') {
         this.applySettingsLanguageChoice(content, e.target.value, { autoDetect: false });
       } else if (e.target.id === 'tts-enabled') {
-        content.querySelectorAll('#browser-voice, #speech-rate, #speech-pitch, #auto-show-transcript').forEach(control => {
+        content.querySelectorAll('#browser-voice, #speech-rate, #speech-pitch, #auto-show-transcript, [data-action="set-tts-voice-mode"]').forEach(control => {
           control.disabled = !e.target.checked;
         });
       } else if (e.target.id === 'browser-voice') {
@@ -8654,11 +8694,12 @@ Return ONLY a JSON object with this exact format, no other text:
   saveSettings() {
     const content = this.container.querySelector('#detail-content');
     const selectedLang = content.querySelector('#ui-language')?.value || null;
+    const currentSettings = Settings.get();
     const autoDetectLanguage = content.querySelector('#auto-detect-lang')?.checked ?? false;
     const activeLang = autoDetectLanguage ? LanguageManager.detectBrowserLanguage() : selectedLang;
     const preferredBrowserVoice = this.getLanguageSafePreferredVoice(
       activeLang,
-      content.querySelector('#browser-voice')?.value || ''
+      content.querySelector('#browser-voice')?.value || currentSettings.preferredBrowserVoice || ''
     ) || null;
     const newSettings = {
       autoDetectLanguage,
@@ -8667,15 +8708,15 @@ Return ONLY a JSON object with this exact format, no other text:
       tutorialLevel: content.querySelector('#tutorial-level')?.value || 'guided',
       ttsEnabled: content.querySelector('#tts-enabled')?.checked ?? true,
       preferredBrowserVoice,
-      speechRate: parseFloat(content.querySelector('#speech-rate')?.value || 1),
-      speechPitch: parseFloat(content.querySelector('#speech-pitch')?.value || 1),
-      autoShowTranscript: content.querySelector('#auto-show-transcript')?.checked ?? false,
+      speechRate: parseFloat(content.querySelector('#speech-rate')?.value || currentSettings.speechRate || 1),
+      speechPitch: parseFloat(content.querySelector('#speech-pitch')?.value || currentSettings.speechPitch || 1),
+      autoShowTranscript: content.querySelector('#auto-show-transcript')?.checked ?? currentSettings.autoShowTranscript ?? false,
       showCountryHover: content.querySelector('#show-country-hover')?.checked ?? false,
       baseTextureQuality: content.querySelector('#base-texture-quality')?.value || 'auto',
       feverLoopResolution: content.querySelector('#fever-loop-resolution')?.value || 'auto',
       aiWebSearchEnabled: content.querySelector('#ai-web-search-enabled')?.checked ?? true,
       aiUpdatesUseLinkedApi: content.querySelector('#ai-updates-use-linked-api')?.checked ?? true,
-      aiVoiceEnabled: content.querySelector('#ai-voice-enabled')?.checked ?? false,
+      aiVoiceEnabled: content.querySelector('#ai-voice-enabled')?.checked ?? currentSettings.aiVoiceEnabled ?? false,
       aiVoiceFallbackToBrowser: true,
       regionalAutoLocate: content.querySelector('#regional-auto-locate')?.checked ?? true,
       regionalLocationPrecision: content.querySelector('#regional-location-precision')?.value || 'region'
