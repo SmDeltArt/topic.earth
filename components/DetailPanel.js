@@ -8037,14 +8037,14 @@ Return ONLY a JSON object with this exact format, no other text:
     `).join('');
   }
 
-  renderLanguageChoiceButtons(languages, currentLang) {
+  renderLanguageChoiceButtons(languages, currentLang, action = 'set-ui-language') {
     return languages.map(lang => {
       const active = currentLang === lang.code;
       return `
         <button
           type="button"
           class="language-choice${active ? ' active' : ''}"
-          data-action="set-ui-language"
+          data-action="${this.escapeHtml(action)}"
           data-language="${this.escapeHtml(lang.code)}"
           aria-pressed="${active ? 'true' : 'false'}"
         >
@@ -8152,6 +8152,30 @@ Return ONLY a JSON object with this exact format, no other text:
     }
   }
 
+  syncTranslationLanguageChoiceUi(content, langCode) {
+    content.querySelectorAll('[data-action="set-translation-language"]').forEach(button => {
+      const active = button.dataset.language === langCode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+
+    const languageName = LanguageManager.getLanguageInfo(langCode)?.nativeName || langCode;
+    const status = content.querySelector('#translation-language-current-status');
+    if (status) {
+      status.textContent = `Translate + Read: ${languageName}`;
+    }
+  }
+
+  applyTranslationLanguageChoice(content, langCode) {
+    const selectedLang = LanguageManager.getLanguageInfo(langCode)?.code || langCode;
+    this.syncTranslationLanguageChoiceUi(content, selectedLang);
+    const updatedSettings = Settings.set({ translationLanguage: selectedLang });
+    window.dispatchEvent(new CustomEvent('settingsChanged', {
+      detail: { settings: updatedSettings || Settings.get(), feverResolutionChanged: false }
+    }));
+    return updatedSettings;
+  }
+
   applySettingsLanguageChoice(content, langCode, options = {}) {
     const { autoDetect = false } = options;
     const selectedLang = LanguageManager.getLanguageInfo(langCode)?.code || langCode;
@@ -8236,6 +8260,8 @@ Return ONLY a JSON object with this exact format, no other text:
     const { allVoices, voices, matchingCount } = this.getVoiceChoicesForLanguage(currentLang);
     const detectedLanguageName = LanguageManager.getLanguageInfo(detectedLang)?.nativeName || detectedLang;
     const currentLanguageName = LanguageManager.getLanguageInfo(currentLang)?.nativeName || currentLang;
+    const translationLang = LanguageManager.getLanguageInfo(settings.translationLanguage)?.code || currentLang;
+    const translationLanguageName = LanguageManager.getLanguageInfo(translationLang)?.nativeName || translationLang;
     const t = (key, values = null) => values
       ? LanguageManager.formatLabel(key, currentLang, values)
       : LanguageManager.getLabel(key, currentLang);
@@ -8326,6 +8352,7 @@ Return ONLY a JSON object with this exact format, no other text:
       <div class="detail-section" data-tutorial-id="settings-language">
         <div class="section-label">${this.escapeHtml(t('settings.language'))}</div>
         <div class="form-group language-picker">
+          <div class="settings-language-row-label">${this.escapeHtml(t('settings.uiLanguage'))}</div>
           <div class="language-choice-grid language-choice-strip" role="listbox" aria-label="${this.escapeHtml(t('settings.uiLanguage'))}">
             ${this.renderLanguageChoiceButtons(languages, currentLang)}
           </div>
@@ -8336,6 +8363,16 @@ Return ONLY a JSON object with this exact format, no other text:
             ${this.escapeHtml(`${t('settings.using')}: ${currentLanguageName}`)}
           </div>
           <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.languagePickerHint'))}</div>
+        </div>
+        <div class="form-group language-picker translation-language-picker">
+          <div class="settings-language-row-label">Translate + Read language</div>
+          <div class="language-choice-grid language-choice-strip" role="listbox" aria-label="Translate + Read language">
+            ${this.renderLanguageChoiceButtons(languages, translationLang, 'set-translation-language')}
+          </div>
+          <div id="translation-language-current-status" class="language-current-status">
+            ${this.escapeHtml(`Translate + Read: ${translationLanguageName}`)}
+          </div>
+          <div class="setting-hint settings-tutorialized-hint">This controls the selected text Translate + Read target without changing the interface language.</div>
         </div>
         <div class="form-group" style="margin-top: 12px;" data-tutorial-id="tutorial-toggle">
           <label>
@@ -8627,6 +8664,8 @@ Return ONLY a JSON object with this exact format, no other text:
 
       if (action === 'set-ui-language') {
         this.applySettingsLanguageChoice(content, target.dataset.language, { autoDetect: false });
+      } else if (action === 'set-translation-language') {
+        this.applyTranslationLanguageChoice(content, target.dataset.language);
       } else if (action === 'set-tts-voice-mode') {
         const useLinkedAiVoice = target.dataset.mode === 'ai';
         const aiVoiceControl = content.querySelector('#ai-voice-enabled');
@@ -8705,6 +8744,7 @@ Return ONLY a JSON object with this exact format, no other text:
     const newSettings = {
       autoDetectLanguage,
       uiLanguage: autoDetectLanguage ? null : selectedLang,
+      translationLanguage: content.querySelector('[data-action="set-translation-language"].active')?.dataset.language || currentSettings.translationLanguage || selectedLang,
       tutorialModeEnabled: content.querySelector('#tutorial-mode-enabled')?.checked ?? true,
       tutorialLevel: content.querySelector('#tutorial-level')?.value || 'guided',
       ttsEnabled: content.querySelector('#tts-enabled')?.checked ?? true,

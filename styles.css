@@ -2758,6 +2758,19 @@ body.regional-map-search-open #layer-panel {
     margin-top: 8px;
 }
 
+.translation-language-picker {
+    margin-top: 14px;
+}
+
+.settings-language-row-label {
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+}
+
 .language-hidden-select {
     height: 1px;
     min-height: 0;

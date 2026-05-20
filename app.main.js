@@ -1593,10 +1593,11 @@ class TopicEarthApp {
       
       const settings = Settings.get();
       const currentLang = this.getCurrentUiLanguage(settings);
+      const translationLang = LanguageManager.getLanguageInfo(settings.translationLanguage)?.code || currentLang;
       const speechLang = LanguageManager.getSpeechCode(currentLang);
       const readLabel = LanguageManager.getLabel('common.readAloud', currentLang);
       const translateReadLabel = LanguageManager.getLabel('auto.appMain.translateRead', currentLang);
-      const targetLanguage = LanguageManager.getLanguageInfo(currentLang)?.nativeName || currentLang;
+      const targetLanguage = LanguageManager.getLanguageInfo(translationLang)?.nativeName || translationLang;
       const translateReadTitle = LanguageManager.formatLabel('auto.appMain.translateSelectedTextToValueThenRead', currentLang, {
         value: targetLanguage
       });
@@ -1645,10 +1646,10 @@ class TopicEarthApp {
           const vignetteId = this.ttsVignetteState?.id;
 
           try {
-            const translated = await ReadTranslationService.translateText(text, currentLang);
+            const translated = await ReadTranslationService.translateText(text, translationLang);
             if (!this.isActiveTTSVignette(vignetteId)) return;
-            const translatedSpeechLang = translated.speechLang || LanguageManager.getSpeechCode(translated.language || currentLang);
-            const status = translated.provider === 'original' && currentLang !== 'en'
+            const translatedSpeechLang = translated.speechLang || LanguageManager.getSpeechCode(translated.language || translationLang);
+            const status = translated.provider === 'original' && translationLang !== 'en'
               ? `No translation available yet. Reading original text.`
               : `Reading in ${targetLanguage}`;
             this.updateTTSVignette({

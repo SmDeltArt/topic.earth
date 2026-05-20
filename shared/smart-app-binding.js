@@ -51,6 +51,8 @@ class SmartAppBinding {
     "http://127.0.0.1:8088",
     "http://localhost:8125", // Widgets direct server
     "http://127.0.0.1:8125",
+    "http://localhost:8765", // topic.earth local dev server
+    "http://127.0.0.1:8765",
     // File protocol for local testing
     "null", // file:// protocol reports origin as "null"
   ];
