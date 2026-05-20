@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>topic.earth transparent logo capture</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="../fonts/space-mono.css">
+  <style>
+    :root {
+      color-scheme: dark;
+      --capture-scale: 2;
+      --logo-cycle: 6s;
+      --logo-topic: #00d4ff;
+      --logo-earth: #9ff5ff;
+      --logo-line-a: #00d4ff;
+      --logo-line-b: #7cffd6;
+      --logo-line-c: #81d4ff;
+      --logo-frame: rgba(0, 212, 255, 0.16);
+      --logo-frame-glow: rgba(0, 212, 255, 0.08);
+      --glow: rgba(0, 212, 255, 0.3);
+      font-family: "Space Mono", Consolas, monospace;
+      background: transparent;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: 40px;
+    }
+
+    body[data-bg="black"] {
+      background: #000;
+    }
+
+    body[data-paused="true"] .logo::before,
+    body[data-paused="true"] .logo::after,
+    body[data-paused="true"] .logo-mark,
+    body[data-paused="true"] .logo-word,
+    body[data-paused="true"] .logo-word::after {
+      animation: none !important;
+    }
+
+    body[data-paused="true"] .logo-word {
+      background: none !important;
+      background-image: none !important;
+      opacity: 1 !important;
+      -webkit-text-fill-color: currentColor !important;
+    }
+
+    body[data-paused="true"] .logo-word-topic {
+      color: var(--logo-topic) !important;
+    }
+
+    body[data-paused="true"] .logo-word-earth {
+      color: var(--logo-earth) !important;
+    }
+
+    .capture-stage {
+      width: max-content;
+      background: transparent;
+      transform: scale(var(--capture-scale));
+      transform-origin: center;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 46px;
+      position: relative;
+      isolation: isolate;
+      padding: 0 7px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .logo::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: 4px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, var(--logo-line-a), var(--logo-line-b), var(--logo-line-c), transparent);
+      box-shadow: 0 0 10px color-mix(in srgb, var(--logo-line-b) 45%, transparent);
+      opacity: 0.62;
+      transform-origin: center;
+      z-index: 0;
+      animation: logoModeRail var(--logo-cycle) ease-in-out infinite;
+    }
+
+    .logo::after {
+      content: "";
+      position: absolute;
+      inset: 3px 0;
+      border: 1px solid var(--logo-frame);
+      border-radius: 8px;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--logo-line-a) 12%, transparent), rgba(124, 255, 214, 0.03), color-mix(in srgb, var(--logo-line-c) 12%, transparent));
+      box-shadow: 0 0 18px var(--logo-frame-glow);
+      opacity: 0.7;
+      z-index: -1;
+      animation: logoSixTickFrame var(--logo-cycle) steps(6, end) infinite;
+    }
+
+    .logo-mark {
+      width: 42px;
+      height: 42px;
+      display: block;
+      flex: 0 0 42px;
+      filter: drop-shadow(0 0 8px var(--glow));
+      transform-origin: 50% 50%;
+      animation: logoSixTickMark var(--logo-cycle) steps(6, end) infinite;
+    }
+
+    .logo-word {
+      display: inline-block;
+      position: relative;
+      --logo-word-color: var(--logo-topic);
+      color: var(--logo-word-color);
+      font-size: 18px;
+      line-height: 1;
+      transform: scaleY(1.16);
+      transform-origin: center;
+      background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--logo-word-color) 78%, white) 18%, var(--logo-word-color) 44%, rgba(232, 234, 237, 0.14) 58%, transparent 76%, color-mix(in srgb, var(--logo-word-color) 86%, white) 100%);
+      background-size: 240% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px color-mix(in srgb, var(--logo-word-color) 34%, transparent);
+      animation:
+        logoWordSignal var(--logo-cycle) ease-in-out infinite,
+        logoWordVanish calc(var(--logo-cycle) * 1.35) ease-in-out infinite;
+    }
+
+    .logo-word::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -6px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--logo-line-a), var(--logo-line-b), var(--logo-line-c), transparent);
+      opacity: 0.45;
+      transform: scaleX(0.24);
+      transform-origin: left center;
+      animation: logoWordSweep var(--logo-cycle) steps(6, end) infinite;
+    }
+
+    .logo-word-earth {
+      --logo-word-color: var(--logo-earth);
+      animation-delay: -3s;
+    }
+
+    .logo-word-earth::after {
+      animation-delay: -3s;
+    }
+
+    body[data-mode="regional"] {
+      --logo-cycle: 7s;
+      --logo-topic: #7cffd6;
+      --logo-earth: #d4ff72;
+      --logo-line-a: #00d4ff;
+      --logo-line-b: #7cff6b;
+      --logo-line-c: #d4ff72;
+      --logo-frame: rgba(124, 255, 214, 0.18);
+      --logo-frame-glow: rgba(124, 255, 214, 0.1);
+    }
+
+    body[data-mode="space"] {
+      --logo-cycle: 8s;
+      --logo-topic: #8fb2ff;
+      --logo-earth: #ffd166;
+      --logo-line-a: #7c83ff;
+      --logo-line-b: #00d4ff;
+      --logo-line-c: #ffd166;
+      --logo-frame: rgba(143, 178, 255, 0.18);
+      --logo-frame-glow: rgba(143, 178, 255, 0.12);
+    }
+
+    body[data-mode="fever"] {
+      --logo-cycle: 4.8s;
+      --logo-topic: #ffb020;
+      --logo-earth: #ff5f57;
+      --logo-line-a: #ff5f57;
+      --logo-line-b: #ffb020;
+      --logo-line-c: #ff2d55;
+      --logo-frame: rgba(255, 95, 87, 0.2);
+      --logo-frame-glow: rgba(255, 95, 87, 0.14);
+    }
+
+    body[data-mode="fever"] .logo::before,
+    body[data-mode="fever"] .logo-word::after {
+      animation: logoFeverBoundaryCycle var(--logo-cycle) steps(6, end) infinite;
+    }
+
+    body[data-mode="regional"] .logo-mark {
+      animation-name: logoRegionalMark;
+    }
+
+    body[data-mode="space"] .logo-mark {
+      animation-name: logoSpaceMark;
+    }
+
+    body[data-mode="fever"] .logo-mark {
+      animation-name: logoFeverMark;
+    }
+
+    @keyframes logoSixTickFrame {
+      0%, 100% { border-color: rgba(0, 212, 255, 0.14); box-shadow: 0 0 14px rgba(0, 212, 255, 0.07); }
+      16.66%, 50%, 83.33% { border-color: rgba(0, 212, 255, 0.23); box-shadow: 0 0 20px rgba(0, 212, 255, 0.12); }
+      33.33%, 66.66% { border-color: rgba(124, 255, 214, 0.24); box-shadow: 0 0 18px rgba(124, 255, 214, 0.1); }
+    }
+
+    @keyframes logoModeRail {
+      0%, 100% { transform: scaleX(0.42); opacity: 0.36; }
+      50% { transform: scaleX(1); opacity: 0.78; }
+    }
+
+    @keyframes logoSixTickMark {
+      0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 8px var(--glow)); }
+      16.66%, 50%, 83.33% { transform: translateY(-1px) scale(1.015); filter: drop-shadow(0 0 11px rgba(0, 212, 255, 0.42)); }
+      33.33%, 66.66% { transform: translateY(0) scale(0.995); filter: drop-shadow(0 0 10px rgba(124, 255, 214, 0.32)); }
+    }
+
+    @keyframes logoRegionalMark {
+      0%, 100% { transform: translateX(0) scale(1); filter: drop-shadow(0 0 8px rgba(124, 255, 214, 0.28)); }
+      50% { transform: translateX(1px) scale(1.01); filter: drop-shadow(0 0 12px rgba(124, 255, 214, 0.42)); }
+    }
+
+    @keyframes logoSpaceMark {
+      0%, 100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 9px rgba(143, 178, 255, 0.34)); }
+      50% { transform: rotate(2deg) scale(1.018); filter: drop-shadow(0 0 13px rgba(255, 209, 102, 0.32)); }
+    }
+
+    @keyframes logoFeverMark {
+      0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 9px rgba(255, 95, 87, 0.42)); }
+      50% { transform: translateY(-1px) scale(1.035); filter: drop-shadow(0 0 14px rgba(255, 176, 32, 0.55)); }
+    }
+
+    @keyframes logoWordSignal {
+      0%, 100% { opacity: 0.86; text-shadow: 0 0 8px rgba(0, 212, 255, 0.24); }
+      50% { opacity: 1; text-shadow: 0 0 12px rgba(0, 212, 255, 0.5); }
+    }
+
+    @keyframes logoWordVanish {
+      0%, 100% { background-position: 0% 50%; opacity: 0.86; }
+      45% { background-position: 72% 50%; opacity: 1; }
+      72% { background-position: 150% 50%; opacity: 0.58; }
+    }
+
+    @keyframes logoWordSweep {
+      0%, 100% { transform: scaleX(0.24); opacity: 0.25; }
+      50% { transform: scaleX(1); opacity: 0.7; }
+    }
+
+    @keyframes logoFeverBoundaryCycle {
+      0%, 100% { background: linear-gradient(90deg, transparent, #ff5f57, #ffb020, #ff2d55, transparent); box-shadow: 0 0 12px rgba(255, 95, 87, 0.36); opacity: 0.7; transform: scaleX(0.55); }
+      16.66% { background: linear-gradient(90deg, transparent, #ff5eea, #b777ff, #00d4ff, transparent); box-shadow: 0 0 12px rgba(183, 119, 255, 0.36); transform: scaleX(0.72); }
+      33.33% { background: linear-gradient(90deg, transparent, #00d4ff, #2ee6c9, #7cf7ff, transparent); box-shadow: 0 0 12px rgba(46, 230, 201, 0.34); transform: scaleX(1); }
+      50% { background: linear-gradient(90deg, transparent, #ffe066, #8dff7c, #ff9f1c, transparent); box-shadow: 0 0 12px rgba(255, 224, 102, 0.34); transform: scaleX(0.82); }
+      66.66% { background: linear-gradient(90deg, transparent, #55d6ff, #6f9cff, #b6f7ff, transparent); box-shadow: 0 0 12px rgba(85, 214, 255, 0.34); transform: scaleX(0.92); }
+      83.33% { background: linear-gradient(90deg, transparent, #64ff9b, #00d4ff, #b8ff72, transparent); box-shadow: 0 0 12px rgba(100, 255, 155, 0.34); transform: scaleX(0.68); }
+    }
+  </style>
+</head>
+<body data-mode="main" data-bg="transparent" data-paused="false">
+  <div class="capture-stage">
+    <div class="logo" aria-label="topic.earth">
+      <span class="logo-word logo-word-topic">topic</span>
+      <img class="logo-mark" src="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg" alt="" aria-hidden="true">
+      <span class="logo-word logo-word-earth">earth</span>
+    </div>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode') || 'main';
+    const bg = params.get('bg') || 'transparent';
+    const scale = Number(params.get('scale'));
+    document.body.dataset.mode = mode;
+    document.body.dataset.bg = bg;
+    document.body.dataset.paused = params.get('paused') === 'true' ? 'true' : 'false';
+    if (Number.isFinite(scale) && scale > 0) {
+      document.documentElement.style.setProperty('--capture-scale', String(scale));
+    }
+  </script>
+</body>
+</html>
