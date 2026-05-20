@@ -7690,31 +7690,7 @@ Return ONLY a JSON object with this exact format, no other text:
   }
 
   renderAiApiModelBadges(summary = this.getAiApiSummary()) {
-    const currentModel = summary.textModel || 'None';
-    const maxModel = summary.textMaxModel || 'Check';
-    const sttProvider = summary.sttProviderName || summary.sttProvider || 'Browser STT';
-    const sttModel = summary.sttModel || '';
-    const sttReady = summary.sttActiveMode === 'external' && (summary.sttHasKey || summary.sttProvider === 'browser-speech');
-    const sttLabel = summary.sttActiveMode === 'external'
-      ? [sttProvider, sttModel].filter(Boolean).join(' / ')
-      : (sttProvider === 'browser' ? 'Browser STT' : sttProvider || 'Browser STT');
-    const maxTitle = summary.textMaxDetectedAt
-      ? `Detected ${this.formatAiApiTimestamp(summary.textMaxDetectedAt)}`
-      : 'Use Refresh to detect available OpenAI text models';
-
-    return `
-      <div id="ai-api-model-badges" class="ai-api-model-badges">
-        <span class="ai-api-model-badge current" title="Current linked text model">
-          <b>Current</b>${this.escapeHtml(currentModel)}
-        </span>
-        <span class="ai-api-model-badge max" title="${this.escapeHtml(maxTitle)}">
-          <b>Max</b>${this.escapeHtml(maxModel)}
-        </span>
-        <span class="ai-api-model-badge stt ${sttReady ? 'linked' : 'browser'}" title="Linked speech-to-text input">
-          <b>STT</b>${this.escapeHtml(sttLabel)}
-        </span>
-      </div>
-    `;
+    return '';
   }
 
   updateAiApiStatus(summary = this.getAiApiSummary()) {
