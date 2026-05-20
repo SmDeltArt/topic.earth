@@ -6607,12 +6607,31 @@ canvas:hover {
     background: rgba(10, 14, 22, 0.72);
 }
 
-.api-settings-launch-title {
-    color: var(--text-primary);
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+.api-settings-launch-copy {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.api-settings-launch-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex: 0 0 auto;
+}
+
+.api-settings-open-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.api-settings-open-btn img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex: 0 0 22px;
 }
 
 .api-settings-overlay {
@@ -6784,17 +6803,14 @@ canvas:hover {
     font-size: 11px;
 }
 
-.ai-api-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-}
-
 @media (max-width: 768px) {
     .api-settings-launch-card,
     .admin-topic-export-card {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .api-settings-launch-actions {
         align-items: stretch;
         flex-direction: column;
     }

@@ -8548,16 +8548,17 @@ Return ONLY a JSON object with this exact format, no other text:
         </div>
 
         <div class="api-settings-launch-card">
-          <div>
-            <div class="api-settings-launch-title">${this.escapeHtml(t('settings.apiSettingsWidget'))}</div>
+          <div class="api-settings-launch-copy">
             <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.apiSettingsWidgetHint'))}</div>
             <div class="setting-hint settings-tutorialized-hint" data-api-settings-source>${this.escapeHtml(t('topic.source'))}: ${this.escapeHtml(apiSettingsWidgetUrl)}</div>
           </div>
-          <button class="btn-primary" data-action="open-api-settings-window">${this.escapeHtml(t('settings.apiSettingsButton'))}</button>
-        </div>
-
-        <div class="ai-api-actions">
-          <button class="btn-secondary" data-action="refresh-ai-api-settings">${this.escapeHtml(t('settings.refreshLinkedModels'))}</button>
+          <div class="api-settings-launch-actions">
+            <button class="btn-secondary" data-action="refresh-ai-api-settings">${this.escapeHtml(t('settings.refreshLinkedModels'))}</button>
+            <button class="btn-primary api-settings-open-btn" data-action="open-api-settings-window">
+              <img src="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779289515/robot-tr_64x64_bcxyba.png" alt="" aria-hidden="true">
+              <span>${this.escapeHtml(t('settings.apiSettingsButton'))}</span>
+            </button>
+          </div>
         </div>
       </div>
 
