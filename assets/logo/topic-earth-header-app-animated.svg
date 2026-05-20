@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="820" height="220" viewBox="0 0 820 220" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="740" height="220" viewBox="0 0 740 220" role="img" aria-labelledby="title desc">
   <title id="title">topic.earth animated transparent header logo</title>
   <desc id="desc">Transparent animated topic.earth header logo with the original Earth mark.</desc>
   <defs>
@@ -91,11 +91,11 @@
       }
     </style>
   </defs>
-  <g transform="translate(46 38)">
-    <rect class="frame" x="0" y="9" width="728" height="126" rx="18"/>
-    <rect class="rail" x="268" y="112" width="192" height="5" rx="3" fill="url(#rail)" filter="url(#cyanGlow)"/>
-    <text class="word" x="32" y="94" fill="url(#topicWord)">topic</text>
-    <image class="mark" href="../icons/topic.earth_64x64.svg" x="308" y="14" width="112" height="112" preserveAspectRatio="xMidYMid meet"/>
-    <text class="word word-earth" x="484" y="94" fill="url(#earthWord)">earth</text>
+  <g transform="translate(38 38)">
+    <rect class="frame" x="0" y="9" width="664" height="126" rx="18"/>
+    <rect class="rail" x="236" y="112" width="192" height="5" rx="3" fill="url(#rail)" filter="url(#cyanGlow)"/>
+    <text class="word" x="24" y="94" fill="url(#topicWord)">topic</text>
+    <image class="mark" href="../icons/topic.earth_64x64.svg" x="276" y="14" width="112" height="112" preserveAspectRatio="xMidYMid meet"/>
+    <text class="word word-earth" x="420" y="94" fill="url(#earthWord)">earth</text>
   </g>
 </svg>
