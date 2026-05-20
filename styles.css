@@ -3891,6 +3891,21 @@ body.regional-map-search-open #layer-panel {
     box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
 }
 
+.topic-summary-actions {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.topic-www-check-btn {
+    flex: 0 0 auto;
+}
+
+.topic-summary-actions .setting-hint {
+    margin-top: 0;
+}
+
 @media (max-width: 768px) {
     .topic-management-summary {
         grid-template-columns: repeat(2, minmax(0, 1fr));

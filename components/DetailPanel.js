@@ -502,6 +502,8 @@ export class DetailPanel {
         this.toggleTopicDictation(target);
       } else if (action === 'generate-summary') {
         this.generateSummary();
+      } else if (action === 'check-draft-www') {
+        this.checkDraftWebEvidence(target);
       } else if (action === 'generate-insight') {
         this.generateInsight();
       } else if (action === 'delete-media') {
@@ -5856,6 +5858,12 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
                   placeholder="${isRegionalProposal ? 'What is happening locally, and why should people know about it?' : 'Briefly describe the event, update, or topic'}"
                   required
                 >${this.escapeHtml(this.topicFormState.summary || '')}</textarea>
+                <div class="topic-summary-actions">
+                  <button type="button" class="btn-secondary topic-www-check-btn" data-action="check-draft-www">
+                    Check WWW
+                  </button>
+                  <span class="setting-hint" data-draft-www-status>Searches around the draft date, 1 week before and after.</span>
+                </div>
               </div>
 
               ${isRegionalProposal ? `
@@ -7067,6 +7075,192 @@ The summary should be factual, informative, focus on the latest/most recent deve
       btn.innerHTML = originalHTML;
       btn.disabled = false;
     }
+  }
+
+  getDraftWebSearchWindow(dateValue = '') {
+    const anchor = dateValue ? new Date(`${dateValue}T12:00:00`) : new Date();
+    const safeAnchor = Number.isNaN(anchor.getTime()) ? new Date() : anchor;
+    const start = new Date(safeAnchor);
+    const end = new Date(safeAnchor);
+    start.setDate(start.getDate() - 7);
+    end.setDate(end.getDate() + 7);
+    return {
+      start: start.toISOString().split('T')[0],
+      end: end.toISOString().split('T')[0]
+    };
+  }
+
+  parseDraftWebEvidenceResponse(content = '') {
+    const text = String(content || '').trim();
+    if (!text) return {};
+
+    try {
+      return JSON.parse(text);
+    } catch (_error) {
+      const match = text.match(/\{[\s\S]*\}/);
+      if (!match) return {};
+      try {
+        return JSON.parse(match[0]);
+      } catch (error) {
+        console.warn('[Draft WWW] Could not parse web evidence JSON:', error);
+        return {};
+      }
+    }
+  }
+
+  async checkDraftWebEvidence(button = null) {
+    const form = this.container.querySelector('#topic-form');
+    if (!form) return;
+
+    this.saveFormState();
+
+    const title = String(this.topicFormState.title || '').trim();
+    const summary = String(this.topicFormState.summary || '').trim();
+    if (!title && !summary) {
+      alert('Add a title or summary first, then check the web.');
+      return;
+    }
+
+    const status = this.container.querySelector('[data-draft-www-status]');
+    const originalHTML = button?.innerHTML || '';
+    if (button) {
+      button.innerHTML = '<div class="spinner-small"></div> Checking...';
+      button.disabled = true;
+    }
+    if (status) status.textContent = 'Checking web evidence around the draft date...';
+
+    const layer = this.layers.find(l => l.id === this.topicFormState.category);
+    const dateWindow = this.getDraftWebSearchWindow(this.topicFormState.date);
+    const location = [this.topicFormState.region, this.topicFormState.country].filter(Boolean).join(', ');
+    const apiSummary = this.getAiApiSummary();
+
+    const prompt = `Check the public web for evidence related to this topic draft. Use the configured web/search-capable provider when available. Prefer reliable official, scientific, local authority, NGO, or reputable media sources.
+
+Topic: ${title || '[untitled]'}
+Summary: ${summary || '[no summary]'}
+Layer/category: ${layer?.name || this.topicFormState.category || 'general'}
+Location: ${location || 'not specified'}
+Draft date: ${this.topicFormState.date || 'not specified'}
+Search window: ${dateWindow.start} to ${dateWindow.end} (one week before and one week after the draft date)
+
+Return ONLY a JSON object, no markdown, with this shape:
+{
+  "sources": [
+    { "name": "Source title", "url": "https://...", "category": "official|scientific|media|ngo|local", "reliability": "high|medium", "reason": "short reason" }
+  ],
+  "images": [
+    { "url": "https://...", "sourceUrl": "https://...", "sourceName": "Source title", "caption": "short caption" }
+  ],
+  "suggestedSettings": {
+    "geographicScope": "local|regional|national|international",
+    "timeScope": "today|recent|historical|future",
+    "outputIntent": "brief|analysis|social-post",
+    "trustedOnly": true
+  }
+}
+
+Rules:
+- Include 3-5 source URLs maximum.
+- Include up to 3 image URLs only when they look directly usable as images. If unsure, omit images and keep the page as a source.
+- Do not invent URLs. If live web search is unavailable, return likely search targets with empty url fields rather than fake links.`;
+
+    try {
+      const completion = await window.ourEarthAI.createChatCompletion({
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a careful web evidence assistant for a topic draft. Return strict JSON only. Never fabricate URLs.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        json: true,
+        temperature: 0.1
+      });
+
+      const parsed = this.parseDraftWebEvidenceResponse(completion.content || '');
+      const applied = this.applyDraftWebEvidenceResult(parsed);
+      this.showSourceEditor = true;
+      this.topicBuilderTab = 'describe';
+      this.setTopicDraftStatus({
+        ...(this.topicDraftStatus || {}),
+        state: this.topicDraftStatus?.state || 'unsaved',
+        title: this.topicFormState.title || this.topicDraftStatus?.title || 'Topic draft',
+        message: `${applied.sources} source${applied.sources === 1 ? '' : 's'} and ${applied.media} media candidate${applied.media === 1 ? '' : 's'} added from ${apiSummary.textProviderName || apiSummary.textProvider || 'linked AI'}.`
+      });
+      this.renderCreateTopic();
+    } catch (error) {
+      console.error('[Draft WWW] Web evidence check failed:', error);
+      if (status) status.textContent = this.getActionErrorMessage(error, 'Draft web check');
+      alert(this.getActionErrorMessage(error, 'Draft web check'));
+      if (button) {
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+      }
+    }
+  }
+
+  applyDraftWebEvidenceResult(result = {}) {
+    const sources = Array.isArray(result.sources) ? result.sources : [];
+    const images = Array.isArray(result.images) ? result.images : [];
+    let addedSources = 0;
+    let addedMedia = 0;
+
+    sources.forEach(source => {
+      const url = this.sanitizeUrl(source.url || '');
+      const name = String(source.name || this.getHostFromUrl(url) || '').trim();
+      if (!url && !name) return;
+      const duplicate = this.topicSources.some(existing => (
+        url && String(existing.url || '') === url
+      ));
+      if (duplicate) return;
+      this.topicSources.push({
+        name: name || 'Web evidence',
+        url,
+        category: source.category || 'source',
+        reliability: source.reliability || 'medium',
+        adminNotes: source.reason || '',
+        verified: Boolean(url),
+        webChecked: true
+      });
+      addedSources += 1;
+    });
+
+    images.forEach(image => {
+      if (addedMedia >= 3) return;
+      const imageUrl = this.sanitizeUrl(image.url || '');
+      if (!imageUrl || !this.getDirectImageUrl(imageUrl)) return;
+      const sourceUrl = this.sanitizeUrl(image.sourceUrl || imageUrl) || imageUrl;
+      const token = this.createMediaToken({
+        url: imageUrl,
+        sourceUrl,
+        sourceName: image.sourceName || this.getHostFromUrl(sourceUrl) || 'Web image',
+        caption: image.caption || '',
+        provider: 'draft-www-check'
+      });
+      if (this.addMediaTokenToCurrentPoint(token)) {
+        addedMedia += 1;
+      }
+    });
+
+    const settings = result.suggestedSettings || {};
+    if (settings && typeof settings === 'object') {
+      const allowedGeo = ['local', 'regional', 'national', 'international'];
+      const allowedTime = ['today', 'recent', 'historical', 'future'];
+      const allowedIntent = ['brief', 'analysis', 'social-post'];
+      if (allowedGeo.includes(settings.geographicScope)) this.topicResearchSettings.geographicScope = settings.geographicScope;
+      if (allowedTime.includes(settings.timeScope)) this.topicResearchSettings.timeScope = settings.timeScope;
+      if (allowedIntent.includes(settings.outputIntent)) this.topicResearchSettings.outputIntent = settings.outputIntent;
+      if (typeof settings.trustedOnly === 'boolean') this.topicResearchSettings.trustedOnly = settings.trustedOnly;
+      this.topicFormState.geographicScope = this.topicResearchSettings.geographicScope;
+      this.topicFormState.timeScope = this.topicResearchSettings.timeScope;
+      this.topicFormState.outputIntent = this.topicResearchSettings.outputIntent;
+      this.topicFormState.trustedOnly = this.topicResearchSettings.trustedOnly;
+    }
+
+    return { sources: addedSources, media: addedMedia };
   }
   
   async generateInsight() {
