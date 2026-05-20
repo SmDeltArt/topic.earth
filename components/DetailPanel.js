@@ -224,6 +224,7 @@ export class DetailPanel {
     if (!window.ttsManager) return;
 
     window.ttsManager.speak(text, language, {
+      channel: 'fever',
       forceBrowser: true,
       ...extraOptions
     });
@@ -2518,6 +2519,8 @@ export class DetailPanel {
         if (window.ttsManager) {
           const language = target.dataset.language || this.getCurrentLanguage();
           window.ttsManager.speak(text, LanguageManager.getSpeechCode(language), {
+            priority: 'manual',
+            channel: 'selection',
             forceBrowser: true
           });
         }
@@ -7681,8 +7684,9 @@ Return ONLY a JSON object with this exact format, no other text:
     const ttsModel = summary.ttsModel || '';
     const ttsVoice = summary.ttsVoice || '';
     const ttsReady = summary.ttsActiveMode === 'external' && summary.ttsProvider === 'openai-tts' && summary.ttsHasKey;
+    const ttsBlocked = summary.ttsActiveMode === 'external' && summary.ttsProvider === 'openai-tts' && !summary.ttsHasKey;
     const ttsLabel = summary.ttsActiveMode === 'external'
-      ? [ttsProvider, ttsModel, ttsVoice].filter(Boolean).join(' / ')
+      ? [ttsProvider, ttsModel, ttsVoice, ttsBlocked ? 'no key here' : ''].filter(Boolean).join(' / ')
       : (ttsProvider === 'browser' ? 'Browser TTS' : ttsProvider || 'Browser TTS');
     const sttProvider = summary.sttProviderName || summary.sttProvider || 'Browser STT';
     const sttModel = summary.sttModel || '';
@@ -7702,7 +7706,7 @@ Return ONLY a JSON object with this exact format, no other text:
         <span class="ai-api-model-badge max" title="${this.escapeHtml(maxTitle)}">
           <b>Max</b>${this.escapeHtml(maxModel)}
         </span>
-        <span class="ai-api-model-badge tts ${ttsReady ? 'linked' : 'browser'}" title="Linked read-aloud voice">
+        <span class="ai-api-model-badge tts ${ttsReady ? 'linked' : ttsBlocked ? 'blocked' : 'browser'}" title="Linked read-aloud voice">
           <b>TTS</b>${this.escapeHtml(ttsLabel)}
         </span>
         <span class="ai-api-model-badge stt ${sttReady ? 'linked' : 'browser'}" title="Linked speech-to-text input">
@@ -7727,7 +7731,9 @@ Return ONLY a JSON object with this exact format, no other text:
     const textModel = summary.textModel || 'No model selected';
     const imageProvider = summary.imageProviderName || summary.imageProvider || 'No image provider selected';
     const ttsProvider = summary.ttsProviderName || summary.ttsProvider || 'Browser TTS';
-    const ttsVoice = summary.ttsActiveMode === 'external' ? summary.ttsVoice || 'auto' : 'browser';
+    const ttsVoice = summary.ttsActiveMode === 'external'
+      ? `${summary.ttsVoice || 'auto'}${summary.ttsHasKey ? '' : ' (no key on this origin)'}`
+      : 'browser';
     const sttProvider = summary.sttProviderName || summary.sttProvider || 'Browser STT';
     const sttModel = summary.sttActiveMode === 'external' ? summary.sttModel || 'default' : 'browser';
     const webSearchMode = summary.webSearchCapable ? 'Live web-search capable' : 'Manual search/update';
@@ -8240,7 +8246,9 @@ Return ONLY a JSON object with this exact format, no other text:
     const aiModelBadges = this.renderAiApiModelBadges(aiSummary);
     const aiImageProvider = aiSummary.imageProviderName || aiSummary.imageProvider || t('settings.noImageProvider');
     const aiTtsProvider = aiSummary.ttsProviderName || aiSummary.ttsProvider || 'Browser TTS';
-    const aiTtsVoice = aiSummary.ttsActiveMode === 'external' ? aiSummary.ttsVoice || 'auto' : 'browser';
+    const aiTtsVoice = aiSummary.ttsActiveMode === 'external'
+      ? `${aiSummary.ttsVoice || 'auto'}${aiSummary.ttsHasKey ? '' : ' (no key on this origin)'}`
+      : 'browser';
     const aiSttProvider = aiSummary.sttProviderName || aiSummary.sttProvider || 'Browser STT';
     const aiSttModel = aiSummary.sttActiveMode === 'external' ? aiSummary.sttModel || 'default' : 'browser';
     const aiSearchMode = aiSummary.webSearchCapable ? t('settings.liveWebSearchCapable') : t('settings.aiAssistedSearchUpdate');

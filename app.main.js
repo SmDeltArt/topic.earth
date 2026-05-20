@@ -16,7 +16,7 @@ import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-2026
 import { Settings } from './lib/settings.js?v=topic-earth-stt-tts-badges-20260520';
 import { LanguageManager } from './lib/language.js?v=topic-earth-tab-layers-20260507';
 import { ReadTranslationService } from './lib/read-translation.js?v=topic-earth-warning-panel-collapse-20260430';
-import { TTSManager } from './lib/tts.js?v=topic-earth-language-voice-menu-20260430';
+import { TTSManager } from './lib/tts.js?v=topic-earth-tts-origin-debug-20260520';
 import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-access-toggle-20260517';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
 import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-warning-panel-collapse-20260430';
@@ -1673,7 +1673,10 @@ class TopicEarthApp {
         } else {
           actionButton.querySelector('span').textContent = 'Reading...';
           this.removeTTSVignette({ stopAudio: true });
-          this.ttsManager?.speak(text, speechLang);
+          this.ttsManager?.speak(text, speechLang, {
+            priority: 'manual',
+            channel: 'selection'
+          });
         }
 
         this.removeTTSButton();
@@ -1899,6 +1902,8 @@ class TopicEarthApp {
     });
 
     this.ttsManager?.speak(text, speechLang, {
+      priority: 'manual',
+      channel: 'selection',
       onStart: () => {
         this.startTTSHighlight();
       },

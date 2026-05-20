@@ -6503,6 +6503,11 @@ canvas:hover {
     background: rgba(255, 176, 32, 0.1);
 }
 
+.ai-api-model-badge.tts.blocked {
+    border-color: rgba(255, 95, 87, 0.42);
+    background: rgba(255, 95, 87, 0.12);
+}
+
 .ai-api-model-badge.stt.linked {
     border-color: rgba(34, 197, 94, 0.42);
     background: rgba(34, 197, 94, 0.12);
