@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="220" viewBox="0 0 900 220" role="img" aria-labelledby="title desc">
+  <title id="title">topic.earth animated transparent header logo</title>
+  <desc id="desc">Transparent animated topic.earth header logo with the original Earth mark.</desc>
+  <defs>
+    <linearGradient id="topicWord" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.72"/>
+      <stop offset="18%" stop-color="#c8f7ff"/>
+      <stop offset="44%" stop-color="#00d4ff"/>
+      <stop offset="58%" stop-color="#e8eaed" stop-opacity="0.18"/>
+      <stop offset="76%" stop-color="#00d4ff" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#b8fbff"/>
+      <animateTransform attributeName="gradientTransform" type="translate" values="-0.55 0;0.35 0;1.05 0;-0.55 0" dur="8.1s" repeatCount="indefinite"/>
+    </linearGradient>
+    <linearGradient id="earthWord" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#9ff5ff" stop-opacity="0.72"/>
+      <stop offset="18%" stop-color="#ffffff"/>
+      <stop offset="44%" stop-color="#9ff5ff"/>
+      <stop offset="58%" stop-color="#e8eaed" stop-opacity="0.18"/>
+      <stop offset="76%" stop-color="#9ff5ff" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#e9fbff"/>
+      <animateTransform attributeName="gradientTransform" type="translate" values="0.35 0;1.05 0;-0.55 0;0.35 0" dur="8.1s" repeatCount="indefinite"/>
+    </linearGradient>
+    <linearGradient id="rail" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0"/>
+      <stop offset="32%" stop-color="#00d4ff"/>
+      <stop offset="56%" stop-color="#7cffd6"/>
+      <stop offset="78%" stop-color="#81d4ff"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="cyanGlow" x="-30%" y="-70%" width="160%" height="240%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softWordGlow" x="-12%" y="-50%" width="124%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .frame {
+        fill: none;
+        stroke: rgba(0, 212, 255, 0.17);
+        stroke-width: 1.4;
+        animation: framePulse 6s steps(6, end) infinite;
+      }
+      .rail {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: railPulse 6s ease-in-out infinite;
+      }
+      .word {
+        font-family: "Space Mono", Consolas, monospace;
+        font-size: 76px;
+        font-weight: 700;
+        letter-spacing: 0;
+        filter: url(#softWordGlow);
+        animation: wordSignal 8.1s ease-in-out infinite;
+      }
+      .word-earth {
+        animation-delay: -3s;
+      }
+      .mark {
+        transform-box: fill-box;
+        transform-origin: center;
+        filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.42));
+        animation: markPulse 6s steps(6, end) infinite;
+      }
+      @keyframes framePulse {
+        0%, 100% { stroke: rgba(0, 212, 255, 0.14); filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.08)); }
+        16.66%, 50%, 83.33% { stroke: rgba(0, 212, 255, 0.26); filter: drop-shadow(0 0 18px rgba(0, 212, 255, 0.15)); }
+        33.33%, 66.66% { stroke: rgba(124, 255, 214, 0.25); filter: drop-shadow(0 0 16px rgba(124, 255, 214, 0.13)); }
+      }
+      @keyframes railPulse {
+        0%, 100% { transform: scaleX(0.42); opacity: 0.36; }
+        50% { transform: scaleX(1); opacity: 0.78; }
+      }
+      @keyframes markPulse {
+        0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 9px rgba(0, 212, 255, 0.3)); }
+        16.66%, 50%, 83.33% { transform: translateY(-1px) scale(1.018); filter: drop-shadow(0 0 13px rgba(0, 212, 255, 0.45)); }
+        33.33%, 66.66% { transform: translateY(0) scale(0.996); filter: drop-shadow(0 0 12px rgba(124, 255, 214, 0.36)); }
+      }
+      @keyframes wordSignal {
+        0%, 100% { opacity: 0.86; }
+        45% { opacity: 1; }
+        72% { opacity: 0.58; }
+      }
+    </style>
+  </defs>
+  <g transform="translate(95 38)">
+    <rect class="frame" x="142" y="9" width="466" height="126" rx="18"/>
+    <rect class="rail" x="178" y="112" width="392" height="5" rx="3" fill="url(#rail)" filter="url(#cyanGlow)"/>
+    <text class="word" x="0" y="94" fill="url(#topicWord)">topic</text>
+    <image class="mark" href="../icons/topic.earth_64x64.svg" x="315" y="14" width="112" height="112" preserveAspectRatio="xMidYMid meet"/>
+    <text class="word word-earth" x="441" y="94" fill="url(#earthWord)">earth</text>
+  </g>
+</svg>
