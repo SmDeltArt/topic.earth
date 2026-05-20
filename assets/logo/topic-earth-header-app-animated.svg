@@ -3,20 +3,20 @@
   <desc id="desc">Transparent animated topic.earth header logo with the original Earth mark.</desc>
   <defs>
     <linearGradient id="topicWord" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.72"/>
+      <stop offset="0%" stop-color="#00d4ff"/>
       <stop offset="18%" stop-color="#c8f7ff"/>
       <stop offset="44%" stop-color="#00d4ff"/>
-      <stop offset="58%" stop-color="#e8eaed" stop-opacity="0.18"/>
-      <stop offset="76%" stop-color="#00d4ff" stop-opacity="0.55"/>
+      <stop offset="58%" stop-color="#e8eaed" stop-opacity="0.55"/>
+      <stop offset="76%" stop-color="#00d4ff"/>
       <stop offset="100%" stop-color="#b8fbff"/>
       <animateTransform attributeName="gradientTransform" type="translate" values="-0.55 0;0.35 0;1.05 0;-0.55 0" dur="8.1s" repeatCount="indefinite"/>
     </linearGradient>
     <linearGradient id="earthWord" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#9ff5ff" stop-opacity="0.72"/>
+      <stop offset="0%" stop-color="#9ff5ff"/>
       <stop offset="18%" stop-color="#ffffff"/>
       <stop offset="44%" stop-color="#9ff5ff"/>
-      <stop offset="58%" stop-color="#e8eaed" stop-opacity="0.18"/>
-      <stop offset="76%" stop-color="#9ff5ff" stop-opacity="0.55"/>
+      <stop offset="58%" stop-color="#e8eaed" stop-opacity="0.55"/>
+      <stop offset="76%" stop-color="#9ff5ff"/>
       <stop offset="100%" stop-color="#e9fbff"/>
       <animateTransform attributeName="gradientTransform" type="translate" values="0.35 0;1.05 0;-0.55 0;0.35 0" dur="8.1s" repeatCount="indefinite"/>
     </linearGradient>
@@ -85,17 +85,17 @@
         33.33%, 66.66% { transform: translateY(0) scale(0.996); filter: drop-shadow(0 0 12px rgba(124, 255, 214, 0.36)); }
       }
       @keyframes wordSignal {
-        0%, 100% { opacity: 0.86; }
+        0%, 100% { opacity: 0.96; }
         45% { opacity: 1; }
-        72% { opacity: 0.58; }
+        72% { opacity: 0.9; }
       }
     </style>
   </defs>
-  <g transform="translate(95 38)">
-    <rect class="frame" x="142" y="9" width="466" height="126" rx="18"/>
-    <rect class="rail" x="178" y="112" width="392" height="5" rx="3" fill="url(#rail)" filter="url(#cyanGlow)"/>
-    <text class="word" x="0" y="94" fill="url(#topicWord)">topic</text>
-    <image class="mark" href="../icons/topic.earth_64x64.svg" x="315" y="14" width="112" height="112" preserveAspectRatio="xMidYMid meet"/>
-    <text class="word word-earth" x="441" y="94" fill="url(#earthWord)">earth</text>
+  <g transform="translate(64 38)">
+    <rect class="frame" x="0" y="9" width="772" height="126" rx="18"/>
+    <rect class="rail" x="44" y="112" width="684" height="5" rx="3" fill="url(#rail)" filter="url(#cyanGlow)"/>
+    <text class="word" x="26" y="94" fill="url(#topicWord)">topic</text>
+    <image class="mark" href="../icons/topic.earth_64x64.svg" x="330" y="14" width="112" height="112" preserveAspectRatio="xMidYMid meet"/>
+    <text class="word word-earth" x="466" y="94" fill="url(#earthWord)">earth</text>
   </g>
 </svg>
