@@ -16,11 +16,11 @@ import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-2026
 import { Settings } from './lib/settings.js?v=topic-earth-stt-tts-badges-20260520';
 import { LanguageManager } from './lib/language.js?v=topic-earth-tab-layers-20260507';
 import { ReadTranslationService } from './lib/read-translation.js?v=topic-earth-warning-panel-collapse-20260430';
-import { TTSManager } from './lib/tts.js?v=topic-earth-tts-origin-debug-20260520';
+import { TTSManager } from './lib/tts.js?v=topic-earth-bridge-cleanup-20260520';
 import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-access-toggle-20260517';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
 import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-warning-panel-collapse-20260430';
-import { installAiApiBridge } from './lib/ai-api-bridge.js?v=topic-earth-stt-tts-badges-20260520';
+import { installAiApiBridge } from './lib/ai-api-bridge.js?v=topic-earth-bridge-cleanup-20260520';
 
 const TOPIC_EARTH_FAVICON_URL = 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg';
 const TOPIC_EARTH_FAVICON_FALLBACK_URL = './assets/icons/topic.earth_24x24.svg?v=topic-earth-icons-20260505';

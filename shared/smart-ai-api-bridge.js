@@ -36,6 +36,7 @@
     'http://127.0.0.1:8000'
   ];
   const WIDGET_ALLOWED_VERCEL_PATTERN = /^https:\/\/smdeltart[a-z0-9-]*\.vercel\.app$/;
+  const API_SETTINGS_CHANNEL_NAME = 'smdeltart-api-settings-sync';
 
   const TEXT_PROVIDER_ALIASES = {
     'deepseek-free': 'deepseek',
@@ -329,22 +330,26 @@
       this.getRuntimeSettings = options.getRuntimeSettings || (() => ({ aiUpdatesUseLinkedApi: true, aiWebSearchEnabled: true }));
       this.onSummary = options.onSummary || (() => {});
       this.eventName = options.eventName || 'smartAiApiSettingsChanged';
-      this.widgetSync = null;
+      this.syncChannel = null;
       this.lastSummary = null;
 
-      this.initWidgetSync();
+      this.initBroadcastSync();
       this.syncFromStorage('init');
       this.attachListeners();
     }
 
-    initWidgetSync() {
-      if (!global.SmartWidgetSync) return;
-
+    initBroadcastSync() {
       try {
-        this.widgetSync = new global.SmartWidgetSync(this.appName);
-        this.widgetSync.onSettingsChange(() => this.syncFromStorage('smart-widget-sync'));
+        if (!global.BroadcastChannel) return;
+        this.syncChannel = new global.BroadcastChannel(API_SETTINGS_CHANNEL_NAME);
+        this.syncChannel.onmessage = (event) => {
+          const { type, settings } = event.data || {};
+          if (!['settings-updated', 'settings-response', 'widget-ready'].includes(type)) return;
+          this.applyIncomingSettings(settings, global.location?.origin);
+          this.syncFromStorage('broadcast');
+        };
       } catch (error) {
-        console.warn('[Smart AI API] SmartWidgetSync unavailable:', error);
+        console.warn('[Smart AI API] Broadcast sync unavailable:', error);
       }
     }
 
