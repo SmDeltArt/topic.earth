@@ -7680,14 +7680,6 @@ Return ONLY a JSON object with this exact format, no other text:
   renderAiApiModelBadges(summary = this.getAiApiSummary()) {
     const currentModel = summary.textModel || 'None';
     const maxModel = summary.textMaxModel || 'Check';
-    const ttsProvider = summary.ttsProviderName || summary.ttsProvider || 'Browser TTS';
-    const ttsModel = summary.ttsModel || '';
-    const ttsVoice = summary.ttsVoice || '';
-    const ttsReady = summary.ttsActiveMode === 'external' && summary.ttsProvider === 'openai-tts' && summary.ttsHasKey;
-    const ttsBlocked = summary.ttsActiveMode === 'external' && summary.ttsProvider === 'openai-tts' && !summary.ttsHasKey;
-    const ttsLabel = summary.ttsActiveMode === 'external'
-      ? [ttsProvider, ttsModel, ttsVoice, ttsBlocked ? 'no key here' : ''].filter(Boolean).join(' / ')
-      : (ttsProvider === 'browser' ? 'Browser TTS' : ttsProvider || 'Browser TTS');
     const sttProvider = summary.sttProviderName || summary.sttProvider || 'Browser STT';
     const sttModel = summary.sttModel || '';
     const sttReady = summary.sttActiveMode === 'external' && (summary.sttHasKey || summary.sttProvider === 'browser-speech');
@@ -7705,9 +7697,6 @@ Return ONLY a JSON object with this exact format, no other text:
         </span>
         <span class="ai-api-model-badge max" title="${this.escapeHtml(maxTitle)}">
           <b>Max</b>${this.escapeHtml(maxModel)}
-        </span>
-        <span class="ai-api-model-badge tts ${ttsReady ? 'linked' : ttsBlocked ? 'blocked' : 'browser'}" title="Linked read-aloud voice">
-          <b>TTS</b>${this.escapeHtml(ttsLabel)}
         </span>
         <span class="ai-api-model-badge stt ${sttReady ? 'linked' : 'browser'}" title="Linked speech-to-text input">
           <b>STT</b>${this.escapeHtml(sttLabel)}
