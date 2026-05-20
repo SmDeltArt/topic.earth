@@ -1,4 +1,4 @@
-import { Settings } from '../lib/settings.js?v=topic-earth-api-settings-widget-20260516';
+import { Settings } from '../lib/settings.js?v=topic-earth-stt-tts-badges-20260520';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-tab-layers-20260507';
 import { ReadTranslationService } from '../lib/read-translation.js';
@@ -42,6 +42,8 @@ export class DetailPanel {
     this.topicBuilderContext = null;
     this.pendingResearchAutoApply = false;
     this.composerSmartInput = '';
+    this.topicDictationTarget = null;
+    this.topicDictationRecognition = null;
     this.showMediaUrlInput = false;
     this.mediaUrlDraftUrl = '';
     this.mediaUrlPreviewToken = null;
@@ -495,6 +497,8 @@ export class DetailPanel {
         this.copyOutput();
       } else if (action === 'apply-composer-input') {
         this.applyComposerInput();
+      } else if (action === 'toggle-topic-dictation') {
+        this.toggleTopicDictation(target);
       } else if (action === 'generate-summary') {
         this.generateSummary();
       } else if (action === 'generate-insight') {
@@ -607,6 +611,128 @@ export class DetailPanel {
         }
       }
     });
+
+    this.container.addEventListener('focusin', (e) => {
+      if (this.mode !== 'create-topic') return;
+      if (this.isTopicDictationTarget(e.target)) {
+        this.topicDictationTarget = e.target;
+      }
+    });
+  }
+
+  getSpeechRecognitionConstructor() {
+    return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  }
+
+  isTopicDictationTarget(element) {
+    if (!element || !this.container.contains(element)) return false;
+    if (!element.closest('#topic-form')) return false;
+    const tag = element.tagName?.toLowerCase();
+    return tag === 'textarea'
+      || (tag === 'input' && !['button', 'submit', 'reset', 'file', 'checkbox', 'radio'].includes(element.type))
+      || element.isContentEditable;
+  }
+
+  getTopicDictationTarget() {
+    const active = document.activeElement;
+    if (this.isTopicDictationTarget(active)) {
+      this.topicDictationTarget = active;
+      return active;
+    }
+
+    if (this.isTopicDictationTarget(this.topicDictationTarget)) {
+      return this.topicDictationTarget;
+    }
+
+    return this.container.querySelector('#topic-smart-input');
+  }
+
+  setTopicDictationStatus(message, state = '') {
+    const status = this.container.querySelector('[data-topic-dictation-status]');
+    if (!status) return;
+    status.textContent = message;
+    status.dataset.state = state;
+  }
+
+  insertDictationText(target, text) {
+    const value = String(text || '').trim();
+    if (!target || !value) return;
+
+    if (target.isContentEditable) {
+      target.focus();
+      document.execCommand('insertText', false, value);
+      target.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: value }));
+      return;
+    }
+
+    const current = target.value || '';
+    const start = Number.isFinite(target.selectionStart) ? target.selectionStart : current.length;
+    const end = Number.isFinite(target.selectionEnd) ? target.selectionEnd : current.length;
+    const prefix = current.slice(0, start);
+    const suffix = current.slice(end);
+    const spacer = prefix && !/\s$/.test(prefix) ? ' ' : '';
+    const nextText = `${spacer}${value}`;
+    target.value = `${prefix}${nextText}${suffix}`;
+    const nextCursor = start + nextText.length;
+    target.focus();
+    target.setSelectionRange?.(nextCursor, nextCursor);
+    target.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: value }));
+  }
+
+  toggleTopicDictation(button = null) {
+    if (this.topicDictationRecognition) {
+      this.topicDictationRecognition.stop();
+      return;
+    }
+
+    const Recognition = this.getSpeechRecognitionConstructor();
+    if (!Recognition) {
+      this.setTopicDictationStatus('Browser speech recognition is not available here. Configure external STT for higher quality.', 'error');
+      return;
+    }
+
+    const target = this.getTopicDictationTarget();
+    if (!target) return;
+
+    const recognition = new Recognition();
+    const lang = LanguageManager.getSpeechCode(this.getCurrentLanguage()) || 'en-US';
+    recognition.lang = lang;
+    recognition.interimResults = false;
+    recognition.continuous = false;
+
+    this.topicDictationRecognition = recognition;
+    button?.classList.add('active');
+    this.setTopicDictationStatus(`Listening for ${target.getAttribute('name') || target.id || 'focused field'}...`, 'listening');
+
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results || [])
+        .map(result => result?.[0]?.transcript || '')
+        .join(' ')
+        .trim();
+      this.insertDictationText(target, transcript);
+      this.saveFormState?.();
+      this.setTopicDictationStatus('Dictation inserted. Focus another field and press Mic to continue.', 'ready');
+    };
+
+    recognition.onerror = (event) => {
+      this.setTopicDictationStatus(`Dictation stopped: ${event.error || 'speech recognition error'}`, 'error');
+    };
+
+    recognition.onend = () => {
+      this.topicDictationRecognition = null;
+      button?.classList.remove('active');
+      if (this.container.querySelector('[data-topic-dictation-status]')?.dataset.state === 'listening') {
+        this.setTopicDictationStatus('Dictation stopped. Focus any topic field and press Mic.', 'ready');
+      }
+    };
+
+    try {
+      recognition.start();
+    } catch (error) {
+      this.topicDictationRecognition = null;
+      button?.classList.remove('active');
+      this.setTopicDictationStatus(`Dictation could not start: ${error.message || error}`, 'error');
+    }
   }
 
   toggleCompactMode() {
@@ -5671,8 +5797,10 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
               >${this.escapeHtml(this.composerSmartInput || '')}</textarea>
               <div class="topic-smart-input-actions">
                 <button type="button" class="btn-primary-alt" data-action="apply-composer-input">Use in draft</button>
+                <button type="button" class="simple-ai-btn topic-dictation-btn" data-action="toggle-topic-dictation" title="Dictate into the focused topic field">Mic</button>
                 <button type="button" class="simple-ai-btn" data-action="import-file">Add media</button>
               </div>
+              <div class="setting-hint topic-dictation-status" data-topic-dictation-status>Mic uses the focused topic field, or this input if no field is active.</div>
               <div class="topic-smart-chips" aria-label="Accepted input types">
                 <span>Search</span>
                 <span>Source</span>
@@ -7521,6 +7649,11 @@ Return ONLY a JSON object with this exact format, no other text:
       textMaxDetectedAt: settings.aiApiTextMaxDetectedAt,
       imageProviderName: settings.aiApiImageProvider,
       imageModel: settings.aiApiImageModel,
+      sttActiveMode: settings.aiApiSttProvider && settings.aiApiSttProvider !== 'browser' ? 'external' : 'browser',
+      sttProvider: settings.aiApiSttProvider || 'browser',
+      sttProviderName: settings.aiApiSttProvider && settings.aiApiSttProvider !== 'browser' ? settings.aiApiSttProvider : 'Browser STT',
+      sttModel: settings.aiApiSttModel || '',
+      sttHasKey: false,
       ttsActiveMode: settings.aiVoiceEnabled ? 'external' : 'browser',
       ttsProvider: settings.aiVoiceProvider,
       ttsProviderName: settings.aiVoiceProvider === 'openai-tts' ? 'OpenAI TTS' : settings.aiVoiceProvider,
@@ -7548,7 +7681,15 @@ Return ONLY a JSON object with this exact format, no other text:
     const ttsModel = summary.ttsModel || '';
     const ttsVoice = summary.ttsVoice || '';
     const ttsReady = summary.ttsActiveMode === 'external' && summary.ttsProvider === 'openai-tts' && summary.ttsHasKey;
-    const ttsLabel = [ttsProvider, ttsModel, ttsVoice].filter(Boolean).join(' / ') || 'Browser voice';
+    const ttsLabel = summary.ttsActiveMode === 'external'
+      ? [ttsProvider, ttsModel, ttsVoice].filter(Boolean).join(' / ')
+      : (ttsProvider === 'browser' ? 'Browser TTS' : ttsProvider || 'Browser TTS');
+    const sttProvider = summary.sttProviderName || summary.sttProvider || 'Browser STT';
+    const sttModel = summary.sttModel || '';
+    const sttReady = summary.sttActiveMode === 'external' && (summary.sttHasKey || summary.sttProvider === 'browser-speech');
+    const sttLabel = summary.sttActiveMode === 'external'
+      ? [sttProvider, sttModel].filter(Boolean).join(' / ')
+      : (sttProvider === 'browser' ? 'Browser STT' : sttProvider || 'Browser STT');
     const maxTitle = summary.textMaxDetectedAt
       ? `Detected ${this.formatAiApiTimestamp(summary.textMaxDetectedAt)}`
       : 'Use Refresh to detect available OpenAI text models';
@@ -7563,6 +7704,9 @@ Return ONLY a JSON object with this exact format, no other text:
         </span>
         <span class="ai-api-model-badge tts ${ttsReady ? 'linked' : 'browser'}" title="Linked read-aloud voice">
           <b>TTS</b>${this.escapeHtml(ttsLabel)}
+        </span>
+        <span class="ai-api-model-badge stt ${sttReady ? 'linked' : 'browser'}" title="Linked speech-to-text input">
+          <b>STT</b>${this.escapeHtml(sttLabel)}
         </span>
       </div>
     `;
@@ -7583,13 +7727,16 @@ Return ONLY a JSON object with this exact format, no other text:
     const textModel = summary.textModel || 'No model selected';
     const imageProvider = summary.imageProviderName || summary.imageProvider || 'No image provider selected';
     const ttsProvider = summary.ttsProviderName || summary.ttsProvider || 'Browser TTS';
-    const ttsVoice = summary.ttsVoice || 'auto';
+    const ttsVoice = summary.ttsActiveMode === 'external' ? summary.ttsVoice || 'auto' : 'browser';
+    const sttProvider = summary.sttProviderName || summary.sttProvider || 'Browser STT';
+    const sttModel = summary.sttActiveMode === 'external' ? summary.sttModel || 'default' : 'browser';
     const webSearchMode = summary.webSearchCapable ? 'Live web-search capable' : 'Manual search/update';
 
     meta.innerHTML = `
       <span><strong>Text:</strong> ${this.escapeHtml(textProvider)}${textModel ? ` / ${this.escapeHtml(textModel)}` : ''}</span>
       <span><strong>Image:</strong> ${this.escapeHtml(imageProvider)}</span>
       <span><strong>TTS:</strong> ${this.escapeHtml(ttsProvider)} / ${this.escapeHtml(ttsVoice)}</span>
+      <span><strong>STT:</strong> ${this.escapeHtml(sttProvider)} / ${this.escapeHtml(sttModel)}</span>
       <span><strong>Mode:</strong> ${this.escapeHtml(webSearchMode)}</span>
     `;
 
@@ -8093,7 +8240,9 @@ Return ONLY a JSON object with this exact format, no other text:
     const aiModelBadges = this.renderAiApiModelBadges(aiSummary);
     const aiImageProvider = aiSummary.imageProviderName || aiSummary.imageProvider || t('settings.noImageProvider');
     const aiTtsProvider = aiSummary.ttsProviderName || aiSummary.ttsProvider || 'Browser TTS';
-    const aiTtsVoice = aiSummary.ttsVoice || 'auto';
+    const aiTtsVoice = aiSummary.ttsActiveMode === 'external' ? aiSummary.ttsVoice || 'auto' : 'browser';
+    const aiSttProvider = aiSummary.sttProviderName || aiSummary.sttProvider || 'Browser STT';
+    const aiSttModel = aiSummary.sttActiveMode === 'external' ? aiSummary.sttModel || 'default' : 'browser';
     const aiSearchMode = aiSummary.webSearchCapable ? t('settings.liveWebSearchCapable') : t('settings.aiAssistedSearchUpdate');
     const isAdmin = AppAccess.isAdminMode();
     const accessState = AppAccess.getState();
@@ -8325,6 +8474,7 @@ Return ONLY a JSON object with this exact format, no other text:
             <span><strong>${this.escapeHtml(t('settings.aiText'))}:</strong> ${this.escapeHtml(aiTextProvider)}${aiTextModel ? ` / ${this.escapeHtml(aiTextModel)}` : ''}</span>
             <span><strong>${this.escapeHtml(t('settings.aiImage'))}:</strong> ${this.escapeHtml(aiImageProvider)}</span>
             <span><strong>TTS:</strong> ${this.escapeHtml(aiTtsProvider)} / ${this.escapeHtml(aiTtsVoice)}</span>
+            <span><strong>STT:</strong> ${this.escapeHtml(aiSttProvider)} / ${this.escapeHtml(aiSttModel)}</span>
             <span><strong>${this.escapeHtml(t('settings.aiMode'))}:</strong> ${this.escapeHtml(aiSearchMode)}</span>
           </div>
           ${aiModelBadges}

@@ -11,16 +11,16 @@ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js
 import { TopBar } from './components/TopBar.js?v=topic-earth-tutorial-bubbles-20260516';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-access-toggle-20260517';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-access-toggle-20260517';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-tts-read-sync-20260520';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-stt-tts-badges-20260520';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-20260506';
-import { Settings } from './lib/settings.js?v=topic-earth-api-settings-widget-20260516';
+import { Settings } from './lib/settings.js?v=topic-earth-stt-tts-badges-20260520';
 import { LanguageManager } from './lib/language.js?v=topic-earth-tab-layers-20260507';
 import { ReadTranslationService } from './lib/read-translation.js?v=topic-earth-warning-panel-collapse-20260430';
 import { TTSManager } from './lib/tts.js?v=topic-earth-language-voice-menu-20260430';
 import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-access-toggle-20260517';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
 import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-warning-panel-collapse-20260430';
-import { installAiApiBridge } from './lib/ai-api-bridge.js';
+import { installAiApiBridge } from './lib/ai-api-bridge.js?v=topic-earth-stt-tts-badges-20260520';
 
 const TOPIC_EARTH_FAVICON_URL = 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg';
 const TOPIC_EARTH_FAVICON_FALLBACK_URL = './assets/icons/topic.earth_24x24.svg?v=topic-earth-icons-20260505';

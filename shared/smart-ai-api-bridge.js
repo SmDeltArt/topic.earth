@@ -126,6 +126,10 @@
   };
 
   const TTS_PROVIDERS = {
+    browser: {
+      name: 'Browser TTS',
+      noKey: true
+    },
     'openai-tts': {
       name: 'OpenAI TTS',
       defaultModel: 'tts-1',
@@ -136,6 +140,39 @@
     },
     elevenlabs: {
       name: 'ElevenLabs'
+    }
+  };
+
+  const STT_PROVIDERS = {
+    browser: {
+      name: 'Browser STT',
+      noKey: true
+    },
+    'browser-speech': {
+      name: 'Browser STT',
+      noKey: true
+    },
+    'openai-whisper': {
+      name: 'OpenAI STT',
+      defaultModel: 'whisper-1'
+    },
+    'groq-whisper': {
+      name: 'Groq Whisper'
+    },
+    deepgram: {
+      name: 'Deepgram'
+    },
+    assemblyai: {
+      name: 'AssemblyAI'
+    },
+    'azure-speech': {
+      name: 'Azure Speech'
+    },
+    'google-speech': {
+      name: 'Google Speech-to-Text'
+    },
+    'elevenlabs-scribe': {
+      name: 'ElevenLabs Scribe'
     }
   };
 
@@ -378,6 +415,7 @@
       const apiSettings = this.readApiSettings();
       const textConfig = this.getTextConfig(apiSettings);
       const imageConfig = this.getImageConfig(apiSettings);
+      const sttConfig = this.getSttConfig(apiSettings);
       const ttsConfig = this.getTtsConfig(apiSettings);
       const textReady = Boolean(
         textConfig.provider &&
@@ -385,8 +423,9 @@
         (textConfig.apiKey || textConfig.config?.noKey)
       );
       const imageReady = Boolean(imageConfig.provider && (imageConfig.apiKey || imageConfig.provider === 'pollinations'));
+      const sttReady = Boolean(sttConfig.provider && (sttConfig.apiKey || sttConfig.config?.noKey));
       const ttsReady = Boolean(ttsConfig.activeMode === 'external' && ttsConfig.provider === 'openai-tts' && ttsConfig.apiKey);
-      const linked = Boolean(apiSettings.hasSavedSettings && (textReady || imageReady || ttsReady));
+      const linked = Boolean(apiSettings.hasSavedSettings && (textReady || imageReady || sttReady || ttsReady));
       const now = new Date().toISOString();
 
       const summary = {
@@ -403,6 +442,11 @@
         imageProviderName: imageConfig.providerName,
         imageModel: imageConfig.model,
         imageHasKey: Boolean(imageConfig.apiKey),
+        sttActiveMode: sttConfig.activeMode,
+        sttProvider: sttConfig.provider,
+        sttProviderName: sttConfig.providerName,
+        sttModel: sttConfig.model,
+        sttHasKey: Boolean(sttConfig.apiKey),
         ttsActiveMode: ttsConfig.activeMode,
         ttsProvider: ttsConfig.provider,
         ttsProviderName: ttsConfig.providerName,
@@ -514,11 +558,35 @@
       };
     }
 
+    getSttConfig(apiSettings = this.readApiSettings()) {
+      const activeMode = apiSettings.activeSttProvider ||
+        (apiSettings.externalSttApiRadio ? 'external' : 'browser');
+      const rawProvider = activeMode === 'external' ? apiSettings.externalSttApi : 'browser';
+      const provider = rawProvider || (activeMode === 'browser' ? 'browser' : '');
+      const providerConfig = STT_PROVIDERS[provider];
+      const apiKey =
+        activeMode === 'external'
+          ? apiSettings.externalSttApiKey ||
+            (provider === 'openai-whisper' ? apiSettings.paidTextApiKey || apiSettings.freeTextApiKey || '' : '')
+          : '';
+
+      return {
+        activeMode,
+        provider,
+        providerName: providerConfig?.name || rawProvider || '',
+        apiKey,
+        model: provider === 'openai-whisper'
+          ? apiSettings.openaiSttModel || providerConfig?.defaultModel || 'whisper-1'
+          : '',
+        config: providerConfig
+      };
+    }
+
     getTtsConfig(apiSettings = this.readApiSettings()) {
       const activeMode = apiSettings.activeTtsProvider ||
-        (apiSettings.externalTtsApiRadio ? 'external' : apiSettings.browserTtsRadio ? 'browser' : 'websim');
-      const rawProvider = activeMode === 'external' ? apiSettings.externalTtsApi : activeMode;
-      const provider = rawProvider || '';
+        (apiSettings.externalTtsApiRadio ? 'external' : 'browser');
+      const rawProvider = activeMode === 'external' ? apiSettings.externalTtsApi : 'browser';
+      const provider = rawProvider || (activeMode === 'browser' ? 'browser' : '');
       const providerConfig = TTS_PROVIDERS[provider];
       const apiKey =
         activeMode === 'external'
