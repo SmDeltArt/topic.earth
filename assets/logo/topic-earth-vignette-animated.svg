@@ -50,7 +50,7 @@
       .mark { transform-box: fill-box; transform-origin: center; filter: drop-shadow(0 0 13px rgba(0, 212, 255, 0.45)); animation: markPulse 6s steps(6, end) infinite; }
       .rail { transform-box: fill-box; transform-origin: center; animation: railPulse 6s ease-in-out infinite; }
       .frame { fill: none; stroke: rgba(0, 212, 255, 0.22); stroke-width: 1.4; animation: framePulse 6s steps(6, end) infinite; }
-      .logo-wrap { transform-origin: 370px 72px; animation: logoTravel 12s cubic-bezier(.2,.8,.2,1) infinite; }
+      .logo-wrap { transform-origin: 370px 72px; }
       .title-line { font-family: "Space Mono", Consolas, monospace; font-size: 44px; font-weight: 700; fill: #00d4ff; letter-spacing: 0; filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.42)); animation: titleMove 12s cubic-bezier(.2,.8,.2,1) infinite; }
       .info-stack { font-family: "Space Mono", Consolas, monospace; fill: #00d4ff; filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.36)); animation: infoSlide 12s cubic-bezier(.2,.8,.2,1) infinite; }
       .bar { fill: #00d4ff; filter: drop-shadow(0 0 13px rgba(0, 212, 255, 0.42)); transform-origin: 0 50%; animation: barReveal 12s cubic-bezier(.2,.8,.2,1) infinite; }
@@ -66,23 +66,18 @@
         50% { transform: translateY(-1px) scale(1.018); filter: drop-shadow(0 0 13px rgba(0, 212, 255, 0.45)); }
       }
       @keyframes wordSignal { 0%, 100% { opacity: 0.96; } 45% { opacity: 1; } 72% { opacity: 0.9; } }
-      @keyframes logoTravel {
-        0%, 20% { transform: translate(0, 18px) scale(1); opacity: 1; }
-        30%, 55% { transform: translate(0, 0) scale(1); opacity: 1; }
-        68%, 100% { transform: translate(-310px, 0) scale(.82); opacity: 1; }
-      }
       @keyframes titleMove {
         0%, 14% { transform: translate(0, 76px); opacity: 1; }
         28%, 55% { transform: translate(0, 0); opacity: 1; }
-        68%, 100% { transform: translate(-344px, 0); opacity: 1; }
+        68%, 100% { transform: translate(-320px, 0); opacity: 1; }
       }
       @keyframes barReveal {
-        0%, 56% { transform: scaleY(0.08); opacity: 1; }
-        68%, 100% { transform: scaleY(1); opacity: 1; }
+        0%, 60% { transform: scaleY(0.08); opacity: 0; }
+        70%, 100% { transform: scaleY(1); opacity: 1; }
       }
       @keyframes infoSlide {
-        0%, 55% { transform: translate(370px, 0); opacity: 1; }
-        70%, 100% { transform: translate(0, 0); opacity: 1; }
+        0%, 60% { transform: translate(370px, 0); opacity: 0; }
+        72%, 100% { transform: translate(0, 0); opacity: 1; }
       }
     </style>
   </defs>
@@ -111,12 +106,17 @@
   </g>
   </g>
 
-  <text class="title-line" x="600" y="352" text-anchor="middle">Climate Dashboard</text>
-  <rect class="bar" x="486" y="396" width="6" height="108" rx="3"/>
-  <g class="info-stack">
-    <text class="modes" x="518" y="430">REGIONAL - WORLD - SPACE - FEVER SIM</text>
-    <text class="url" x="518" y="486">https://topic.earth - topic.earth</text>
+  <g class="text-wrap">
+    <text class="title-line" x="600" y="382" text-anchor="middle">Climate Dashboard</text>
+    <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
+    <g class="info-stack">
+      <text class="modes" x="282" y="462">REGIONAL - WORLD - SPACE - FEVER SIM</text>
+      <text class="url" x="282" y="520">https://topic.earth - topic.earth</text>
+    </g>
   </g>
 </svg>
+
+
+
 
 
