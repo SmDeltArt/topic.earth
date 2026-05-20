@@ -37,6 +37,7 @@
   ];
   const WIDGET_ALLOWED_VERCEL_PATTERN = /^https:\/\/smdeltart[a-z0-9-]*\.vercel\.app$/;
   const API_SETTINGS_CHANNEL_NAME = 'smdeltart-api-settings-sync';
+  const LEGACY_API_SECRET_KEY = 'Sm\u0394rt2025!ApiKey#Secure';
 
   const TEXT_PROVIDER_ALIASES = {
     'deepseek-free': 'deepseek',
@@ -198,8 +199,27 @@
     return /^ENC:/i.test(String(value || '').trim());
   }
 
+  function decryptLegacyApiKey(value = '') {
+    const text = String(value || '').trim();
+    if (!isEncryptedSecret(text) || typeof global.atob !== 'function') return text;
+
+    try {
+      const encoded = text.slice(4);
+      const xored = decodeURIComponent(escape(global.atob(encoded)));
+      let plainText = '';
+      for (let index = 0; index < xored.length; index += 1) {
+        plainText += String.fromCharCode(
+          xored.charCodeAt(index) ^ LEGACY_API_SECRET_KEY.charCodeAt(index % LEGACY_API_SECRET_KEY.length)
+        );
+      }
+      return plainText;
+    } catch (error) {
+      return '';
+    }
+  }
+
   function usableApiKey(value = '') {
-    const key = String(value || '').trim();
+    const key = decryptLegacyApiKey(value).trim();
     return key && !isEncryptedSecret(key) ? key : '';
   }
 
