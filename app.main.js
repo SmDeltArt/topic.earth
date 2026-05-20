@@ -1675,7 +1675,11 @@ class TopicEarthApp {
           this.removeTTSVignette({ stopAudio: true });
           this.ttsManager?.speak(text, speechLang, {
             priority: 'manual',
-            channel: 'selection'
+            channel: 'selection',
+            aiVoiceFallbackToBrowser: false,
+            onError: (error) => {
+              console.warn('[Selected Read] Linked TTS failed:', error?.message || error);
+            }
           });
         }
 
@@ -1904,8 +1908,12 @@ class TopicEarthApp {
     this.ttsManager?.speak(text, speechLang, {
       priority: 'manual',
       channel: 'selection',
-      onStart: () => {
+      aiVoiceFallbackToBrowser: false,
+      onStart: ({ source } = {}) => {
         this.startTTSHighlight();
+        this.updateTTSVignette({
+          status: source === 'ai' ? 'Reading with linked OpenAI voice...' : 'Reading with browser voice...'
+        });
       },
       onBoundary: (event) => {
         this.handleTTSBoundary(event.charIndex || 0);
@@ -1913,6 +1921,12 @@ class TopicEarthApp {
       onEnd: () => {
         this.stopTTSHighlight();
         this.updateTTSVignette({ status: 'Finished' });
+      },
+      onError: (error) => {
+        this.stopTTSHighlight();
+        this.updateTTSVignette({
+          status: `Linked TTS unavailable: ${error?.message || 'check API Settings'}`
+        });
       }
     });
   }
