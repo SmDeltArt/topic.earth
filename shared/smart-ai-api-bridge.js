@@ -193,6 +193,40 @@
     }
   }
 
+  function isEncryptedSecret(value = '') {
+    return /^ENC:/i.test(String(value || '').trim());
+  }
+
+  function usableApiKey(value = '') {
+    const key = String(value || '').trim();
+    return key && !isEncryptedSecret(key) ? key : '';
+  }
+
+  function firstUsableApiKey(...values) {
+    return values.map(usableApiKey).find(Boolean) || '';
+  }
+
+  function mergeApiSettings(...sources) {
+    return sources.reduce((merged, source) => {
+      Object.entries(source || {}).forEach(([key, value]) => {
+        if (/ApiKey$/i.test(key)) {
+          const nextUsable = usableApiKey(value);
+          const currentUsable = usableApiKey(merged[key]);
+          if (nextUsable || !currentUsable) {
+            merged[key] = value;
+          }
+          return;
+        }
+
+        if (value !== undefined) {
+          merged[key] = value;
+        }
+      });
+
+      return merged;
+    }, {});
+  }
+
   function compactMessages(messages = []) {
     return messages
       .map((message) => {
@@ -396,17 +430,16 @@
 
     readApiSettings() {
       const preferences = getStorageObject('smdeltartPreferences') || {};
-      const plain =
-        getStorageObject('smartApiSettings') ||
-        getStorageObject('cadAiApiSettings') ||
-        getStorageObject('smdeltartApiSettings') ||
-        {};
+      const smdeltartSettings = getStorageObject('smdeltartApiSettings') || {};
+      const cadSettings = getStorageObject('cadAiApiSettings') || {};
+      const smartSettings = getStorageObject('smartApiSettings') || {};
+      const plain = mergeApiSettings(smdeltartSettings, cadSettings, smartSettings);
+      const merged = mergeApiSettings(preferences, plain);
 
       return {
-        ...preferences,
-        ...plain,
+        ...merged,
         preferencesSource: preferences.source || null,
-        plainSource: plain.source || null,
+        plainSource: plain.source || smartSettings.source || cadSettings.source || smdeltartSettings.source || null,
         hasSavedSettings: Boolean(preferences.lastSaved || plain.lastSaved)
       };
     }
@@ -510,8 +543,8 @@
       const providerConfig = TEXT_PROVIDERS[provider];
       const apiKey =
         activeTier === 'free'
-          ? apiSettings.freeTextApiKey || apiSettings.paidTextApiKey || ''
-          : apiSettings.paidTextApiKey || apiSettings.freeTextApiKey || '';
+          ? firstUsableApiKey(apiSettings.freeTextApiKey, apiSettings.paidTextApiKey)
+          : firstUsableApiKey(apiSettings.paidTextApiKey, apiSettings.freeTextApiKey);
 
       return {
         activeTier,
@@ -547,8 +580,8 @@
       const providerConfig = IMAGE_PROVIDERS[provider];
       const apiKey =
         activeTier === 'free'
-          ? apiSettings.freeImageApiKey || apiSettings.paidImageApiKey || ''
-          : apiSettings.paidImageApiKey || apiSettings.freeImageApiKey || '';
+          ? firstUsableApiKey(apiSettings.freeImageApiKey, apiSettings.paidImageApiKey)
+          : firstUsableApiKey(apiSettings.paidImageApiKey, apiSettings.freeImageApiKey);
 
       return {
         activeTier,
@@ -568,8 +601,11 @@
       const providerConfig = STT_PROVIDERS[provider];
       const apiKey =
         activeMode === 'external'
-          ? apiSettings.externalSttApiKey ||
-            (provider === 'openai-whisper' ? apiSettings.paidTextApiKey || apiSettings.freeTextApiKey || '' : '')
+          ? firstUsableApiKey(
+            apiSettings.externalSttApiKey,
+            provider === 'openai-whisper' ? apiSettings.paidTextApiKey : '',
+            provider === 'openai-whisper' ? apiSettings.freeTextApiKey : ''
+          )
           : '';
 
       return {
@@ -592,8 +628,11 @@
       const providerConfig = TTS_PROVIDERS[provider];
       const apiKey =
         activeMode === 'external'
-          ? apiSettings.externalTtsApiKey ||
-            (provider === 'openai-tts' ? apiSettings.paidTextApiKey || apiSettings.freeTextApiKey || '' : '')
+          ? firstUsableApiKey(
+            apiSettings.externalTtsApiKey,
+            provider === 'openai-tts' ? apiSettings.paidTextApiKey : '',
+            provider === 'openai-tts' ? apiSettings.freeTextApiKey : ''
+          )
           : '';
 
       return {
