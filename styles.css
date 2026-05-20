@@ -6625,6 +6625,14 @@ canvas:hover {
     align-items: center;
     justify-content: center;
     gap: 8px;
+    border-color: rgba(0, 255, 255, 0.34);
+    background: linear-gradient(135deg, #2d3a5a, #1a2332);
+    box-shadow: inset 0 0 0 1px rgba(0, 255, 255, 0.08);
+}
+
+.api-settings-open-btn:hover {
+    border-color: rgba(0, 255, 255, 0.54);
+    background: linear-gradient(135deg, #1e3a5f, #0d1b2a);
 }
 
 .api-settings-open-btn img {
