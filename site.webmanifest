@@ -1,7 +1,7 @@
 {
   "name": "topic.earth",
   "short_name": "topic.earth",
-  "description": "Interactive Earth intelligence dashboard for climate systems, regional initiatives, space context, tipping points, AMOC, and AI-assisted topic research.",
+  "description": "Interactive Earth intelligence for climate signals, regional updates, space context, Fever scenarios, and AI-assisted topic research.",
   "id": "https://topic.earth/",
   "start_url": "/",
   "scope": "/",
@@ -25,7 +25,7 @@
       "purpose": "any maskable"
     },
     {
-      "src": "https://res.cloudinary.com/dsbfcgtdv/image/upload/w_512,h_512,c_pad,b_rgb:0a0e1a/f_png/v1778010556/topic.earth_64x64_frtsvs.svg",
+      "src": "/assets/social/topic-earth-mark-world.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

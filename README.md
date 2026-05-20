@@ -72,6 +72,16 @@ metadata are also exposed through:
 - [CITATION.cff](CITATION.cff)
 - [assets/logo/metadata.json](assets/logo/metadata.json)
 
+## Social Copy And Assets
+
+Social: `topic.earth turns climate, regional, space, and Fever signals into an interactive Earth intelligence dashboard.`
+
+GitHub: `Open-source interactive Earth intelligence dashboard with climate layers, Fever scenarios, regional topic drafting, and linked AI research tools.`
+
+Discord: `Explore topic.earth: Earth layers, Fever scenarios, regional updates, and AI-assisted topic research in one browser dashboard.`
+
+Preview and logo assets live in [assets/social](assets/social), including a Twitter/Discord-safe PNG card, transparent PNG/SVG marks, header variants, and animated GIF marks.
+
 ## Product Flow
 
 The current docs converge on one cleaner model:

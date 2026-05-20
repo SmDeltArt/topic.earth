@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img">
+
+
+
+    <defs>
+      <radialGradient id="ocean-fever" cx="34%" cy="28%" r="68%">
+        <stop offset="0" stop-color="#ff5a5f"/>
+        <stop offset="0.52" stop-color="#172033"/>
+        <stop offset="1" stop-color="#062044"/>
+      </radialGradient>
+      <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="10" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <g transform="translate(256 256) scale(1) translate(-256 -256)">
+      <circle cx="256" cy="256" r="178" fill="#ff4f42" opacity="0.18" filter="url(#softGlow)"/>
+      <circle cx="256" cy="256" r="170" fill="url(#ocean-fever)" stroke="#ffcf5a" stroke-width="8"/>
+      <g transform="rotate(0 256 256)">
+  <g class="continents" fill="#8bd73f">
+    <path d="M212 152c-22-24-62-20-82 2-18 20-16 50 8 66 17 12 41 8 49 30 7 21-15 43 5 58 18 14 50-1 62-20 15-24 2-45 18-63 13-15 35-12 41-33 6-19-10-31-26-35-24-6-49 12-75-5z"/>
+    <path d="M322 150c28 10 50 31 60 59 8 23-1 50-20 62-17 10-34-2-47 12-14 15-6 42-28 53-20 10-45-6-52-29-8-25 7-41 25-53 20-13 8-35 25-54 11-13 26-8 37-50z"/>
+    <path d="M150 316c19-1 34 13 36 31 2 19-14 35-35 35-23 0-44-18-42-37 2-17 18-28 41-29z"/>
+  </g></g>
+      <ellipse cx="256" cy="256" rx="190" ry="54" fill="none" stroke="rgba(255,255,255,0.38)" stroke-width="7" transform="rotate(-18 256 256)"/>
+      <path d="M154 145c74-34 176-18 217 54" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity="0.28"/>
+      <path d="M160 380c52 30 126 42 194 5" stroke="#ff675f" stroke-width="14" stroke-linecap="round" opacity="0.82"/><path d="M130 95l-50 78m52-18-20 44" stroke="#fffbf0" stroke-width="16" stroke-linecap="round" opacity="0.92"/>
+    </g>
+</svg>
