@@ -24,7 +24,6 @@
         allowedHosts: [
           "smdeltart.vercel.app",
           "smdeltart.com",
-          "topic.earth",
           "localhost",
           "127.0.0.1",
         ],
@@ -1324,7 +1323,8 @@
                       line-height: 1.45;
                     "
                   >
-                    Current: saved model · Max: click Refresh All or Test Text API
+                    Current: saved model · Max: click Refresh All or Test Text
+                    API
                   </div>
                 </div>
                 <a
@@ -1414,7 +1414,7 @@
                       data-key-format="sk-"
                       data-free-key="true"
                     >
-                      DeepSeek Free
+                      DeepSeek Free (V3 / R1 / Coder)
                     </option>
                     <option
                       value="perplexity-free"
@@ -1466,6 +1466,157 @@
                   id="ollamaModelSelector"
                   style="display: none; margin-top: 8px"
                 >
+                  <!-- Ollama server host (local or remote) -->
+                  <div style="margin-bottom: 8px">
+                    <label style="font-size: 0.75em; color: #888"
+                      >🌐 Ollama Server:</label
+                    >
+                    <div
+                      style="
+                        display: flex;
+                        gap: 4px;
+                        margin-top: 3px;
+                        align-items: stretch;
+                      "
+                    >
+                      <input
+                        type="text"
+                        id="ollamaHost"
+                        class="api-key-input"
+                        value="http://localhost:11434"
+                        placeholder="http://localhost:11434"
+                        style="flex: 1; margin-bottom: 0; font-size: 0.85em"
+                      />
+                      <select
+                        class="api-select"
+                        style="
+                          width: auto;
+                          font-size: 0.78em;
+                          margin-bottom: 0;
+                          padding: 4px 6px;
+                        "
+                        title="Quick host presets"
+                        onchange="
+                          if (this.value) {
+                            document.getElementById('ollamaHost').value =
+                              this.value;
+                            this.value = '';
+                          }
+                        "
+                      >
+                        <option value="">⬇️ preset</option>
+                        <option value="http://localhost:11434">
+                          🖥 localhost
+                        </option>
+                        <option value="http://127.0.0.1:11434">
+                          🖥 127.0.0.1
+                        </option>
+                        <option value="http://0.0.0.0:11434">
+                          🌐 0.0.0.0 (LAN)
+                        </option>
+                      </select>
+                    </div>
+                    <div
+                      style="font-size: 0.68em; color: #555; margin-top: 2px"
+                    >
+                      Local default · Or paste any Ollama-compatible URL
+                    </div>
+                  </div>
+                  <!-- Task preset buttons -->
+                  <div
+                    style="
+                      display: flex;
+                      gap: 4px;
+                      flex-wrap: wrap;
+                      margin-bottom: 6px;
+                    "
+                  >
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Chat / general"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #6366f1;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('ollamaModel').value =
+                          'llama3.1:8b'
+                      "
+                    >
+                      💬 Chat
+                    </button>
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Code generation"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #0ea5e9;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('ollamaModel').value =
+                          'deepseek-coder-v2:latest'
+                      "
+                    >
+                      💻 Code
+                    </button>
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Reasoning / thinking"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #f59e0b;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('ollamaModel').value =
+                          'deepseek-r1:14b'
+                      "
+                    >
+                      🧠 Think
+                    </button>
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Vision / image analysis"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #10b981;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('ollamaModel').value =
+                          'llama3.2-vision'
+                      "
+                    >
+                      👁️ Vision
+                    </button>
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Fast / lightweight"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #8b5cf6;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('ollamaModel').value =
+                          'llama3.2:3b'
+                      "
+                    >
+                      ⚡ Fast
+                    </button>
+                  </div>
                   <label style="font-size: 0.75em; color: #888"
                     >🦙 Ollama Text Model:</label
                   >
@@ -1507,8 +1658,27 @@
                     class="api-key-input"
                     value="llama3.1:8b"
                     placeholder="Or type a custom tag (e.g. llama3.1:8b)"
+                    list="ollamaModelSuggestions"
                     style="display: block; margin-top: 4px"
                   />
+                  <datalist id="ollamaModelSuggestions">
+                    <option value="deepseek-r1:7b">DeepSeek-R1 7B</option>
+                    <option value="deepseek-r1:14b">DeepSeek-R1 14B</option>
+                    <option value="deepseek-r1:32b">DeepSeek-R1 32B</option>
+                    <option value="deepseek-coder-v2:latest">
+                      DeepSeek Coder V2
+                    </option>
+                    <option value="deepseek-v3:latest">DeepSeek V3</option>
+                    <option value="llama3.1:8b">Llama 3.1 8B</option>
+                    <option value="llama3.3:70b">Llama 3.3 70B</option>
+                    <option value="llama3.2:3b">Llama 3.2 3B</option>
+                    <option value="mistral:7b">Mistral 7B</option>
+                    <option value="phi4:latest">Phi-4</option>
+                    <option value="qwen2.5:14b">Qwen 2.5 14B</option>
+                    <option value="qwen2.5-coder:7b">Qwen 2.5 Coder 7B</option>
+                    <option value="gemma3:12b">Gemma 3 12B</option>
+                    <option value="codellama:13b">Code Llama 13B</option>
+                  </datalist>
                   <div
                     id="ollamaModelInfo"
                     style="font-size: 0.7em; color: #666; margin-top: 4px"
@@ -1516,6 +1686,109 @@
                     📂 Your models: <code>~/.ollama/models/</code> · 💡 CLI:
                     <code>ollama list</code> · 📥
                     <code>ollama pull &lt;name&gt;</code>
+                  </div>
+                </div>
+                <!-- DeepSeek Cloud Model Selector (shown when deepseek-free selected) -->
+                <div
+                  id="deepseekCloudSelector"
+                  style="display: none; margin-top: 8px"
+                >
+                  <label style="font-size: 0.75em; color: #888"
+                    >🧠 DeepSeek Model:</label
+                  >
+                  <div
+                    style="
+                      display: flex;
+                      gap: 4px;
+                      margin-top: 3px;
+                      flex-wrap: wrap;
+                    "
+                  >
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Best for coding & general tasks"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #0ea5e9;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('deepseekCloudModel').value =
+                          'deepseek-v3'
+                      "
+                    >
+                      💻 V3
+                    </button>
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Reasoning / thinking model"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #f59e0b;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('deepseekCloudModel').value =
+                          'deepseek-r1'
+                      "
+                    >
+                      🧠 R1
+                    </button>
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Latest R1 snapshot (May 2025)"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #8b5cf6;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('deepseekCloudModel').value =
+                          'deepseek-r1-0528'
+                      "
+                    >
+                      🧠 R1-0528
+                    </button>
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Code specialist"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #6366f1;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('deepseekCloudModel').value =
+                          'deepseek-coder'
+                      "
+                    >
+                      📦 Coder
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    id="deepseekCloudModel"
+                    class="api-key-input"
+                    value="deepseek-v3"
+                    placeholder="deepseek-v3, deepseek-r1, deepseek-coder..."
+                    style="margin-top: 4px; font-size: 0.85em"
+                  />
+                  <div style="font-size: 0.68em; color: #555; margin-top: 2px">
+                    🌐 api.deepseek.com ·
+                    <a
+                      href="https://platform.deepseek.com/api_keys"
+                      target="_blank"
+                      rel="noopener"
+                      >Get free key</a
+                    >
                   </div>
                 </div>
                 <a
@@ -3496,7 +3769,7 @@
       }
     </script>
 
-    <script src="src/api-settings.js"></script>
+    <script src="src/api-settings.js?v=topic-earth-ollama-host-20260521"></script>
     <script src="src/api-model-updater.js" defer></script>
 
     <!-- SmΔrt Popup Library (optional - for popup integration) -->

@@ -5,7 +5,6 @@ function enforceDomainAndCdnPolicy() {
     allowedHosts: [
       "smdeltart.vercel.app",
       "smdeltart.com",
-      "topic.earth",
       "localhost",
       "127.0.0.1",
     ],
@@ -3301,6 +3300,15 @@ function setupTextAPIHandlers() {
         apiValue === "ollama" ? "block" : "none";
     }
 
+    // Show/hide DeepSeek cloud model selector
+    const deepseekCloudSelector = document.getElementById(
+      "deepseekCloudSelector",
+    );
+    if (deepseekCloudSelector) {
+      deepseekCloudSelector.style.display =
+        apiValue === "deepseek-free" ? "block" : "none";
+    }
+
     if (apiValue) {
       const isFree = selectedOption.getAttribute("data-free") === "true";
       const needsKey = selectedOption.getAttribute("data-free-key") === "true";
@@ -3353,6 +3361,19 @@ function setupTextAPIHandlers() {
 
   // Test Text API button
   testTextBtn?.addEventListener("click", () => testFreeTextAPI());
+
+  // Ollama: refresh installed model list from /api/tags
+  document
+    .getElementById("refreshOllamaModelsBtn")
+    ?.addEventListener("click", refreshOllamaModelList);
+
+  // Ollama: sync dropdown selection → text input
+  document
+    .getElementById("ollamaModelList")
+    ?.addEventListener("change", (e) => {
+      if (e.target.value)
+        document.getElementById("ollamaModel").value = e.target.value;
+    });
 }
 
 function setupPaidTextAPIHandlers() {
@@ -3584,6 +3605,75 @@ async function testSambaNova(prompt) {
   }
 }
 
+// ── Ollama helpers ─────────────────────────────────────────────────────────────
+/** Returns the configured Ollama base URL (no trailing slash). */
+function getOllamaHost() {
+  return (
+    document.getElementById("ollamaHost")?.value?.trim().replace(/\/$/, "") ||
+    "http://localhost:11434"
+  );
+}
+
+/** Fetch installed models from /api/tags and populate the dropdown. */
+async function refreshOllamaModelList() {
+  const btn = document.getElementById("refreshOllamaModelsBtn");
+  const select = document.getElementById("ollamaModelList");
+  const modelInput = document.getElementById("ollamaModel");
+  if (!select) return;
+
+  const origText = btn?.textContent || "🔄 Refresh";
+  if (btn) {
+    btn.textContent = "⏳";
+    btn.disabled = true;
+  }
+
+  try {
+    const r = await fetch(`${getOllamaHost()}/api/tags`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const { models = [] } = await r.json();
+
+    select.innerHTML = "<option value=''>— select installed —</option>";
+    models
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .forEach((m) => {
+        const opt = document.createElement("option");
+        opt.value = m.name;
+        opt.textContent = m.name;
+        select.appendChild(opt);
+      });
+
+    // Auto-select if current model is in list
+    const cur = modelInput?.value?.trim();
+    if (cur) {
+      const match = [...select.options].find(
+        (o) => o.value === cur || cur.startsWith(o.value.split(":")[0]),
+      );
+      if (match) select.value = match.value;
+    }
+
+    if (btn) {
+      btn.textContent = `✅ ${models.length}`;
+      setTimeout(() => {
+        btn.textContent = origText;
+        btn.disabled = false;
+      }, 2000);
+    }
+  } catch (e) {
+    if (btn) {
+      btn.textContent = "❌ offline";
+      btn.title = e.message;
+      setTimeout(() => {
+        btn.textContent = origText;
+        btn.disabled = false;
+        btn.title = "Query /api/tags and refresh list";
+      }, 3000);
+    }
+  }
+}
+
 async function testOllama(prompt) {
   try {
     // Get the selected Ollama model from UI
@@ -3596,7 +3686,7 @@ async function testOllama(prompt) {
     );
 
     // First check if Ollama server is running
-    const versionResponse = await fetch("http://localhost:11434/api/version", {
+    const versionResponse = await fetch(`${getOllamaHost()}/api/version`, {
       method: "GET",
       signal: AbortSignal.timeout(3000),
     });
@@ -3618,21 +3708,18 @@ async function testOllama(prompt) {
     );
 
     // Then test actual text generation with the selected model
-    const generateResponse = await fetch(
-      "http://localhost:11434/api/generate",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: ollamaModel,
-          prompt: "Hello",
-          stream: false,
-        }),
-        signal: AbortSignal.timeout(15000), // Longer timeout for generation
+    const generateResponse = await fetch(`${getOllamaHost()}/api/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        model: ollamaModel,
+        prompt: "Hello",
+        stream: false,
+      }),
+      signal: AbortSignal.timeout(15000), // Longer timeout for generation
+    });
 
     if (!generateResponse.ok) {
       const errorText = await generateResponse.text().catch(() => "");
@@ -3728,7 +3815,7 @@ async function testOllamaVision() {
     );
 
     // First check if Ollama server is running
-    const versionResponse = await fetch("http://localhost:11434/api/version", {
+    const versionResponse = await fetch(`${getOllamaHost()}/api/version`, {
       method: "GET",
       signal: AbortSignal.timeout(3000),
     });
@@ -3750,7 +3837,7 @@ async function testOllamaVision() {
     );
 
     // Check if the vision model exists by listing models
-    const listResponse = await fetch("http://localhost:11434/api/tags", {
+    const listResponse = await fetch(`${getOllamaHost()}/api/tags`, {
       method: "GET",
       signal: AbortSignal.timeout(5000),
     });
@@ -3790,12 +3877,10 @@ async function testOllamaVision() {
   } catch (error) {
     let errorMessage;
     if (error.name === "TimeoutError") {
-      errorMessage =
-        "Ollama server timeout - check if localhost:11434 is accessible";
+      errorMessage = `Ollama server timeout - check if ${getOllamaHost()} is accessible`;
       addLogEntry(`⏱️ ${errorMessage}`, "error");
     } else if (error.message.includes("Failed to fetch")) {
-      errorMessage =
-        "Cannot connect to Ollama server - is it running on localhost:11434?";
+      errorMessage = `Cannot connect to Ollama server - is it running on ${getOllamaHost()}?`;
       addLogEntry(`🔌 ${errorMessage}`, "error");
       addLogEntry("💡 Start Ollama with: ollama serve", "info");
     } else {
@@ -3914,11 +3999,43 @@ async function testDeepSeek(prompt, apiKey) {
     return { success: false, message: "API key required for DeepSeek" };
   }
 
+  const model =
+    document.getElementById("deepseekCloudModel")?.value?.trim() ||
+    "deepseek-v3";
+
   try {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const response = await fetch(
+      "https://api.deepseek.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: "user", content: prompt }],
+          max_tokens: 30,
+        }),
+        signal: AbortSignal.timeout(10000),
+      },
+    );
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        message: `DeepSeek ${response.status}: ${
+          err?.error?.message || response.statusText
+        }`,
+      };
+    }
+
+    const data = await response.json();
+    const reply = data?.choices?.[0]?.message?.content?.trim() || "(ok)";
     return {
       success: true,
-      message: "DeepSeek API key configured - ready for use",
+      message: `DeepSeek ${model} ✅ — ${reply.slice(0, 80)}`,
     };
   } catch (error) {
     return {
@@ -5469,7 +5586,7 @@ async function testIndividualAPI(type) {
       return;
     }
 
-    // Use dedicated OpenAI text tester for OpenAI with model selection
+    // � Use dedicated OpenAI text tester for OpenAI with model selection
     if ((type === "paidText" || type === "freeText") && provider === "openai") {
       await testOpenAITextAPI(apiKey, config.status);
       return;
@@ -6680,6 +6797,7 @@ window.ApiVault = {
       "openaiTtsModel",
       "openaiTtsVoice",
       "ollamaModel",
+      "ollamaHost",
     ].forEach((id) => {
       const el = document.getElementById(id);
       if (el?.value) keys[id] = el.value;
@@ -6805,13 +6923,14 @@ window.ApiVault = {
       "openaiTtsModel",
       "openaiTtsVoice",
       "ollamaModel",
+      "ollamaHost",
+      "deepseekCloudModel",
     ].forEach((id) => {
       const el = document.getElementById(id);
       if (el?.value) keys[id] = el.value;
     });
 
     [
-      "vercelApiRadio",
       "paidTextApiRadio",
       "freeTextApiRadio",
       "vercelImageRadio",
@@ -7352,6 +7471,8 @@ function collectAllSettings() {
     "openaiSttModel",
     "openaiVideoModel",
     "ollamaModel",
+    "ollamaHost",
+    "deepseekCloudModel",
   ];
 
   inputs.forEach((id) => {
@@ -7457,7 +7578,8 @@ function updateOpenAIModelStatus(data = {}) {
   const status = document.getElementById("openaiTextModelStatus");
   if (!status) return;
 
-  const selectedModel = document.getElementById("openaiTextModel")?.value || "not selected";
+  const selectedModel =
+    document.getElementById("openaiTextModel")?.value || "not selected";
   const projectLabel = getOpenAIProjectLabel() || "unlabeled project";
   const keyLabel = getOpenAIKeyLabel() || getWidgetOriginLabel();
   const maxModel = data.maxModel || data.openaiTextMaxModel || "not checked";
@@ -7467,8 +7589,12 @@ function updateOpenAIModelStatus(data = {}) {
   status.innerHTML = [
     `<strong>Project:</strong> ${escapeHtml(projectLabel)} · <strong>Key:</strong> ${escapeHtml(keyLabel)}`,
     `<strong>Current:</strong> ${escapeHtml(selectedModel)} · <strong>Max:</strong> ${escapeHtml(maxModel)}${modelCount ? ` · ${modelCount} models` : ""}`,
-    testedAt ? `<span style="color:#9ca3af">Detected: ${escapeHtml(new Date(testedAt).toLocaleString())}</span>` : "",
-  ].filter(Boolean).join("<br>");
+    testedAt
+      ? `<span style="color:#9ca3af">Detected: ${escapeHtml(new Date(testedAt).toLocaleString())}</span>`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("<br>");
 }
 
 window.updateOpenAIModelStatus = updateOpenAIModelStatus;
@@ -7608,10 +7734,16 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       // Ollama model selector
       ollamaModel:
         document.getElementById("ollamaModel")?.value || "llama3.1:8b",
+      ollamaHost:
+        document.getElementById("ollamaHost")?.value ||
+        "http://localhost:11434",
       // Ollama Vision model selector
       ollamaVisionModel:
         document.getElementById("ollamaVisionModel")?.value ||
         "llama3.2-vision",
+      // DeepSeek cloud model
+      deepseekCloudModel:
+        document.getElementById("deepseekCloudModel")?.value || "deepseek-v3",
       // Active provider indicators (FIX: audit issue #2)
       activeTextProvider: document.getElementById("paidTextApiRadio")?.checked
         ? "paid"
@@ -7676,7 +7808,9 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       elevenlabsVoice: plainSettings.elevenlabsVoice,
       openaiVideoModel: plainSettings.openaiVideoModel,
       ollamaModel: plainSettings.ollamaModel,
+      ollamaHost: plainSettings.ollamaHost,
       ollamaVisionModel: plainSettings.ollamaVisionModel,
+      deepseekCloudModel: plainSettings.deepseekCloudModel,
       // Active providers
       activeTextProvider: plainSettings.activeTextProvider,
       activeImageProvider: plainSettings.activeImageProvider,
@@ -7711,21 +7845,11 @@ function saveSettingsToLocalStorage(skipWarning = false) {
         {
           type: "smart-widget",
           action: "settings-saved",
-          settings,
-          data: {
-            widgetId: "api-settings",
-            provider: plainSettings.paidTextApi || "openai",
-            settings,
-          },
+          data: { provider: plainSettings.paidTextApi || "openai" },
         },
         "*",
       );
     }
-
-    broadcastSync({
-      type: "settings-updated",
-      settings,
-    });
 
     // Also save to vault if unlocked (AES-256-GCM encrypted)
     if (ApiVault.isUnlocked) {

@@ -248,6 +248,20 @@
     }, {});
   }
 
+  function normalizeOllamaHost(value = '') {
+    const fallback = 'http://localhost:11434';
+    const raw = String(value || '').trim();
+    if (!raw) return fallback;
+
+    try {
+      const withProtocol = /^https?:\/\//i.test(raw) ? raw : `http://${raw}`;
+      const url = new URL(withProtocol);
+      return url.origin + url.pathname.replace(/\/$/, '');
+    } catch {
+      return fallback;
+    }
+  }
+
   function compactMessages(messages = []) {
     return messages
       .map((message) => {
@@ -571,13 +585,21 @@
           ? firstUsableApiKey(apiSettings.freeTextApiKey, apiSettings.paidTextApiKey)
           : firstUsableApiKey(apiSettings.paidTextApiKey, apiSettings.freeTextApiKey);
 
+      const config = provider === 'ollama'
+        ? {
+          ...providerConfig,
+          host: normalizeOllamaHost(apiSettings.ollamaHost),
+          endpoint: `${normalizeOllamaHost(apiSettings.ollamaHost)}/api/generate`
+        }
+        : providerConfig;
+
       return {
         activeTier,
         provider,
         providerName: providerConfig?.name || rawProvider || '',
         apiKey,
         model: this.getTextModelForProvider(provider, providerConfig, apiSettings),
-        config: providerConfig
+        config
       };
     }
 
