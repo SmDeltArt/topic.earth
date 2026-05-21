@@ -2168,6 +2168,7 @@ body.regional-map-search-open #layer-panel {
     justify-content: center;
     z-index: 1000;
     transition: opacity 0.5s ease;
+    padding: 24px;
 }
 
 #loading.fade-out {
@@ -2181,6 +2182,20 @@ body.regional-map-search-open #layer-panel {
     display: block;
     margin-bottom: 18px;
     filter: drop-shadow(0 0 16px var(--glow));
+}
+
+.loading-vignette {
+    width: min(86vw, 820px);
+    aspect-ratio: 1200 / 630;
+    display: block;
+    object-fit: contain;
+    border-radius: 12px;
+    filter: drop-shadow(0 0 26px rgba(0, 212, 255, 0.18));
+}
+
+.loading-build {
+    width: min(72vw, 520px);
+    margin-top: 18px;
 }
 
 .spinner {
@@ -2202,6 +2217,31 @@ body.regional-map-search-open #layer-panel {
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 1px;
+    text-align: center;
+    margin: 0 0 10px;
+}
+
+.loading-build-bar {
+    height: 4px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(0, 212, 255, 0.14);
+}
+
+.loading-build-bar span {
+    display: block;
+    width: 42%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, rgba(124, 255, 214, 0), #7cffd6 22%, #00d4ff 68%, rgba(0, 212, 255, 0));
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.44);
+    animation: loadingBuildSweep 1.8s ease-in-out infinite;
+}
+
+@keyframes loadingBuildSweep {
+    0% { transform: translateX(-105%); }
+    52% { transform: translateX(58%); }
+    100% { transform: translateX(238%); }
 }
 
 /* Globe Tooltip */

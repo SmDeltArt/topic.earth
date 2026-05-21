@@ -86,6 +86,7 @@
     </script>
     <link rel="icon" type="image/svg+xml" sizes="24x24" data-topic-favicon data-local-href="./assets/icons/topic.earth_24x24.svg?v=topic-earth-icons-20260506" data-cloud-href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg" href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg">
     <link rel="preload" as="image" href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg">
+    <link rel="preload" as="image" href="./assets/logo/topic-earth-vignette-animated.svg?v=topic-earth-loading-vignette-20260521">
     <script src="./shared/topic-favicon.js?v=topic-earth-svg-groups-20260506"></script>
     <link rel="stylesheet" href="./assets/fonts/space-mono.css?v=topic-earth-local-vendor-20260506">
   <link rel="stylesheet" href="styles.css?v=topic-earth-layer-left-gap-20260520">
@@ -149,8 +150,13 @@
 
         <!-- Loading Indicator -->
         <div id="loading">
-            <img class="loading-brand-icon" src="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg" data-fallback-src="./assets/icons/topic.earth_64x64.svg?v=topic-earth-icons-20260505" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc;" alt="" aria-hidden="true">
-            <p>Initializing Globe...</p>
+            <img class="loading-vignette" src="./assets/logo/topic-earth-vignette-animated.svg?v=topic-earth-loading-vignette-20260521" alt="topic.earth modes loading preview">
+            <div class="loading-build" aria-live="polite">
+                <p>Building Globe...</p>
+                <div class="loading-build-bar" aria-hidden="true">
+                    <span></span>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -7,6 +7,8 @@
   "license": "EUPL-1.2-or-later for source code and documentation; see ASSET-LICENSES.md for media and brand assets.",
   "source": {
     "html": "./topic-earth-logo-kit.html",
+    "vignetteEn": "./topic-earth-vignette-animated.svg",
+    "vignetteFr": "./sujet-terre-vignette-animated.svg",
     "cloudinaryMark64": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg",
     "cloudinaryFavicon24": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg",
     "localMark64": "../icons/topic.earth_64x64.svg",
