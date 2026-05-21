@@ -47,6 +47,12 @@ export class DetailPanel {
     this.showMediaUrlInput = false;
     this.mediaUrlDraftUrl = '';
     this.mediaUrlPreviewToken = null;
+    this.topicStoryDraft = {
+      enabled: false,
+      title: '',
+      style: 'story-card',
+      html: ''
+    };
     this.isCompact = false;
     this.panelSize = 'middle';
     
@@ -545,6 +551,12 @@ export class DetailPanel {
         this.addMediaUrlFromInput(target);
       } else if (action === 'preview-media-url') {
         this.previewMediaUrlFromInput(target);
+      } else if (action === 'preview-topic-story') {
+        this.previewTopicStory();
+      } else if (action === 'insert-topic-story-starter') {
+        this.insertTopicStoryStarter();
+      } else if (action === 'clear-topic-story') {
+        this.clearTopicStory();
       } else if (action === 'source-media-search') {
         this.findMediaFromSources();
       } else if (action === 'ai-gen-update') {
@@ -5561,6 +5573,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       summary: this.currentPoint.summary || '',
       source: this.currentPoint.source || '',
       insight: this.currentPoint.insight || '',
+      topicStory: this.normalizeTopicStory(this.currentPoint.topicStory),
       searchHint: this.currentPoint.review?.userMessage || '',
       locationPrecision: this.currentPoint.locationPrecision || this.currentPoint.storageMeta?.mapPrecision || '',
       regionalLabel: this.currentPoint.storageMeta?.regionalLabel || this.getRegionalProposalContextLabel(this.topicBuilderContext?.regionalContext || {})
@@ -5614,6 +5627,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       summary: form.querySelector('#topic-summary')?.value || '',
       source: form.querySelector('#topic-source')?.value || '',
       insight: form.querySelector('#topic-insight')?.value || '',
+      topicStory: this.readTopicStoryForm(form),
       searchHint: form.querySelector('#topic-search-hint')?.value || this.topicFormState.searchHint || '',
       locationPrecision: this.topicFormState.locationPrecision || this.currentPoint?.locationPrecision || this.topicBuilderContext?.regionalContext?.precision || this.topicBuilderContext?.regionalContext?.scope || '',
       regionalLabel: this.topicFormState.regionalLabel || this.getRegionalProposalContextLabel(this.topicBuilderContext?.regionalContext || {}) || this.currentPoint?.storageMeta?.regionalLabel || '',
@@ -5623,16 +5637,266 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       trustedOnly: form.querySelector('#trusted-only')?.checked ?? this.topicResearchSettings.trustedOnly
     };
     this.composerSmartInput = form.querySelector('#topic-smart-input')?.value || this.composerSmartInput || '';
+    this.topicStoryDraft = this.topicFormState.topicStory;
   }
 
   normalizeTopicBuilderTab(tab = '') {
     const aliases = {
       basics: 'describe',
       research: 'evidence',
-      manage: 'evidence'
+      manage: 'evidence',
+      live: 'story',
+      html: 'story'
     };
     const normalized = aliases[tab] || tab || 'describe';
-    return ['describe', 'evidence', 'review'].includes(normalized) ? normalized : 'describe';
+    return ['describe', 'evidence', 'story', 'review'].includes(normalized) ? normalized : 'describe';
+  }
+
+  normalizeTopicStory(story = null) {
+    const source = story && typeof story === 'object' ? story : {};
+    const html = String(source.html || '').trim();
+    return {
+      enabled: Boolean(source.enabled || html),
+      title: String(source.title || '').trim(),
+      style: String(source.style || 'story-card').trim() || 'story-card',
+      html,
+      sanitizedHtml: String(source.sanitizedHtml || '').trim(),
+      createdAt: source.createdAt || '',
+      updatedAt: source.updatedAt || ''
+    };
+  }
+
+  readTopicStoryForm(form) {
+    const previous = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
+    const html = form.querySelector('#topic-story-html')?.value ?? previous.html;
+    const story = {
+      ...previous,
+      enabled: form.querySelector('#topic-story-enabled')?.checked ?? previous.enabled,
+      title: form.querySelector('#topic-story-title')?.value ?? previous.title,
+      style: form.querySelector('#topic-story-style')?.value ?? previous.style,
+      html
+    };
+    story.enabled = Boolean(story.enabled || String(story.html || '').trim());
+    story.sanitizedHtml = this.sanitizeStoryHtml(story.html);
+    story.updatedAt = story.enabled ? new Date().toISOString() : previous.updatedAt;
+    if (story.enabled && !story.createdAt) story.createdAt = story.updatedAt;
+    return story;
+  }
+
+  sanitizeStoryHtml(html = '') {
+    const raw = String(html || '').trim();
+    if (!raw) return '';
+
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<body>${raw}</body>`, 'text/html');
+      doc.querySelectorAll('script, iframe, object, embed, form, input, button, link[rel="import"]').forEach(node => node.remove());
+      doc.querySelectorAll('*').forEach((node) => {
+        Array.from(node.attributes || []).forEach((attr) => {
+          const name = attr.name.toLowerCase();
+          const value = String(attr.value || '').trim();
+          if (name.startsWith('on') || name === 'srcdoc') {
+            node.removeAttribute(attr.name);
+          } else if ((name === 'href' || name === 'src' || name === 'xlink:href') && /^javascript:/i.test(value)) {
+            node.removeAttribute(attr.name);
+          }
+        });
+      });
+      return doc.body.innerHTML.trim();
+    } catch (error) {
+      console.warn('[Topic Story] Sanitizer fell back to text escaping:', error);
+      return `<pre>${this.escapeHtml(raw)}</pre>`;
+    }
+  }
+
+  wrapTopicStoryHtml(html = '', story = {}) {
+    const body = this.sanitizeStoryHtml(html || story.html || '');
+    const title = story.title || this.topicFormState.title || 'topic.earth story';
+    if (!body) return '';
+    return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${this.escapeHtml(title)}</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; padding: 18px; background: #07111f; color: #eef8ff; }
+    img, svg, video { max-width: 100%; height: auto; }
+    a { color: #00d4ff; }
+  </style>
+</head>
+<body>
+${body}
+</body>
+</html>`;
+  }
+
+  renderTopicStoryEditor() {
+    const story = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
+    const previewHtml = this.wrapTopicStoryHtml(story.sanitizedHtml || story.html, story);
+    const hasStory = Boolean(String(story.html || '').trim());
+    const manifest = {
+      bridge: true,
+      bridgeVersion: 'topic-story-1',
+      origin: 'topic.earth',
+      style: story.style,
+      title: story.title || this.topicFormState.title || '',
+      limits: {
+        allowScripts: false,
+        sandbox: 'no-scripts'
+      }
+    };
+
+    return `
+      <div class="topic-story-editor" data-tutorial-id="topic-story-editor">
+        <div class="topic-story-header">
+          <div>
+            <div class="section-label">Embedded HTML Story</div>
+            <div class="setting-hint">Paste HTML/SVG, preview it in a sandbox, then save it with this topic.</div>
+          </div>
+          <label class="topic-story-toggle">
+            <input type="checkbox" id="topic-story-enabled" ${story.enabled ? 'checked' : ''}>
+            <span>Attach</span>
+          </label>
+        </div>
+
+        <div class="topic-story-grid">
+          <label>
+            <span>Story title</span>
+            <input type="text" id="topic-story-title" value="${this.escapeHtml(story.title || '')}" placeholder="Short story card title">
+          </label>
+          <label>
+            <span>Type</span>
+            <select id="topic-story-style">
+              ${[
+                ['story-card', 'Story card'],
+                ['educational-scene', 'Educational scene'],
+                ['interactive-croquis', 'Interactive croquis'],
+                ['micro-game', 'Micro-game'],
+                ['external-widget', 'External widget']
+              ].map(([value, label]) => `<option value="${value}" ${story.style === value ? 'selected' : ''}>${label}</option>`).join('')}
+            </select>
+          </label>
+        </div>
+
+        <textarea id="topic-story-html" rows="10" spellcheck="false" placeholder="<section>Paste a safe HTML/SVG story card here...</section>">${this.escapeHtml(story.html || '')}</textarea>
+
+        <div class="topic-story-actions">
+          <button type="button" class="btn-primary-alt" data-action="preview-topic-story">Preview</button>
+          <button type="button" class="btn-media-action" data-action="insert-topic-story-starter">Starter HTML</button>
+          <button type="button" class="btn-media-action danger" data-action="clear-topic-story" ${hasStory ? '' : 'disabled'}>Clear</button>
+        </div>
+
+        <div class="topic-story-preview-card">
+          <div class="topic-story-preview-header">
+            <span>Sandbox preview</span>
+            <span>${hasStory ? 'scripts blocked' : 'waiting for HTML'}</span>
+          </div>
+          ${previewHtml ? `
+            <iframe
+              class="topic-story-preview-frame"
+              sandbox=""
+              referrerpolicy="no-referrer"
+              srcdoc="${this.escapeHtml(previewHtml)}"
+              title="${this.escapeHtml(story.title || 'Topic story preview')}"
+            ></iframe>
+          ` : `
+            <div class="topic-story-empty-preview">Paste HTML or create a starter card to preview the embedded story.</div>
+          `}
+        </div>
+
+        <details class="topic-story-manifest">
+          <summary>Bridge JSON</summary>
+          <pre>${this.escapeHtml(JSON.stringify(manifest, null, 2))}</pre>
+        </details>
+      </div>
+    `;
+  }
+
+  previewTopicStory() {
+    this.saveFormState();
+    this.topicBuilderTab = 'story';
+    this.renderCreateTopic();
+  }
+
+  insertTopicStoryStarter() {
+    this.saveFormState();
+    const title = this.topicFormState.topicStory?.title || this.topicFormState.title || 'Topic Story';
+    const summary = this.topicFormState.summary || 'Add a short explanation, evidence, and a visual idea here.';
+    const sourceCount = (this.topicSources || []).filter(source => source.name || source.url).length;
+    const starterStory = {
+      ...this.normalizeTopicStory(this.topicFormState.topicStory),
+      enabled: true,
+      title,
+      style: this.topicFormState.topicStory?.style || 'story-card',
+      html: `<article class="topic-story-card" style="max-width:760px;margin:auto;padding:24px;border:1px solid #00d4ff55;border-radius:14px;background:#07111f;color:#eef8ff;font-family:system-ui,sans-serif;">
+  <p style="margin:0 0 10px;color:#00d4ff;font-weight:800;letter-spacing:.08em;text-transform:uppercase;">topic.earth story</p>
+  <h1 style="margin:0 0 14px;font-size:clamp(28px,6vw,52px);line-height:1.02;">${this.escapeHtml(title)}</h1>
+  <p style="font-size:18px;line-height:1.55;color:#cfe9f6;">${this.escapeHtml(summary)}</p>
+  <div style="display:grid;gap:10px;margin-top:18px;">
+    <strong style="color:#9ad99d;">Evidence attached: ${sourceCount}</strong>
+    <span style="color:#a8b3c6;">Replace this starter with an SVG, croquis, lesson, or interactive card.</span>
+  </div>
+</article>`
+    };
+    this.topicFormState.topicStory = starterStory;
+    this.topicStoryDraft = this.topicFormState.topicStory;
+    const form = this.container.querySelector('#topic-form');
+    if (form) {
+      const enabled = form.querySelector('#topic-story-enabled');
+      const titleInput = form.querySelector('#topic-story-title');
+      const styleInput = form.querySelector('#topic-story-style');
+      const htmlInput = form.querySelector('#topic-story-html');
+      if (enabled) enabled.checked = true;
+      if (titleInput) titleInput.value = starterStory.title;
+      if (styleInput) styleInput.value = starterStory.style;
+      if (htmlInput) htmlInput.value = starterStory.html;
+      this.saveFormState();
+    }
+    this.topicBuilderTab = 'story';
+    this.renderCreateTopic();
+  }
+
+  clearTopicStory() {
+    if (!confirm('Clear the embedded HTML story from this draft?')) return;
+    this.topicFormState.topicStory = {
+      enabled: false,
+      title: '',
+      style: 'story-card',
+      html: '',
+      sanitizedHtml: ''
+    };
+    this.topicStoryDraft = this.topicFormState.topicStory;
+    this.topicBuilderTab = 'story';
+    this.renderCreateTopic();
+  }
+
+  buildTopicStoryForSave() {
+    const story = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
+    if (!story.enabled || !String(story.html || '').trim()) return null;
+    const now = new Date().toISOString();
+    return {
+      enabled: true,
+      type: story.style || 'story-card',
+      style: story.style || 'story-card',
+      title: story.title || this.topicFormState.title || 'Topic story',
+      html: story.html,
+      sanitizedHtml: this.sanitizeStoryHtml(story.html),
+      bridge: {
+        bridge: true,
+        bridgeVersion: 'topic-story-1',
+        origin: 'topic.earth',
+        style: story.style || 'story-card',
+        title: story.title || this.topicFormState.title || 'Topic story',
+        limits: {
+          allowScripts: false,
+          sandbox: 'no-scripts'
+        }
+      },
+      createdAt: story.createdAt || now,
+      updatedAt: now
+    };
   }
 
   setTopicDraftStatus(status = {}) {
@@ -5732,6 +5996,8 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     const mediaTokens = this.getMediaTokensForPoint(this.currentPoint || {});
     const sourceCount = (this.topicSources || []).filter(source => source.name || source.url).length;
     const mediaCount = mediaTokens.length;
+    const topicStory = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
+    const hasTopicStory = Boolean(topicStory.enabled && topicStory.html);
     const descriptionReady = Boolean(
       String(this.topicFormState.title || '').trim()
       && String(this.topicFormState.category || '').trim()
@@ -5781,6 +6047,9 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
           </button>
           <button class="tab-btn ${this.topicBuilderTab === 'evidence' ? 'active' : ''}" data-action="switch-tab" data-tab="evidence">
             Evidence
+          </button>
+          <button class="tab-btn ${this.topicBuilderTab === 'story' ? 'active' : ''}" data-action="switch-tab" data-tab="story">
+            Story
           </button>
           <button class="tab-btn ${this.topicBuilderTab === 'review' ? 'active' : ''}" data-action="switch-tab" data-tab="review">
             Review
@@ -6003,9 +6272,18 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
 
         </div>
 
+        <div class="tab-content ${this.topicBuilderTab === 'story' ? 'active' : ''}">
+          <div class="proposal-step-intro" data-tutorial-id="topic-story-tab">
+            <div class="proposal-step-kicker">Step 3</div>
+            <div class="proposal-step-title">Embed a live card</div>
+            <div class="proposal-step-text">Attach one sandboxed HTML/SVG story card to this topic. Scripts stay blocked in the first version.</div>
+          </div>
+          ${this.renderTopicStoryEditor()}
+        </div>
+
         <div class="tab-content ${this.topicBuilderTab === 'review' ? 'active' : ''}">
           <div class="proposal-step-intro" data-tutorial-id="topic-review-tab">
-            <div class="proposal-step-kicker">Step 3</div>
+            <div class="proposal-step-kicker">Step 4</div>
             <div class="proposal-step-title">Review before saving</div>
             <div class="proposal-step-text">This is still a local draft. Saving keeps it on this device; publishing remains an admin review step.</div>
           </div>
@@ -6030,6 +6308,10 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
             <div class="topic-review-row">
               <span>Photos / videos</span>
               <strong>${mediaCount > 0 ? `${mediaCount} item${mediaCount === 1 ? '' : 's'} added` : 'Optional'}</strong>
+            </div>
+            <div class="topic-review-row">
+              <span>Story card</span>
+              <strong>${hasTopicStory ? `${this.escapeHtml(topicStory.style)} attached` : 'Optional'}</strong>
             </div>
             <div class="topic-review-row">
               <span>Status</span>
@@ -7471,6 +7753,7 @@ Return ONLY a JSON object with this exact format, no other text:
       sourceUrl: this.currentPoint?.sourceUrl || '',
       media: mediaTokens.map(token => token.url),
       mediaTokens,
+      topicStory: this.buildTopicStoryForSave(),
       isCustom: true,
       originalTopicId: this.currentPoint?.originalTopicId || '',
       originalTitle: this.currentPoint?.originalTitle || '',
