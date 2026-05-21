@@ -51,9 +51,14 @@
       .rail { transform-box: fill-box; transform-origin: center; animation: railPulse 6s ease-in-out infinite; }
       .frame { fill: none; stroke: rgba(0, 212, 255, 0.22); stroke-width: 1.4; animation: framePulse 6s steps(6, end) infinite; }
       .logo-wrap { transform-origin: 370px 72px; }
-      .title-line { font-family: "Space Mono", Consolas, monospace; font-size: 44px; font-weight: 700; fill: #00d4ff; letter-spacing: 0; filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.42)); animation: titleMove 12s cubic-bezier(.2,.8,.2,1) infinite, modeTextColor 12s steps(1, end) infinite; }
-      .info-stack { font-family: "Space Mono", Consolas, monospace; fill: #00d4ff; filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.36)); animation: infoSlide 12s cubic-bezier(.2,.8,.2,1) infinite, modeTextColor 12s steps(1, end) infinite; }
-      .bar { fill: #00d4ff; filter: drop-shadow(0 0 13px rgba(0, 212, 255, 0.42)); transform-origin: 0 50%; animation: barReveal 12s cubic-bezier(.2,.8,.2,1) infinite, modeTextColor 12s steps(1, end) infinite; }
+      .mode-copy { opacity: 0; color: #00d4ff; animation-duration: 12s; animation-timing-function: cubic-bezier(.2,.8,.2,1); animation-iteration-count: infinite; }
+      .mode-regional { color: #7cffd6; animation-name: regionalCopy; }
+      .mode-world { color: #00d4ff; animation-name: worldCopy; }
+      .mode-space { color: #a78bfa; animation-name: spaceCopy; }
+      .mode-fever { color: #ff6b5f; animation-name: feverCopy; }
+      .title-line { font-family: "Space Mono", Consolas, monospace; font-size: 44px; font-weight: 700; fill: currentColor; letter-spacing: 0; filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.42)); }
+      .info-stack { font-family: "Space Mono", Consolas, monospace; fill: currentColor; filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.36)); }
+      .bar { fill: currentColor; filter: drop-shadow(0 0 13px rgba(0, 212, 255, 0.42)); transform-origin: 0 50%; }
       .modes { font-size: 31px; font-weight: 700; }
       .url { font-size: 25px; font-weight: 700; opacity: 0.9; }
       @keyframes framePulse {
@@ -66,24 +71,25 @@
         50% { transform: translateY(-1px) scale(1.018); filter: drop-shadow(0 0 13px rgba(0, 212, 255, 0.45)); }
       }
       @keyframes wordSignal { 0%, 100% { opacity: 0.96; } 45% { opacity: 1; } 72% { opacity: 0.9; } }
-      @keyframes modeTextColor {
-        0%, 24% { fill: #00d4ff; }
-        25%, 49% { fill: #7cffd6; }
-        50%, 74% { fill: #a78bfa; }
-        75%, 100% { fill: #ff6b5f; }
+      @keyframes regionalCopy {
+        0%, 3% { transform: translate(0, 330px); opacity: 0; }
+        8%, 20% { transform: translate(0, 0); opacity: 1; }
+        25%, 100% { transform: translate(-980px, 0); opacity: 0; }
       }
-      @keyframes titleMove {
-        0%, 14% { transform: translate(0, 330px); opacity: 1; }
-        28%, 55% { transform: translate(0, 0); opacity: 1; }
-        68%, 100% { transform: translate(-420px, 0); opacity: 1; }
+      @keyframes worldCopy {
+        0%, 25% { transform: translate(980px, 0); opacity: 0; }
+        30%, 45% { transform: translate(0, 0); opacity: 1; }
+        50%, 100% { transform: translate(-980px, 0); opacity: 0; }
       }
-      @keyframes barReveal {
-        0%, 60% { transform: translate(980px, 0) scaleY(0.08); opacity: 0; }
-        70%, 100% { transform: translate(0, 0) scaleY(1); opacity: 1; }
+      @keyframes spaceCopy {
+        0%, 50% { transform: translate(980px, 0); opacity: 0; }
+        55%, 70% { transform: translate(0, 0); opacity: 1; }
+        75%, 100% { transform: translate(-980px, 0); opacity: 0; }
       }
-      @keyframes infoSlide {
-        0%, 60% { transform: translate(980px, 0); opacity: 0; }
-        72%, 100% { transform: translate(0, 0); opacity: 1; }
+      @keyframes feverCopy {
+        0%, 75% { transform: translate(980px, 0); opacity: 0; }
+        80%, 94% { transform: translate(0, 0); opacity: 1; }
+        100% { transform: translate(-980px, 0); opacity: 0; }
       }
     </style>
   </defs>
@@ -113,11 +119,37 @@
   </g>
 
   <g class="text-wrap">
-    <text class="title-line" x="600" y="382" text-anchor="middle">Climate Dashboard</text>
-    <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
-    <g class="info-stack">
-      <text class="modes" x="282" y="462">REGIONAL - WORLD - SPACE - FEVER SIM</text>
-      <text class="url" x="282" y="520">https://topic.earth - topic.earth</text>
+    <g class="mode-copy mode-regional">
+      <text class="title-line" x="600" y="382" text-anchor="middle">Regional Dashboard</text>
+      <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
+      <g class="info-stack">
+        <text class="modes" x="282" y="462">REGIONAL INTELLIGENCE</text>
+        <text class="url" x="282" y="520">https://topic.earth - topic.earth</text>
+      </g>
+    </g>
+    <g class="mode-copy mode-world">
+      <text class="title-line" x="600" y="382" text-anchor="middle">World Update</text>
+      <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
+      <g class="info-stack">
+        <text class="modes" x="282" y="462">WORLD LIVE DATA STREAM</text>
+        <text class="url" x="282" y="520">https://topic.earth - topic.earth</text>
+      </g>
+    </g>
+    <g class="mode-copy mode-space">
+      <text class="title-line" x="600" y="382" text-anchor="middle">Space Watch</text>
+      <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
+      <g class="info-stack">
+        <text class="modes" x="282" y="462">SPACE WEATHER + ORBITAL SIGNALS</text>
+        <text class="url" x="282" y="520">https://topic.earth - topic.earth</text>
+      </g>
+    </g>
+    <g class="mode-copy mode-fever">
+      <text class="title-line" x="600" y="382" text-anchor="middle">Fever Simulation</text>
+      <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
+      <g class="info-stack">
+        <text class="modes" x="282" y="462">FEVER SIM + TIPPING POINTS</text>
+        <text class="url" x="282" y="520">https://topic.earth - topic.earth</text>
+      </g>
     </g>
   </g>
 </svg>
