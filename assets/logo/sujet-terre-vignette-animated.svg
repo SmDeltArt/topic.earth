@@ -1,6 +1,6 @@
 ﻿<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
-  <title id="title">sujet.terre vignette anim?e du tableau climatique</title>
-  <desc id="desc">Vignette anim?e sujet.terre avec logo, r?sum? des modes, tableau climatique et contact.</desc>
+  <title id="title">sujet.terre vignette animée du tableau climatique</title>
+  <desc id="desc">Vignette animée sujet.terre avec logo, résumé des modes, tableau climatique et contact.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#02060d"/>
@@ -139,18 +139,18 @@
 
   <g class="text-wrap">
     <g class="mode-copy mode-regional">
-      <text class="title-line" x="600" y="382" text-anchor="middle">Tableau R?gional</text>
+      <text class="title-line" x="600" y="382" text-anchor="middle">Tableau Régional</text>
       <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
       <g class="info-stack">
-        <text class="modes" x="282" y="462">INTELLIGENCE R?GIONALE</text>
+        <text class="modes" x="282" y="462">INTELLIGENCE RÉGIONALE</text>
         <text class="url" x="282" y="520">https://topic.earth - info@topic.earth</text>
       </g>
     </g>
     <g class="mode-copy mode-world">
-      <text class="title-line" x="600" y="382" text-anchor="middle">Actualit? Monde</text>
+      <text class="title-line" x="600" y="382" text-anchor="middle">Actualité Monde</text>
       <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
       <g class="info-stack">
-        <text class="modes" x="282" y="462">FLUX DE DONN?ES MONDE</text>
+        <text class="modes" x="282" y="462">FLUX DE DONNÉES MONDE</text>
         <text class="url" x="282" y="520">https://topic.earth - info@topic.earth</text>
       </g>
     </g>
@@ -158,7 +158,7 @@
       <text class="title-line" x="600" y="382" text-anchor="middle">Veille Spatiale</text>
       <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
       <g class="info-stack">
-        <text class="modes" x="282" y="462">M?T?O SPATIALE + SIGNAUX ORBITAUX</text>
+        <text class="modes" x="282" y="462">MÉTÉO SPATIALE + SIGNAUX ORBITAUX</text>
         <text class="url" x="282" y="520">https://topic.earth - info@topic.earth</text>
       </g>
     </g>
@@ -174,7 +174,7 @@
       <text class="title-line" x="600" y="382" text-anchor="middle">Modes sujet.terre</text>
       <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
       <g class="info-stack">
-        <text class="mode-chip regional-chip" x="282" y="462">R?GIONAL</text>
+        <text class="mode-chip regional-chip" x="282" y="462">RÉGIONAL</text>
         <text class="mode-chip world-chip" x="456" y="462">MONDE</text>
         <text class="mode-chip space-chip" x="590" y="462">SPACE</text>
         <text class="mode-chip fever-chip" x="728" y="462">SIM FEVER</text>
