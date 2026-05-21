@@ -21,6 +21,7 @@
   const CACHE_KEY = "smdeltart-model-cache";
   const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
   const SETTINGS_KEY = "smdeltartApiSettings";
+  const LEGACY_API_SECRET_KEY = "Sm\u0394rt2025!ApiKey#Secure";
 
   // ---------- utilities ----------
 
@@ -41,10 +42,57 @@
     }
   }
 
+  function isEncryptedSecret(value = "") {
+    return /^ENC:/i.test(String(value || "").trim());
+  }
+
+  function decryptLegacyApiKey(value = "") {
+    const text = String(value || "").trim();
+    if (!isEncryptedSecret(text)) return text;
+
+    try {
+      const encoded = text.slice(4);
+      const xored = decodeURIComponent(escape(atob(encoded)));
+      let plainText = "";
+      for (let index = 0; index < xored.length; index += 1) {
+        plainText += String.fromCharCode(
+          xored.charCodeAt(index) ^
+            LEGACY_API_SECRET_KEY.charCodeAt(
+              index % LEGACY_API_SECRET_KEY.length,
+            ),
+        );
+      }
+      return plainText;
+    } catch (error) {
+      console.warn("[model-updater] encrypted API key could not be decoded");
+      return "";
+    }
+  }
+
+  function usableApiKey(value = "") {
+    const key = decryptLegacyApiKey(value).trim();
+    return key && !isEncryptedSecret(key) ? key : "";
+  }
+
+  function normalizeSavedKeys(settings) {
+    const next = { ...settings };
+    [
+      "paidTextApiKey",
+      "freeTextApiKey",
+      "paidImageApiKey",
+      "freeImageApiKey",
+      "externalTtsApiKey",
+      "externalSttApiKey",
+    ].forEach((key) => {
+      if (next[key]) next[key] = usableApiKey(next[key]);
+    });
+    return next;
+  }
+
   function readSavedSettings() {
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
-      return raw ? JSON.parse(raw) : {};
+      return raw ? normalizeSavedKeys(JSON.parse(raw)) : {};
     } catch {
       return {};
     }
