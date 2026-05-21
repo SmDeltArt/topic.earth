@@ -80,7 +80,7 @@ GitHub: `Open-source interactive Earth intelligence dashboard with climate layer
 
 Discord: `Explore topic.earth: Earth layers, Fever scenarios, regional updates, and AI-assisted topic research in one browser dashboard.`
 
-Preview and logo assets live in [assets/social](assets/social), including an animated SVG vignette, a captured English first-frame PNG, a light GIF fallback, a Twitter/Discord-safe PNG resume card, transparent PNG/SVG marks, header variants, and animated GIF marks. Cloudinary export metadata for the current logo pass is archived in [assets/logo/export-2026-05-21T05_12_25.270Z.csv](assets/logo/export-2026-05-21T05_12_25.270Z.csv).
+Preview and logo assets live in [assets/social](assets/social), including an animated SVG vignette, a captured English first-frame PNG, a light GIF fallback, a Twitter/Discord-safe PNG resume card, transparent PNG/SVG marks, header variants, and animated GIF marks. Cloudinary export metadata is archived in [assets/logo/export-2026-05-21T05_12_25.270Z.csv](assets/logo/export-2026-05-21T05_12_25.270Z.csv), and the cleaned social-preview upload set is archived in [assets/social/export-2026-05-21T07_12_07.418Z.csv](assets/social/export-2026-05-21T07_12_07.418Z.csv).
 
 ## Product Flow
 
