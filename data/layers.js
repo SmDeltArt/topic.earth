@@ -8,6 +8,14 @@ export const LAYERS = [
     feverOnly: true
   },
   {
+    id: 'fever-scenarios',
+    name: 'Scenario Logic',
+    icon: '\uD83D\uDCCA',
+    color: '#ffb020',
+    enabled: false,
+    feverOnly: true
+  },
+  {
     id: 'tipping-points',
     name: 'Tipping Points',
     icon: '\u26A0\uFE0F',

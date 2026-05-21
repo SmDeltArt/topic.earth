@@ -1,6 +1,6 @@
-import { Settings } from '../lib/settings.js?v=topic-earth-stt-tts-badges-20260520';
+import { Settings } from '../lib/settings.js?v=topic-earth-fever-scenario-layer-20260521';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
-import { LanguageManager } from '../lib/language.js?v=topic-earth-tab-layers-20260507';
+import { LanguageManager } from '../lib/language.js?v=topic-earth-fever-scenario-layer-20260521';
 import { ReadTranslationService } from '../lib/read-translation.js';
 import { getFeverWarmingTranslation } from '../lib/fever-warming-translations.js?v=topic-earth-fever-json-i18n-20260422';
 import { LocalStorage } from '../lib/storage.js?v=topic-earth-regional-initiative-20260424';
@@ -15,7 +15,7 @@ import {
   downloadAdminTopicPackage,
   downloadTopicAdminSubmission,
   getAdminTopicExportSummary
-} from '../lib/topic-exporter.js';
+} from '../lib/topic-exporter.js?v=topic-earth-embedded-story-20260521';
 
 /**
  * Detail panel component
@@ -553,6 +553,8 @@ export class DetailPanel {
         this.previewMediaUrlFromInput(target);
       } else if (action === 'preview-topic-story') {
         this.previewTopicStory();
+      } else if (action === 'generate-topic-story') {
+        this.generateTopicStoryFromAi(target);
       } else if (action === 'insert-topic-story-starter') {
         this.insertTopicStoryStarter();
       } else if (action === 'clear-topic-story') {
@@ -2882,6 +2884,7 @@ Keep response concise (3-4 sentences).`;
     const isRegionalProposal = AppAccess.isRegionalProposalTopic(point);
     const initiativeRegionalHtml = this.renderInitiativeRegionalSection(point);
     const carbonHistoryHtml = this.renderCarbonHistorySection(point);
+    const feverScenarioTransparencyHtml = this.renderFeverScenarioTransparencySection(point);
 
     let mediaHtml = '';
     const mediaTokens = this.getMediaTokensForPoint(point);
@@ -3035,6 +3038,8 @@ Keep response concise (3-4 sentences).`;
 
       ${initiativeRegionalHtml}
 
+      ${feverScenarioTransparencyHtml}
+
       ${sourcesHtml}
 
       ${point.source ? `
@@ -3053,7 +3058,187 @@ Keep response concise (3-4 sentences).`;
 
       ${topicActions}
     `;
+    this.initFeverScenarioTransparencyChart(point);
     this.updateCompactSummary();
+  }
+
+  getFeverScenarioTransparencySeries() {
+    const scenarios = ['best', 'objective', 'high'];
+    const years = this.getFeverYearsFromConfig();
+
+    return scenarios.map(scenario => {
+      const milestones = this.getScenarioMilestones(scenario) || {};
+      return {
+        scenario,
+        label: scenario === 'best' ? 'Best' : scenario === 'high' ? 'High' : 'Objective',
+        years,
+        temp: years.map(year => Number(milestones[String(year)]?.temperatureDeltaC ?? 0)),
+        tipping: years.map(year => Number(milestones[String(year)]?.tippingRiskPct ?? 0)),
+        amoc: years.map(year => Number(milestones[String(year)]?.amocStrengthPct ?? 100)),
+        sea: years.map(year => Number(milestones[String(year)]?.seaLevelCm ?? 0))
+      };
+    });
+  }
+
+  renderFeverScenarioTransparencySection(point = {}) {
+    if (!point.isFeverScenarioTopic) return '';
+
+    const transparency = point.scenarioTransparency || {};
+    const series = this.getFeverScenarioTransparencySeries();
+    const years = series[0]?.years || this.getFeverYearsFromConfig();
+    const currentScenario = this.currentGlobe?.getFeverScenario?.() || 'objective';
+    const currentMilestones = this.getScenarioMilestones(currentScenario) || {};
+    const metrics = transparency.metrics || [];
+
+    const metricRows = metrics.map(metric => {
+      const first = currentMilestones[String(years[0])]?.[metric.key];
+      const latest = currentMilestones[String(years[years.length - 1])]?.[metric.key];
+      return `
+        <tr>
+          <td>${this.escapeHtml(metric.label)}</td>
+          <td>${this.escapeHtml(metric.unit)}</td>
+          <td>${this.escapeHtml(first ?? '-')}</td>
+          <td>${this.escapeHtml(latest ?? '-')}</td>
+          <td>${this.escapeHtml(metric.sourceNeed || '')}</td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <div class="detail-section fever-scenario-transparency">
+        <div class="section-label">Scenario Transparency</div>
+        <div class="fever-transparency-card">
+          <div class="fever-transparency-grid">
+            <div>
+              <span class="fever-transparency-label">Data file</span>
+              <strong>${this.escapeHtml(transparency.dataFile || 'fever-scenarios.json')}</strong>
+            </div>
+            <div>
+              <span class="fever-transparency-label">Status</span>
+              <strong>${this.escapeHtml(transparency.status || 'provisional')}</strong>
+            </div>
+            <div>
+              <span class="fever-transparency-label">Version</span>
+              <strong>${this.escapeHtml(transparency.version || '0.1.0')}</strong>
+            </div>
+            <div>
+              <span class="fever-transparency-label">Updated</span>
+              <strong>${this.escapeHtml(transparency.updatedAt || 'unknown')}</strong>
+            </div>
+          </div>
+          <p>${this.escapeHtml(transparency.updateRule || 'Scenario updates need reviewed sources and a short logic note.')}</p>
+        </div>
+
+        <div class="fever-transparency-chart-wrap">
+          <canvas id="fever-scenario-transparency-chart" width="520" height="260"></canvas>
+        </div>
+
+        <div class="fever-transparency-table-wrap">
+          <table class="fever-transparency-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Unit</th>
+                <th>${this.escapeHtml(String(years[0] || 'Start'))}</th>
+                <th>${this.escapeHtml(String(years[years.length - 1] || 'End'))}</th>
+                <th>Source needed</th>
+              </tr>
+            </thead>
+            <tbody>${metricRows}</tbody>
+          </table>
+        </div>
+
+        <div class="fever-transparency-logic">
+          ${(transparency.sourceLogic || []).map(item => `
+            <div class="fever-transparency-logic-item">${this.escapeHtml(item)}</div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  initFeverScenarioTransparencyChart(point = {}) {
+    if (!point.isFeverScenarioTopic || !window.Chart) return;
+    const canvas = this.container.querySelector('#fever-scenario-transparency-chart');
+    if (!canvas) return;
+
+    if (this.feverScenarioTransparencyChart) {
+      this.feverScenarioTransparencyChart.destroy();
+      this.feverScenarioTransparencyChart = null;
+    }
+
+    const series = this.getFeverScenarioTransparencySeries();
+    const colors = {
+      best: '#7cffd6',
+      objective: '#00d4ff',
+      high: '#ff5f57'
+    };
+
+    this.feverScenarioTransparencyChart = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: series[0]?.years?.map(String) || [],
+        datasets: [
+          ...series.map(item => ({
+            label: `${item.label} temp`,
+            data: item.temp,
+            borderColor: colors[item.scenario],
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            tension: 0.32,
+            pointRadius: 3,
+            yAxisID: 'yTemp'
+          })),
+          ...series.map(item => ({
+            label: `${item.label} tipping`,
+            data: item.tipping,
+            borderColor: colors[item.scenario],
+            backgroundColor: 'transparent',
+            borderDash: [5, 4],
+            borderWidth: 2,
+            tension: 0.32,
+            pointRadius: 2,
+            yAxisID: 'yRisk'
+          }))
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#e8eaed',
+              font: { family: 'Space Mono', size: 9 },
+              boxWidth: 12
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#9aa0a6', font: { family: 'Space Mono', size: 9 } },
+            grid: { color: 'rgba(255,255,255,0.06)' }
+          },
+          yTemp: {
+            type: 'linear',
+            position: 'left',
+            title: { display: true, text: 'deg C', color: '#e8eaed' },
+            ticks: { color: '#9aa0a6', font: { family: 'Space Mono', size: 9 } },
+            grid: { color: 'rgba(255,255,255,0.06)' }
+          },
+          yRisk: {
+            type: 'linear',
+            position: 'right',
+            title: { display: true, text: 'risk %', color: '#e8eaed' },
+            min: 0,
+            max: 100,
+            ticks: { color: '#9aa0a6', font: { family: 'Space Mono', size: 9 } },
+            grid: { drawOnChartArea: false }
+          }
+        }
+      }
+    });
   }
   
   renderClusterDetail(cluster, layer) {
@@ -5661,6 +5846,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       style: String(source.style || 'story-card').trim() || 'story-card',
       html,
       sanitizedHtml: String(source.sanitizedHtml || '').trim(),
+      structuredStory: source.structuredStory && typeof source.structuredStory === 'object' ? source.structuredStory : null,
       createdAt: source.createdAt || '',
       updatedAt: source.updatedAt || ''
     };
@@ -5674,7 +5860,8 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       enabled: form.querySelector('#topic-story-enabled')?.checked ?? previous.enabled,
       title: form.querySelector('#topic-story-title')?.value ?? previous.title,
       style: form.querySelector('#topic-story-style')?.value ?? previous.style,
-      html
+      html,
+      structuredStory: previous.structuredStory || null
     };
     story.enabled = Boolean(story.enabled || String(story.html || '').trim());
     story.sanitizedHtml = this.sanitizeStoryHtml(story.html);
@@ -5784,8 +5971,12 @@ ${body}
 
         <div class="topic-story-actions">
           <button type="button" class="btn-primary-alt" data-action="preview-topic-story">Preview</button>
+          <button type="button" class="btn-media-action" data-action="generate-topic-story">AI Create</button>
           <button type="button" class="btn-media-action" data-action="insert-topic-story-starter">Starter HTML</button>
           <button type="button" class="btn-media-action danger" data-action="clear-topic-story" ${hasStory ? '' : 'disabled'}>Clear</button>
+        </div>
+        <div class="setting-hint topic-story-status" data-topic-story-status>
+          AI Create writes structured JSON first, then renders safe HTML/SVG from the template.
         </div>
 
         <div class="topic-story-preview-card">
@@ -5820,6 +6011,240 @@ ${body}
     this.renderCreateTopic();
   }
 
+  parseAiJsonObject(content = '', label = 'AI JSON') {
+    const text = String(content || '').trim();
+    if (!text) return {};
+
+    try {
+      return JSON.parse(text);
+    } catch (_error) {
+      const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+      const candidate = fenced?.[1] || text.match(/\{[\s\S]*\}/)?.[0] || '';
+      if (!candidate) return {};
+
+      try {
+        return JSON.parse(candidate);
+      } catch (error) {
+        console.warn(`[Topic Story] Could not parse ${label}:`, error);
+        return {};
+      }
+    }
+  }
+
+  buildTopicStoryPrompt() {
+    const settings = Settings.get();
+    const location = [
+      this.topicFormState.region,
+      this.topicFormState.country
+    ].filter(Boolean).join(', ') || settings.regionalDefaultScale || 'current regional setting';
+    const sources = (this.topicSources || [])
+      .filter(source => source.name || source.url)
+      .slice(0, 6)
+      .map(source => ({
+        name: source.name || this.getHostFromUrl(source.url) || 'source',
+        url: source.url || '',
+        category: source.category || ''
+      }));
+
+    return [
+      {
+        role: 'system',
+        content: [
+          'You create safe topic.earth story card data.',
+          'Return strict JSON only. Do not return HTML.',
+          'The app will render your JSON through a locked template with scripts disabled.',
+          'Keep it factual, educational, and evidence-aware. Separate known facts from assumptions.'
+        ].join(' ')
+      },
+      {
+        role: 'user',
+        content: JSON.stringify({
+          task: 'Create one embeddable topic story card.',
+          requiredShape: {
+            title: 'short title',
+            style: 'story-card | educational-scene | interactive-croquis | micro-game',
+            audience: 'general | kid-9-12 | teen | adult-simple | adult-deep',
+            summary: 'one sentence',
+            sections: [
+              { label: 'Context', body: 'plain language body' },
+              { label: 'What changes', body: 'plain language body' },
+              { label: 'Action idea', body: 'plain language body' }
+            ],
+            visualPlan: {
+              type: 'annotated-svg',
+              caption: 'short caption',
+              labels: ['3 to 5 visual labels']
+            },
+            exercise: {
+              question: 'optional short check question',
+              answer: 'optional answer'
+            },
+            assumptions: ['short assumption if any'],
+            evidenceLinks: sources
+          },
+          topic: {
+            title: this.topicFormState.title || '',
+            category: this.topicFormState.category || '',
+            date: this.topicFormState.date || '',
+            location,
+            summary: this.topicFormState.summary || '',
+            analysis: this.topicFormState.insight || '',
+            sourceNote: this.topicFormState.source || ''
+          },
+          sources
+        }, null, 2)
+      }
+    ];
+  }
+
+  renderTrustedTopicStoryHtml(data = {}) {
+    const title = String(data.title || this.topicFormState.title || 'Topic Story').trim();
+    const style = String(data.style || this.topicFormState.topicStory?.style || 'story-card').trim();
+    const summary = String(data.summary || this.topicFormState.summary || '').trim();
+    const sections = Array.isArray(data.sections) && data.sections.length > 0
+      ? data.sections.slice(0, 5)
+      : [
+        { label: 'Context', body: this.topicFormState.summary || 'Add the core explanation here.' },
+        { label: 'Evidence', body: `${(this.topicSources || []).filter(source => source.name || source.url).length} source item(s) attached for review.` },
+        { label: 'Next step', body: 'Review, improve, and connect this card to the topic package.' }
+      ];
+    const labels = Array.isArray(data.visualPlan?.labels) && data.visualPlan.labels.length > 0
+      ? data.visualPlan.labels.slice(0, 5)
+      : ['signal', 'place', 'evidence', 'action'];
+    const color = style === 'educational-scene'
+      ? '#9ad99d'
+      : style === 'interactive-croquis'
+        ? '#ffb020'
+        : style === 'micro-game'
+          ? '#b99cff'
+          : '#00d4ff';
+    const caption = data.visualPlan?.caption || 'Topic sketch';
+    const evidenceLinks = Array.isArray(data.evidenceLinks) ? data.evidenceLinks.slice(0, 5) : [];
+    const assumptions = Array.isArray(data.assumptions) ? data.assumptions.slice(0, 4) : [];
+    const labelRows = labels.map((label, index) => {
+      const y = 42 + index * 38;
+      const x = index % 2 === 0 ? 34 : 258;
+      const lineX = index % 2 === 0 ? 188 : 236;
+      return `
+        <g>
+          <circle cx="${lineX}" cy="${y}" r="5" fill="${color}"/>
+          <line x1="${lineX}" y1="${y}" x2="${x + 118}" y2="${y}" stroke="${color}" stroke-width="1.5" stroke-dasharray="4 5"/>
+          <text x="${x}" y="${y + 5}" fill="#eaf8ff" font-size="12" font-weight="700">${this.escapeHtml(label)}</text>
+        </g>
+      `;
+    }).join('');
+
+    return `<article class="topic-story-card topic-story-card-${this.escapeHtml(style)}" style="max-width:860px;margin:auto;padding:24px;border:1px solid ${color}66;border-radius:14px;background:#07111f;color:#eef8ff;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <p style="margin:0 0 10px;color:${color};font-weight:900;letter-spacing:.08em;text-transform:uppercase;">topic.earth live card</p>
+  <h1 style="margin:0 0 12px;font-size:clamp(28px,6vw,54px);line-height:1.02;">${this.escapeHtml(title)}</h1>
+  <p style="margin:0 0 20px;font-size:18px;line-height:1.55;color:#cfe9f6;">${this.escapeHtml(summary)}</p>
+  <svg viewBox="0 0 440 230" role="img" aria-label="${this.escapeHtml(caption)}" style="display:block;width:100%;height:auto;margin:18px 0;border-radius:12px;background:#020814;border:1px solid ${color}33;">
+    <defs>
+      <radialGradient id="storyGlow" cx="50%" cy="45%" r="60%">
+        <stop offset="0%" stop-color="${color}" stop-opacity=".42"/>
+        <stop offset="65%" stop-color="${color}" stop-opacity=".08"/>
+        <stop offset="100%" stop-color="#020814" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect x="0" y="0" width="440" height="230" fill="url(#storyGlow)"/>
+    <circle cx="220" cy="112" r="58" fill="#14344f" stroke="${color}" stroke-width="2"/>
+    <path d="M186 116c28-52 78-42 76 4-17 12-44 18-76-4Z" fill="#7cd957" opacity=".92"/>
+    <path d="M188 83c34 16 58 7 84 26" stroke="#2a9dde" stroke-width="15" stroke-linecap="round" opacity=".82"/>
+    <path d="M204 130c28 2 50-9 74-2" stroke="#eef8ff" stroke-width="9" stroke-linecap="round"/>
+    ${labelRows}
+    <text x="18" y="214" fill="${color}" font-size="12" font-weight="800">${this.escapeHtml(caption)}</text>
+  </svg>
+  <div style="display:grid;gap:12px;">
+    ${sections.map(section => `
+      <section style="padding:14px;border:1px solid #ffffff18;border-radius:10px;background:#ffffff08;">
+        <h2 style="margin:0 0 6px;color:${color};font-size:14px;text-transform:uppercase;letter-spacing:.06em;">${this.escapeHtml(section.label || 'Note')}</h2>
+        <p style="margin:0;color:#d8e8f2;line-height:1.55;">${this.escapeHtml(section.body || '')}</p>
+      </section>
+    `).join('')}
+  </div>
+  ${data.exercise?.question ? `
+    <section style="margin-top:14px;padding:14px;border:1px solid ${color}55;border-radius:10px;background:${color}14;">
+      <h2 style="margin:0 0 6px;color:${color};font-size:14px;text-transform:uppercase;letter-spacing:.06em;">Quick check</h2>
+      <p style="margin:0 0 8px;color:#eef8ff;">${this.escapeHtml(data.exercise.question)}</p>
+      <p style="margin:0;color:#b8c6d8;">${this.escapeHtml(data.exercise.answer || '')}</p>
+    </section>
+  ` : ''}
+  ${assumptions.length ? `
+    <p style="margin:14px 0 0;color:#a8b3c6;font-size:13px;">Assumptions: ${assumptions.map(item => this.escapeHtml(item)).join('; ')}</p>
+  ` : ''}
+  ${evidenceLinks.length ? `
+    <footer style="margin-top:16px;color:#a8b3c6;font-size:13px;">
+      Evidence: ${evidenceLinks.map(link => `<span>${this.escapeHtml(link.name || this.getHostFromUrl(link.url) || 'source')}</span>`).join(' / ')}
+    </footer>
+  ` : ''}
+</article>`;
+  }
+
+  async generateTopicStoryFromAi(button = null) {
+    this.saveFormState();
+
+    if (!window.ourEarthAI?.createChatCompletion) {
+      alert('Linked AI text is not ready. Open API Settings, save a text model, then try AI Create again.');
+      return;
+    }
+
+    const title = String(this.topicFormState.title || '').trim();
+    const summary = String(this.topicFormState.summary || '').trim();
+    if (!title && !summary) {
+      alert('Add a title or summary first, then create the story card.');
+      return;
+    }
+
+    const status = this.container.querySelector('[data-topic-story-status]');
+    const originalText = button?.textContent || '';
+    if (button) {
+      button.textContent = 'Creating...';
+      button.disabled = true;
+    }
+    if (status) status.textContent = 'Creating structured story JSON from linked AI...';
+
+    try {
+      const completion = await window.ourEarthAI.createChatCompletion({
+        messages: this.buildTopicStoryPrompt(),
+        temperature: 0.35,
+        json: true
+      });
+      const structuredStory = this.parseAiJsonObject(completion.content || '', 'topic story JSON');
+      const nextTitle = structuredStory.title || title || 'Topic Story';
+      const nextStyle = structuredStory.style || this.topicFormState.topicStory?.style || 'story-card';
+      const html = this.renderTrustedTopicStoryHtml({
+        ...structuredStory,
+        title: nextTitle,
+        style: nextStyle
+      });
+      const now = new Date().toISOString();
+
+      this.topicFormState.topicStory = {
+        ...this.normalizeTopicStory(this.topicFormState.topicStory),
+        enabled: true,
+        title: nextTitle,
+        style: nextStyle,
+        html,
+        sanitizedHtml: this.sanitizeStoryHtml(html),
+        structuredStory,
+        createdAt: this.topicFormState.topicStory?.createdAt || now,
+        updatedAt: now
+      };
+      this.topicStoryDraft = this.topicFormState.topicStory;
+      this.topicBuilderTab = 'story';
+      this.renderCreateTopic();
+    } catch (error) {
+      console.error('[Topic Story] AI Create failed:', error);
+      if (status) status.textContent = `AI Create failed: ${error.message || error}`;
+      alert(this.getActionErrorMessage(error, 'Topic story AI create'));
+    } finally {
+      if (button) {
+        button.textContent = originalText || 'AI Create';
+        button.disabled = false;
+      }
+    }
+  }
+
   insertTopicStoryStarter() {
     this.saveFormState();
     const title = this.topicFormState.topicStory?.title || this.topicFormState.title || 'Topic Story';
@@ -5838,7 +6263,20 @@ ${body}
     <strong style="color:#9ad99d;">Evidence attached: ${sourceCount}</strong>
     <span style="color:#a8b3c6;">Replace this starter with an SVG, croquis, lesson, or interactive card.</span>
   </div>
-</article>`
+</article>`,
+      structuredStory: {
+        title,
+        style: this.topicFormState.topicStory?.style || 'story-card',
+        summary,
+        sections: [
+          { label: 'Context', body: summary },
+          { label: 'Evidence', body: `${sourceCount} source item(s) attached for review.` }
+        ],
+        visualPlan: {
+          type: 'starter-html',
+          caption: 'Starter card'
+        }
+      }
     };
     this.topicFormState.topicStory = starterStory;
     this.topicStoryDraft = this.topicFormState.topicStory;
@@ -5865,7 +6303,8 @@ ${body}
       title: '',
       style: 'story-card',
       html: '',
-      sanitizedHtml: ''
+      sanitizedHtml: '',
+      structuredStory: null
     };
     this.topicStoryDraft = this.topicFormState.topicStory;
     this.topicBuilderTab = 'story';
@@ -5883,6 +6322,7 @@ ${body}
       title: story.title || this.topicFormState.title || 'Topic story',
       html: story.html,
       sanitizedHtml: this.sanitizeStoryHtml(story.html),
+      structuredStory: story.structuredStory || null,
       bridge: {
         bridge: true,
         bridgeVersion: 'topic-story-1',
@@ -9252,6 +9692,7 @@ Return ONLY a JSON object with this exact format, no other text:
                             this.currentPoint?.isFeverWarning || 
                             this.currentPoint?.isAMOC ||
                             this.currentPoint?.category === 'earths-fever' ||
+                            this.currentPoint?.category === 'fever-scenarios' ||
                             this.currentPoint?.category === 'tipping-points' ||
                             this.currentPoint?.category === 'amoc-watch';
       

@@ -86,6 +86,67 @@ export const FEVER_MONITORING_CONTENT = {
  */
 export const FEVER_TOPICS = [
   {
+    id: 'fever_scenario_logic',
+    title: 'Fever Scenario Logic',
+    category: 'fever-scenarios',
+    date: '2026-05-21',
+    country: 'Global',
+    region: 'Simulation transparency',
+    lat: 8,
+    lon: -25,
+    summary: 'Explains how the Fever loop scenarios are built, what values drive the simulation, which sources should be used for review, and how updates should remain transparent.',
+    source: 'fever-scenarios.json + reviewed climate source registry',
+    insight: `
+      <p><strong>Purpose:</strong> Fever mode is an educational simulation loop, not a live climate model. It combines milestone textures with scenario values for temperature delta, sea level, Arctic ice loss, vegetation stress, AMOC strength, and tipping risk.</p>
+      <p><strong>Transparency rule:</strong> every scenario value should keep a source, review status, date, and short logic note before it is treated as more than a provisional placeholder.</p>
+    `,
+    isFeverScenarioTopic: true,
+    scenarioTransparency: {
+      version: '0.1.0',
+      updatedAt: '2026-04-08',
+      status: 'provisional',
+      dataFile: 'fever-scenarios.json',
+      updateRule: 'Update scenario values only when a reviewed source or explicit admin note explains the changed assumption.',
+      sourceLogic: [
+        'Observed historical values should be anchored to datasets such as NASA GISTEMP, NOAA GlobalTemp, IPCC AR6, WMO State of the Global Climate, NASA/NSIDC sea ice records, and NOAA sea-level indicators.',
+        'Future milestones should be mapped from cited scenario families or reviewed assumptions, then converted into the app metrics used by the loop.',
+        'Texture frames are visual milestones; numeric scenario values are the transparent data layer that explains what the animation means.',
+        'Best, Objective, and High are communication scenarios: mitigation/recovery, current-policy/objective path, and high-risk delayed-action path.'
+      ],
+      metrics: [
+        { key: 'temperatureDeltaC', label: 'Temperature delta', unit: 'deg C', sourceNeed: 'Observed warming and scenario projection source' },
+        { key: 'seaLevelCm', label: 'Sea level', unit: 'cm', sourceNeed: 'Sea-level reconstruction/projection source' },
+        { key: 'arcticIceLossPct', label: 'Arctic ice loss', unit: '%', sourceNeed: 'Sea-ice extent or derived loss assumption' },
+        { key: 'vegetationStressPct', label: 'Vegetation stress', unit: '%', sourceNeed: 'Drought, heat, fire, ecosystem stress proxy' },
+        { key: 'amocStrengthPct', label: 'AMOC strength', unit: '%', sourceNeed: 'AMOC observation/proxy/model assumption' },
+        { key: 'tippingRiskPct', label: 'Tipping risk', unit: '%', sourceNeed: 'Planetary boundary/tipping literature and reviewed app mapping' }
+      ]
+    },
+    researchSources: [
+      {
+        name: 'Fever scenario data file',
+        url: './fever-scenarios.json',
+        verified: true
+      },
+      {
+        name: 'IPCC Sixth Assessment Report',
+        url: 'https://www.ipcc.ch/assessment-report/ar6/',
+        verified: false
+      },
+      {
+        name: 'NASA Global Climate Change - Vital Signs',
+        url: 'https://climate.nasa.gov/vital-signs/',
+        verified: false
+      },
+      {
+        name: 'NOAA Climate.gov',
+        url: 'https://www.climate.gov/',
+        verified: false
+      }
+    ],
+    ttsText: 'Fever scenario logic explains that the loop is an educational scenario simulation. Values are provisional until reviewed sources and update notes are attached.'
+  },
+  {
     id: 'fever_1950',
     year: 1950,
     title: 'Climate Year 1950',

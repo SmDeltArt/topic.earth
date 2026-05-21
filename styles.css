@@ -3842,7 +3842,7 @@ body.regional-map-search-open #layer-panel {
 
 .topic-story-actions {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
 }
 
@@ -3850,6 +3850,10 @@ body.regional-map-search-open #layer-panel {
 .topic-story-actions .btn-media-action {
     min-height: 38px;
     width: 100%;
+}
+
+.topic-story-status {
+    min-height: 18px;
 }
 
 .topic-story-preview-card {
@@ -6582,6 +6586,105 @@ canvas:hover {
     display: flex;
     gap: 8px;
     justify-content: flex-end;
+}
+
+.fever-scenario-transparency {
+    display: grid;
+    gap: 14px;
+}
+
+.fever-transparency-card,
+.fever-transparency-chart-wrap,
+.fever-transparency-table-wrap,
+.fever-transparency-logic {
+    border: 1px solid rgba(255, 176, 32, 0.22);
+    border-radius: 8px;
+    background: rgba(12, 16, 26, 0.62);
+}
+
+.fever-transparency-card {
+    padding: 14px;
+}
+
+.fever-transparency-card p {
+    margin: 12px 0 0;
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.fever-transparency-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.fever-transparency-grid > div {
+    min-width: 0;
+}
+
+.fever-transparency-label {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--text-secondary);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.fever-transparency-grid strong {
+    color: #ffb020;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.fever-transparency-chart-wrap {
+    height: 280px;
+    padding: 12px;
+}
+
+.fever-transparency-table-wrap {
+    overflow-x: auto;
+}
+
+.fever-transparency-table {
+    width: 100%;
+    min-width: 620px;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+
+.fever-transparency-table th,
+.fever-transparency-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
+    vertical-align: top;
+}
+
+.fever-transparency-table th {
+    color: #00d4ff;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.fever-transparency-table td {
+    color: var(--text-primary);
+}
+
+.fever-transparency-logic {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+}
+
+.fever-transparency-logic-item {
+    padding-left: 12px;
+    border-left: 3px solid rgba(0, 212, 255, 0.48);
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
 }
 
 /* Web Search Notice */

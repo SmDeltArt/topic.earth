@@ -33,6 +33,7 @@ const ROUTING_PROFILES = {
 const EXCLUDED_CATEGORIES = new Set([
   'space',
   'earths-fever',
+  'fever-scenarios',
   'tipping-points',
   'amoc-watch'
 ]);
