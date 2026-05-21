@@ -5923,6 +5923,13 @@ ${body}
     const story = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
     const previewHtml = this.wrapTopicStoryHtml(story.sanitizedHtml || story.html, story);
     const hasStory = Boolean(String(story.html || '').trim());
+    const storyTypeOptions = [
+      ['story-card', this.t('topic.story.storyCard')],
+      ['educational-scene', this.t('topic.story.educationalScene')],
+      ['interactive-croquis', this.t('topic.story.interactiveCroquis')],
+      ['micro-game', this.t('topic.story.microGame')],
+      ['external-widget', this.t('topic.story.externalWidget')]
+    ];
     const manifest = {
       bridge: true,
       bridgeVersion: 'topic-story-1',
@@ -5939,50 +5946,44 @@ ${body}
       <div class="topic-story-editor" data-tutorial-id="topic-story-editor">
         <div class="topic-story-header">
           <div>
-            <div class="section-label">Embedded HTML Story</div>
-            <div class="setting-hint">Paste HTML/SVG, preview it in a sandbox, then save it with this topic.</div>
+            <div class="section-label">${this.escapeHtml(this.t('topic.story.embeddedHtmlStory'))}</div>
+            <div class="setting-hint">${this.escapeHtml(this.t('topic.story.pasteHelp'))}</div>
           </div>
           <label class="topic-story-toggle">
             <input type="checkbox" id="topic-story-enabled" ${story.enabled ? 'checked' : ''}>
-            <span>Attach</span>
+            <span>${this.escapeHtml(this.t('topic.story.attach'))}</span>
           </label>
         </div>
 
         <div class="topic-story-grid">
           <label>
-            <span>Story title</span>
-            <input type="text" id="topic-story-title" value="${this.escapeHtml(story.title || '')}" placeholder="Short story card title">
+            <span>${this.escapeHtml(this.t('topic.story.storyTitle'))}</span>
+            <input type="text" id="topic-story-title" value="${this.escapeHtml(story.title || '')}" placeholder="${this.escapeHtml(this.t('topic.story.titlePlaceholder'))}">
           </label>
           <label>
-            <span>Type</span>
+            <span>${this.escapeHtml(this.t('topic.story.type'))}</span>
             <select id="topic-story-style">
-              ${[
-                ['story-card', 'Story card'],
-                ['educational-scene', 'Educational scene'],
-                ['interactive-croquis', 'Interactive croquis'],
-                ['micro-game', 'Micro-game'],
-                ['external-widget', 'External widget']
-              ].map(([value, label]) => `<option value="${value}" ${story.style === value ? 'selected' : ''}>${label}</option>`).join('')}
+              ${storyTypeOptions.map(([value, label]) => `<option value="${value}" ${story.style === value ? 'selected' : ''}>${this.escapeHtml(label)}</option>`).join('')}
             </select>
           </label>
         </div>
 
-        <textarea id="topic-story-html" rows="10" spellcheck="false" placeholder="<section>Paste a safe HTML/SVG story card here...</section>">${this.escapeHtml(story.html || '')}</textarea>
+        <textarea id="topic-story-html" rows="10" spellcheck="false" placeholder="${this.escapeHtml(this.t('topic.story.placeholder'))}">${this.escapeHtml(story.html || '')}</textarea>
 
         <div class="topic-story-actions">
-          <button type="button" class="btn-primary-alt" data-action="preview-topic-story">Preview</button>
-          <button type="button" class="btn-media-action" data-action="generate-topic-story">AI Create</button>
-          <button type="button" class="btn-media-action" data-action="insert-topic-story-starter">Starter HTML</button>
-          <button type="button" class="btn-media-action danger" data-action="clear-topic-story" ${hasStory ? '' : 'disabled'}>Clear</button>
+          <button type="button" class="btn-primary-alt" data-action="preview-topic-story">${this.escapeHtml(this.t('topic.story.preview'))}</button>
+          <button type="button" class="btn-media-action" data-action="generate-topic-story">${this.escapeHtml(this.t('topic.story.aiCreate'))}</button>
+          <button type="button" class="btn-media-action" data-action="insert-topic-story-starter">${this.escapeHtml(this.t('topic.story.starterHtml'))}</button>
+          <button type="button" class="btn-media-action danger" data-action="clear-topic-story" ${hasStory ? '' : 'disabled'}>${this.escapeHtml(this.t('topic.story.clear'))}</button>
         </div>
         <div class="setting-hint topic-story-status" data-topic-story-status>
-          AI Create writes structured JSON first, then renders safe HTML/SVG from the template.
+          ${this.escapeHtml(this.t('topic.story.aiCreateWrites'))}
         </div>
 
         <div class="topic-story-preview-card">
           <div class="topic-story-preview-header">
-            <span>Sandbox preview</span>
-            <span>${hasStory ? 'scripts blocked' : 'waiting for HTML'}</span>
+            <span>${this.escapeHtml(this.t('topic.story.sandboxPreview'))}</span>
+            <span>${this.escapeHtml(hasStory ? this.t('topic.story.scriptsBlocked') : this.t('topic.story.waitingForHtml'))}</span>
           </div>
           ${previewHtml ? `
             <iframe
@@ -5993,12 +5994,12 @@ ${body}
               title="${this.escapeHtml(story.title || 'Topic story preview')}"
             ></iframe>
           ` : `
-            <div class="topic-story-empty-preview">Paste HTML or create a starter card to preview the embedded story.</div>
+            <div class="topic-story-empty-preview">${this.escapeHtml(this.t('topic.story.pasteHelp'))}</div>
           `}
         </div>
 
         <details class="topic-story-manifest">
-          <summary>Bridge JSON</summary>
+          <summary>${this.escapeHtml(this.t('topic.story.bridgeJson'))}</summary>
           <pre>${this.escapeHtml(JSON.stringify(manifest, null, 2))}</pre>
         </details>
       </div>
@@ -6184,14 +6185,14 @@ ${body}
     this.saveFormState();
 
     if (!window.ourEarthAI?.createChatCompletion) {
-      alert('Linked AI text is not ready. Open API Settings, save a text model, then try AI Create again.');
+      alert(this.t('topic.story.aiCreateNotReady'));
       return;
     }
 
     const title = String(this.topicFormState.title || '').trim();
     const summary = String(this.topicFormState.summary || '').trim();
     if (!title && !summary) {
-      alert('Add a title or summary first, then create the story card.');
+      alert(this.t('topic.story.aiCreateNeedsDraft'));
       return;
     }
 
@@ -6201,7 +6202,7 @@ ${body}
       button.textContent = 'Creating...';
       button.disabled = true;
     }
-    if (status) status.textContent = 'Creating structured story JSON from linked AI...';
+    if (status) status.textContent = this.t('topic.story.aiCreateStatus');
 
     try {
       const completion = await window.ourEarthAI.createChatCompletion({
@@ -6235,11 +6236,11 @@ ${body}
       this.renderCreateTopic();
     } catch (error) {
       console.error('[Topic Story] AI Create failed:', error);
-      if (status) status.textContent = `AI Create failed: ${error.message || error}`;
+      if (status) status.textContent = `${this.t('topic.story.aiCreateFailed')}: ${error.message || error}`;
       alert(this.getActionErrorMessage(error, 'Topic story AI create'));
     } finally {
       if (button) {
-        button.textContent = originalText || 'AI Create';
+        button.textContent = originalText || this.t('topic.story.aiCreate');
         button.disabled = false;
       }
     }
@@ -6297,7 +6298,7 @@ ${body}
   }
 
   clearTopicStory() {
-    if (!confirm('Clear the embedded HTML story from this draft?')) return;
+    if (!confirm(this.t('topic.story.clearConfirm'))) return;
     this.topicFormState.topicStory = {
       enabled: false,
       title: '',
@@ -6715,8 +6716,8 @@ ${body}
         <div class="tab-content ${this.topicBuilderTab === 'story' ? 'active' : ''}">
           <div class="proposal-step-intro" data-tutorial-id="topic-story-tab">
             <div class="proposal-step-kicker">Step 3</div>
-            <div class="proposal-step-title">Embed a live card</div>
-            <div class="proposal-step-text">Attach one sandboxed HTML/SVG story card to this topic. Scripts stay blocked in the first version.</div>
+            <div class="proposal-step-title">${this.escapeHtml(this.t('topic.story.embedLiveCard'))}</div>
+            <div class="proposal-step-text">${this.escapeHtml(this.t('topic.story.liveCardHelp'))}</div>
           </div>
           ${this.renderTopicStoryEditor()}
         </div>
@@ -6750,7 +6751,7 @@ ${body}
               <strong>${mediaCount > 0 ? `${mediaCount} item${mediaCount === 1 ? '' : 's'} added` : 'Optional'}</strong>
             </div>
             <div class="topic-review-row">
-              <span>Story card</span>
+              <span>${this.escapeHtml(this.t('topic.story.storyCard'))}</span>
               <strong>${hasTopicStory ? `${this.escapeHtml(topicStory.style)} attached` : 'Optional'}</strong>
             </div>
             <div class="topic-review-row">
