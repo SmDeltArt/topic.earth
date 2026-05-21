@@ -51,11 +51,17 @@
       .rail { transform-box: fill-box; transform-origin: center; animation: railPulse 6s ease-in-out infinite; }
       .frame { fill: none; stroke: rgba(0, 212, 255, 0.22); stroke-width: 1.4; animation: framePulse 12s steps(1, end) infinite; }
       .logo-wrap { transform-origin: 370px 72px; }
-      .mode-copy { opacity: 0; color: #00d4ff; animation-duration: 12s; animation-timing-function: cubic-bezier(.2,.8,.2,1); animation-iteration-count: infinite; }
+      .mode-copy { opacity: 0; color: #00d4ff; animation-duration: 15s; animation-timing-function: cubic-bezier(.2,.8,.2,1); animation-iteration-count: infinite; }
       .mode-regional { color: #7cffd6; animation-name: regionalCopy; }
       .mode-world { color: #00d4ff; animation-name: worldCopy; }
       .mode-space { color: #a78bfa; animation-name: spaceCopy; }
       .mode-fever { color: #ff6b5f; animation-name: feverCopy; }
+      .mode-all { color: #00d4ff; animation-name: allModesCopy; }
+      .mode-chip { font-size: 27px; font-weight: 700; }
+      .regional-chip { fill: #7cffd6; }
+      .world-chip { fill: #00d4ff; }
+      .space-chip { fill: #a78bfa; }
+      .fever-chip { fill: #ff6b5f; }
       .title-line { font-family: "Space Mono", Consolas, monospace; font-size: 44px; font-weight: 700; fill: currentColor; letter-spacing: 0; filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.42)); }
       .info-stack { font-family: "Space Mono", Consolas, monospace; fill: currentColor; filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.36)); }
       .bar { fill: currentColor; filter: drop-shadow(0 0 13px rgba(0, 212, 255, 0.42)); transform-origin: 0 50%; }
@@ -74,19 +80,29 @@
          55%, 72% { filter: drop-shadow(0 0 13px rgba(143, 178, 255, 0.42)); }
          80%, 97% { filter: drop-shadow(0 0 14px rgba(255, 176, 32, 0.5)); }
        }
+      @keyframes regionalCopy {
+        0%, 3% { transform: translate(0, 330px); opacity: 0; }
+        7%, 16% { transform: translate(0, 0); opacity: 1; }
+        20%, 100% { transform: translate(-980px, 0); opacity: 0; }
+      }
       @keyframes worldCopy {
-        0%, 25% { transform: translate(980px, 0); opacity: 0; }
-        30%, 45% { transform: translate(0, 0); opacity: 1; }
-        50%, 100% { transform: translate(-980px, 0); opacity: 0; }
+        0%, 20% { transform: translate(980px, 0); opacity: 0; }
+        24%, 36% { transform: translate(0, 0); opacity: 1; }
+        40%, 100% { transform: translate(-980px, 0); opacity: 0; }
       }
       @keyframes spaceCopy {
-        0%, 50% { transform: translate(980px, 0); opacity: 0; }
-        55%, 70% { transform: translate(0, 0); opacity: 1; }
-        75%, 100% { transform: translate(-980px, 0); opacity: 0; }
+        0%, 40% { transform: translate(980px, 0); opacity: 0; }
+        44%, 56% { transform: translate(0, 0); opacity: 1; }
+        60%, 100% { transform: translate(-980px, 0); opacity: 0; }
       }
       @keyframes feverCopy {
-        0%, 75% { transform: translate(980px, 0); opacity: 0; }
-        80%, 94% { transform: translate(0, 0); opacity: 1; }
+        0%, 60% { transform: translate(980px, 0); opacity: 0; }
+        64%, 76% { transform: translate(0, 0); opacity: 1; }
+        80%, 100% { transform: translate(-980px, 0); opacity: 0; }
+      }
+      @keyframes allModesCopy {
+        0%, 80% { transform: translate(980px, 0); opacity: 0; }
+        84%, 96% { transform: translate(0, 0); opacity: 1; }
         100% { transform: translate(-980px, 0); opacity: 0; }
       }
     </style>
@@ -124,11 +140,11 @@
 
   <g class="text-wrap">
     <g class="mode-copy mode-regional">
-      <text class="title-line" x="600" y="382" text-anchor="middle">Regional Climate Dashboard</text>
+      <text class="title-line" x="600" y="382" text-anchor="middle">Regional Dashboard</text>
       <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
       <g class="info-stack">
         <text class="modes" x="282" y="462">REGIONAL INTELLIGENCE</text>
-        <text class="url" x="282" y="520">https://topic.earth - topic.earth</text>
+        <text class="url" x="282" y="520">https://topic.earth - info@topic.earth</text>
       </g>
     </g>
     <g class="mode-copy mode-world">
@@ -136,7 +152,7 @@
       <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
       <g class="info-stack">
         <text class="modes" x="282" y="462">WORLD LIVE DATA STREAM</text>
-        <text class="url" x="282" y="520">https://topic.earth - topic.earth</text>
+        <text class="url" x="282" y="520">https://topic.earth - info@topic.earth</text>
       </g>
     </g>
     <g class="mode-copy mode-space">
@@ -144,7 +160,7 @@
       <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
       <g class="info-stack">
         <text class="modes" x="282" y="462">SPACE WEATHER + ORBITAL SIGNALS</text>
-        <text class="url" x="282" y="520">https://topic.earth - topic.earth</text>
+        <text class="url" x="282" y="520">https://topic.earth - info@topic.earth</text>
       </g>
     </g>
     <g class="mode-copy mode-fever">
@@ -152,7 +168,18 @@
       <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
       <g class="info-stack">
         <text class="modes" x="282" y="462">FEVER SIM + TIPPING POINTS</text>
-        <text class="url" x="282" y="520">https://topic.earth - topic.earth</text>
+        <text class="url" x="282" y="520">https://topic.earth - info@topic.earth</text>
+      </g>
+    </g>
+    <g class="mode-copy mode-all">
+      <text class="title-line" x="600" y="382" text-anchor="middle">topic.earth Modes</text>
+      <rect class="bar" x="250" y="424" width="6" height="116" rx="3"/>
+      <g class="info-stack">
+        <text class="mode-chip regional-chip" x="282" y="462">REGIONAL</text>
+        <text class="mode-chip world-chip" x="456" y="462">WORLD</text>
+        <text class="mode-chip space-chip" x="590" y="462">SPACE</text>
+        <text class="mode-chip fever-chip" x="728" y="462">FEVER SIM</text>
+        <text class="url" x="282" y="520">https://topic.earth - info@topic.earth</text>
       </g>
     </g>
   </g>
