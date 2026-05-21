@@ -6,7 +6,7 @@ Cette note rassemble des pistes pour faire evoluer topic.earth: passer de l'obse
 
 Construire cela en quatre couches, dans cet ordre:
 
-1. **Carte narrative de topic**: permettre a un brouillon de topic d'inclure une carte HTML/SVG generee ou collee, affichee dans une iframe sandboxee et exportee avec le ZIP du topic.
+1. **Carte narrative / HTML heberge**: permettre a un brouillon de topic d'inclure une carte HTML/SVG generee, collee ou liee, affichee dans une iframe sandboxee et exportee avec le ZIP du topic.
 2. **Couche Visions regeneratives**: ajouter un espace de proposition creative dans la structure des modes, centre sur des futurs durables plausibles lies a un topic, un lieu ou un jeu de preuves.
 3. **Couche Jardinage regional**: ajouter une couche locale pratique pour jardins, resilience alimentaire, corridors de biodiversite, compost, recuperation d'eau, timing meteo et croquis annote.
 4. **Profil Animateur educatif**: connecter un profil d'histoire pour enfants/adultes au format de timeline du Smart SVG Editor, sans transformer topic.earth en studio d'animation complet.
@@ -25,6 +25,7 @@ Les utilisateurs pourraient:
 - Utiliser les reglages regionaux de l'app comme contexte de localisation par defaut.
 - Ajouter la carte au ZIP du topic comme `story/index.html`.
 - Relier la carte aux preuves, images, URLs sources ou fichiers de presentation.
+- Lier optionnellement une carte hebergee depuis `widgets.smdeltart.com` ou une autre origine de confiance si le contenu demande un outil plus riche.
 
 La preview devrait utiliser une iframe sandboxee sans scripts par defaut. Pour les SVG animes, preferer le SVG/CSS inline a JavaScript. Un mode script futur devrait rester admin-only et clairement indique.
 
@@ -77,6 +78,86 @@ Forme de sortie recommandee:
 ```
 
 Le renderer cree ensuite une carte HTML coherente avec des templates approuves.
+
+## Multivers HTML Heberge
+
+Cela peut devenir ton multivers de topics, mais la premiere version devrait garder chaque univers comme une piece jointe bornee. Un topic peut heberger une carte narrative, une animation educative, un SVG interactif ou meme une petite experience de jeu, tant que le contenu reste emballe avec metadata, contexte de preuves et limites de sandbox.
+
+Types d'attachements suggeres:
+
+- `story-card`: HTML/SVG statique ou legerement anime.
+- `educational-scene`: lecon guidee avec personnage, expression, TTS et court exercice.
+- `interactive-croquis`: plan SVG annote avec notes cliquables.
+- `micro-game`: petit jeu ou simulation connecte a un objectif de topic.
+- `external-widget`: app hebergee de confiance ouverte via bridge.
+
+Pour un jeu comme `TetrAIs-3d.html`, ne pas le traiter comme du HTML colle ordinaire. Il devrait utiliser un profil plus strict:
+
+- Iframe sandboxee.
+- Aucun acces aux cles API ni au vault.
+- Aucune ecriture dans le stockage parent sauf bridge explicite.
+- Dimensions fixes et fallback mobile.
+- Objectif de topic clair: puzzle, equilibre energetique, plan d'adaptation ou compromis de ressources.
+- Export comme `story/game/index.html` avec `story/game/manifest.json`.
+
+Cela permet aux utilisateurs de poster du contenu ludique ou interactif sans affaiblir le flux evidence-first.
+
+## Contrat De Bridge SVG / Widget
+
+Le bridge doit etre du vrai JSON d'abord, puis rendu en HTML/SVG. Ainsi topic.earth, `widgets.smdeltart.com` et le SVG editor prive peuvent echanger une intention sans copier du markup brut non sur entre apps.
+
+Forme recommandee:
+
+```json
+{
+  "bridge": true,
+  "bridgeVersion": "topic-story-1",
+  "origin": "topic.earth",
+  "target": "smart-svg-editor",
+  "sourceTopicId": "topic-123",
+  "style": "educational-scene",
+  "preset": "kid-9-12",
+  "locationContext": {
+    "source": "settings",
+    "label": "Regional default"
+  },
+  "scene": {
+    "title": "Why a rain garden helps after storms",
+    "objective": "Explain runoff and soil absorption",
+    "character": {
+      "type": "robot",
+      "expression": "curious",
+      "focus": "eye-contact",
+      "movement": "point-and-wave"
+    },
+    "timeline": [
+      {
+        "time": 0,
+        "action": "speak",
+        "text": "Rain gardens slow water and help soil drink."
+      }
+    ],
+    "svg": {
+      "mode": "inline-svg",
+      "expressions": ["curious", "happy", "thinking"],
+      "rasterParts": [
+        {
+          "role": "face-texture",
+          "source": "embedded-data-uri",
+          "animatedBy": "svg-bone"
+        }
+      ]
+    }
+  },
+  "limits": {
+    "allowScripts": false,
+    "maxDurationSeconds": 45,
+    "maxTokens": 1200
+  }
+}
+```
+
+La generation par defaut devrait partir d'un preset simple, puis laisser les utilisateurs avances ouvrir la scene dans le SVG editor. Le SVG reste une base forte: il peut animer expressions, focus du curseur/des yeux, bones, labels et morceaux raster couches tout en restant inspectable. Si des parties raster IA sont necessaires, les integrer comme assets dans le dossier SVG/story et les animer avec des transforms SVG plutot que transformer toute la scene en video plate.
 
 ## Couche Visions Regeneratives
 
@@ -157,6 +238,7 @@ Bons usages:
 - Construire un court exercice apres l'explication.
 - Utiliser un guide simple, humain, robot ou animal, qui parle, pointe et reagit.
 - Exporter un SVG anime transparent ou une carte HTML.
+- Demarrer depuis un preset par defaut, puis bridger vers le SVG editor pour les expressions, mouvements ou timelines avancees.
 
 Profils proposes:
 
@@ -184,6 +266,7 @@ Pour le composeur de topic:
 - Ajouter un onglet `Story` ou `Live Card` apres media/evidence.
 - Boutons: `Paste HTML`, `AI Create`, `Preview`, `Add to ZIP`.
 - Selecteur de style: `Croquis`, `Illustrated`, `Comic`, `Infographic`, `Presentation`, `Educational`.
+- Selecteur avance d'attachement: `Story`, `SVG Scene`, `Micro-game`, `External Widget`.
 - Pre-remplir le lieu depuis Settings et le contexte Regional.
 - Garder la preview dans une iframe contrainte avec reset/clear.
 
@@ -198,6 +281,7 @@ Pour les exports:
 
 - Inclure la carte narrative dans les packages admin review.
 - Inclure un resume texte pour les outils qui ne rendent pas le HTML.
+- Inclure le bridge JSON et les manifests a cote du HTML genere pour que les futurs outils puissent reouvrir et modifier l'attachement.
 
 ## Securite Et Qualite
 
@@ -211,6 +295,7 @@ Le risque principal est de laisser le HTML genere devenir un probleme de securit
 - Marquer les visuels generes comme brouillons jusqu'a review.
 - Pour le contenu enfant, exiger age, objectif pedagogique et etat de review adulte.
 - Pour meteo/jardinage, indiquer l'incertitude et eviter les promesses agricoles professionnelles.
+- Pour les jeux et widgets, les separer des API settings, du vault, du storage sync et de l'etat admin sauf permission de bridge explicite et revue.
 
 ## Meilleur Premier Build
 
@@ -220,7 +305,8 @@ Implementer d'abord:
 - Preview iframe sanitizee.
 - Generateur IA structure.
 - Renderer HTML avec 3 templates: croquis, brief illustre, comic strip.
-- Un template educatif base sur les concepts timeline/export du SVG editor comme pont futur.
+- Un template educatif base sur les concepts timeline/export du SVG editor avec contrat JSON de bridge.
+- Un profil `micro-game` avec iframe stricte et manifest dedie.
 - Support export ZIP.
 
 Ensuite ajouter `Visions regeneratives` et `Jardinage regional` quand le flux d'attachement est stable.
