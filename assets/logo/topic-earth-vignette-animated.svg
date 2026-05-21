@@ -92,8 +92,14 @@
     </style>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <circle cx="850" cy="128" r="350" fill="#00d4ff" opacity="0.035" filter="url(#panelGlow)"/>
-  <circle cx="150" cy="520" r="310" fill="#7cffd6" opacity="0.03" filter="url(#panelGlow)"/>
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0 0;18 10;6 24;-12 8;0 0" dur="42s" repeatCount="indefinite"/>
+    <circle cx="850" cy="128" r="350" fill="#00d4ff" opacity="0.035" filter="url(#panelGlow)"/>
+  </g>
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0 0;-16 -8;-8 -22;12 -10;0 0" dur="52s" repeatCount="indefinite"/>
+    <circle cx="150" cy="520" r="310" fill="#7cffd6" opacity="0.03" filter="url(#panelGlow)"/>
+  </g>
 
   <g transform="translate(230 116)">
     <g class="logo-wrap">
