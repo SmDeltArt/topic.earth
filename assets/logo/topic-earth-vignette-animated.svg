@@ -51,9 +51,9 @@
       .rail { transform-box: fill-box; transform-origin: center; animation: railPulse 6s ease-in-out infinite; }
       .frame { fill: none; stroke: rgba(0, 212, 255, 0.22); stroke-width: 1.4; animation: framePulse 6s steps(6, end) infinite; }
       .logo-wrap { transform-origin: 370px 72px; }
-      .title-line { font-family: "Space Mono", Consolas, monospace; font-size: 44px; font-weight: 700; fill: #00d4ff; letter-spacing: 0; filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.42)); animation: titleMove 12s cubic-bezier(.2,.8,.2,1) infinite; }
-      .info-stack { font-family: "Space Mono", Consolas, monospace; fill: #00d4ff; filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.36)); animation: infoSlide 12s cubic-bezier(.2,.8,.2,1) infinite; }
-      .bar { fill: #00d4ff; filter: drop-shadow(0 0 13px rgba(0, 212, 255, 0.42)); transform-origin: 0 50%; animation: barReveal 12s cubic-bezier(.2,.8,.2,1) infinite; }
+      .title-line { font-family: "Space Mono", Consolas, monospace; font-size: 44px; font-weight: 700; fill: #00d4ff; letter-spacing: 0; filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.42)); animation: titleMove 12s cubic-bezier(.2,.8,.2,1) infinite, modeTextColor 12s steps(1, end) infinite; }
+      .info-stack { font-family: "Space Mono", Consolas, monospace; fill: #00d4ff; filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.36)); animation: infoSlide 12s cubic-bezier(.2,.8,.2,1) infinite, modeTextColor 12s steps(1, end) infinite; }
+      .bar { fill: #00d4ff; filter: drop-shadow(0 0 13px rgba(0, 212, 255, 0.42)); transform-origin: 0 50%; animation: barReveal 12s cubic-bezier(.2,.8,.2,1) infinite, modeTextColor 12s steps(1, end) infinite; }
       .modes { font-size: 31px; font-weight: 700; }
       .url { font-size: 25px; font-weight: 700; opacity: 0.9; }
       @keyframes framePulse {
@@ -66,17 +66,23 @@
         50% { transform: translateY(-1px) scale(1.018); filter: drop-shadow(0 0 13px rgba(0, 212, 255, 0.45)); }
       }
       @keyframes wordSignal { 0%, 100% { opacity: 0.96; } 45% { opacity: 1; } 72% { opacity: 0.9; } }
+      @keyframes modeTextColor {
+        0%, 24% { fill: #00d4ff; }
+        25%, 49% { fill: #7cffd6; }
+        50%, 74% { fill: #a78bfa; }
+        75%, 100% { fill: #ff6b5f; }
+      }
       @keyframes titleMove {
-        0%, 14% { transform: translate(0, 76px); opacity: 1; }
+        0%, 14% { transform: translate(0, 330px); opacity: 1; }
         28%, 55% { transform: translate(0, 0); opacity: 1; }
-        68%, 100% { transform: translate(-320px, 0); opacity: 1; }
+        68%, 100% { transform: translate(-420px, 0); opacity: 1; }
       }
       @keyframes barReveal {
-        0%, 60% { transform: scaleY(0.08); opacity: 0; }
-        70%, 100% { transform: scaleY(1); opacity: 1; }
+        0%, 60% { transform: translate(980px, 0) scaleY(0.08); opacity: 0; }
+        70%, 100% { transform: translate(0, 0) scaleY(1); opacity: 1; }
       }
       @keyframes infoSlide {
-        0%, 60% { transform: translate(370px, 0); opacity: 0; }
+        0%, 60% { transform: translate(980px, 0); opacity: 0; }
         72%, 100% { transform: translate(0, 0); opacity: 1; }
       }
     </style>
