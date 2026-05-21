@@ -1949,6 +1949,12 @@ body.regional-map-search-open #layer-panel {
     border-bottom: 1px solid var(--border);
 }
 
+.topic-composer-header {
+    width: 100%;
+    padding-right: 0;
+    box-sizing: border-box;
+}
+
 .detail-category {
     display: inline-block;
     padding: 4px 12px;
@@ -3555,8 +3561,10 @@ body.regional-map-search-open #layer-panel {
 /* Topic Builder Styles */
 .topic-builder-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: 12px;
+    width: 100%;
 }
 
 .topic-recording-note {
@@ -3575,6 +3583,10 @@ body.regional-map-search-open #layer-panel {
 }
 
 .topic-draft-status {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    box-sizing: border-box;
     margin-top: 10px;
     padding: 12px 13px;
     border: 1px solid rgba(0, 212, 255, 0.26);
@@ -3608,6 +3620,7 @@ body.regional-map-search-open #layer-panel {
     color: var(--text-primary);
     font-size: 13px;
     font-weight: 800;
+    overflow-wrap: anywhere;
 }
 
 .topic-draft-status-text,
@@ -3616,6 +3629,7 @@ body.regional-map-search-open #layer-panel {
     color: var(--text-secondary);
     font-size: 11px;
     line-height: 1.4;
+    overflow-wrap: anywhere;
 }
 
 .topic-draft-status-meta {
@@ -3625,9 +3639,12 @@ body.regional-map-search-open #layer-panel {
 
 .topic-management-summary {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
     gap: 8px;
     margin-top: 10px;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
 }
 
 .topic-management-item {
@@ -4359,9 +4376,11 @@ body.regional-map-search-open #layer-panel {
 
 .topic-builder-actions {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
+    width: 100%;
     margin-top: 24px;
     padding-top: 20px;
     border-top: 1px solid var(--border);
@@ -4369,7 +4388,15 @@ body.regional-map-search-open #layer-panel {
 
 .primary-actions {
     display: flex;
+    flex: 1 1 240px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 8px;
+}
+
+.topic-builder-actions > .btn-secondary,
+.primary-actions > button {
+    min-width: min(100%, 160px);
 }
 
 .btn-primary-alt {

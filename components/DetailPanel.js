@@ -6471,7 +6471,7 @@ ${body}
     this.showSourceEditor = this.showSourceEditor || false;
     
     content.innerHTML = `
-      <div class="detail-header">
+      <div class="detail-header topic-composer-header">
         <h2 class="detail-title">${workspaceTitle}</h2>
         ${recordingNote ? `<div class="topic-recording-note">${recordingNote}</div>` : ''}
         ${isRegionalProposal ? `
