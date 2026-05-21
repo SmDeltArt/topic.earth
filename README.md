@@ -71,6 +71,7 @@ metadata are also exposed through:
 - [codemeta.json](codemeta.json)
 - [CITATION.cff](CITATION.cff)
 - [assets/logo/metadata.json](assets/logo/metadata.json)
+- [docs/app-trust-and-store-publishing.md](docs/app-trust-and-store-publishing.md)
 
 ## Social Copy And Assets
 
