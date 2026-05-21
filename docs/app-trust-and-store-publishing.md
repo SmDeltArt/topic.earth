@@ -102,6 +102,7 @@ The simplest Android path is a Progressive Web App first, then a store wrapper o
 - Add app icons, screenshots, theme color, and offline fallback if useful.
 - Make install prompt work from Chrome/Android.
 - This is fastest and does not require a store review.
+- While the app is still in developer mode, use this path as the main mobile test channel: install from `topic.earth` or a Vercel preview, test the full flow, then only package for Google Play once privacy pages, icons, screenshots, and local-storage behavior are stable.
 
 ### Option B: Google Play
 
@@ -136,6 +137,7 @@ Apple is stricter about apps that are only a website in a wrapper. The iOS versi
 - Make the web app installable from Safari.
 - Provide Apple touch icons and mobile layout polish.
 - This is the fastest path and avoids App Store review.
+- While the app is still in developer mode, keep iPhone/iPad testing here first: add the site to the Home Screen from Safari, verify touch layout and permissions, then move to an App Store wrapper only when the experience is stable enough for review.
 
 ### Option B: App Store
 
@@ -156,10 +158,11 @@ Apple requires privacy policy links and accurate privacy metadata. App Store pro
 Best sequence:
 
 1. **PWA first**: make the installed web app excellent on Android and iOS.
-2. **Trust pages**: add privacy, security, cookies, and contact pages.
-3. **Security checklist**: document checks in `docs/security-checklist.md`.
-4. **Android wrapper**: publish a Trusted Web Activity or Capacitor wrapper.
-5. **iOS wrapper later**: only after the app has enough native-quality value and stable privacy declarations.
+2. **Developer-mode mobile validation**: install the PWA on Android and iOS devices from the live site or preview deploys, then test settings, local drafts, AI bridge behavior, media, and language/TTS flows before store packaging.
+3. **Trust pages**: add privacy, security, cookies, and contact pages.
+4. **Security checklist**: document checks in `docs/security-checklist.md`.
+5. **Android wrapper**: publish a Trusted Web Activity or Capacitor wrapper.
+6. **iOS wrapper later**: only after the app has enough native-quality value and stable privacy declarations.
 
 ## Privacy Policy Draft Outline
 
