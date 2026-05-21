@@ -14,6 +14,7 @@ This folder is the portable source area for the topic.earth animated logo modes.
 - `topic-earth-logo-kit.html` renders the four animated logo modes together.
 - `topic-earth-vignette-animated.svg` is the English animated vignette used for loading and social motion exports.
 - `sujet-terre-vignette-animated.svg` is the French animated vignette variant for internationalization previews.
+- `../social/topic-earth-vignette-first-en.png` is the captured English first/resume frame used as a validation still before more language vignettes are exported.
 - `metadata.json` describes the logo URLs, colors, and preferred export formats.
 
 ## Export Recommendations

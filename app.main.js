@@ -13,8 +13,8 @@ import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-access-to
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-access-toggle-20260517';
 import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-story-embed-20260521';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-20260506';
-import { Settings } from './lib/settings.js?v=topic-earth-stt-tts-badges-20260520';
-import { LanguageManager } from './lib/language.js?v=topic-earth-tab-layers-20260507';
+import { Settings } from './lib/settings.js?v=topic-earth-greek-language-20260521';
+import { LanguageManager } from './lib/language.js?v=topic-earth-greek-language-20260521';
 import { ReadTranslationService } from './lib/read-translation.js?v=topic-earth-warning-panel-collapse-20260430';
 import { TTSManager } from './lib/tts.js?v=topic-earth-legacy-key-decode-20260520';
 import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-access-toggle-20260517';
@@ -127,7 +127,7 @@ class TopicEarthApp {
   }
 
   async init() {
-      await LanguageManager.loadTranslationCatalog('./shared/topic-earth-ui.csv?v=topic-earth-settings-tutorial-20260516');
+      await LanguageManager.loadTranslationCatalog('./shared/topic-earth-ui.csv?v=topic-earth-greek-language-20260521');
 
     // Initialize settings early
     await this.initSettings();
