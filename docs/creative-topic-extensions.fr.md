@@ -159,6 +159,36 @@ Forme recommandee:
 
 La generation par defaut devrait partir d'un preset simple, puis laisser les utilisateurs avances ouvrir la scene dans le SVG editor. Le SVG reste une base forte: il peut animer expressions, focus du curseur/des yeux, bones, labels et morceaux raster couches tout en restant inspectable. Si des parties raster IA sont necessaires, les integrer comme assets dans le dossier SVG/story et les animer avec des transforms SVG plutot que transformer toute la scene en video plate.
 
+## Memoire De Traduction CSV
+
+L'internationalisation devrait rester extensible par l'utilisateur. Une memoire de traduction CSV simple permettrait d'ameliorer les traductions UI et topic sans modifier le code.
+
+Workflow recommande:
+
+- Quand l'app detecte un label UI, texte de tutoriel, label de couche, champ de topic ou phrase de story-card manquant, elle peut ajouter une ligne en attente dans un CSV de traduction.
+- Les utilisateurs peuvent exporter, modifier et reimporter le CSV.
+- Le mode read/transcribe lie peut aider a remplir les lignes: lire le texte source, capturer la traduction par voix, puis sauvegarder comme brouillon.
+- L'IA liee peut proposer des traductions, mais chaque ligne doit garder un champ `status` pour ne jamais ecraser les textes deja valides par l'utilisateur.
+- La traduction devrait etre lancee sur trigger par defaut, pas en continu, pour eviter les surprises de cout ou de capture vocale.
+
+Colonnes CSV suggerees:
+
+```csv
+key,scope,source_language,target_language,source_text,translated_text,status,origin,updated_at,notes
+tutorial.settingsAi.title,ui,en,fr,AI Settings,Parametres IA,reviewed,user,2026-05-21,
+topic.story.summary,topic,en,fr,Urban shade corridor,Corridor d'ombre urbain,draft,ai,2026-05-21,
+```
+
+Triggers utiles:
+
+- `Collect missing strings`: scanner l'UI/topic courant et ajouter les lignes manquantes.
+- `Translate selected`: traduire seulement le topic, la story card ou le panneau courant.
+- `Read + transcribe`: parler une traduction et l'enregistrer dans la ligne CSV selectionnee.
+- `Validate current language`: afficher les lignes non traduites ou obsoletes de la langue active.
+- `Export language pack`: ajouter `i18n/<language>.csv` au ZIP du topic.
+
+L'app doit garder une cle stable pour chaque texte UI. Les textes de topic/story peuvent utiliser des cles generees depuis l'id du topic et le chemin du champ. Cela rend la traduction portable entre packages ZIP, GitHub, Discord et futures cartes hebergees.
+
 ## Couche Visions Regeneratives
 
 `Imagine` est comprehensible, mais peut sembler trop detache des preuves. Un meilleur nom pour cette app est:
@@ -269,6 +299,7 @@ Pour le composeur de topic:
 - Selecteur avance d'attachement: `Story`, `SVG Scene`, `Micro-game`, `External Widget`.
 - Pre-remplir le lieu depuis Settings et le contexte Regional.
 - Garder la preview dans une iframe contrainte avec reset/clear.
+- Ajouter un outil de traduction avec `Collect missing strings`, `Translate selected`, `Read + transcribe` et `Export CSV`.
 
 Pour Regional:
 
@@ -282,6 +313,7 @@ Pour les exports:
 - Inclure la carte narrative dans les packages admin review.
 - Inclure un resume texte pour les outils qui ne rendent pas le HTML.
 - Inclure le bridge JSON et les manifests a cote du HTML genere pour que les futurs outils puissent reouvrir et modifier l'attachement.
+- Inclure les fichiers optionnels `i18n/*.csv` quand l'utilisateur exporte des traductions avec un package topic.
 
 ## Securite Et Qualite
 
@@ -296,6 +328,7 @@ Le risque principal est de laisser le HTML genere devenir un probleme de securit
 - Pour le contenu enfant, exiger age, objectif pedagogique et etat de review adulte.
 - Pour meteo/jardinage, indiquer l'incertitude et eviter les promesses agricoles professionnelles.
 - Pour les jeux et widgets, les separer des API settings, du vault, du storage sync et de l'etat admin sauf permission de bridge explicite et revue.
+- Pour la traduction, ne jamais ecraser automatiquement les lignes validees par l'utilisateur; les propositions IA et voix doivent rester en brouillon jusqu'a acceptation.
 
 ## Meilleur Premier Build
 
@@ -307,6 +340,7 @@ Implementer d'abord:
 - Renderer HTML avec 3 templates: croquis, brief illustre, comic strip.
 - Un template educatif base sur les concepts timeline/export du SVG editor avec contrat JSON de bridge.
 - Un profil `micro-game` avec iframe stricte et manifest dedie.
+- Memoire de traduction CSV pour textes UI/topic/story, avec brouillons assistes par read/transcribe.
 - Support export ZIP.
 
 Ensuite ajouter `Visions regeneratives` et `Jardinage regional` quand le flux d'attachement est stable.

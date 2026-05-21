@@ -159,6 +159,36 @@ Recommended bridge shape:
 
 Default generation should start from a simple preset, then let advanced users open it in the SVG editor. SVG remains a strong base because it can animate expressions, cursor/eye focus, bones, labels, and layered raster pieces while staying inspectable. If AI raster parts are needed, embed or package them as assets inside the SVG/story folder and animate them with SVG transforms rather than making the whole scene a flat video.
 
+## Translation CSV Memory
+
+Internationalization should be user-extensible. A simple CSV translation memory can let users improve UI and topic translations without editing code.
+
+Recommended workflow:
+
+- When the app sees a missing UI label, tutorial string, layer label, topic field, or story-card sentence, it can add a pending row to a translation CSV.
+- Users can export, edit, and re-import the CSV.
+- Linked read/transcribe can help populate rows: read the source text, capture the user's spoken translation, then save it as a draft translation.
+- Linked AI can propose translations, but the row should keep a `status` field so user-reviewed strings are not overwritten.
+- Translation should run on trigger by default, not continuously, so the app does not surprise users with cost or voice capture.
+
+Suggested CSV columns:
+
+```csv
+key,scope,source_language,target_language,source_text,translated_text,status,origin,updated_at,notes
+tutorial.settingsAi.title,ui,en,fr,AI Settings,Parametres IA,reviewed,user,2026-05-21,
+topic.story.summary,topic,en,fr,Urban shade corridor,Corridor d'ombre urbain,draft,ai,2026-05-21,
+```
+
+Useful triggers:
+
+- `Collect missing strings`: scan current UI/topic and append missing rows.
+- `Translate selected`: translate only the current topic, story card, or panel.
+- `Read + transcribe`: speak a translation and save it into the selected CSV row.
+- `Validate current language`: show untranslated or stale rows for the active language.
+- `Export language pack`: package `i18n/<language>.csv` with the topic ZIP.
+
+The app should keep a stable key for each UI string. Topic/story strings can use generated keys tied to the topic id and field path. This makes translation portable across topic packages, GitHub, Discord posts, and future hosted cards.
+
 ## Regenerative Visions Layer
 
 `Imagine` is understandable, but it may sound too detached from evidence. A better layer name for this app is:
@@ -276,6 +306,7 @@ For the topic composer:
 - Add an advanced attachment selector: `Story`, `SVG Scene`, `Micro-game`, `External Widget`.
 - Pre-fill place from Settings and Regional context when available.
 - Keep the preview in a constrained iframe with reset/clear controls.
+- Add a translation tool with `Collect missing strings`, `Translate selected`, `Read + transcribe`, and `Export CSV`.
 
 For Regional:
 
@@ -289,6 +320,7 @@ For exports:
 - Include the story card in admin review packages.
 - Include a plain fallback summary for review tools that do not render HTML.
 - Include bridge JSON and manifests next to generated HTML so future tools can re-open and modify the attachment.
+- Include optional `i18n/*.csv` files when the user exports translations with a topic package.
 
 ## Safety And Quality
 
@@ -303,6 +335,7 @@ The core risk is letting generated HTML become a security or quality problem. Ke
 - For child-facing content, require an age profile, learning objective, and adult review state.
 - For meteo/gardening guidance, include uncertainty and avoid medical, legal, or professional farming claims.
 - For games and widgets, keep them separated from API settings, vault, storage sync, and admin state unless a reviewed bridge permission explicitly allows one action.
+- For translation, never overwrite reviewed user rows automatically; AI and speech rows should enter as draft until accepted.
 
 ## Best First Build
 
@@ -314,6 +347,7 @@ Implement the first version as:
 - HTML renderer with 3 templates: croquis, illustrated brief, comic strip.
 - One educational template using the SVG editor's timeline/export concepts with the JSON bridge contract.
 - One `micro-game` profile with strict iframe and manifest support.
+- CSV translation memory for UI/topic/story strings, with read/transcribe assisted draft rows.
 - ZIP export support.
 
 Then add `Regenerative Visions` and `Regional Gardening` once the attachment flow is stable.
