@@ -48,6 +48,33 @@ function buildTopicSummary(input) {
   return lines.filter(Boolean).join("\n");
 }
 
+function buildTopicSummaryOutput(input) {
+  const title = cleanText(input.title) || "Untitled topic";
+  const summary = firstSentences(input.text || input.summary || input.description, 700) || "No topic text was provided yet.";
+  const location = cleanText([input.region, input.country].filter(Boolean).join(", "));
+  const source = cleanText(input.source || input.url);
+  const date = cleanText(input.date);
+  const whyItMatters = "This topic can help users connect Earth-scale climate signals with regional action and sustainable initiatives.";
+  const text = [
+    `Topic: ${title}`,
+    `Summary: ${summary}`,
+    location ? `Location: ${location}` : "",
+    date ? `Date: ${date}` : "",
+    source ? `Source: ${source}` : "",
+    `Why it matters: ${whyItMatters}`
+  ].filter(Boolean).join("\n");
+
+  return {
+    title,
+    summary,
+    location,
+    date,
+    source,
+    whyItMatters,
+    text
+  };
+}
+
 const FRENCH_GLOSSARY = new Map([
   ["settings", "Parametres"],
   ["language", "Langue"],
@@ -95,6 +122,18 @@ function translateTextToFrench(text) {
   ].join("\n");
 }
 
+function buildFrenchTranslationOutput(text) {
+  const originalText = cleanText(text);
+  const translatedText = translateTextToFrench(originalText);
+  return {
+    sourceLanguage: "auto",
+    targetLanguage: "fr",
+    originalText,
+    translatedText,
+    text: translatedText
+  };
+}
+
 function createTopicEarthMcpServer() {
   const server = new McpServer({
     name: SERVER_NAME,
@@ -117,6 +156,15 @@ function createTopicEarthMcpServer() {
         source: z.string().optional().describe("Source title or reference."),
         url: z.string().url().optional().describe("Source URL, when available.")
       },
+      outputSchema: {
+        title: z.string().describe("Normalized topic title."),
+        summary: z.string().describe("Concise topic summary."),
+        location: z.string().describe("Region or country context when provided."),
+        date: z.string().describe("Topic date when provided."),
+        source: z.string().describe("Source title or URL when provided."),
+        whyItMatters: z.string().describe("Short explanation of educational relevance."),
+        text: z.string().describe("Human-readable summary block.")
+      },
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -128,14 +176,18 @@ function createTopicEarthMcpServer() {
         "openai/toolInvocation/invoked": "Topic summary ready"
       }
     },
-    async (input) => ({
-      content: [
-        {
-          type: "text",
-          text: buildTopicSummary(input)
-        }
-      ]
-    })
+    async (input) => {
+      const output = buildTopicSummaryOutput(input);
+      return {
+        structuredContent: output,
+        content: [
+          {
+            type: "text",
+            text: output.text
+          }
+        ]
+      };
+    }
   );
 
   server.registerTool(
@@ -146,6 +198,13 @@ function createTopicEarthMcpServer() {
       inputSchema: {
         text: z.string().min(1).describe("Selected text to translate."),
         context: z.string().optional().describe("Optional UI or topic context.")
+      },
+      outputSchema: {
+        sourceLanguage: z.string().describe("Detected or assumed source language."),
+        targetLanguage: z.string().describe("Translation language code."),
+        originalText: z.string().describe("Original text supplied to the tool."),
+        translatedText: z.string().describe("French translation output."),
+        text: z.string().describe("Human-readable translation output.")
       },
       annotations: {
         readOnlyHint: true,
@@ -158,14 +217,18 @@ function createTopicEarthMcpServer() {
         "openai/toolInvocation/invoked": "French translation ready"
       }
     },
-    async ({ text }) => ({
-      content: [
-        {
-          type: "text",
-          text: translateTextToFrench(text)
-        }
-      ]
-    })
+    async ({ text }) => {
+      const output = buildFrenchTranslationOutput(text);
+      return {
+        structuredContent: output,
+        content: [
+          {
+            type: "text",
+            text: output.text
+          }
+        ]
+      };
+    }
   );
 
   return server;
@@ -219,3 +282,5 @@ module.exports = async function handler(req, res) {
 module.exports.createTopicEarthMcpServer = createTopicEarthMcpServer;
 module.exports.buildTopicSummary = buildTopicSummary;
 module.exports.translateTextToFrench = translateTextToFrench;
+module.exports.buildTopicSummaryOutput = buildTopicSummaryOutput;
+module.exports.buildFrenchTranslationOutput = buildFrenchTranslationOutput;
