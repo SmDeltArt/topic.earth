@@ -1,0 +1,17 @@
+{
+  "name": "topic-earth",
+  "version": "0.1.0",
+  "private": true,
+  "description": "topic.earth static app with a minimal MCP endpoint for safe ChatGPT tools.",
+  "type": "commonjs",
+  "scripts": {
+    "check:mcp": "node -c api/mcp.js && node tools/check-mcp-helpers.cjs",
+    "audio:read-cache": "node tools/generate-read-audio.mjs",
+    "audio:record": "node tools/generate-read-audio.mjs",
+    "csv:copy": "node tools/generate-ui-csv-copy.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.76"
+  }
+}

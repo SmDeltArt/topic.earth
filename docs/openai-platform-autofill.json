@@ -1,0 +1,78 @@
+{
+  "app": {
+    "name": "topic.earth",
+    "slug": "topic-earth",
+    "developer_name": "SmDeltArt.com",
+    "developer_url": "https://smdeltart.com/",
+    "publisher_name": "SmDeltArt.com",
+    "short_description": "Interactive Earth dashboard for climate simulation, regional initiatives, space context, and sustainable action.",
+    "long_description": "topic.earth is an interactive Earth dashboard that popularizes climate systems, global warming scenarios, regional initiatives, tipping points, AMOC, and space context. It combines simulation, curated topics, AI-assisted research, and user proposals to help people understand risks and discover sustainable action.",
+    "website_url": "https://topic.earth/",
+    "repository_url": "https://github.com/SmDeltArt/topic.earth",
+    "support_url": "https://topic.earth/",
+    "support_email": "support@topic.earth",
+    "contact_emails": {
+      "general": "info@topic.earth",
+      "support": "support@topic.earth",
+      "publishing": "contact@topic.earth"
+    },
+    "privacy_policy_url": "https://topic.earth/privacy",
+    "terms_url": "https://topic.earth/terms",
+    "category": "Education",
+    "keywords": [
+      "climate",
+      "earth intelligence",
+      "regional initiatives",
+      "tipping points",
+      "AMOC",
+      "topic research",
+      "translation",
+      "open source"
+    ]
+  },
+  "branding": {
+    "primary_logo_upload": "assets/icons/topic-earth-openai-platform.svg",
+    "existing_local_logo": "assets/icons/topic.earth_64x64.svg",
+    "existing_cloudinary_logo": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg",
+    "cloudinary_social_preview": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779360411/topic-earth-github-vignette-600-short_vgmezc.gif",
+    "favicon": "assets/icons/topic.earth_24x24.svg",
+    "primary_color": "#00d4ff",
+    "background_color": "#0a0e1a",
+    "theme": "Dark Earth intelligence interface with cyan, green, amber, and warning red signals."
+  },
+  "openai_platform": {
+    "recommended_connection": "Use a backend AI bridge for hosted/public use. Keep direct browser keys only for local/admin testing.",
+    "commerce": {
+      "involves_sales": false,
+      "offers_digital_goods": false,
+      "links_out_to_purchase": false,
+      "note": "topic.earth is an educational app. It does not sell physical goods, subscriptions, in-app purchases, paid digital content, or direct users to checkout."
+    },
+    "required_secret_names": [
+      "OPENAI_API_KEY"
+    ],
+    "never_expose_in_frontend": true,
+    "phase_1_features": [
+      "AI-assisted topic summary",
+      "AI-assisted topic update search",
+      "Selected text translation to French",
+      "Source and media proposal drafting",
+      "Admin-only topic packaging support"
+    ],
+    "future_features": [
+      "Topic assistant chat over saved topics and docs",
+      "Embeddings search over sources and browser/admin drafts",
+      "Voice reading through managed TTS",
+      "Moderated public contribution workflow"
+    ]
+  },
+  "default_prompts": {
+    "assistant_system": "You are topic.earth assistant. Help users understand Earth, climate, regional, and initiative topics with concise, source-aware explanations. Keep user mode read-only for published posts. Suggest browser-local drafts when users want to contribute.",
+    "topic_summary": "Summarize this topic in clear English and include why it matters regionally or globally.",
+    "translate_to_fr": "Translate the selected topic.earth interface text to French. Preserve product names, numbers, dates, source titles, and UI button intent."
+  },
+  "files_to_push": [
+    "docs/openai-platform-autofill.json",
+    "assets/icons/topic-earth-openai-platform.svg"
+  ]
+}

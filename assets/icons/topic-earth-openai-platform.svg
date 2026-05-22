@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">topic.earth logo</title>
+  <desc id="desc">Square topic.earth mark for platform uploads.</desc>
+  <rect width="1024" height="1024" rx="160" fill="#0a0e1a"/>
+  <circle cx="512" cy="512" r="332" fill="#00d4ff"/>
+  <circle cx="512" cy="512" r="274" fill="#101725"/>
+  <path d="M512 214 766 764H258L512 214Z" fill="#e8fbff"/>
+  <path d="M512 352 650 688H374L512 352Z" fill="#00d4ff"/>
+  <path d="M270 458c102-84 254-124 402-84 96 26 161 82 175 148" fill="none" stroke="#7cffd6" stroke-width="34" stroke-linecap="round"/>
+  <path d="M182 612c148 74 354 94 542 24 66-25 112-58 136-96" fill="none" stroke="#ffcf5a" stroke-width="28" stroke-linecap="round" opacity="0.9"/>
+  <circle cx="734" cy="384" r="38" fill="#ff5f57"/>
+</svg>

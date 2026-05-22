@@ -1,0 +1,108 @@
+{
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "name": "topic.earth",
+  "slug": "topic-earth",
+  "developer_name": "SmDeltArt.com",
+  "developer_url": "https://smdeltart.com/",
+  "publisher_name": "SmDeltArt.com",
+  "short_description": "Interactive Earth dashboard for climate simulation, regional initiatives, space context, and sustainable action.",
+  "long_description": "topic.earth is an interactive Earth dashboard that popularizes climate systems, global warming scenarios, regional initiatives, tipping points, AMOC, and space context. It combines simulation, curated topics, AI-assisted research, and user proposals to help people understand risks and discover sustainable action.",
+  "website_url": "https://topic.earth/",
+  "repository_url": "https://github.com/SmDeltArt/topic.earth",
+  "support_url": "https://topic.earth/",
+  "support_email": "support@topic.earth",
+  "contact_emails": {
+    "general": "info@topic.earth",
+    "support": "support@topic.earth",
+    "publishing": "contact@topic.earth"
+  },
+  "privacy_policy_url": "https://topic.earth/privacy",
+  "terms_url": "https://topic.earth/terms",
+  "category": "Education",
+  "keywords": [
+    "climate",
+    "earth intelligence",
+    "regional initiatives",
+    "tipping points",
+    "AMOC",
+    "topic research",
+    "translation",
+    "open source"
+  ],
+  "branding": {
+    "primary_color": "#00d4ff",
+    "background_color": "#0a0e1a",
+    "logo": {
+    "static_512": "assets/logo/topic-earth-logo-512.png",
+      "static_svg": "assets/icons/topic-earth-openai-platform.svg",
+      "social_preview": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779360411/topic-earth-github-vignette-600-short_vgmezc.gif"
+    }
+  },
+  "connection": {
+    "type": "mcp",
+    "mcp_server_url": "https://topic.earth/mcp",
+    "authentication": "none",
+    "security_note": "The first MCP server is read-only and exposes only safe user assistance tools. It does not publish, update, delete, or save topic.earth content."
+  },
+  "tools": {
+    "topic_summary": {
+      "name": "Topic Summary",
+      "description": "Summarizes a topic.earth item with concise context and why it matters.",
+      "status": "ready",
+      "requires_backend": true,
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "justifications": {
+        "read_only_justification": "This tool only reads the selected topic text and metadata to produce a summary. It does not create, update, delete, publish, or save topic content.",
+        "purpose": "Helps users understand a selected topic.earth item without modifying published content.",
+        "user_benefit": "Provides concise context and improves accessibility for climate and regional topics.",
+        "data_access": "Uses only the topic text and metadata provided by the user or current app view."
+      }
+    },
+    "translate_to_french": {
+      "name": "Translate to French",
+      "description": "Translates selected topic.earth UI or topic text to French while preserving names, numbers, dates, and source titles.",
+      "status": "ready",
+      "requires_backend": true,
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "justifications": {
+        "read_only_justification": "This tool only reads selected text and returns a French translation. It does not modify the original interface, selected text, or topic record.",
+        "purpose": "Translates selected topic.earth text into French for comprehension and reading support.",
+        "user_benefit": "Makes climate, regional, and initiative content easier to study in French.",
+        "data_access": "Uses only the selected text supplied by the user or current app view."
+      }
+    }
+  },
+  "features": [
+    "Topic summary",
+    "Selected text translation to French",
+    "Read-only MCP integration",
+    "Safe user assistance for topic.earth"
+  ],
+  "commerce": {
+    "involves_sales": false,
+    "offers_digital_goods": false,
+    "links_out_to_purchase": false,
+    "note": "topic.earth is an educational app. It does not sell physical goods, subscriptions, in-app purchases, paid digital content, or direct users to checkout."
+  },
+  "default_prompts": {
+    "assistant_system": "You are topic.earth assistant. Help users understand Earth, climate, regional, and initiative topics with concise, source-aware explanations. Keep user mode read-only for published posts.",
+    "topic_summary": "Summarize this topic in clear English and include why it matters regionally or globally.",
+    "translate_to_fr": "Translate the selected topic.earth interface text to French. Preserve product names, numbers, dates, source titles, and UI button intent."
+  },
+  "submission_notes": [
+    "Use https://topic.earth/mcp once Vercel is connected to the production domain.",
+    "Use the static PNG logo for strict upload forms.",
+    "The live MCP server exposes only topic_summary and translate_to_french for phase 1."
+  ]
+}
