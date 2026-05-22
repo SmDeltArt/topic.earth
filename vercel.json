@@ -9,6 +9,10 @@
       "destination": "/terms.html"
     },
     {
+      "source": "/.well-known/openai-apps-challenge",
+      "destination": "/api/openai-apps-challenge"
+    },
+    {
       "source": "/mcp",
       "destination": "/api/mcp"
     }
