@@ -280,6 +280,15 @@
       color: #d7e7f4;
       font-weight: 800;
       backdrop-filter: blur(10px);
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+    }
+
+    .message.hidden {
+      opacity: 0;
+      transform: translateY(10px);
     }
 
     @media (max-width: 820px) {
@@ -408,7 +417,8 @@
       ball: { x: 0, y: 0 },
       rolls: 0,
       score: 0,
-      pins: []
+      pins: [],
+      messageTimer: null
     };
 
     const layout = [
@@ -472,6 +482,17 @@
       rollCount.textContent = String(state.rolls);
       pinsDown.textContent = String(down);
       scoreEl.textContent = String(state.score);
+    }
+
+    function showMessage(text, duration = 2400) {
+      window.clearTimeout(state.messageTimer);
+      message.textContent = text;
+      message.classList.remove('hidden');
+      if (duration > 0) {
+        state.messageTimer = window.setTimeout(() => {
+          message.classList.add('hidden');
+        }, duration);
+      }
     }
 
     function updatePath(targetX, targetY) {
@@ -564,7 +585,7 @@
       const started = performance.now();
       state.rolling = true;
       state.rolls += 1;
-      message.textContent = 'Rolling...';
+      showMessage('Rolling...', 1200);
 
       function frame(now) {
         const t = clamp((now - started) / duration, 0, 1);
@@ -588,9 +609,9 @@
           state.rolling = false;
           path.classList.remove('active');
           const down = state.pins.filter(pin => pin.hit).length;
-          message.textContent = down >= 10
+          showMessage(down >= 10
             ? 'Strike. All quilles down.'
-            : `${down} quilles down. Adjust the line and try again.`;
+            : `${down} quilles down. Adjust the line and try again.`, 2600);
           window.setTimeout(resetBall, 450);
         }
       }
@@ -605,7 +626,7 @@
       resetBall();
       updateHud();
       path.classList.remove('active');
-      message.textContent = 'Pull the ball sideways or backward. Release to roll.';
+      showMessage('Pull the ball sideways or backward. Release to roll.', 2600);
     }
 
     ball.addEventListener('pointerdown', startAim);
