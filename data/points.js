@@ -964,7 +964,7 @@ export const MOCK_POINTS = [
     date: '2026-05-23',
     source: 'Commune d Anthisnes',
     summary: 'La Fête à Limont revient du 23 au 25 mai 2026 avec animations gratuites, attractions foraines tout le week-end, balade familiale à vélo, concerts, blind test, messe en wallon, frisée aux lardons et tombola.',
-    insight: 'Exemple vivant de topic régional en français: une source communale vérifiable, une affiche-programme lisible par IA et une page story HTML qui transforme le sujet local en contenu éducatif partageable.',
+    insight: 'Exemple vivant de topic régional en français: une source communale vérifiable, une affiche-programme lisible par IA, une page story HTML et un micro-jeu enfant qui transforment le sujet local en contenu éducatif partageable.',
     regionalScope: 'village',
     initiativeType: 'Culture locale',
     engagementTypes: ['visit', 'learn', 'share'],
@@ -995,6 +995,11 @@ export const MOCK_POINTS = [
       {
         name: 'Story HTML topic.earth',
         url: '/examples/fete-a-limont-2026-story.html',
+        type: 'example'
+      },
+      {
+        name: 'Micro-jeu bowling vertical topic.earth',
+        url: '/examples/vertical-bowling-microgame.html',
         type: 'example'
       }
     ]
