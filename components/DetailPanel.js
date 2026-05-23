@@ -6032,6 +6032,80 @@ ${body}
     }
   }
 
+  parseAiJsonArray(content = '', label = 'AI JSON array') {
+    const text = String(content || '').trim();
+    if (!text) return [];
+
+    const candidates = [text];
+    const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    const bracketed = text.match(/\[[\s\S]*\]/);
+    if (fenced?.[1]) candidates.push(fenced[1].trim());
+    if (bracketed?.[0]) candidates.push(bracketed[0]);
+
+    for (const candidate of candidates) {
+      try {
+        const parsed = JSON.parse(candidate);
+        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed?.sources)) return parsed.sources;
+      } catch (_error) {
+        // Try the next likely JSON candidate.
+      }
+    }
+
+    console.warn(`[Topic Sources] Could not parse ${label}.`);
+    return [];
+  }
+
+  extractFirstUrl(value = '') {
+    const match = String(value || '').match(/https?:\/\/[^\s<>"'`)\]]+/i);
+    return match ? match[0].replace(/[.,;:!?]+$/, '') : '';
+  }
+
+  normalizeSuggestedSource(source = {}) {
+    const rawName = String(source.name || source.title || source.sourceName || '').trim();
+    const rawUrl = [
+      source.url,
+      source.href,
+      source.link,
+      source.sourceUrl,
+      source.website,
+      this.extractFirstUrl(rawName),
+      this.extractFirstUrl(source.text),
+      this.extractFirstUrl(source.reason)
+    ].find(Boolean) || '';
+    const url = this.sanitizeUrl(rawUrl);
+    if (!url) return null;
+
+    const nameWithoutUrl = rawName
+      .replace(/https?:\/\/\S+/i, '')
+      .replace(/\s+[-:]\s*$/, '')
+      .trim();
+    const name = nameWithoutUrl || this.getHostFromUrl(url) || 'Web source';
+
+    return {
+      name,
+      url,
+      category: source.category || 'source',
+      reliability: source.reliability || 'medium',
+      adminNotes: source.reason || source.note || '',
+      verified: false
+    };
+  }
+
+  mergeSuggestedSources(nextSources = []) {
+    const existing = Array.isArray(this.topicSources) ? this.topicSources : [];
+    const seen = new Set(existing.map(source => String(source.url || '').trim()).filter(Boolean));
+    const merged = [...existing];
+
+    nextSources.forEach(source => {
+      if (!source?.url || seen.has(source.url)) return;
+      seen.add(source.url);
+      merged.push(source);
+    });
+
+    this.topicSources = merged;
+  }
+
   buildTopicStoryPrompt() {
     const settings = Settings.get();
     const location = [
@@ -7048,6 +7122,9 @@ ${body}
     const form = this.container.querySelector('#topic-form');
     const titleInput = form?.querySelector('#topic-title');
     const categorySelect = form?.querySelector('#topic-category');
+    const regionInput = form?.querySelector('#topic-region');
+    const countryInput = form?.querySelector('#topic-country');
+    const summaryInput = form?.querySelector('#topic-summary');
     const btn = this.container.querySelector('[data-action="ai-suggest-sources"]');
     
     if (!titleInput?.value) {
@@ -7062,23 +7139,35 @@ ${body}
     try {
       const layer = this.layers.find(l => l.id === categorySelect?.value);
       const layerName = layer?.name || 'general topic';
+      const location = [
+        regionInput?.value,
+        countryInput?.value
+      ].filter(Boolean).join(', ') || 'not specified';
       
       const prompt = `For the following topic, suggest 5-7 high-quality, trustworthy sources for research:
 
 Topic: ${titleInput.value}
 Category: ${layerName}
+Location: ${location}
+Context: ${summaryInput?.value || 'not specified'}
 
 Return ONLY a JSON array with this exact format, no other text:
 [
   {
-    "name": "Source Name",
-    "url": "https://example.com",
+    "name": "Official source name",
+    "url": "https://real-source.example/path",
     "category": "official|scientific|media",
     "reliability": "high|medium"
   }
 ]
 
-Prioritize official sources, scientific journals, and reputable news outlets. Include specific URLs where this topic would be covered.`;
+Rules:
+- Every source must include a real absolute http(s) URL in the "url" field.
+- Do not return placeholder URLs such as example.com.
+- If you cannot provide a usable URL, omit that source.
+- Return [] if no URL-backed sources are available.
+
+Prioritize official local sources, scientific journals, and reputable news outlets.`;
       
       const completion = await window.ourEarthAI.createChatCompletion({
         messages: [
@@ -7094,17 +7183,14 @@ Prioritize official sources, scientific journals, and reputable news outlets. In
         json: true
       });
       
-      const sources = JSON.parse(completion.content);
+      const parsedSources = this.parseAiJsonArray(completion.content, 'source suggestions');
+      const sources = parsedSources
+        .map(source => this.normalizeSuggestedSource(source))
+        .filter(Boolean);
       
-      if (Array.isArray(sources) && sources.length > 0) {
-        this.topicSources = sources.map(s => ({
-          name: s.name,
-          url: s.url,
-          category: s.category,
-          reliability: s.reliability,
-          verified: false
-        }));
-        
+      if (sources.length > 0) {
+        this.mergeSuggestedSources(sources);
+        this.showSourceEditor = true;
         this.renderCreateTopic();
         
         btn.innerHTML = 'Sources Added';
@@ -7113,7 +7199,7 @@ Prioritize official sources, scientific journals, and reputable news outlets. In
           btn.disabled = false;
         }, 2000);
       } else {
-        throw new Error('No sources returned');
+        throw new Error('AI did not return any usable source URLs. Try Check web or add official links manually.');
       }
       
     } catch (error) {
@@ -7931,8 +8017,8 @@ Rules:
 
     sources.forEach(source => {
       const url = this.sanitizeUrl(source.url || '');
+      if (!url) return;
       const name = String(source.name || this.getHostFromUrl(url) || '').trim();
-      if (!url && !name) return;
       const duplicate = this.topicSources.some(existing => (
         url && String(existing.url || '') === url
       ));
