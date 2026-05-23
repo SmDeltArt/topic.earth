@@ -238,6 +238,46 @@ export class DetailPanel {
     });
   }
 
+  getFeverNarrationProfile() {
+    const speed = Number(this.currentGlobe?.feverSpeed || 2 / 3);
+    if (Number.isFinite(speed) && speed >= 0.99) return 'short';
+    if (Number.isFinite(speed) && speed >= 0.6) return 'normal';
+    return 'full';
+  }
+
+  getFeverNarrationLanguage(language) {
+    return LanguageManager.normalizeLanguageCode(language || this.getCurrentLanguage());
+  }
+
+  getFeverNarrationCacheUrls({ scenario, year, language }) {
+    const lg = this.getFeverNarrationLanguage(language);
+    const profile = this.getFeverNarrationProfile();
+    const id = `fever-loop-${scenario}-${year}-${profile}-${lg}`;
+    const base = `./assets/audio/read-messages/${id}`;
+    return [`${base}.webm`, `${base}.mp3`];
+  }
+
+  async speakFeverNarrationWithCache(text, language, context = {}) {
+    if (!window.ttsManager) return;
+
+    const urls = this.getFeverNarrationCacheUrls({
+      scenario: context.scenario || this.currentGlobe?.getFeverScenario?.() || 'objective',
+      year: context.year,
+      language
+    });
+
+    const usedCache = await window.ttsManager.speakCachedAudio(urls, text, language, {
+      channel: 'fever',
+      onCacheMiss: () => {
+        console.info('[Fever Voice] Cached narration unavailable; using browser speech.', { urls });
+      }
+    });
+
+    if (!usedCache) {
+      this.speakFeverNarration(text, language);
+    }
+  }
+
   getFeverSegmentSeconds() {
     const speed = Number(this.currentGlobe?.feverSpeed || 2 / 3);
     const safeSpeed = Math.max(speed, 0.01);
@@ -2277,7 +2317,7 @@ export class DetailPanel {
         scenario,
         text: localizedWarning.text
       });
-      this.speakFeverNarration(spokenWarning, this.getFeverTtsLanguage(localizedWarning));
+      this.speakFeverNarrationWithCache(spokenWarning, this.getFeverTtsLanguage(localizedWarning), { scenario, year });
     }
   }
   
@@ -2378,7 +2418,7 @@ export class DetailPanel {
         title: localizedWarning.title,
         text: localizedWarning.full
       });
-      this.speakFeverNarration(spokenWarning, localizedWarning.ttsLanguage);
+      this.speakFeverNarrationWithCache(spokenWarning, localizedWarning.ttsLanguage, { scenario, year });
     }
   }
   
