@@ -5918,9 +5918,10 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
   wrapTopicStoryHtml(html = '', story = {}) {
     const body = this.sanitizeStoryHtml(html || story.html || '');
     const title = story.title || this.topicFormState.title || 'topic.earth story';
+    const language = this.getTopicStoryLanguageContext();
     if (!body) return '';
     return `<!doctype html>
-<html lang="en">
+<html lang="${this.escapeHtml(language.code || 'en')}" dir="${this.escapeHtml(language.direction || 'ltr')}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -6234,10 +6235,48 @@ ${body}
     this.topicSources = merged;
   }
 
+  getTopicStoryLanguageContext() {
+    const currentCode = LanguageManager.normalizeLanguageCode(this.getCurrentLanguage());
+    const text = [
+      this.topicFormState.title,
+      this.topicFormState.summary,
+      this.topicFormState.region,
+      this.topicFormState.country,
+      this.topicFormState.source,
+      ...(this.topicSources || []).flatMap(source => [source.name, source.adminNotes])
+    ].join(' ').toLowerCase();
+
+    let code = currentCode;
+    if (/[\u4e00-\u9fff]/.test(text)) {
+      code = 'zh';
+    } else if (/[\u0900-\u097f]/.test(text)) {
+      code = 'hi';
+    } else if (/[\u0370-\u03ff]/.test(text)) {
+      code = 'el';
+    } else if (/[\u0400-\u04ff]/.test(text)) {
+      code = 'ru';
+    } else if (/[àâçéèêëîïôùûüÿœæ]/i.test(text) || /\b(fete|fête|commune|animations|gratuites|dimanche|samedi|lundi|balade|tombola)\b/i.test(text)) {
+      code = 'fr';
+    } else if (/\b(und|oder|mit|stadt|gemeinde|nachrichten)\b/i.test(text)) {
+      code = 'de';
+    } else if (/\b(en|het|een|gemeente|nieuws)\b/i.test(text)) {
+      code = 'nl';
+    }
+
+    const info = LanguageManager.getLanguageInfo(code) || LanguageManager.getLanguageInfo(currentCode) || { code: 'en', name: 'English', nativeName: 'English' };
+    return {
+      code: info.code || code,
+      name: info.name || info.nativeName || code,
+      nativeName: info.nativeName || info.name || code,
+      direction: LanguageManager.getTextDirection(info.code || code)
+    };
+  }
+
   buildTopicStoryPrompt() {
     const settings = Settings.get();
     const story = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
     const audienceProfile = this.getTopicStoryAudienceProfile(story.audience, story.under16Only);
+    const language = this.getTopicStoryLanguageContext();
     const location = [
       this.topicFormState.region,
       this.topicFormState.country
@@ -6259,6 +6298,8 @@ ${body}
           'Return strict JSON only. Do not return HTML.',
           'The app will render your JSON through a locked template with scripts disabled.',
           'Keep it factual, educational, and evidence-aware. Separate known facts from assumptions.',
+          'Prefer a one-screen animated vignette: short title, very short sections, clear program or timeline when available.',
+          'If sources include a poster, program image, or image URL, extract visible schedule text when possible and turn it into ordered sections.',
           'Respect the requested age profile exactly. For child or under-16 profiles, avoid frightening framing and any manipulative persuasion.'
         ].join(' ')
       },
@@ -6274,16 +6315,17 @@ ${body}
             learningObjective: 'one sentence objective',
             vocabularyLevel: 'short vocabulary note',
             adultReviewRequired: true,
+            language: language.code,
             summary: 'one sentence',
             sections: [
-              { label: 'Context', body: 'plain language body' },
-              { label: 'What changes', body: 'plain language body' },
-              { label: 'Action idea', body: 'plain language body' }
+              { label: 'Panel 1 label', body: 'plain language body, max 35 words' },
+              { label: 'Panel 2 label', body: 'plain language body, max 35 words' },
+              { label: 'Panel 3 label', body: 'plain language body, max 35 words' }
             ],
             visualPlan: {
-              type: 'annotated-svg',
+              type: 'animated-vignette',
               caption: 'short caption',
-              labels: ['3 to 5 visual labels']
+              labels: ['3 to 5 visual labels for the SVG vignette']
             },
             exercise: {
               question: 'optional short check question',
@@ -6300,6 +6342,18 @@ ${body}
             summary: this.topicFormState.summary || '',
             analysis: this.topicFormState.insight || '',
             sourceNote: this.topicFormState.source || ''
+          },
+          language: {
+            code: language.code,
+            name: language.name,
+            nativeName: language.nativeName,
+            instruction: `Write all visible story text in ${language.nativeName}. Keep official names and place names unchanged when appropriate.`
+          },
+          layoutPreset: {
+            name: 'one-page animated vignette',
+            height: 'one viewport when possible',
+            interaction: 'horizontal scroll-snap panels; each panel is short enough to read in one stop',
+            animation: 'subtle CSS/SVG motion only; no scripts'
           },
           generationPreset: {
             audience: story.audience,
@@ -6322,6 +6376,22 @@ ${body}
     const audience = String(data.audience || story.audience || 'general').trim();
     const audienceProfile = this.getTopicStoryAudienceProfile(audience, story.under16Only || data.adultReviewRequired);
     const summary = String(data.summary || this.topicFormState.summary || '').trim();
+    const language = {
+      ...this.getTopicStoryLanguageContext(),
+      code: LanguageManager.normalizeLanguageCode(data.language || this.getTopicStoryLanguageContext().code)
+    };
+    const fixedLabels = {
+      en: { live: 'topic.earth live vignette', age: 'Age', review: 'adult review', objective: 'Learning goal', check: 'Quick check', sources: 'Evidence', assumptions: 'Assumptions', next: 'Next' },
+      fr: { live: 'vignette vivante topic.earth', age: 'Age', review: 'validation adulte', objective: 'Objectif', check: 'Petite question', sources: 'Sources', assumptions: 'Hypotheses', next: 'Suite' },
+      nl: { live: 'topic.earth live vignette', age: 'Leeftijd', review: 'volwassen check', objective: 'Leerdoel', check: 'Korte vraag', sources: 'Bewijs', assumptions: 'Aannames', next: 'Volgende' },
+      de: { live: 'topic.earth Live-Vignette', age: 'Alter', review: 'Erwachsenencheck', objective: 'Lernziel', check: 'Kurzfrage', sources: 'Quellen', assumptions: 'Annahmen', next: 'Weiter' },
+      el: { live: 'topic.earth live vignette', age: 'Age', review: 'adult review', objective: 'Learning goal', check: 'Quick check', sources: 'Evidence', assumptions: 'Assumptions', next: 'Next' },
+      ru: { live: 'topic.earth live vignette', age: 'Age', review: 'adult review', objective: 'Learning goal', check: 'Quick check', sources: 'Evidence', assumptions: 'Assumptions', next: 'Next' },
+      uk: { live: 'topic.earth live vignette', age: 'Age', review: 'adult review', objective: 'Learning goal', check: 'Quick check', sources: 'Evidence', assumptions: 'Assumptions', next: 'Next' },
+      zh: { live: 'topic.earth live vignette', age: 'Age', review: 'adult review', objective: 'Learning goal', check: 'Quick check', sources: 'Evidence', assumptions: 'Assumptions', next: 'Next' },
+      hi: { live: 'topic.earth live vignette', age: 'Age', review: 'adult review', objective: 'Learning goal', check: 'Quick check', sources: 'Evidence', assumptions: 'Assumptions', next: 'Next' }
+    };
+    const ui = fixedLabels[language.code] || fixedLabels.en;
     const sections = Array.isArray(data.sections) && data.sections.length > 0
       ? data.sections.slice(0, 5)
       : [
@@ -6342,68 +6412,247 @@ ${body}
     const caption = data.visualPlan?.caption || 'Topic sketch';
     const evidenceLinks = Array.isArray(data.evidenceLinks) ? data.evidenceLinks.slice(0, 5) : [];
     const assumptions = Array.isArray(data.assumptions) ? data.assumptions.slice(0, 4) : [];
+    const navDots = sections.map((section, index) => `
+      <a href="#story-panel-${index + 1}" aria-label="${this.escapeHtml(`${ui.next}: ${section.label || index + 1}`)}">${index + 1}</a>
+    `).join('');
     const labelRows = labels.map((label, index) => {
-      const y = 42 + index * 38;
-      const x = index % 2 === 0 ? 34 : 258;
-      const lineX = index % 2 === 0 ? 188 : 236;
+      const angle = (index / Math.max(labels.length, 1)) * Math.PI * 2;
+      const x = 220 + Math.cos(angle) * 118;
+      const y = 124 + Math.sin(angle) * 62;
       return `
-        <g>
-          <circle cx="${lineX}" cy="${y}" r="5" fill="${color}"/>
-          <line x1="${lineX}" y1="${y}" x2="${x + 118}" y2="${y}" stroke="${color}" stroke-width="1.5" stroke-dasharray="4 5"/>
-          <text x="${x}" y="${y + 5}" fill="#eaf8ff" font-size="12" font-weight="700">${this.escapeHtml(label)}</text>
+        <g class="story-orbit-label" style="animation-delay:${(index * 0.4).toFixed(1)}s">
+          <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="${color}"/>
+          <text x="${Math.min(Math.max(x - 44, 16), 340).toFixed(1)}" y="${(y + 24).toFixed(1)}" fill="#eaf8ff" font-size="12" font-weight="800">${this.escapeHtml(label)}</text>
         </g>
       `;
     }).join('');
+    const sectionPanels = sections.map((section, index) => `
+      <section id="story-panel-${index + 1}" class="story-vignette-panel">
+        <p class="story-panel-step">${String(index + 1).padStart(2, '0')}</p>
+        <h2>${this.escapeHtml(section.label || 'Note')}</h2>
+        <p>${this.escapeHtml(section.body || '')}</p>
+      </section>
+    `).join('');
 
-    return `<article class="topic-story-card topic-story-card-${this.escapeHtml(style)}" data-audience="${this.escapeHtml(audience)}" data-under16="${story.under16Only || audienceProfile.under16 ? 'true' : 'false'}" style="max-width:860px;margin:auto;padding:24px;border:1px solid ${color}66;border-radius:14px;background:#07111f;color:#eef8ff;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <p style="margin:0 0 10px;color:${color};font-weight:900;letter-spacing:.08em;text-transform:uppercase;">topic.earth live card</p>
-  <h1 style="margin:0 0 12px;font-size:clamp(28px,6vw,54px);line-height:1.02;">${this.escapeHtml(title)}</h1>
-  <div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;">
-    <span style="display:inline-flex;padding:6px 9px;border:1px solid ${color}66;border-radius:999px;color:${color};font-size:12px;font-weight:800;">Age: ${this.escapeHtml(audienceProfile.label)}</span>
-    <span style="display:inline-flex;padding:6px 9px;border:1px solid #ffffff22;border-radius:999px;color:#b8c6d8;font-size:12px;font-weight:700;">${this.escapeHtml(data.vocabularyLevel || audienceProfile.vocabulary)}</span>
-    ${story.under16Only || audienceProfile.under16 ? '<span style="display:inline-flex;padding:6px 9px;border:1px solid #9ad99d66;border-radius:999px;color:#9ad99d;font-size:12px;font-weight:800;">adult review</span>' : ''}
-  </div>
-  <p style="margin:0 0 20px;font-size:18px;line-height:1.55;color:#cfe9f6;">${this.escapeHtml(summary)}</p>
-  ${data.learningObjective ? `<p style="margin:0 0 18px;padding:12px;border:1px solid #ffffff18;border-radius:10px;background:#ffffff08;color:#d8e8f2;"><strong style="color:${color};">Learning objective:</strong> ${this.escapeHtml(data.learningObjective)}</p>` : ''}
-  <svg viewBox="0 0 440 230" role="img" aria-label="${this.escapeHtml(caption)}" style="display:block;width:100%;height:auto;margin:18px 0;border-radius:12px;background:#020814;border:1px solid ${color}33;">
+    return `<article lang="${this.escapeHtml(language.code)}" dir="${this.escapeHtml(language.direction || 'ltr')}" class="topic-story-card topic-story-card-${this.escapeHtml(style)} topic-story-vignette" data-audience="${this.escapeHtml(audience)}" data-under16="${story.under16Only || audienceProfile.under16 ? 'true' : 'false'}">
+  <style>
+    .topic-story-vignette {
+      --story-color: ${color};
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(260px, 0.9fr) minmax(300px, 1.1fr);
+      gap: 0;
+      width: min(980px, 100%);
+      min-height: min(720px, 100dvh);
+      max-height: 760px;
+      margin: auto;
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--story-color) 45%, transparent);
+      border-radius: 14px;
+      background: radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--story-color) 22%, transparent), transparent 34%), #07111f;
+      color: #eef8ff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .topic-story-vignette * { box-sizing: border-box; }
+    .story-vignette-hero {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+      padding: clamp(18px, 4vw, 34px);
+      border-right: 1px solid rgba(255,255,255,.14);
+    }
+    .story-vignette-kicker {
+      margin: 0 0 10px;
+      color: var(--story-color);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .topic-story-vignette h1 {
+      margin: 0;
+      font-size: clamp(34px, 7vw, 72px);
+      line-height: .94;
+      letter-spacing: 0;
+    }
+    .story-vignette-summary {
+      margin: 14px 0 0;
+      color: #cfe9f6;
+      font-size: clamp(15px, 2vw, 19px);
+      line-height: 1.45;
+    }
+    .story-vignette-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .story-vignette-badges span {
+      display: inline-flex;
+      padding: 6px 9px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      color: #dbeafa;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .story-vignette-visual {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 270px;
+      border: 1px solid color-mix(in srgb, var(--story-color) 24%, transparent);
+      border-radius: 12px;
+      background: #020814;
+    }
+    .story-vignette-main {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      min-width: 0;
+      min-height: 0;
+    }
+    .story-vignette-rail {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 100%;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      min-height: 0;
+    }
+    .story-vignette-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+      padding: clamp(22px, 5vw, 54px);
+      scroll-snap-align: start;
+    }
+    .story-panel-step {
+      width: fit-content;
+      margin: 0 0 16px;
+      padding: 7px 10px;
+      border: 1px solid color-mix(in srgb, var(--story-color) 50%, transparent);
+      border-radius: 999px;
+      color: var(--story-color);
+      font-weight: 900;
+    }
+    .story-vignette-panel h2 {
+      margin: 0 0 12px;
+      color: #ffffff;
+      font-size: clamp(30px, 6vw, 64px);
+      line-height: .98;
+      letter-spacing: 0;
+    }
+    .story-vignette-panel p {
+      max-width: 42rem;
+      margin: 0;
+      color: #d8e8f2;
+      font-size: clamp(17px, 2vw, 23px);
+      line-height: 1.45;
+    }
+    .story-vignette-footer {
+      display: grid;
+      gap: 10px;
+      padding: 14px 18px 18px;
+      border-top: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.16);
+    }
+    .story-vignette-nav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .story-vignette-nav a {
+      display: inline-grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border: 1px solid color-mix(in srgb, var(--story-color) 38%, transparent);
+      border-radius: 50%;
+      color: #eef8ff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .story-vignette-note {
+      margin: 0;
+      color: #a8b3c6;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .story-vignette-note strong { color: var(--story-color); }
+    .story-orbit-core { animation: storyPulse 3.4s ease-in-out infinite; transform-origin: 220px 124px; }
+    .story-orbit-ring { animation: storyDash 9s linear infinite; }
+    .story-orbit-label { animation: storyFloat 4s ease-in-out infinite; }
+    @keyframes storyPulse { 0%, 100% { transform: scale(.96); opacity: .8; } 50% { transform: scale(1.04); opacity: 1; } }
+    @keyframes storyDash { to { stroke-dashoffset: -92; } }
+    @keyframes storyFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @media (max-width: 740px) {
+      .topic-story-vignette {
+        grid-template-columns: 1fr;
+        min-height: 100dvh;
+        max-height: none;
+      }
+      .story-vignette-hero {
+        border-right: 0;
+        border-bottom: 1px solid rgba(255,255,255,.14);
+      }
+      .story-vignette-visual { max-height: 210px; }
+      .story-vignette-panel { min-height: 42vh; }
+    }
+  </style>
+  <section class="story-vignette-hero">
+    <div>
+      <p class="story-vignette-kicker">${this.escapeHtml(ui.live)}</p>
+      <h1>${this.escapeHtml(title)}</h1>
+      <p class="story-vignette-summary">${this.escapeHtml(summary)}</p>
+      <div class="story-vignette-badges">
+        <span>${this.escapeHtml(ui.age)}: ${this.escapeHtml(audienceProfile.label)}</span>
+        <span>${this.escapeHtml(data.vocabularyLevel || audienceProfile.vocabulary)}</span>
+        ${story.under16Only || audienceProfile.under16 ? `<span>${this.escapeHtml(ui.review)}</span>` : ''}
+      </div>
+    </div>
+    <svg class="story-vignette-visual" viewBox="0 0 440 270" role="img" aria-label="${this.escapeHtml(caption)}">
     <defs>
-      <radialGradient id="storyGlow" cx="50%" cy="45%" r="60%">
+      <radialGradient id="storyVignetteGlow" cx="50%" cy="45%" r="60%">
         <stop offset="0%" stop-color="${color}" stop-opacity=".42"/>
         <stop offset="65%" stop-color="${color}" stop-opacity=".08"/>
         <stop offset="100%" stop-color="#020814" stop-opacity="0"/>
       </radialGradient>
     </defs>
-    <rect x="0" y="0" width="440" height="230" fill="url(#storyGlow)"/>
-    <circle cx="220" cy="112" r="58" fill="#14344f" stroke="${color}" stroke-width="2"/>
-    <path d="M186 116c28-52 78-42 76 4-17 12-44 18-76-4Z" fill="#7cd957" opacity=".92"/>
-    <path d="M188 83c34 16 58 7 84 26" stroke="#2a9dde" stroke-width="15" stroke-linecap="round" opacity=".82"/>
-    <path d="M204 130c28 2 50-9 74-2" stroke="#eef8ff" stroke-width="9" stroke-linecap="round"/>
+    <rect x="0" y="0" width="440" height="270" fill="url(#storyVignetteGlow)"/>
+    <circle class="story-orbit-ring" cx="220" cy="124" r="86" fill="none" stroke="${color}" stroke-width="2" stroke-dasharray="12 11" opacity=".8"/>
+    <g class="story-orbit-core">
+      <circle cx="220" cy="124" r="56" fill="#14344f" stroke="${color}" stroke-width="2"/>
+      <path d="M184 130c30-54 82-44 78 3-20 13-48 18-78-3Z" fill="#7cd957" opacity=".92"/>
+      <path d="M190 94c34 16 58 7 84 26" stroke="#2a9dde" stroke-width="15" stroke-linecap="round" opacity=".82"/>
+      <path d="M204 145c30 2 54-9 76-2" stroke="#eef8ff" stroke-width="9" stroke-linecap="round"/>
+    </g>
     ${labelRows}
-    <text x="18" y="214" fill="${color}" font-size="12" font-weight="800">${this.escapeHtml(caption)}</text>
+    <text x="18" y="248" fill="${color}" font-size="12" font-weight="900">${this.escapeHtml(caption)}</text>
   </svg>
-  <div style="display:grid;gap:12px;">
-    ${sections.map(section => `
-      <section style="padding:14px;border:1px solid #ffffff18;border-radius:10px;background:#ffffff08;">
-        <h2 style="margin:0 0 6px;color:${color};font-size:14px;text-transform:uppercase;letter-spacing:.06em;">${this.escapeHtml(section.label || 'Note')}</h2>
-        <p style="margin:0;color:#d8e8f2;line-height:1.55;">${this.escapeHtml(section.body || '')}</p>
-      </section>
-    `).join('')}
-  </div>
-  ${data.exercise?.question ? `
-    <section style="margin-top:14px;padding:14px;border:1px solid ${color}55;border-radius:10px;background:${color}14;">
-      <h2 style="margin:0 0 6px;color:${color};font-size:14px;text-transform:uppercase;letter-spacing:.06em;">Quick check</h2>
-      <p style="margin:0 0 8px;color:#eef8ff;">${this.escapeHtml(data.exercise.question)}</p>
-      <p style="margin:0;color:#b8c6d8;">${this.escapeHtml(data.exercise.answer || '')}</p>
-    </section>
-  ` : ''}
-  ${assumptions.length ? `
-    <p style="margin:14px 0 0;color:#a8b3c6;font-size:13px;">Assumptions: ${assumptions.map(item => this.escapeHtml(item)).join('; ')}</p>
-  ` : ''}
-  ${evidenceLinks.length ? `
-    <footer style="margin-top:16px;color:#a8b3c6;font-size:13px;">
-      Evidence: ${evidenceLinks.map(link => `<span>${this.escapeHtml(link.name || this.getHostFromUrl(link.url) || 'source')}</span>`).join(' / ')}
+  </section>
+  <section class="story-vignette-main">
+    <div class="story-vignette-rail" aria-label="Story panels">
+      ${sectionPanels}
+      ${data.exercise?.question ? `
+        <section id="story-panel-${sections.length + 1}" class="story-vignette-panel">
+          <p class="story-panel-step">?</p>
+          <h2>${this.escapeHtml(ui.check)}</h2>
+          <p>${this.escapeHtml(data.exercise.question)} ${this.escapeHtml(data.exercise.answer || '')}</p>
+        </section>
+      ` : ''}
+    </div>
+    <footer class="story-vignette-footer">
+      <nav class="story-vignette-nav" aria-label="Story panel navigation">${navDots}</nav>
+      ${data.learningObjective ? `<p class="story-vignette-note"><strong>${this.escapeHtml(ui.objective)}:</strong> ${this.escapeHtml(data.learningObjective)}</p>` : ''}
+      ${assumptions.length ? `<p class="story-vignette-note"><strong>${this.escapeHtml(ui.assumptions)}:</strong> ${assumptions.map(item => this.escapeHtml(item)).join('; ')}</p>` : ''}
+      ${evidenceLinks.length ? `<p class="story-vignette-note"><strong>${this.escapeHtml(ui.sources)}:</strong> ${evidenceLinks.map(link => this.escapeHtml(link.name || this.getHostFromUrl(link.url) || 'source')).join(' / ')}</p>` : ''}
     </footer>
-  ` : ''}
+  </section>
 </article>`;
   }
 
