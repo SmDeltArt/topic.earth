@@ -5803,21 +5803,32 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
   saveFormState() {
     const form = this.container.querySelector('#topic-form');
     if (!form) return;
+
+    const preserveWhenHidden = this.topicBuilderTab !== 'describe';
+    const readDraftField = (selector, key) => {
+      const field = form.querySelector(selector);
+      if (!field) return this.topicFormState[key] || '';
+      const value = field.value ?? '';
+      if (preserveWhenHidden && !String(value).trim() && String(this.topicFormState[key] || '').trim()) {
+        return this.topicFormState[key];
+      }
+      return value;
+    };
     
     // Save all form values
     this.topicFormState = {
-      title: form.querySelector('#topic-title')?.value || '',
-      category: form.querySelector('#topic-category')?.value || '',
-      date: form.querySelector('#topic-date')?.value || '',
-      country: form.querySelector('#topic-country')?.value || '',
-      region: form.querySelector('#topic-region')?.value || '',
-      lat: form.querySelector('#topic-lat')?.value || '',
-      lon: form.querySelector('#topic-lon')?.value || '',
-      summary: form.querySelector('#topic-summary')?.value || '',
-      source: form.querySelector('#topic-source')?.value || '',
-      insight: form.querySelector('#topic-insight')?.value || '',
+      title: readDraftField('#topic-title', 'title'),
+      category: readDraftField('#topic-category', 'category'),
+      date: readDraftField('#topic-date', 'date'),
+      country: readDraftField('#topic-country', 'country'),
+      region: readDraftField('#topic-region', 'region'),
+      lat: readDraftField('#topic-lat', 'lat'),
+      lon: readDraftField('#topic-lon', 'lon'),
+      summary: readDraftField('#topic-summary', 'summary'),
+      source: readDraftField('#topic-source', 'source'),
+      insight: readDraftField('#topic-insight', 'insight'),
       topicStory: this.readTopicStoryForm(form),
-      searchHint: form.querySelector('#topic-search-hint')?.value || this.topicFormState.searchHint || '',
+      searchHint: readDraftField('#topic-search-hint', 'searchHint') || this.topicFormState.searchHint || '',
       locationPrecision: this.topicFormState.locationPrecision || this.currentPoint?.locationPrecision || this.topicBuilderContext?.regionalContext?.precision || this.topicBuilderContext?.regionalContext?.scope || '',
       regionalLabel: this.topicFormState.regionalLabel || this.getRegionalProposalContextLabel(this.topicBuilderContext?.regionalContext || {}) || this.currentPoint?.storageMeta?.regionalLabel || '',
       geographicScope: form.querySelector('#geographic-scope')?.value || this.topicResearchSettings.geographicScope,
@@ -7390,8 +7401,9 @@ Prioritize official local sources, scientific journals, and reputable news outle
 
   async inferDraftFromEvidenceSource(source = {}) {
     const url = this.sanitizeUrl(source.url || '');
+    const fallbackSuggestion = this.buildEvidenceUrlFallbackSuggestion(source);
     if (!url || !window.ourEarthAI?.createChatCompletion) {
-      return this.buildEvidenceUrlFallbackSuggestion(source);
+      return fallbackSuggestion;
     }
 
     const prompt = `Use this evidence URL to help fill a topic.earth draft. Prefer facts visible in the URL, source title, and likely page metadata. If you cannot know a field, leave it empty instead of inventing.
@@ -7415,22 +7427,33 @@ Return ONLY JSON:
   "imageCaption": "short caption"
 }`;
 
-    const completion = await window.ourEarthAI.createChatCompletion({
-      messages: [
-        {
-          role: 'system',
-          content: 'You turn source URLs into cautious topic draft metadata. Return strict JSON only. Do not fabricate coordinates or image URLs.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      json: true,
-      temperature: 0.1
-    });
+    try {
+      const completion = await window.ourEarthAI.createChatCompletion({
+        messages: [
+          {
+            role: 'system',
+            content: 'You turn source URLs into cautious topic draft metadata. Return strict JSON only. Do not fabricate coordinates or image URLs.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        json: true,
+        temperature: 0.1
+      });
 
-    return this.parseAiJsonObject(completion.content || '', 'evidence source draft JSON');
+      return {
+        ...fallbackSuggestion,
+        ...Object.fromEntries(
+          Object.entries(this.parseAiJsonObject(completion.content || '', 'evidence source draft JSON'))
+            .filter(([, value]) => String(value ?? '').trim())
+        )
+      };
+    } catch (error) {
+      console.warn('[Evidence] AI source inference failed; using URL fallback:', error);
+      return fallbackSuggestion;
+    }
   }
 
   buildEvidenceUrlFallbackSuggestion(source = {}) {
@@ -7447,13 +7470,16 @@ Return ONLY JSON:
         ?.replace(/\.[a-z0-9]+$/i, '')
         .replace(/[-_]+/g, ' ')
         .trim() || '';
-      const title = slugText
+      const slugTitle = slugText
         ? slugText.replace(/\b\w/g, char => char.toUpperCase())
         : '';
       const lowerHaystack = `${host} ${url.pathname}`.toLowerCase();
+      const sourceName = String(source.name || '').trim();
+      const title = sourceName || slugTitle;
       const suggestion = {
         title,
-        sourceName: source.name || host
+        sourceName: sourceName || host,
+        sourceUrl: safeUrl
       };
 
       if (host.endsWith('.be')) {
@@ -7462,6 +7488,11 @@ Return ONLY JSON:
       if (lowerHaystack.includes('anthisnes') || lowerHaystack.includes('limont')) {
         suggestion.region = 'Limont (Anthisnes)';
         suggestion.country = suggestion.country || 'Belgium';
+        suggestion.category = 'regional-news';
+        suggestion.summary = `${title || 'This source'} points to a local event or update in Limont, Anthisnes. Keep this as a draft until the source text is reviewed.`;
+      } else if (host.endsWith('.be') || lowerHaystack.includes('commune') || lowerHaystack.includes('event') || lowerHaystack.includes('fete')) {
+        suggestion.category = 'regional-news';
+        suggestion.summary = `${title || 'This source'} appears to be a local or regional source. Review the page, then refine the summary before saving.`;
       }
 
       return suggestion;
@@ -7481,8 +7512,9 @@ Return ONLY JSON:
     if (text(suggestion.sourceName) && !text(source.name)) {
       source.name = text(suggestion.sourceName);
     }
-    if (text(suggestion.title) && !text(this.topicFormState.title)) {
-      this.topicFormState.title = text(suggestion.title).slice(0, 140);
+    const inferredTitle = text(suggestion.title) || text(source.name) || text(suggestion.sourceName);
+    if (inferredTitle && !text(this.topicFormState.title)) {
+      this.topicFormState.title = inferredTitle.slice(0, 140);
     }
     if (text(suggestion.summary) && !text(this.topicFormState.summary)) {
       this.topicFormState.summary = text(suggestion.summary);
@@ -7503,6 +7535,27 @@ Return ONLY JSON:
 
     if (!text(this.topicFormState.source)) {
       this.topicFormState.source = source.name || this.getHostFromUrl(safeUrl) || safeUrl;
+    }
+
+    const inferredCategory = text(suggestion.category)
+      || (this.isRegionalProposalWorkspace() ? this.getRegionalProposalDefaultLayerId() : '')
+      || (text(this.topicFormState.region) || text(this.topicFormState.country) ? 'regional-news' : '');
+    if (inferredCategory && !text(this.topicFormState.category)) {
+      const layerExists = this.layers.some(layer => layer.id === inferredCategory);
+      this.topicFormState.category = layerExists
+        ? inferredCategory
+        : this.layers.find(layer => !layer.isGroup)?.id || '';
+      if (this.topicFormState.category) {
+        this.autoSetupForLayer(this.topicFormState.category);
+      }
+    }
+
+    if (!text(this.composerSmartInput)) {
+      this.composerSmartInput = [
+        this.topicFormState.title,
+        this.topicFormState.summary,
+        safeUrl
+      ].filter(Boolean).join('\n');
     }
   }
 
@@ -7548,6 +7601,8 @@ Return ONLY JSON:
       source.verified = true;
       source.url = this.sanitizeUrl(url.href) || url.href;
       this.saveFormState();
+      source.verified = true;
+      source.url = this.sanitizeUrl(url.href) || url.href;
       let mediaAdded = false;
       try {
         const suggestion = await this.inferDraftFromEvidenceSource(source);
@@ -7555,6 +7610,7 @@ Return ONLY JSON:
         mediaAdded = await this.addEvidenceImageCandidate(source, suggestion);
       } catch (hydrateError) {
         console.warn('[Evidence] Could not hydrate draft from source URL:', hydrateError);
+        this.applyEvidenceDraftSuggestion(source, this.buildEvidenceUrlFallbackSuggestion(source));
         mediaAdded = await this.addEvidenceImageCandidate(source, {});
       }
       
