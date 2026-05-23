@@ -952,5 +952,51 @@ export const MOCK_POINTS = [
     initiativeType: 'Resilience',
     engagementTypes: ['join', 'learn'],
     communityStatus: 'active'
+  },
+  {
+    id: 24,
+    lat: 50.5077401,
+    lon: 5.492298,
+    category: 'regional-news',
+    title: 'Fête à Limont 2026',
+    country: 'Belgium',
+    region: 'Limont (Anthisnes)',
+    date: '2026-05-23',
+    source: 'Commune d Anthisnes',
+    summary: 'La Fête à Limont revient du 23 au 25 mai 2026 avec animations gratuites, attractions foraines tout le week-end, balade familiale à vélo, concerts, blind test, messe en wallon, frisée aux lardons et tombola.',
+    insight: 'Exemple vivant de topic régional en français: une source communale vérifiable, une affiche-programme lisible par IA et une page story HTML qui transforme le sujet local en contenu éducatif partageable.',
+    regionalScope: 'village',
+    initiativeType: 'Culture locale',
+    engagementTypes: ['visit', 'learn', 'share'],
+    communityStatus: 'scheduled',
+    media: [
+      'https://www.app360.be/sites/default/files/styles/api_sheet/public/home_background_image/fete_a_limont_mai_2026.jpg?itok=WOZvKmJU&focalpoint=50,50'
+    ],
+    mediaTokens: [
+      {
+        kind: 'image',
+        url: 'https://www.app360.be/sites/default/files/styles/api_sheet/public/home_background_image/fete_a_limont_mai_2026.jpg?itok=WOZvKmJU&focalpoint=50,50',
+        title: 'Affiche Fête à Limont mai 2026',
+        source: 'Commune d Anthisnes / app360',
+        alt: 'Affiche du programme de la Fête à Limont 2026'
+      }
+    ],
+    researchSources: [
+      {
+        name: 'Commune d Anthisnes - Fête à Limont',
+        url: 'https://anthisnes.be/fete-a-limont/',
+        type: 'official'
+      },
+      {
+        name: 'Affiche programme 2026',
+        url: 'https://www.app360.be/sites/default/files/styles/api_sheet/public/home_background_image/fete_a_limont_mai_2026.jpg?itok=WOZvKmJU&focalpoint=50,50',
+        type: 'media'
+      },
+      {
+        name: 'Story HTML topic.earth',
+        url: '/examples/fete-a-limont-2026-story.html',
+        type: 'example'
+      }
+    ]
   }
 ];

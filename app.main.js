@@ -2,9 +2,9 @@ import { GlobeRenderer } from './lib/globe.js?v=topic-earth-mobile-compose-20260
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
 import { LAYERS } from './data/layers.js?v=topic-earth-regional-layer-tabs-20260523';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-cloud-over-20260423';
-import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-regional-hub-20260423';
+import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-fete-limont-20260523';
 import { FEVER_TOPICS } from './data/fever-topics.js?v=topic-earth-embedded-story-20260521';
-import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-regional-hub-20260423';
+import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-fete-limont-20260523';
 import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-topics-20260505';
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
