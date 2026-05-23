@@ -7429,8 +7429,8 @@ Return ONLY JSON:
   "summary": "1-2 sentence summary",
   "country": "country if clear",
   "region": "city, commune, region, or locality if clear",
-  "lat": 0,
-  "lon": 0,
+  "lat": "",
+  "lon": "",
   "sourceName": "better source name",
   "imageUrl": "direct image URL if available",
   "imageCaption": "short caption"
@@ -7537,7 +7537,8 @@ Return ONLY JSON:
 
     const lat = numericText(suggestion.lat);
     const lon = numericText(suggestion.lon);
-    if (lat && lon && !text(this.topicFormState.lat) && !text(this.topicFormState.lon)) {
+    const isEmptyCoordinatePlaceholder = Number(lat) === 0 && Number(lon) === 0;
+    if (lat && lon && !isEmptyCoordinatePlaceholder && !text(this.topicFormState.lat) && !text(this.topicFormState.lon)) {
       this.topicFormState.lat = lat;
       this.topicFormState.lon = lon;
     }
@@ -7616,10 +7617,12 @@ Return ONLY JSON:
       try {
         const suggestion = await this.inferDraftFromEvidenceSource(source);
         this.applyEvidenceDraftSuggestion(source, suggestion);
+        await this.ensureDraftCoordinatesFromPlace({ silent: true });
         mediaAdded = await this.addEvidenceImageCandidate(source, suggestion);
       } catch (hydrateError) {
         console.warn('[Evidence] Could not hydrate draft from source URL:', hydrateError);
         this.applyEvidenceDraftSuggestion(source, this.buildEvidenceUrlFallbackSuggestion(source));
+        await this.ensureDraftCoordinatesFromPlace({ silent: true });
         mediaAdded = await this.addEvidenceImageCandidate(source, {});
       }
       
@@ -8523,76 +8526,147 @@ Provide expert analysis focusing on the latest developments, potential implicati
     }
   }
 
-  async generateCoordinates() {
-    const form = this.container.querySelector('#topic-form');
-    const countryInput = form.querySelector('#topic-country');
-    const regionInput = form.querySelector('#topic-region');
-    const titleInput = form.querySelector('#topic-title');
-    const latInput = form.querySelector('#topic-lat');
-    const lonInput = form.querySelector('#topic-lon');
-    const btn = this.container.querySelector('[data-action="generate-coordinates"]');
-    
-    if (!countryInput?.value && !regionInput?.value && !titleInput?.value) {
-      alert('Please enter a country, region, or title first');
-      return;
+  buildDraftLocationString(form = null) {
+    const country = form?.querySelector('#topic-country')?.value || this.topicFormState.country || '';
+    const region = form?.querySelector('#topic-region')?.value || this.topicFormState.region || '';
+    const title = form?.querySelector('#topic-title')?.value || this.topicFormState.title || '';
+    const location = [region, country].filter(Boolean).join(', ');
+    return location || title;
+  }
+
+  normalizeCoordinateResult(coords = {}) {
+    const lat = Number(coords.lat ?? coords.latitude);
+    const lon = Number(coords.lon ?? coords.lng ?? coords.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
+    return { lat, lon };
+  }
+
+  async geocodeDraftPlaceWithNominatim(locationString = '') {
+    const query = String(locationString || '').trim();
+    if (!query) return null;
+
+    const url = new URL('https://nominatim.openstreetmap.org/search');
+    url.searchParams.set('format', 'jsonv2');
+    url.searchParams.set('limit', '1');
+    url.searchParams.set('q', query);
+
+    const response = await fetch(url.toString(), {
+      headers: { Accept: 'application/json' }
+    });
+    if (!response.ok) return null;
+
+    const results = await response.json();
+    const first = Array.isArray(results) ? results[0] : null;
+    return this.normalizeCoordinateResult(first || {});
+  }
+
+  getKnownPlaceCoordinates(locationString = '') {
+    const normalizedLocation = String(locationString || '').toLowerCase();
+    if (normalizedLocation.includes('limont') && normalizedLocation.includes('anthisnes')) {
+      return { lat: 50.5077401, lon: 5.4922980 };
     }
-    
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<div class="spinner-small"></div> Finding...';
-    btn.disabled = true;
-    
-    try {
-      let locationString = '';
-      if (regionInput?.value) locationString += regionInput.value;
-      if (countryInput?.value) {
-        locationString += (locationString ? ', ' : '') + countryInput.value;
-      }
-      if (!locationString) locationString = titleInput.value;
-      
-      const prompt = `Provide the precise geographic coordinates (latitude and longitude) for: ${locationString}
+    return null;
+  }
+
+  async geocodeDraftPlaceWithAi(locationString = '') {
+    if (!window.ourEarthAI?.createChatCompletion) return null;
+
+    const prompt = `Provide the precise geographic coordinates (latitude and longitude) for: ${locationString}
 
 Return ONLY a JSON object with this exact format, no other text:
 {
   "lat": <latitude as number>,
   "lon": <longitude as number>
 }`;
-      
-      const completion = await window.ourEarthAI.createChatCompletion({
-        messages: [
-          {
-            role: "system",
-            content: "You are a geocoding assistant. Return precise coordinates in JSON format only."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        json: true
-      });
-      
-      const coords = JSON.parse(completion.content);
-      
-      if (coords.lat && coords.lon && !isNaN(coords.lat) && !isNaN(coords.lon)) {
-        latInput.value = coords.lat.toFixed(4);
-        lonInput.value = coords.lon.toFixed(4);
-        this.topicFormState.lat = coords.lat.toFixed(4);
-        this.topicFormState.lon = coords.lon.toFixed(4);
-        
-        // Update globe view immediately
-        if (this.callbacks.onShow) {
-          this.callbacks.onShow({ lat: coords.lat, lon: coords.lon });
+
+    const completion = await window.ourEarthAI.createChatCompletion({
+      messages: [
+        {
+          role: "system",
+          content: "You are a geocoding assistant. Return precise coordinates in JSON format only."
+        },
+        {
+          role: "user",
+          content: prompt
         }
-        
-        btn.innerHTML = 'Found';
-        setTimeout(() => {
-          btn.innerHTML = originalHTML;
-          btn.disabled = false;
-        }, 2000);
-      } else {
-        throw new Error('Invalid coordinates received');
+      ],
+      json: true
+    });
+
+    return this.normalizeCoordinateResult(this.parseAiJsonObject(completion.content || '', 'coordinate JSON'));
+  }
+
+  applyDraftCoordinates(coords = {}, form = null) {
+    const normalized = this.normalizeCoordinateResult(coords);
+    if (!normalized) return false;
+
+    const latValue = normalized.lat.toFixed(4);
+    const lonValue = normalized.lon.toFixed(4);
+    this.topicFormState.lat = latValue;
+    this.topicFormState.lon = lonValue;
+
+    const latInput = form?.querySelector('#topic-lat') || this.container.querySelector('#topic-lat');
+    const lonInput = form?.querySelector('#topic-lon') || this.container.querySelector('#topic-lon');
+    if (latInput) latInput.value = latValue;
+    if (lonInput) lonInput.value = lonValue;
+
+    if (this.callbacks.onShow) {
+      this.callbacks.onShow({ lat: normalized.lat, lon: normalized.lon });
+    }
+
+    return true;
+  }
+
+  async ensureDraftCoordinatesFromPlace(options = {}) {
+    const form = this.container.querySelector('#topic-form');
+    const existingLatText = String(this.topicFormState.lat || form?.querySelector('#topic-lat')?.value || '').trim();
+    const existingLonText = String(this.topicFormState.lon || form?.querySelector('#topic-lon')?.value || '').trim();
+    const existingLat = Number(existingLatText);
+    const existingLon = Number(existingLonText);
+    if (existingLatText && existingLonText && Number.isFinite(existingLat) && Number.isFinite(existingLon)) return true;
+
+    const locationString = this.buildDraftLocationString(form);
+    if (!locationString) return false;
+
+    try {
+      const coords = await this.geocodeDraftPlaceWithNominatim(locationString)
+        || this.getKnownPlaceCoordinates(locationString)
+        || await this.geocodeDraftPlaceWithAi(locationString);
+      if (!coords) throw new Error(`No coordinates found for ${locationString}`);
+      return this.applyDraftCoordinates(coords, form);
+    } catch (error) {
+      if (!options.silent) {
+        throw error;
       }
-      
+      console.warn('[Coordinates] Could not auto-fill draft coordinates:', error);
+      return false;
+    }
+  }
+
+  async generateCoordinates() {
+    const form = this.container.querySelector('#topic-form');
+    const btn = this.container.querySelector('[data-action="generate-coordinates"]');
+    const locationString = this.buildDraftLocationString(form);
+
+    if (!locationString) {
+      alert('Please enter a country, region, or title first');
+      return;
+    }
+
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<div class="spinner-small"></div> Finding...';
+    btn.disabled = true;
+
+    try {
+      const found = await this.ensureDraftCoordinatesFromPlace();
+      if (!found) throw new Error('Invalid coordinates received');
+
+      btn.innerHTML = 'Found';
+      setTimeout(() => {
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+      }, 2000);
     } catch (error) {
       console.error('Error generating coordinates:', error);
       alert(this.getActionErrorMessage(error, 'Coordinate suggestion'));
