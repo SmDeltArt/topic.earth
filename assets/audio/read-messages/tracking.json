@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-05-23T11:55:45.964Z",
+  "generatedAt": "2026-05-23T12:01:22.388Z",
   "manifestPath": "assets/audio/read-messages/manifest.json",
   "csvPath": "shared/topic-earth-ui.csv",
   "totalMessages": 1391,
   "englishMessages": 168,
-  "newEnglishMessages": 6,
+  "newEnglishMessages": 0,
   "missingCsvRows": 0,
   "missingAudioRows": 1391,
   "mp3FilesTracked": 0,
@@ -15020,7 +15020,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-aim-el",
@@ -15038,7 +15038,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-aim-en",
@@ -15056,7 +15056,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-aim-fr",
@@ -15074,7 +15074,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-aim-hi",
@@ -15092,7 +15092,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-aim-nl",
@@ -15110,7 +15110,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-aim-ru",
@@ -15128,7 +15128,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-aim-uk",
@@ -15146,7 +15146,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-aim-zh",
@@ -15164,7 +15164,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-template-de",
@@ -15182,7 +15182,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-template-el",
@@ -15200,7 +15200,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-template-en",
@@ -15218,7 +15218,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-template-fr",
@@ -15236,7 +15236,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-template-hi",
@@ -15254,7 +15254,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-template-nl",
@@ -15272,7 +15272,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-template-ru",
@@ -15290,7 +15290,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-template-uk",
@@ -15308,7 +15308,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-micro-game-template-zh",
@@ -15326,7 +15326,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "tutorial-step-topic-review-save-de",
@@ -24416,7 +24416,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-body-el",
@@ -24434,7 +24434,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-body-en",
@@ -24452,7 +24452,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-body-fr",
@@ -24470,7 +24470,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-body-hi",
@@ -24488,7 +24488,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-body-nl",
@@ -24506,7 +24506,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-body-ru",
@@ -24524,7 +24524,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-body-uk",
@@ -24542,7 +24542,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-body-zh",
@@ -24560,7 +24560,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-title-de",
@@ -24578,7 +24578,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-title-el",
@@ -24596,7 +24596,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-title-en",
@@ -24614,7 +24614,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-title-fr",
@@ -24632,7 +24632,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-title-hi",
@@ -24650,7 +24650,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-title-nl",
@@ -24668,7 +24668,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-title-ru",
@@ -24686,7 +24686,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-title-uk",
@@ -24704,7 +24704,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-aim-title-zh",
@@ -24722,7 +24722,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-body-de",
@@ -24740,7 +24740,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-body-el",
@@ -24758,7 +24758,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-body-en",
@@ -24776,7 +24776,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-body-fr",
@@ -24794,7 +24794,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-body-hi",
@@ -24812,7 +24812,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-body-nl",
@@ -24830,7 +24830,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-body-ru",
@@ -24848,7 +24848,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-body-uk",
@@ -24866,7 +24866,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-body-zh",
@@ -24884,7 +24884,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-title-de",
@@ -24902,7 +24902,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-title-el",
@@ -24920,7 +24920,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-title-en",
@@ -24938,7 +24938,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-title-fr",
@@ -24956,7 +24956,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-title-hi",
@@ -24974,7 +24974,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-title-nl",
@@ -24992,7 +24992,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-title-ru",
@@ -25010,7 +25010,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-title-uk",
@@ -25028,7 +25028,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     },
     {
       "id": "ui-text-tutorial-micro-game-body-title-zh",
@@ -25046,7 +25046,7 @@
       "mp3Exists": false,
       "webmExists": false,
       "generated": true,
-      "newSinceLastRun": true
+      "newSinceLastRun": false
     }
   ]
 }
