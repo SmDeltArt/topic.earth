@@ -29,7 +29,9 @@ export class LayerPanel {
     this.attachEventListeners();
 
     window.addEventListener('layerFilterChanged', (e) => {
-      this.layerFilter = e.detail.filter;
+      const previousFilter = this.layerFilter;
+      this.layerFilter = this.normalizeLayerFilter(e.detail.filter);
+      this.preparePanelForFilter(this.layerFilter, previousFilter);
       this.updateData(this.layers, this.points);
     });
 
@@ -44,6 +46,30 @@ export class LayerPanel {
   handleRegionalContextChanged(event) {
     this.regionalContext = event?.detail?.context || null;
     this.updateData(this.layers, this.points);
+  }
+
+  preparePanelForFilter(filter = 'main', previousFilter = this.layerFilter) {
+    if (previousFilter !== filter && this.isCollapsed) {
+      this.setCollapsed(false);
+    }
+
+    if (filter === 'regional') {
+      [
+        'regional-news',
+        'community-projects',
+        'bike-ways',
+        'ev-charging',
+        'hydrogen-charging'
+      ].forEach(layerId => {
+        if (this.getLayerById(layerId)) this.expandedLayers.add(layerId);
+      });
+    } else if (filter === 'space') {
+      this.expandedLayers.add('space');
+    } else if (filter === 'fever') {
+      ['earths-fever', 'fever-scenarios', 'tipping-points', 'amoc-watch'].forEach(layerId => {
+        if (this.getLayerById(layerId)) this.expandedLayers.add(layerId);
+      });
+    }
   }
 
   getCurrentLanguage() {
@@ -529,8 +555,14 @@ export class LayerPanel {
   }
 
   handleCollapse(btn) {
-    this.isCollapsed = !this.isCollapsed;
+    this.setCollapsed(!this.isCollapsed);
+  }
+
+  setCollapsed(isCollapsed) {
+    this.isCollapsed = Boolean(isCollapsed);
     this.container.classList.toggle('collapsed', this.isCollapsed);
+    const btn = this.container.querySelector('.panel-collapse-btn');
+    if (!btn) return;
     btn.innerHTML = this.isCollapsed ? '&#9654;' : '&#9664;';
 
     if (this.isCollapsed) {

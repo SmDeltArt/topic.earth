@@ -34,6 +34,7 @@ export const LAYERS = [
   {
     id: 'meteo',
     name: 'Meteo',
+    modeTabs: ['main', 'regional'],
     sortByRegionalContext: true,
     icon: '\uD83C\uDF24\uFE0F',
     color: '#4fc3f7',
@@ -42,6 +43,7 @@ export const LAYERS = [
   {
     id: 'meteo-clouds',
     name: 'Clouds',
+    modeTabs: ['main', 'regional'],
     sortByRegionalContext: true,
     icon: '\u2601\uFE0F',
     color: '#b6d8ff',
@@ -56,6 +58,7 @@ export const LAYERS = [
   {
     id: 'meteo-live',
     name: 'Live Meteo',
+    modeTabs: ['main', 'regional'],
     sortByRegionalContext: true,
     icon: '\u26C5',
     color: '#7dd3fc',
@@ -66,6 +69,7 @@ export const LAYERS = [
   {
     id: 'regional-news',
     name: 'Regional News',
+    modeTabs: ['main', 'regional'],
     sortByRegionalContext: true,
     icon: '\uD83D\uDCF0',
     color: '#81c784',
@@ -74,6 +78,7 @@ export const LAYERS = [
   {
     id: 'community-projects',
     name: 'Community Projects',
+    modeTabs: ['main', 'regional'],
     sortByRegionalContext: true,
     icon: '\uD83E\uDD1D',
     color: '#74c69d',
@@ -82,6 +87,7 @@ export const LAYERS = [
   {
     id: 'country-news',
     name: 'Country News',
+    modeTabs: ['main', 'regional'],
     icon: '\uD83D\uDDDE\uFE0F',
     color: '#ffb74d',
     enabled: true
@@ -89,6 +95,7 @@ export const LAYERS = [
   {
     id: 'eu',
     name: 'EU',
+    modeTabs: ['main', 'regional'],
     icon: '\uD83C\uDDEA\uD83C\uDDFA',
     color: '#64b5f6',
     enabled: true
@@ -103,6 +110,7 @@ export const LAYERS = [
   {
     id: 'bike-ways',
     name: 'Bike Ways',
+    modeTabs: ['main', 'regional'],
     sortByRegionalContext: true,
     icon: '\uD83D\uDEB2',
     color: '#66bb6a',
@@ -111,6 +119,7 @@ export const LAYERS = [
   {
     id: 'ev-charging',
     name: 'EV Charging',
+    modeTabs: ['main', 'regional'],
     sortByRegionalContext: true,
     icon: '\u26A1',
     color: '#26c6da',
@@ -119,6 +128,7 @@ export const LAYERS = [
   {
     id: 'hydrogen-charging',
     name: 'Hydrogen H2',
+    modeTabs: ['main', 'regional'],
     sortByRegionalContext: true,
     icon: 'H2',
     color: '#ffd54f',

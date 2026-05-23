@@ -1,6 +1,6 @@
 import { GlobeRenderer } from './lib/globe.js?v=topic-earth-globe-vignette-20260516';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
-import { LAYERS } from './data/layers.js?v=topic-earth-embedded-story-20260521';
+import { LAYERS } from './data/layers.js?v=topic-earth-regional-layer-tabs-20260523';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-cloud-over-20260423';
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-regional-hub-20260423';
 import { FEVER_TOPICS } from './data/fever-topics.js?v=topic-earth-embedded-story-20260521';
@@ -10,7 +10,7 @@ import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-e
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=topic-earth-tutorial-bubbles-20260516';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-embedded-story-20260521';
-import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-access-toggle-20260517';
+import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-layer-tabs-20260523';
 import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-composer-fluid2-20260521';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-20260506';
 import { Settings } from './lib/settings.js?v=topic-earth-greek-language-20260521';
