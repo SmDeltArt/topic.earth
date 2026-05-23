@@ -7227,6 +7227,146 @@ Prioritize official local sources, scientific journals, and reputable news outle
     }
   }
 
+  async inferDraftFromEvidenceSource(source = {}) {
+    const url = this.sanitizeUrl(source.url || '');
+    if (!url || !window.ourEarthAI?.createChatCompletion) {
+      return this.buildEvidenceUrlFallbackSuggestion(source);
+    }
+
+    const prompt = `Use this evidence URL to help fill a topic.earth draft. Prefer facts visible in the URL, source title, and likely page metadata. If you cannot know a field, leave it empty instead of inventing.
+
+Evidence name: ${source.name || ''}
+Evidence URL: ${url}
+Current title: ${this.topicFormState.title || ''}
+Current summary: ${this.topicFormState.summary || ''}
+Current location: ${[this.topicFormState.region, this.topicFormState.country].filter(Boolean).join(', ') || ''}
+
+Return ONLY JSON:
+{
+  "title": "concise topic title",
+  "summary": "1-2 sentence summary",
+  "country": "country if clear",
+  "region": "city, commune, region, or locality if clear",
+  "lat": 0,
+  "lon": 0,
+  "sourceName": "better source name",
+  "imageUrl": "direct image URL if available",
+  "imageCaption": "short caption"
+}`;
+
+    const completion = await window.ourEarthAI.createChatCompletion({
+      messages: [
+        {
+          role: 'system',
+          content: 'You turn source URLs into cautious topic draft metadata. Return strict JSON only. Do not fabricate coordinates or image URLs.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      json: true,
+      temperature: 0.1
+    });
+
+    return this.parseAiJsonObject(completion.content || '', 'evidence source draft JSON');
+  }
+
+  buildEvidenceUrlFallbackSuggestion(source = {}) {
+    const safeUrl = this.sanitizeUrl(source.url || '');
+    if (!safeUrl) return {};
+
+    try {
+      const url = new URL(safeUrl);
+      const host = url.hostname.replace(/^www\./, '');
+      const slugText = url.pathname
+        .split('/')
+        .filter(Boolean)
+        .pop()
+        ?.replace(/\.[a-z0-9]+$/i, '')
+        .replace(/[-_]+/g, ' ')
+        .trim() || '';
+      const title = slugText
+        ? slugText.replace(/\b\w/g, char => char.toUpperCase())
+        : '';
+      const lowerHaystack = `${host} ${url.pathname}`.toLowerCase();
+      const suggestion = {
+        title,
+        sourceName: source.name || host
+      };
+
+      if (host.endsWith('.be')) {
+        suggestion.country = 'Belgium';
+      }
+      if (lowerHaystack.includes('anthisnes') || lowerHaystack.includes('limont')) {
+        suggestion.region = 'Limont (Anthisnes)';
+        suggestion.country = suggestion.country || 'Belgium';
+      }
+
+      return suggestion;
+    } catch (error) {
+      return {};
+    }
+  }
+
+  applyEvidenceDraftSuggestion(source = {}, suggestion = {}) {
+    const safeUrl = this.sanitizeUrl(source.url || '');
+    const text = value => String(value || '').trim();
+    const numericText = value => {
+      const number = Number(value);
+      return Number.isFinite(number) ? String(number) : '';
+    };
+
+    if (text(suggestion.sourceName) && !text(source.name)) {
+      source.name = text(suggestion.sourceName);
+    }
+    if (text(suggestion.title) && !text(this.topicFormState.title)) {
+      this.topicFormState.title = text(suggestion.title).slice(0, 140);
+    }
+    if (text(suggestion.summary) && !text(this.topicFormState.summary)) {
+      this.topicFormState.summary = text(suggestion.summary);
+    }
+    if (text(suggestion.country) && !text(this.topicFormState.country)) {
+      this.topicFormState.country = text(suggestion.country);
+    }
+    if (text(suggestion.region) && !text(this.topicFormState.region)) {
+      this.topicFormState.region = text(suggestion.region);
+    }
+
+    const lat = numericText(suggestion.lat);
+    const lon = numericText(suggestion.lon);
+    if (lat && lon && !text(this.topicFormState.lat) && !text(this.topicFormState.lon)) {
+      this.topicFormState.lat = lat;
+      this.topicFormState.lon = lon;
+    }
+
+    if (!text(this.topicFormState.source)) {
+      this.topicFormState.source = source.name || this.getHostFromUrl(safeUrl) || safeUrl;
+    }
+  }
+
+  async addEvidenceImageCandidate(source = {}, suggestion = {}) {
+    const candidates = [
+      suggestion.imageUrl,
+      source.imageUrl,
+      source.url
+    ].map(value => String(value || '').trim()).filter(Boolean);
+
+    for (const candidate of candidates) {
+      const token = await this.resolveImageUrlToken(candidate);
+      if (!token?.url) continue;
+      token.sourceUrl = token.sourceUrl || source.url || candidate;
+      token.sourceName = source.name || token.sourceName || this.getHostFromUrl(token.sourceUrl) || 'Evidence image';
+      token.caption = suggestion.imageCaption || token.caption || '';
+      if (this.addMediaTokenToCurrentPoint(token)) {
+        source.mediaTokenId = token.id;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   async verifySource(btn) {
     const index = parseInt(btn.dataset.index);
     if (isNaN(index)) return;
@@ -7245,6 +7385,26 @@ Prioritize official local sources, scientific journals, and reputable news outle
       // Simple verification - just check if URL is well-formed and domain exists
       const url = new URL(source.url);
       source.verified = true;
+      source.url = this.sanitizeUrl(url.href) || url.href;
+      this.saveFormState();
+      let mediaAdded = false;
+      try {
+        const suggestion = await this.inferDraftFromEvidenceSource(source);
+        this.applyEvidenceDraftSuggestion(source, suggestion);
+        mediaAdded = await this.addEvidenceImageCandidate(source, suggestion);
+      } catch (hydrateError) {
+        console.warn('[Evidence] Could not hydrate draft from source URL:', hydrateError);
+        mediaAdded = await this.addEvidenceImageCandidate(source, {});
+      }
+      
+      this.setTopicDraftStatus({
+        ...(this.topicDraftStatus || {}),
+        state: this.topicDraftStatus?.state || 'unsaved',
+        title: this.topicFormState.title || this.topicDraftStatus?.title || 'Topic draft',
+        message: mediaAdded
+          ? 'Evidence verified, draft fields updated, and a media candidate was attached.'
+          : 'Evidence verified and draft fields updated where the source URL was clear.'
+      });
       
       this.renderCreateTopic();
       

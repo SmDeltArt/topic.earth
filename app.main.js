@@ -1,4 +1,4 @@
-import { GlobeRenderer } from './lib/globe.js?v=topic-earth-globe-vignette-20260516';
+import { GlobeRenderer } from './lib/globe.js?v=topic-earth-mobile-compose-20260523';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
 import { LAYERS } from './data/layers.js?v=topic-earth-regional-layer-tabs-20260523';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-cloud-over-20260423';
@@ -8,10 +8,10 @@ import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-regional-hu
 import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-topics-20260505';
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=topic-earth-tutorial-bubbles-20260516';
+import { TopBar } from './components/TopBar.js?v=topic-earth-mobile-compose-20260523';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-embedded-story-20260521';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-layer-tabs-20260523';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-composer-fluid2-20260521';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-mobile-compose-20260523';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-20260506';
 import { Settings } from './lib/settings.js?v=topic-earth-greek-language-20260521';
 import { LanguageManager } from './lib/language.js?v=topic-earth-greek-language-20260521';
@@ -2067,6 +2067,10 @@ class TopicEarthApp {
     window.addEventListener('regionalMoveTopicRequested', () => {
       this.requestRegionalTopicMove();
     });
+
+    window.addEventListener('topicFullscreenToggleRequested', () => {
+      this.toggleFullscreenView();
+    });
     
     // Listen for admin mode changes to update layer panel and initialize debug tools
     window.addEventListener('adminModeChanged', (e) => {
@@ -2086,6 +2090,19 @@ class TopicEarthApp {
         }
       }
     });
+  }
+
+  toggleFullscreenView() {
+    const target = document.documentElement;
+    try {
+      if (!document.fullscreenElement) {
+        target.requestFullscreen?.();
+      } else {
+        document.exitFullscreen?.();
+      }
+    } catch (error) {
+      console.warn('[Fullscreen] Could not toggle fullscreen:', error);
+    }
   }
 
   initLayerPanel() {
@@ -2327,13 +2344,19 @@ class TopicEarthApp {
 
   initGlobe() {
     const globeContainer = document.getElementById('globe-container');
+    const isSmallScreen = window.matchMedia?.('(max-width: 768px)').matches;
     
     this.globe = new GlobeRenderer(globeContainer, {
       earthTexture: './assets/textures/main/Material.001_baseColor_1k.jpeg',
       minDistance: 1.3,
-      maxDistance: 6,
+      maxDistance: isSmallScreen ? 7 : 6,
+      initialDistance: isSmallScreen ? 3.15 : 2.5,
       autoRotate: true
     });
+
+    if (isSmallScreen) {
+      this.topBar?.setInteractionMode?.('interaction');
+    }
     
     // Make globe globally accessible for fever mode
     window.currentGlobe = this.globe;

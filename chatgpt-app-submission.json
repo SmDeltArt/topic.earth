@@ -8,9 +8,9 @@
   "publisher_name": "SmDeltArt.com",
   "short_description": "Interactive Earth dashboard for climate simulation, regional initiatives, space context, and sustainable action.",
   "long_description": "topic.earth is an interactive Earth dashboard that popularizes climate systems, global warming scenarios, regional initiatives, tipping points, AMOC, and space context. It combines simulation, curated topics, AI-assisted research, and user proposals to help people understand risks and discover sustainable action.",
-  "website_url": "https://topic.earth/",
+  "website_url": "https://www.topic.earth/",
   "repository_url": "https://github.com/SmDeltArt/topic.earth",
-  "support_url": "https://topic.earth/",
+  "support_url": "https://www.topic.earth/",
   "support_email": "support@topic.earth",
   "contact_emails": {
     "general": "info@topic.earth",
@@ -41,7 +41,7 @@
   },
   "connection": {
     "type": "mcp",
-    "mcp_server_url": "https://topic.earth/mcp",
+    "mcp_server_url": "https://www.topic.earth/mcp",
     "authentication": "none",
     "security_note": "The first MCP server is read-only and exposes only safe user assistance tools. It does not publish, update, delete, or save topic.earth content."
   },
@@ -101,7 +101,7 @@
     "translate_to_fr": "Translate the selected topic.earth interface text to French. Preserve product names, numbers, dates, source titles, and UI button intent."
   },
   "submission_notes": [
-    "Use https://topic.earth/mcp once Vercel is connected to the production domain.",
+    "Use https://www.topic.earth/mcp so OpenAI verifies the non-redirecting production host.",
     "Use the static PNG logo for strict upload forms.",
     "The live MCP server exposes only topic_summary and translate_to_french for phase 1."
   ]

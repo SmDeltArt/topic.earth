@@ -41,6 +41,8 @@ export class TopBar {
       const state = AppAccess.setAdminMode(!AppAccess.isAdminMode());
       this.render();
       window.dispatchEvent(new CustomEvent('adminModeChanged', { detail: state }));
+    } else if (target.dataset.action === 'toggle-fullscreen') {
+      window.dispatchEvent(new CustomEvent('topicFullscreenToggleRequested'));
     } else if (target.dataset.action === 'update-news') {
       window.dispatchEvent(new CustomEvent('newsUpdateClicked'));
     }
@@ -170,7 +172,7 @@ export class TopBar {
       ? this.t('nav.drag')
       : (this.interactionMode === 'rotate'
       ? this.t('nav.rotate')
-      : this.t('nav.interaction'));
+      : this.t('nav.drag'));
     const modeTabs = this.getModeTabs().map(tab => this.renderModeTab(tab, activeModeTab)).join('');
 
     this.container.innerHTML = `
@@ -218,6 +220,11 @@ export class TopBar {
             <path d="M8 5V8L10.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
           <span class="btn-label">${this.escapeHtml(this.t('topic.search'))}</span>
+        </button>
+        <button id="fullscreen-btn" class="settings-btn fullscreen-btn" data-action="toggle-fullscreen" title="Full screen" aria-label="Full screen">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M2 6V2H6M10 2H14V6M14 10V14H10M6 14H2V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
       </div>
     `;

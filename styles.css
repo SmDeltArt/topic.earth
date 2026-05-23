@@ -23,6 +23,7 @@ body {
     color: var(--text-primary);
     overflow: hidden;
     height: 100vh;
+    height: 100dvh;
 }
 
 body:not(.admin-mode) [data-admin-only="true"] {
@@ -32,6 +33,7 @@ body:not(.admin-mode) [data-admin-only="true"] {
 #app {
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     position: relative;
 }
 
@@ -2659,6 +2661,24 @@ body.regional-map-search-open #layer-panel {
 
 /* Mobile Research Adjustments */
 @media (max-width: 768px) {
+    body {
+        height: 100dvh;
+    }
+
+    #app {
+        height: 90dvh;
+        max-height: 90dvh;
+    }
+
+    #globe-container {
+        height: 100%;
+    }
+
+    body.topic-mode-main #globe-container canvas,
+    body.topic-mode-fever #globe-container canvas {
+        touch-action: none;
+    }
+
     .source-categories {
         grid-template-columns: 1fr;
     }
@@ -7701,7 +7721,9 @@ canvas:hover {
     #detail-panel {
         width: auto;
         height: min(58vh, calc(100vh - 112px));
+        height: min(58dvh, calc(90dvh - 112px));
         max-height: min(58vh, calc(100vh - 112px));
+        max-height: min(58dvh, calc(90dvh - 112px));
         right: 10px;
         top: auto;
         bottom: 10px;
@@ -7715,6 +7737,15 @@ canvas:hover {
         bottom: 10px;
         height: auto;
         max-height: calc(100vh - 84px);
+        max-height: calc(90dvh - 84px);
+    }
+
+    body.topic-mode-fever #detail-panel {
+        top: calc(var(--top-bar-height) + 8px);
+        bottom: auto;
+        height: calc(50dvh - var(--top-bar-height) - 14px);
+        max-height: calc(50dvh - var(--top-bar-height) - 14px);
+        overflow-y: auto;
     }
 
     #layer-panel {
