@@ -13,7 +13,7 @@
       "voice": "shimmer",
       "voiceByLanguage": { "de": "echo", "es": "nova", "hi": "nova", "ru": "onyx", "uk": "onyx", "zh": "nova" },
       "tags": ["fever-loop", "fever-milestone"],
-      "languages": ["en", "fr", "nl", "de"],
+      "languages": ["en", "fr", "nl", "de", "ru", "uk", "zh", "hi"],
       "scenarios": ["best", "objective", "high"],
       "years": [1975, 2000, 2025, 2050, 2075, 2100, 2125],
       "speedProfiles": ["short", "normal", "full"]
@@ -25,7 +25,7 @@
       "voice": "alloy",
       "voiceByLanguage": { "de": "echo", "es": "nova", "hi": "nova", "ru": "onyx", "uk": "onyx", "zh": "nova" },
       "tags": ["tutorial-step"],
-      "languages": ["en", "fr", "nl", "de", "el"],
+      "languages": ["en", "fr", "nl", "de", "el", "ru", "uk", "zh", "hi"],
       "steps": [
         { "id": "globe-intro", "level": "essential", "titleKey": "tutorial.globe.title", "bodyKey": "tutorial.globe.body" },
         { "id": "mode-tabs", "level": "essential", "titleKey": "tutorial.modes.title", "bodyKey": "tutorial.modes.body" },
@@ -72,7 +72,7 @@
       "voice": "alloy",
       "voiceByLanguage": { "de": "echo", "es": "nova", "hi": "nova", "ru": "onyx", "uk": "onyx", "zh": "nova" },
       "tags": ["ui-text"],
-      "languages": ["en", "fr", "nl", "de", "el"],
+      "languages": ["en", "fr", "nl", "de", "el", "ru", "uk", "zh", "hi"],
       "keys": [
         "common.admin",
         "common.cancel",
