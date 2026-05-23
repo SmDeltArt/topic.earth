@@ -6813,7 +6813,7 @@ ${body}
                   required
                 >${this.escapeHtml(this.topicFormState.summary || '')}</textarea>
                 <div class="topic-summary-actions">
-                  <button type="button" class="btn-secondary topic-www-check-btn" data-action="check-draft-www">
+                  <button type="button" class="btn-secondary topic-www-check-btn" data-action="check-draft-www" data-return-tab="describe">
                     Check WWW
                   </button>
                   <span class="setting-hint" data-draft-www-status>Searches around the draft date, 1 week before and after.</span>
@@ -7272,12 +7272,21 @@ ${body}
             </div>
           `).join('')}
         </div>
-        <button type="button" class="btn-secondary" data-action="add-source" style="width: 100%; margin-top: 8px;">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="display: inline-block; margin-right: 6px;">
-            <path d="M7 1V13M1 7H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          Add Evidence
-        </button>
+        <div class="source-editor-add-actions">
+          <button type="button" class="btn-secondary source-web-search-btn" data-action="check-draft-www" data-return-tab="evidence">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <circle cx="6.2" cy="6.2" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M9.3 9.3L12.2 12.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Web Search
+          </button>
+          <button type="button" class="btn-secondary source-add-row-btn" data-action="add-source">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M7 1V13M1 7H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Add Evidence
+          </button>
+        </div>
       </div>
     `;
   }
@@ -8300,11 +8309,17 @@ The summary should be factual, informative, focus on the latest/most recent deve
 
     const title = String(this.topicFormState.title || '').trim();
     const summary = String(this.topicFormState.summary || '').trim();
+    const sourceHint = (this.topicSources || [])
+      .filter(source => source.name || source.url)
+      .slice(0, 3)
+      .map(source => [source.name, source.url].filter(Boolean).join(' - '))
+      .join('\n');
     if (!title && !summary) {
-      alert('Add a title or summary first, then check the web.');
+      alert('Add a title, summary, or verified evidence first, then run Web Search.');
       return;
     }
 
+    const returnTab = button?.dataset?.returnTab || this.topicBuilderTab || 'describe';
     const status = this.container.querySelector('[data-draft-www-status]');
     const originalHTML = button?.innerHTML || '';
     if (button) {
@@ -8322,6 +8337,8 @@ The summary should be factual, informative, focus on the latest/most recent deve
 
 Topic: ${title || '[untitled]'}
 Summary: ${summary || '[no summary]'}
+Current evidence:
+${sourceHint || '[none yet]'}
 Layer/category: ${layer?.name || this.topicFormState.category || 'general'}
 Location: ${location || 'not specified'}
 Draft date: ${this.topicFormState.date || 'not specified'}
@@ -8367,7 +8384,7 @@ Rules:
       const parsed = this.parseDraftWebEvidenceResponse(completion.content || '');
       const applied = this.applyDraftWebEvidenceResult(parsed);
       this.showSourceEditor = true;
-      this.topicBuilderTab = 'describe';
+      this.topicBuilderTab = this.normalizeTopicBuilderTab(returnTab);
       this.setTopicDraftStatus({
         ...(this.topicDraftStatus || {}),
         state: this.topicDraftStatus?.state || 'unsaved',

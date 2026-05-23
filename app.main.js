@@ -11,7 +11,7 @@ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js
 import { TopBar } from './components/TopBar.js?v=topic-earth-mobile-compose-20260523';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-embedded-story-20260521';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-layer-tabs-20260523';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-evidence-hydrate-20260523';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-evidence-actions-20260523';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-20260506';
 import { Settings } from './lib/settings.js?v=topic-earth-greek-language-20260521';
 import { LanguageManager } from './lib/language.js?v=topic-earth-greek-language-20260521';

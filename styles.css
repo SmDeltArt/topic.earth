@@ -5010,6 +5010,32 @@ body.regional-map-search-open #layer-panel {
   flex-shrink: 0;
 }
 
+.source-editor-add-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.source-editor-add-actions .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+}
+
+.source-web-search-btn {
+  color: var(--accent);
+  border-color: rgba(0, 212, 255, 0.34);
+  background: rgba(0, 212, 255, 0.09);
+}
+
+.source-add-row-btn {
+  color: var(--text-primary);
+}
+
 .topic-builder-media-preview {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
