@@ -51,6 +51,8 @@ export class DetailPanel {
       enabled: false,
       title: '',
       style: 'story-card',
+      audience: 'general',
+      under16Only: false,
       html: ''
     };
     this.isCompact = false;
@@ -555,6 +557,8 @@ export class DetailPanel {
         this.previewTopicStory();
       } else if (action === 'generate-topic-story') {
         this.generateTopicStoryFromAi(target);
+      } else if (action === 'apply-topic-story-preset') {
+        this.applyTopicStoryPreset(target);
       } else if (action === 'insert-topic-story-starter') {
         this.insertTopicStoryStarter();
       } else if (action === 'clear-topic-story') {
@@ -5844,6 +5848,8 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       enabled: Boolean(source.enabled || html),
       title: String(source.title || '').trim(),
       style: String(source.style || 'story-card').trim() || 'story-card',
+      audience: String(source.audience || 'general').trim() || 'general',
+      under16Only: Boolean(source.under16Only),
       html,
       sanitizedHtml: String(source.sanitizedHtml || '').trim(),
       structuredStory: source.structuredStory && typeof source.structuredStory === 'object' ? source.structuredStory : null,
@@ -5860,6 +5866,8 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       enabled: form.querySelector('#topic-story-enabled')?.checked ?? previous.enabled,
       title: form.querySelector('#topic-story-title')?.value ?? previous.title,
       style: form.querySelector('#topic-story-style')?.value ?? previous.style,
+      audience: form.querySelector('#topic-story-audience')?.value ?? previous.audience,
+      under16Only: form.querySelector('#topic-story-under16')?.checked ?? previous.under16Only,
       html,
       structuredStory: previous.structuredStory || null
     };
@@ -5919,6 +5927,66 @@ ${body}
 </html>`;
   }
 
+  getTopicStoryAudienceProfiles() {
+    return {
+      general: {
+        label: 'General',
+        ageRange: 'mixed audience',
+        vocabulary: 'plain public vocabulary',
+        guidance: 'Clear, factual, calm, and suitable for a broad public audience.',
+        under16: false
+      },
+      'kid-6-8': {
+        label: '6-8',
+        ageRange: '6 to 8 years old',
+        vocabulary: 'very simple words, one idea per section',
+        guidance: 'Friendly and reassuring. Avoid frightening climate framing, doom language, and complex systems language. Include one tiny check question.',
+        under16: true
+      },
+      'kid-9-12': {
+        label: '9-12',
+        ageRange: '9 to 12 years old',
+        vocabulary: 'simple cause and effect vocabulary',
+        guidance: 'Explain cause and effect, keep risk honest but not scary, and include one local action or observation question.',
+        under16: true
+      },
+      teen: {
+        label: 'Teen',
+        ageRange: '13 to 16 years old',
+        vocabulary: 'teen-friendly systems vocabulary',
+        guidance: 'Use systems thinking, tradeoffs, and evidence links. Keep tone respectful and not childish.',
+        under16: true
+      },
+      'adult-simple': {
+        label: 'Adult simple',
+        ageRange: 'adult beginner',
+        vocabulary: 'clear adult vulgarization',
+        guidance: 'Explain plainly without childish tone. Use practical context and evidence.',
+        under16: false
+      },
+      'adult-deep': {
+        label: 'Adult deep',
+        ageRange: 'adult technical reader',
+        vocabulary: 'precise technical vocabulary with short explanations',
+        guidance: 'Use source-linked explanation, uncertainty, and an optional technical sidebar.',
+        under16: false
+      }
+    };
+  }
+
+  getTopicStoryAudienceProfile(audience = 'general', under16Only = false) {
+    const profiles = this.getTopicStoryAudienceProfiles();
+    const profile = profiles[audience] || profiles.general;
+    if (!under16Only) return profile;
+
+    return {
+      ...profile,
+      label: profile.under16 ? profile.label : `${profile.label} (<16 safe)`,
+      under16: true,
+      guidance: `${profile.guidance} Apply the under-16 safety filter: no frightening imagery, no manipulative calls to action, no adult technical overload, short exercise, adult-review friendly wording.`
+    };
+  }
+
   renderTopicStoryEditor() {
     const story = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
     const previewHtml = this.wrapTopicStoryHtml(story.sanitizedHtml || story.html, story);
@@ -5930,11 +5998,21 @@ ${body}
       ['micro-game', this.t('topic.story.microGame')],
       ['external-widget', this.t('topic.story.externalWidget')]
     ];
+    const audienceProfiles = this.getTopicStoryAudienceProfiles();
+    const audienceOptions = Object.entries(audienceProfiles);
+    const presetButtons = [
+      { label: '6-8', preset: 'kid-6-8', title: 'Generate a reassuring first lesson' },
+      { label: '9-12', preset: 'kid-9-12', title: 'Generate a short cause/effect lesson' },
+      { label: 'Teen', preset: 'teen', title: 'Generate a systems-thinking card' },
+      { label: 'Adult', preset: 'adult-simple', title: 'Generate a clear adult card' }
+    ];
     const manifest = {
       bridge: true,
       bridgeVersion: 'topic-story-1',
       origin: 'topic.earth',
       style: story.style,
+      audience: story.audience,
+      under16Only: story.under16Only,
       title: story.title || this.topicFormState.title || '',
       limits: {
         allowScripts: false,
@@ -5966,6 +6044,26 @@ ${body}
               ${storyTypeOptions.map(([value, label]) => `<option value="${value}" ${story.style === value ? 'selected' : ''}>${this.escapeHtml(label)}</option>`).join('')}
             </select>
           </label>
+          <label>
+            <span>Age profile</span>
+            <select id="topic-story-audience">
+              ${audienceOptions.map(([value, profile]) => `<option value="${this.escapeHtml(value)}" ${story.audience === value ? 'selected' : ''}>${this.escapeHtml(profile.label)}</option>`).join('')}
+            </select>
+          </label>
+        </div>
+
+        <div class="topic-story-audience-tools">
+          <label class="topic-story-toggle topic-story-age-filter">
+            <input type="checkbox" id="topic-story-under16" ${story.under16Only ? 'checked' : ''}>
+            <span>Filter for &lt;16</span>
+          </label>
+          <div class="topic-story-preset-actions" aria-label="AI generation presets by age">
+            ${presetButtons.map(preset => `
+              <button type="button" class="btn-media-action topic-story-preset-btn ${story.audience === preset.preset ? 'active' : ''}" data-action="apply-topic-story-preset" data-preset="${this.escapeHtml(preset.preset)}" title="${this.escapeHtml(preset.title)}">
+                ${this.escapeHtml(preset.label)}
+              </button>
+            `).join('')}
+          </div>
         </div>
 
         <textarea id="topic-story-html" rows="10" spellcheck="false" placeholder="${this.escapeHtml(this.t('topic.story.placeholder'))}">${this.escapeHtml(story.html || '')}</textarea>
@@ -6010,6 +6108,25 @@ ${body}
     this.saveFormState();
     this.topicBuilderTab = 'story';
     this.renderCreateTopic();
+  }
+
+  async applyTopicStoryPreset(button = null) {
+    this.saveFormState();
+    const preset = String(button?.dataset?.preset || 'general').trim() || 'general';
+    const profiles = this.getTopicStoryAudienceProfiles();
+    const profile = profiles[preset] || profiles.general;
+    const previous = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
+
+    const presetStory = {
+      ...previous,
+      enabled: true,
+      style: profile.under16 ? 'educational-scene' : previous.style || 'story-card',
+      audience: preset,
+      under16Only: Boolean(profile.under16 || previous.under16Only)
+    };
+    this.topicFormState.topicStory = presetStory;
+    this.topicStoryDraft = this.topicFormState.topicStory;
+    await this.generateTopicStoryFromAi(button, { storyOverride: presetStory });
   }
 
   parseAiJsonObject(content = '', label = 'AI JSON') {
@@ -6108,6 +6225,8 @@ ${body}
 
   buildTopicStoryPrompt() {
     const settings = Settings.get();
+    const story = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
+    const audienceProfile = this.getTopicStoryAudienceProfile(story.audience, story.under16Only);
     const location = [
       this.topicFormState.region,
       this.topicFormState.country
@@ -6128,7 +6247,8 @@ ${body}
           'You create safe topic.earth story card data.',
           'Return strict JSON only. Do not return HTML.',
           'The app will render your JSON through a locked template with scripts disabled.',
-          'Keep it factual, educational, and evidence-aware. Separate known facts from assumptions.'
+          'Keep it factual, educational, and evidence-aware. Separate known facts from assumptions.',
+          'Respect the requested age profile exactly. For child or under-16 profiles, avoid frightening framing and any manipulative persuasion.'
         ].join(' ')
       },
       {
@@ -6138,7 +6258,11 @@ ${body}
           requiredShape: {
             title: 'short title',
             style: 'story-card | educational-scene | interactive-croquis | micro-game',
-            audience: 'general | kid-9-12 | teen | adult-simple | adult-deep',
+            audience: 'general | kid-6-8 | kid-9-12 | teen | adult-simple | adult-deep',
+            ageRange: 'age range label',
+            learningObjective: 'one sentence objective',
+            vocabularyLevel: 'short vocabulary note',
+            adultReviewRequired: true,
             summary: 'one sentence',
             sections: [
               { label: 'Context', body: 'plain language body' },
@@ -6166,6 +6290,14 @@ ${body}
             analysis: this.topicFormState.insight || '',
             sourceNote: this.topicFormState.source || ''
           },
+          generationPreset: {
+            audience: story.audience,
+            under16Only: story.under16Only,
+            ageRange: audienceProfile.ageRange,
+            vocabulary: audienceProfile.vocabulary,
+            guidance: audienceProfile.guidance,
+            adultReviewRequired: Boolean(audienceProfile.under16 || story.under16Only)
+          },
           sources
         }, null, 2)
       }
@@ -6175,6 +6307,9 @@ ${body}
   renderTrustedTopicStoryHtml(data = {}) {
     const title = String(data.title || this.topicFormState.title || 'Topic Story').trim();
     const style = String(data.style || this.topicFormState.topicStory?.style || 'story-card').trim();
+    const story = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
+    const audience = String(data.audience || story.audience || 'general').trim();
+    const audienceProfile = this.getTopicStoryAudienceProfile(audience, story.under16Only || data.adultReviewRequired);
     const summary = String(data.summary || this.topicFormState.summary || '').trim();
     const sections = Array.isArray(data.sections) && data.sections.length > 0
       ? data.sections.slice(0, 5)
@@ -6209,10 +6344,16 @@ ${body}
       `;
     }).join('');
 
-    return `<article class="topic-story-card topic-story-card-${this.escapeHtml(style)}" style="max-width:860px;margin:auto;padding:24px;border:1px solid ${color}66;border-radius:14px;background:#07111f;color:#eef8ff;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+    return `<article class="topic-story-card topic-story-card-${this.escapeHtml(style)}" data-audience="${this.escapeHtml(audience)}" data-under16="${story.under16Only || audienceProfile.under16 ? 'true' : 'false'}" style="max-width:860px;margin:auto;padding:24px;border:1px solid ${color}66;border-radius:14px;background:#07111f;color:#eef8ff;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <p style="margin:0 0 10px;color:${color};font-weight:900;letter-spacing:.08em;text-transform:uppercase;">topic.earth live card</p>
   <h1 style="margin:0 0 12px;font-size:clamp(28px,6vw,54px);line-height:1.02;">${this.escapeHtml(title)}</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;">
+    <span style="display:inline-flex;padding:6px 9px;border:1px solid ${color}66;border-radius:999px;color:${color};font-size:12px;font-weight:800;">Age: ${this.escapeHtml(audienceProfile.label)}</span>
+    <span style="display:inline-flex;padding:6px 9px;border:1px solid #ffffff22;border-radius:999px;color:#b8c6d8;font-size:12px;font-weight:700;">${this.escapeHtml(data.vocabularyLevel || audienceProfile.vocabulary)}</span>
+    ${story.under16Only || audienceProfile.under16 ? '<span style="display:inline-flex;padding:6px 9px;border:1px solid #9ad99d66;border-radius:999px;color:#9ad99d;font-size:12px;font-weight:800;">adult review</span>' : ''}
+  </div>
   <p style="margin:0 0 20px;font-size:18px;line-height:1.55;color:#cfe9f6;">${this.escapeHtml(summary)}</p>
+  ${data.learningObjective ? `<p style="margin:0 0 18px;padding:12px;border:1px solid #ffffff18;border-radius:10px;background:#ffffff08;color:#d8e8f2;"><strong style="color:${color};">Learning objective:</strong> ${this.escapeHtml(data.learningObjective)}</p>` : ''}
   <svg viewBox="0 0 440 230" role="img" aria-label="${this.escapeHtml(caption)}" style="display:block;width:100%;height:auto;margin:18px 0;border-radius:12px;background:#020814;border:1px solid ${color}33;">
     <defs>
       <radialGradient id="storyGlow" cx="50%" cy="45%" r="60%">
@@ -6255,8 +6396,15 @@ ${body}
 </article>`;
   }
 
-  async generateTopicStoryFromAi(button = null) {
+  async generateTopicStoryFromAi(button = null, options = {}) {
     this.saveFormState();
+    if (options.storyOverride) {
+      this.topicFormState.topicStory = {
+        ...this.normalizeTopicStory(this.topicFormState.topicStory),
+        ...this.normalizeTopicStory(options.storyOverride)
+      };
+      this.topicStoryDraft = this.topicFormState.topicStory;
+    }
 
     if (!window.ourEarthAI?.createChatCompletion) {
       alert(this.t('topic.story.aiCreateNotReady'));
@@ -6287,18 +6435,22 @@ ${body}
       const structuredStory = this.parseAiJsonObject(completion.content || '', 'topic story JSON');
       const nextTitle = structuredStory.title || title || 'Topic Story';
       const nextStyle = structuredStory.style || this.topicFormState.topicStory?.style || 'story-card';
+      const currentStory = this.normalizeTopicStory(this.topicFormState.topicStory);
       const html = this.renderTrustedTopicStoryHtml({
         ...structuredStory,
         title: nextTitle,
-        style: nextStyle
+        style: nextStyle,
+        audience: structuredStory.audience || currentStory.audience
       });
       const now = new Date().toISOString();
 
       this.topicFormState.topicStory = {
-        ...this.normalizeTopicStory(this.topicFormState.topicStory),
+        ...currentStory,
         enabled: true,
         title: nextTitle,
         style: nextStyle,
+        audience: structuredStory.audience || currentStory.audience,
+        under16Only: Boolean(currentStory.under16Only || structuredStory.adultReviewRequired),
         html,
         sanitizedHtml: this.sanitizeStoryHtml(html),
         structuredStory,
@@ -6330,6 +6482,8 @@ ${body}
       enabled: true,
       title,
       style: this.topicFormState.topicStory?.style || 'story-card',
+      audience: this.topicFormState.topicStory?.audience || 'general',
+      under16Only: Boolean(this.topicFormState.topicStory?.under16Only),
       html: `<article class="topic-story-card" style="max-width:760px;margin:auto;padding:24px;border:1px solid #00d4ff55;border-radius:14px;background:#07111f;color:#eef8ff;font-family:system-ui,sans-serif;">
   <p style="margin:0 0 10px;color:#00d4ff;font-weight:800;letter-spacing:.08em;text-transform:uppercase;">topic.earth story</p>
   <h1 style="margin:0 0 14px;font-size:clamp(28px,6vw,52px);line-height:1.02;">${this.escapeHtml(title)}</h1>
@@ -6342,6 +6496,7 @@ ${body}
       structuredStory: {
         title,
         style: this.topicFormState.topicStory?.style || 'story-card',
+        audience: this.topicFormState.topicStory?.audience || 'general',
         summary,
         sections: [
           { label: 'Context', body: summary },
@@ -6377,6 +6532,8 @@ ${body}
       enabled: false,
       title: '',
       style: 'story-card',
+      audience: 'general',
+      under16Only: false,
       html: '',
       sanitizedHtml: '',
       structuredStory: null
@@ -6394,6 +6551,8 @@ ${body}
       enabled: true,
       type: story.style || 'story-card',
       style: story.style || 'story-card',
+      audience: story.audience || 'general',
+      under16Only: Boolean(story.under16Only),
       title: story.title || this.topicFormState.title || 'Topic story',
       html: story.html,
       sanitizedHtml: this.sanitizeStoryHtml(story.html),
@@ -6403,6 +6562,8 @@ ${body}
         bridgeVersion: 'topic-story-1',
         origin: 'topic.earth',
         style: story.style || 'story-card',
+        audience: story.audience || 'general',
+        under16Only: Boolean(story.under16Only),
         title: story.title || this.topicFormState.title || 'Topic story',
         limits: {
           allowScripts: false,
