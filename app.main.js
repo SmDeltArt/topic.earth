@@ -11,7 +11,7 @@ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js
 import { TopBar } from './components/TopBar.js?v=topic-earth-mobile-compose-20260523';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-embedded-story-20260521';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-mode-layer-state-20260524';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-fever-cache-audio-20260523';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-fever-quick-loop-20260524';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-20260506';
 import { Settings } from './lib/settings.js?v=topic-earth-greek-language-20260521';
 import { LanguageManager } from './lib/language.js?v=topic-earth-greek-language-20260521';
@@ -189,6 +189,7 @@ class TopicEarthApp {
     
     // Setup view toggle
     this.setupViewToggle();
+    this.setupFeverLoopQuickButton();
     
     // Setup settings change listener
     this.setupSettingsListener();
@@ -883,6 +884,7 @@ class TopicEarthApp {
       // Store current filter
       this.currentLayerFilter = filter;
       this.updateBrowserTabState(filter);
+      this.updateFeverLoopQuickButton();
       
       // Clean exit from previous mode
       if (filter !== 'space' && this.globe.inSolarSystemView) {
@@ -1556,11 +1558,62 @@ class TopicEarthApp {
   showFeverSimulation() {
     this.feverSimulationActive = true;
     this.detailPanel.showFeverSimulation(this.globe);
+    this.updateFeverLoopQuickButton();
   }
   
   hideFeverSimulation() {
     this.feverSimulationActive = false;
     this.detailPanel.hide();
+    this.updateFeverLoopQuickButton();
+  }
+
+  setupFeverLoopQuickButton() {
+    this.feverLoopQuickButton = document.getElementById('fever-loop-quick-btn');
+    if (!this.feverLoopQuickButton) return;
+
+    this.feverLoopQuickButton.addEventListener('click', () => {
+      const detailOpen = this.detailPanel?.isVisible?.();
+      const isFeverMonitorOpen = detailOpen && this.detailPanel?.mode === 'fever-simulation';
+
+      if (this.currentLayerFilter !== 'fever') {
+        this.switchLayerFilter('fever');
+        return;
+      }
+
+      if (isFeverMonitorOpen) {
+        this.hideFeverSimulation();
+      } else {
+        this.showFeverSimulation();
+      }
+    });
+
+    if (this.detailPanel?.container) {
+      const detailObserver = new MutationObserver(() => this.updateFeverLoopQuickButton());
+      detailObserver.observe(this.detailPanel.container, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+      this.feverLoopQuickButtonObserver = detailObserver;
+    }
+
+    this.updateFeverLoopQuickButton();
+  }
+
+  updateFeverLoopQuickButton() {
+    const button = this.feverLoopQuickButton || document.getElementById('fever-loop-quick-btn');
+    if (!button) return;
+
+    const monitorOpen = this.currentLayerFilter === 'fever'
+      && this.detailPanel?.isVisible?.()
+      && this.detailPanel?.mode === 'fever-simulation';
+
+    button.classList.toggle('is-active', monitorOpen);
+    button.setAttribute('aria-pressed', String(monitorOpen));
+    button.setAttribute(
+      'aria-label',
+      monitorOpen ? 'Hide Fever loop monitor' : 'Open Fever loop monitor'
+    );
+    button.title = monitorOpen ? 'Hide Fever loop monitor' : 'Fever loop monitor';
   }
 
   setupTextSelection() {

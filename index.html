@@ -103,7 +103,7 @@
     <link rel="preload" as="image" href="./assets/logo/topic-earth-vignette-animated.svg?v=topic-earth-loading-vignette-20260521">
     <script src="./shared/topic-favicon.js?v=topic-earth-svg-groups-20260506"></script>
     <link rel="stylesheet" href="./assets/fonts/space-mono.css?v=topic-earth-local-vendor-20260506">
-  <link rel="stylesheet" href="styles.css?v=topic-earth-evidence-actions-20260523">
+  <link rel="stylesheet" href="styles.css?v=topic-earth-fever-quick-loop-20260524">
     <script src="./vendor/chart/chart.umd.min.js?v=4.4.0"></script>
 </head>
 <body>
@@ -159,6 +159,11 @@
             <div id="detail-content"></div>
         </aside>
 
+        <button id="fever-loop-quick-btn" class="fever-loop-quick-btn" type="button" aria-label="Open Fever loop monitor" title="Fever loop monitor" aria-pressed="false">
+            <span class="fever-loop-ring" aria-hidden="true"></span>
+            <span class="fever-loop-pulse" aria-hidden="true"></span>
+        </button>
+
         <!-- Fever Debug Bar (Admin only) -->
         <div id="fever-debug-bar"></div>
 
@@ -178,7 +183,7 @@
     <script>
       window.TOPIC_EARTH_PROFILE = window.TOPIC_EARTH_PROFILE || 'admin';
     </script>
-  <script type="module" src="./app.main.js?v=topic-earth-mode-layer-state-20260524"></script>
+  <script type="module" src="./app.main.js?v=topic-earth-fever-quick-loop-20260524"></script>
   
   <style>
     /* Mobile panel visibility rules */
