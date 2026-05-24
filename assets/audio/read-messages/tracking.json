@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-23T12:01:22.388Z",
+  "generatedAt": "2026-05-24T09:25:55.114Z",
   "manifestPath": "assets/audio/read-messages/manifest.json",
   "csvPath": "shared/topic-earth-ui.csv",
   "totalMessages": 1391,
@@ -8,7 +8,7 @@
   "missingCsvRows": 0,
   "missingAudioRows": 1391,
   "mp3FilesTracked": 0,
-  "webmFilesTracked": 0,
+  "webmFilesTracked": 54,
   "messages": [
     {
       "id": "api-settings-safe-en",
@@ -15018,7 +15018,7 @@
       "mp3": "tutorial-step-topic-micro-game-aim-de.mp3",
       "webm": "tutorial-step-topic-micro-game-aim-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15036,7 +15036,7 @@
       "mp3": "tutorial-step-topic-micro-game-aim-el.mp3",
       "webm": "tutorial-step-topic-micro-game-aim-el.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15054,7 +15054,7 @@
       "mp3": "tutorial-step-topic-micro-game-aim-en.mp3",
       "webm": "tutorial-step-topic-micro-game-aim-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15072,7 +15072,7 @@
       "mp3": "tutorial-step-topic-micro-game-aim-fr.mp3",
       "webm": "tutorial-step-topic-micro-game-aim-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15090,7 +15090,7 @@
       "mp3": "tutorial-step-topic-micro-game-aim-hi.mp3",
       "webm": "tutorial-step-topic-micro-game-aim-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15108,7 +15108,7 @@
       "mp3": "tutorial-step-topic-micro-game-aim-nl.mp3",
       "webm": "tutorial-step-topic-micro-game-aim-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15126,7 +15126,7 @@
       "mp3": "tutorial-step-topic-micro-game-aim-ru.mp3",
       "webm": "tutorial-step-topic-micro-game-aim-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15144,7 +15144,7 @@
       "mp3": "tutorial-step-topic-micro-game-aim-uk.mp3",
       "webm": "tutorial-step-topic-micro-game-aim-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15162,7 +15162,7 @@
       "mp3": "tutorial-step-topic-micro-game-aim-zh.mp3",
       "webm": "tutorial-step-topic-micro-game-aim-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15180,7 +15180,7 @@
       "mp3": "tutorial-step-topic-micro-game-template-de.mp3",
       "webm": "tutorial-step-topic-micro-game-template-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15198,7 +15198,7 @@
       "mp3": "tutorial-step-topic-micro-game-template-el.mp3",
       "webm": "tutorial-step-topic-micro-game-template-el.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15216,7 +15216,7 @@
       "mp3": "tutorial-step-topic-micro-game-template-en.mp3",
       "webm": "tutorial-step-topic-micro-game-template-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15234,7 +15234,7 @@
       "mp3": "tutorial-step-topic-micro-game-template-fr.mp3",
       "webm": "tutorial-step-topic-micro-game-template-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15252,7 +15252,7 @@
       "mp3": "tutorial-step-topic-micro-game-template-hi.mp3",
       "webm": "tutorial-step-topic-micro-game-template-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15270,7 +15270,7 @@
       "mp3": "tutorial-step-topic-micro-game-template-nl.mp3",
       "webm": "tutorial-step-topic-micro-game-template-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15288,7 +15288,7 @@
       "mp3": "tutorial-step-topic-micro-game-template-ru.mp3",
       "webm": "tutorial-step-topic-micro-game-template-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15306,7 +15306,7 @@
       "mp3": "tutorial-step-topic-micro-game-template-uk.mp3",
       "webm": "tutorial-step-topic-micro-game-template-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -15324,7 +15324,7 @@
       "mp3": "tutorial-step-topic-micro-game-template-zh.mp3",
       "webm": "tutorial-step-topic-micro-game-template-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24414,7 +24414,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-body-de.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-body-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24432,7 +24432,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-body-el.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-body-el.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24450,7 +24450,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-body-en.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-body-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24468,7 +24468,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-body-fr.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-body-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24486,7 +24486,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-body-hi.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-body-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24504,7 +24504,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-body-nl.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-body-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24522,7 +24522,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-body-ru.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-body-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24540,7 +24540,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-body-uk.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-body-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24558,7 +24558,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-body-zh.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-body-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24576,7 +24576,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-title-de.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-title-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24594,7 +24594,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-title-el.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-title-el.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24612,7 +24612,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-title-en.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-title-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24630,7 +24630,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-title-fr.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-title-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24648,7 +24648,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-title-hi.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-title-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24666,7 +24666,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-title-nl.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-title-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24684,7 +24684,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-title-ru.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-title-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24702,7 +24702,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-title-uk.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-title-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24720,7 +24720,7 @@
       "mp3": "ui-text-tutorial-micro-game-aim-title-zh.mp3",
       "webm": "ui-text-tutorial-micro-game-aim-title-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24738,7 +24738,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-body-de.mp3",
       "webm": "ui-text-tutorial-micro-game-body-body-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24756,7 +24756,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-body-el.mp3",
       "webm": "ui-text-tutorial-micro-game-body-body-el.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24774,7 +24774,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-body-en.mp3",
       "webm": "ui-text-tutorial-micro-game-body-body-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24792,7 +24792,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-body-fr.mp3",
       "webm": "ui-text-tutorial-micro-game-body-body-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24810,7 +24810,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-body-hi.mp3",
       "webm": "ui-text-tutorial-micro-game-body-body-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24828,7 +24828,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-body-nl.mp3",
       "webm": "ui-text-tutorial-micro-game-body-body-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24846,7 +24846,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-body-ru.mp3",
       "webm": "ui-text-tutorial-micro-game-body-body-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24864,7 +24864,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-body-uk.mp3",
       "webm": "ui-text-tutorial-micro-game-body-body-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24882,7 +24882,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-body-zh.mp3",
       "webm": "ui-text-tutorial-micro-game-body-body-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24900,7 +24900,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-title-de.mp3",
       "webm": "ui-text-tutorial-micro-game-body-title-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24918,7 +24918,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-title-el.mp3",
       "webm": "ui-text-tutorial-micro-game-body-title-el.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24936,7 +24936,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-title-en.mp3",
       "webm": "ui-text-tutorial-micro-game-body-title-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24954,7 +24954,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-title-fr.mp3",
       "webm": "ui-text-tutorial-micro-game-body-title-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24972,7 +24972,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-title-hi.mp3",
       "webm": "ui-text-tutorial-micro-game-body-title-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -24990,7 +24990,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-title-nl.mp3",
       "webm": "ui-text-tutorial-micro-game-body-title-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -25008,7 +25008,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-title-ru.mp3",
       "webm": "ui-text-tutorial-micro-game-body-title-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -25026,7 +25026,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-title-uk.mp3",
       "webm": "ui-text-tutorial-micro-game-body-title-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -25044,7 +25044,7 @@
       "mp3": "ui-text-tutorial-micro-game-body-title-zh.mp3",
       "webm": "ui-text-tutorial-micro-game-body-title-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     }
