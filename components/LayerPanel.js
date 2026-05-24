@@ -15,11 +15,16 @@ export class LayerPanel {
     this.points = points;
     this.callbacks = callbacks;
     this.activeLayers = new Set(layers.filter(layer => layer.enabled && !layer.isGroup).map(layer => layer.id));
+    this.activeLayersByFilter = new Map();
     this.knownLayerIds = new Set(layers.map(layer => layer.id));
     this.isCollapsed = false;
     this.expandedLayers = new Set(layers.filter(layer => layer.defaultExpanded).map(layer => layer.id));
     this.layerFilter = 'main';
     this.regionalContext = null;
+    ['main', 'regional', 'space', 'fever'].forEach(filter => {
+      this.activeLayersByFilter.set(filter, this.getDefaultActiveLayersForFilter(filter));
+    });
+    this.activeLayers = new Set(this.activeLayersByFilter.get(this.layerFilter) || []);
 
     this.handleClick = this.handleClick.bind(this);
     this.handleSettingsChanged = this.handleSettingsChanged.bind(this);
@@ -30,7 +35,9 @@ export class LayerPanel {
 
     window.addEventListener('layerFilterChanged', (e) => {
       const previousFilter = this.layerFilter;
+      this.saveActiveLayerState(previousFilter);
       this.layerFilter = this.normalizeLayerFilter(e.detail.filter);
+      this.activeLayers = this.getStoredActiveLayersForFilter(this.layerFilter);
       this.preparePanelForFilter(this.layerFilter, previousFilter);
       this.updateData(this.layers, this.points);
     });
@@ -46,6 +53,47 @@ export class LayerPanel {
   handleRegionalContextChanged(event) {
     this.regionalContext = event?.detail?.context || null;
     this.updateData(this.layers, this.points);
+  }
+
+  normalizeLayerFilter(filter = 'main') {
+    const normalized = filter === 'world' ? 'main' : String(filter || 'main');
+    return ['main', 'regional', 'space', 'fever'].includes(normalized) ? normalized : 'main';
+  }
+
+  getLayerModeTabs(layer) {
+    if (!layer) return ['main'];
+    if (Array.isArray(layer.modeTabs) && layer.modeTabs.length > 0) {
+      return layer.modeTabs.map(tab => this.normalizeLayerFilter(tab));
+    }
+    if (layer.feverOnly) return ['fever'];
+    if (layer.id === 'space') return ['space'];
+    return ['main'];
+  }
+
+  layerBelongsToFilter(layer, filter = this.layerFilter) {
+    return this.getLayerModeTabs(layer).includes(this.normalizeLayerFilter(filter));
+  }
+
+  getDefaultActiveLayersForFilter(filter = 'main') {
+    const normalized = this.normalizeLayerFilter(filter);
+    return new Set(
+      this.layers
+        .filter(layer => !layer.isGroup && layer.enabled && this.layerBelongsToFilter(layer, normalized))
+        .map(layer => layer.id)
+    );
+  }
+
+  getStoredActiveLayersForFilter(filter = this.layerFilter) {
+    const normalized = this.normalizeLayerFilter(filter);
+    if (!this.activeLayersByFilter.has(normalized)) {
+      this.activeLayersByFilter.set(normalized, this.getDefaultActiveLayersForFilter(normalized));
+    }
+    return new Set(this.activeLayersByFilter.get(normalized));
+  }
+
+  saveActiveLayerState(filter = this.layerFilter) {
+    const normalized = this.normalizeLayerFilter(filter);
+    this.activeLayersByFilter.set(normalized, new Set(this.activeLayers));
   }
 
   preparePanelForFilter(filter = 'main', previousFilter = this.layerFilter) {
@@ -154,9 +202,11 @@ export class LayerPanel {
         return topLevelLayers.filter(layer => layer.id === 'space');
       case 'fever':
         return topLevelLayers.filter(layer => layer.id === 'earths-fever' || layer.feverOnly);
+      case 'regional':
+        return topLevelLayers.filter(layer => this.layerBelongsToFilter(layer, 'regional'));
       case 'main':
       default:
-        return topLevelLayers.filter(layer => layer.id !== 'space' && !layer.feverOnly);
+        return topLevelLayers.filter(layer => this.layerBelongsToFilter(layer, 'main'));
     }
   }
 
@@ -593,14 +643,42 @@ export class LayerPanel {
   }
 
   setLayerActive(layerId, isActive) {
+    const layer = this.getLayerById(layerId);
+    if (layer && !this.layerBelongsToFilter(layer, this.layerFilter)) {
+      this.setLayerActiveForFilter(layerId, this.getLayerModeTabs(layer)[0] || this.layerFilter, isActive);
+      return;
+    }
+
     if (isActive) {
       this.activeLayers.add(layerId);
     } else {
       this.activeLayers.delete(layerId);
     }
+    this.saveActiveLayerState(this.layerFilter);
 
     if (this.callbacks.onLayerToggle) {
       this.callbacks.onLayerToggle(layerId, isActive);
+    }
+  }
+
+  setLayerActiveForFilter(layerId, filter = this.layerFilter, isActive, options = {}) {
+    const normalized = this.normalizeLayerFilter(filter);
+    const state = this.getStoredActiveLayersForFilter(normalized);
+    if (isActive) {
+      state.add(layerId);
+    } else {
+      state.delete(layerId);
+    }
+    this.activeLayersByFilter.set(normalized, state);
+
+    if (normalized === this.layerFilter) {
+      this.activeLayers = new Set(state);
+      if (options.render !== false) {
+        this.updateData(this.layers, this.points);
+      }
+      if (options.emit !== false && this.callbacks.onLayerToggle) {
+        this.callbacks.onLayerToggle(layerId, isActive);
+      }
     }
   }
 
@@ -719,9 +797,25 @@ export class LayerPanel {
   }
 
   updateData(layers, points) {
+    this.saveActiveLayerState(this.layerFilter);
+    const nextLayerIds = new Set(layers.map(layer => layer.id));
+    this.activeLayersByFilter.forEach((state, filter) => {
+      const cleaned = new Set(Array.from(state).filter(layerId => nextLayerIds.has(layerId)));
+      layers.forEach(layer => {
+        if (!this.knownLayerIds.has(layer.id) && layer.enabled && !layer.isGroup && this.layerBelongsToFilter(layer, filter)) {
+          cleaned.add(layer.id);
+        }
+      });
+      this.activeLayersByFilter.set(filter, cleaned);
+    });
+
     layers.forEach(layer => {
       if (!this.knownLayerIds.has(layer.id) && layer.enabled && !layer.isGroup) {
-        this.activeLayers.add(layer.id);
+        this.getLayerModeTabs(layer).forEach(filter => {
+          const state = this.getStoredActiveLayersForFilter(filter);
+          state.add(layer.id);
+          this.activeLayersByFilter.set(filter, state);
+        });
       }
       if (layer.defaultExpanded) {
         this.expandedLayers.add(layer.id);
@@ -730,6 +824,7 @@ export class LayerPanel {
     });
     this.layers = layers;
     this.points = points;
+    this.activeLayers = this.getStoredActiveLayersForFilter(this.layerFilter);
     this.render();
 
     if (this.isCollapsed) {
@@ -757,6 +852,13 @@ export class LayerPanel {
 
   getActiveLayers() {
     return this.activeLayers;
+  }
+
+  getActiveLayersForFilter(filter = this.layerFilter) {
+    if (this.normalizeLayerFilter(filter) === this.layerFilter) {
+      this.saveActiveLayerState(this.layerFilter);
+    }
+    return this.getStoredActiveLayersForFilter(filter);
   }
 
   updateFeverYearOverlay(visible) {
@@ -799,11 +901,19 @@ export class LayerPanel {
   }
 
   activatLayer(layerId) {
-    this.activeLayers.add(layerId);
+    this.setLayerActive(layerId, true);
     const icon = this.container.querySelector(`.layer-icon[data-layer-id="${layerId}"]`);
     if (icon) {
       icon.classList.add('active');
     }
+  }
+
+  removeLayerFromAllStates(layerId) {
+    this.activeLayersByFilter.forEach((state, filter) => {
+      state.delete(layerId);
+      this.activeLayersByFilter.set(filter, state);
+    });
+    this.activeLayers.delete(layerId);
   }
 
   disableNonFilteredLayers(filter) {

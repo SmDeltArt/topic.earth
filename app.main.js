@@ -10,7 +10,7 @@ import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-e
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=topic-earth-mobile-compose-20260523';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-embedded-story-20260521';
-import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-layer-tabs-20260523';
+import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-mode-layer-state-20260524';
 import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-fever-cache-audio-20260523';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-20260506';
 import { Settings } from './lib/settings.js?v=topic-earth-greek-language-20260521';
@@ -149,11 +149,11 @@ class TopicEarthApp {
       console.log(`[AMOC Sync] Toggle from ${source}: ${visible ? 'enabled' : 'disabled'}`);
       
       if (visible) {
-        this.layerPanel.activeLayers.add('amoc-watch');
+        this.layerPanel.setLayerActiveForFilter?.('amoc-watch', 'fever', true, { emit: false, render: false });
         const icon = document.querySelector(`.layer-icon[data-layer-id="amoc-watch"]`);
         if (icon) icon.classList.add('active');
       } else {
-        this.layerPanel.activeLayers.delete('amoc-watch');
+        this.layerPanel.setLayerActiveForFilter?.('amoc-watch', 'fever', false, { emit: false, render: false });
         const icon = document.querySelector(`.layer-icon[data-layer-id="amoc-watch"]`);
         if (icon) icon.classList.remove('active');
       }
@@ -287,8 +287,8 @@ class TopicEarthApp {
   ensureRegionalTopicLayerActive(point = null) {
     const layerId = point?.regionalState?.layerId || point?.category;
     if (!layerId || !this.isRegionalLayerId(layerId)) return false;
-    if (!this.layerPanel?.activeLayers?.has(layerId)) {
-      this.layerPanel?.setLayerActive?.(layerId, true);
+    if (!this.layerPanel?.getActiveLayersForFilter?.('regional')?.has(layerId)) {
+      this.layerPanel?.setLayerActiveForFilter?.(layerId, 'regional', true, { emit: false, render: false });
       this.layerPanel?.updateData?.(this.allLayers, this.allPoints);
     }
     return true;
@@ -883,21 +883,6 @@ class TopicEarthApp {
       // Store current filter
       this.currentLayerFilter = filter;
       this.updateBrowserTabState(filter);
-      
-      // Save/restore layer states when switching modes
-      if (filter === 'fever' || filter === 'space') {
-        // Entering special mode - save current layer states and disable non-matching layers
-        if (previous === 'main' || previous === 'regional') {
-          this.savedLayerStates = new Set(this.layerPanel.getActiveLayers());
-        }
-        this.layerPanel.disableNonFilteredLayers(filter);
-      } else if ((filter === 'main' || filter === 'regional') && (previous === 'fever' || previous === 'space')) {
-        // Exiting special mode - restore saved layer states
-        if (this.savedLayerStates) {
-          this.layerPanel.restoreLayerStates(this.savedLayerStates);
-          this.savedLayerStates = null;
-        }
-      }
       
       // Clean exit from previous mode
       if (filter !== 'space' && this.globe.inSolarSystemView) {
@@ -2733,7 +2718,7 @@ class TopicEarthApp {
     this.customPoints = this.customPoints.filter(point => point.category !== layer.id);
     LocalStorage.saveCustomLayers(this.customLayers);
     this.persistCustomPoints('the layer removal');
-    this.layerPanel.activeLayers.delete(layer.id);
+    this.layerPanel.removeLayerFromAllStates?.(layer.id);
     this.layerPanel.expandedLayers.delete(layer.id);
     this.refreshAdminDataViews();
 
