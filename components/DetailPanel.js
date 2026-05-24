@@ -9789,7 +9789,8 @@ Return ONLY a JSON object with this exact format, no other text:
 
   showSettings(ttsManager) {
     this.mode = 'settings';
-    this.setCompactMode(false);
+    const compactSettingsPanel = window.matchMedia?.('(max-width: 768px), (max-height: 650px)').matches;
+    this.setPanelSize(compactSettingsPanel ? 'compact' : 'middle');
     this.ttsManager = ttsManager;
     this.renderSettings();
     this.container.classList.remove('hidden');
