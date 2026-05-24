@@ -6639,9 +6639,49 @@ canvas:hover {
 }
 
 @media (max-width: 768px) {
+    html,
+    body {
+        overflow-x: hidden;
+    }
+
     .fever-monitor-header {
         align-items: flex-start;
         gap: 10px;
+    }
+
+    body.topic-mode-fever #detail-panel,
+    body.topic-mode-fever #detail-panel *,
+    body.topic-mode-fever #detail-panel *::before,
+    body.topic-mode-fever #detail-panel *::after {
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+
+    body.topic-mode-fever #detail-panel {
+        overflow-x: hidden;
+    }
+
+    body.topic-mode-fever #detail-content {
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    body.topic-mode-fever .fever-detail-header {
+        padding-right: 0;
+    }
+
+    body.topic-mode-fever .fever-monitor-header {
+        padding: 12px;
+    }
+
+    body.topic-mode-fever .fever-monitor-title,
+    body.topic-mode-fever .fever-monitor-text {
+        min-width: 0;
+    }
+
+    body.topic-mode-fever .fever-monitor-label {
+        overflow-wrap: anywhere;
+        word-break: normal;
     }
 
     .fever-monitor-controls {
@@ -6655,15 +6695,63 @@ canvas:hover {
     }
 
     .fever-scenario-group {
-        display: grid;
-        grid-template-columns: 64px repeat(3, minmax(72px, 1fr));
+        display: flex;
+        align-items: stretch;
+        flex-wrap: wrap;
         width: 100%;
     }
 
+    .fever-scenario-group > span {
+        flex: 1 0 100%;
+        margin-right: 0 !important;
+    }
+
     .speed-btn {
-        width: 100%;
+        flex: 1 1 0;
+        width: auto;
+        min-width: 0;
         padding: 8px 6px;
         font-size: 11px;
+    }
+
+    body.topic-mode-fever .fever-simulation-container,
+    body.topic-mode-fever .fever-cardio-monitor,
+    body.topic-mode-fever .fever-combined-monitor,
+    body.topic-mode-fever .fever-monitoring-tabs,
+    body.topic-mode-fever .fever-timeline,
+    body.topic-mode-fever .heartbeat-display {
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    body.topic-mode-fever .heartbeat-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    body.topic-mode-fever .stat-item {
+        min-width: 0;
+        padding: 6px 4px;
+    }
+
+    body.topic-mode-fever .stat-label,
+    body.topic-mode-fever .stat-value {
+        overflow-wrap: anywhere;
+    }
+
+    body.topic-mode-fever .monitoring-tabs-header {
+        flex-wrap: wrap;
+    }
+
+    body.topic-mode-fever .monitoring-tab {
+        flex: 1 1 50%;
+        min-width: 0;
+        white-space: normal;
+    }
+
+    body.topic-mode-fever .timeline-marker span {
+        white-space: normal;
+        font-size: 9px;
     }
 
     .fever-topics-grid {
@@ -7911,6 +7999,7 @@ canvas:hover {
     #top-bar {
         padding: 0 8px;
         gap: 4px;
+        overflow: hidden;
     }
 
     #top-bar .layer-filter-group,
@@ -7947,6 +8036,25 @@ canvas:hover {
 
     #top-bar .logo-word {
         font-size: 10px;
+    }
+}
+
+@media (max-width: 360px) {
+    #top-bar .logo-word,
+    #top-bar .top-actions #admin-toggle-btn,
+    #top-bar .top-actions #news-update-btn,
+    #top-bar .top-actions #fullscreen-btn {
+        display: none;
+    }
+
+    #top-bar .logo {
+        flex: 0 0 36px;
+        width: 36px;
+        justify-content: center;
+    }
+
+    #top-bar .top-actions {
+        flex: 0 0 32px;
     }
 }
 /* Mobile & Small Screen Adjustments */
