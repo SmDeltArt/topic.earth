@@ -979,6 +979,22 @@ export const MOCK_POINTS = [
         title: 'Affiche Fête à Limont mai 2026',
         source: 'Commune d Anthisnes / app360',
         alt: 'Affiche du programme de la Fête à Limont 2026'
+      },
+      {
+        kind: 'html',
+        url: '/examples/fete-a-limont-2026-story.html',
+        title: 'Story HTML Fete a Limont 2026',
+        sourceName: 'topic.earth story',
+        sourceUrl: 'https://anthisnes.be/fete-a-limont/',
+        watermarkText: 'Story HTML | topic.earth'
+      },
+      {
+        kind: 'game',
+        url: '/examples/vertical-bowling-microgame.html',
+        title: 'Micro-game bowling vertical',
+        sourceName: 'topic.earth micro-game',
+        sourceUrl: 'https://anthisnes.be/fete-a-limont/',
+        watermarkText: 'Micro-game | topic.earth'
       }
     ],
     researchSources: [

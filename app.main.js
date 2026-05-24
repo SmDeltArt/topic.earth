@@ -1,17 +1,17 @@
-import { GlobeRenderer } from './lib/globe.js?v=topic-earth-mobile-compose-20260523';
+import { GlobeRenderer } from './lib/globe.js?v=topic-earth-fever-loading-20260524';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
 import { LAYERS } from './data/layers.js?v=topic-earth-regional-layer-tabs-20260523';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-cloud-over-20260423';
-import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-fete-limont-20260523';
+import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-media-embed-preview-20260524';
 import { FEVER_TOPICS } from './data/fever-topics.js?v=topic-earth-embedded-story-20260521';
-import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-fete-limont-20260523';
+import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-media-embed-preview-20260524';
 import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-topics-20260505';
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=topic-earth-mobile-compose-20260523';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-embedded-story-20260521';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-mode-layer-state-20260524';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-fever-quick-loop-20260524';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-media-embed-preview-20260524';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-20260506';
 import { Settings } from './lib/settings.js?v=topic-earth-greek-language-20260521';
 import { LanguageManager } from './lib/language.js?v=topic-earth-greek-language-20260521';
@@ -801,6 +801,11 @@ class TopicEarthApp {
       document.title = nextTitle;
     }
     this.updateLogoModeState(mode);
+    if (mode === 'fever' && !this.globe?.inFeverMode) {
+      this.feverLoadingStartedAt = this.feverLoadingStartedAt || this.showFeverModeLoading();
+    } else if (mode !== 'fever' && this.feverLoadingStartedAt) {
+      this.hideFeverModeLoading(this.feverLoadingStartedAt);
+    }
 
     const favicon = document.querySelector('link[data-topic-favicon]') || document.querySelector('link[rel~="icon"]');
     if (favicon) {
@@ -1029,27 +1034,84 @@ class TopicEarthApp {
   
   async enterFeverMode(transitionToken = this.modeTransitionToken) {
     const wasAlreadyInFever = this.globe.inFeverMode;
+    const needsFeverWarmup = !wasAlreadyInFever;
+    const loadingStartedAt = needsFeverWarmup
+      ? (this.feverLoadingStartedAt || this.showFeverModeLoading())
+      : 0;
+
     if (!wasAlreadyInFever && this.globe.getFeverSoundEnabled?.()) {
       this.detailPanel.primeFeverAudioFromGesture?.();
     }
-    await this.globe.toggleFeverMode();
-    if (!this.isCurrentModeTransition(transitionToken) || this.currentLayerFilter !== 'fever') {
-      if (this.globe.inFeverMode) {
-        this.globe.exitFeverMode();
+    try {
+      await this.globe.toggleFeverMode();
+      if (!this.isCurrentModeTransition(transitionToken) || this.currentLayerFilter !== 'fever') {
+        if (this.globe.inFeverMode) {
+          this.globe.exitFeverMode();
+        }
+        if (this.feverSimulationActive) {
+          this.hideFeverSimulation();
+        }
+        return;
       }
-      if (this.feverSimulationActive) {
-        this.hideFeverSimulation();
+
+      // Mobile: keep both panels available; CSS prevents overlap.
+      if (window.innerWidth <= 768) {
+        document.getElementById('layer-panel')?.classList.remove('mobile-hidden');
       }
-      return;
+
+      // Always show fever simulation panel, even when restarting
+      this.showFeverSimulation();
+    } catch (error) {
+      console.error('[Fever] Failed to enter Fever mode:', error);
+      this.switchLayerFilter('main');
+    } finally {
+      if (needsFeverWarmup) {
+        this.hideFeverModeLoading(loadingStartedAt);
+      }
     }
-    
-    // Mobile: keep both panels available; CSS prevents overlap.
-    if (window.innerWidth <= 768) {
-      document.getElementById('layer-panel')?.classList.remove('mobile-hidden');
+  }
+
+  showFeverModeLoading() {
+    let overlay = document.getElementById('fever-mode-loading');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'fever-mode-loading';
+      overlay.className = 'fever-mode-loading';
+      overlay.setAttribute('role', 'status');
+      overlay.setAttribute('aria-live', 'polite');
+      overlay.innerHTML = `
+        <div class="fever-mode-loading-card">
+          <span class="fever-mode-loading-pulse" aria-hidden="true"></span>
+          <span class="fever-mode-loading-text">Loading Fever loop</span>
+          <span class="fever-mode-loading-bar" aria-hidden="true"><span></span></span>
+        </div>
+      `;
+      document.body.appendChild(overlay);
     }
-    
-    // Always show fever simulation panel, even when restarting
-    this.showFeverSimulation();
+
+    window.clearTimeout(this.feverLoadingTimer);
+    overlay.classList.remove('fade-out');
+    document.body.classList.add('fever-mode-loading-active');
+    this.feverLoadingStartedAt = performance.now();
+    return this.feverLoadingStartedAt;
+  }
+
+  hideFeverModeLoading(startedAt = 0) {
+    const overlay = document.getElementById('fever-mode-loading');
+    if (!overlay) return;
+
+    const elapsed = startedAt ? performance.now() - startedAt : 0;
+    const delay = Math.max(0, 420 - elapsed);
+    window.clearTimeout(this.feverLoadingTimer);
+    this.feverLoadingTimer = window.setTimeout(() => {
+      overlay.classList.add('fade-out');
+      document.body.classList.remove('fever-mode-loading-active');
+      this.feverLoadingStartedAt = 0;
+      this.feverLoadingTimer = window.setTimeout(() => {
+        overlay.remove();
+        this.feverLoadingTimer = null;
+      }, 260);
+    }, delay);
   }
   
   exitSpecialModes() {

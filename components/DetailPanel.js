@@ -443,6 +443,25 @@ export class DetailPanel {
     if (closeBtn) {
       closeBtn.addEventListener('click', () => this.hide());
     }
+
+    const collapseBtn = this.container.querySelector('.detail-collapse-btn');
+    if (collapseBtn && collapseBtn.dataset.boundDetailCollapse !== 'true') {
+      collapseBtn.dataset.boundDetailCollapse = 'true';
+      const handlePanelSizeToggle = (event) => {
+        const now = Date.now();
+        if (now - (this.lastPanelSizeToggleAt || 0) < 260) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+        this.lastPanelSizeToggleAt = now;
+        event.preventDefault();
+        event.stopPropagation();
+        this.toggleCompactMode();
+      };
+      collapseBtn.addEventListener('click', handlePanelSizeToggle);
+      collapseBtn.addEventListener('pointerup', handlePanelSizeToggle);
+    }
     
     // Listen for settings button from TopBar
     window.addEventListener('openSettings', () => {
@@ -9325,12 +9344,35 @@ Return ONLY a JSON object with this exact format, no other text:
     return getTopicMediaTokensForPoint(point);
   }
 
+  isEmbeddableMediaUrl(url = '') {
+    const value = String(url || '').trim();
+    if (!value) return false;
+    return /\.html(?:[?#].*)?$/i.test(value)
+      || /^\/?examples\//i.test(value)
+      || /^\.\/examples\//i.test(value);
+  }
+
   renderMediaTokenImage(token, imageClass = 'generated-image', alt = 'Media image') {
     const normalized = this.normalizeMediaToken(token);
     if (!normalized?.url && !normalized?.browserAssetKey) return '';
 
     if (!normalized.url && normalized.browserAssetKey) {
       this.scheduleBrowserMediaHydration();
+    }
+
+    if (this.isEmbeddableMediaUrl(normalized.url)) {
+      return `
+        <div class="media-token-frame media-token-frame-embed">
+          <iframe
+            src="${this.escapeHtml(normalized.url)}"
+            title="${this.escapeHtml(alt)}"
+            class="${this.escapeHtml(imageClass)} topic-media-embed-preview"
+            loading="lazy"
+            sandbox="allow-scripts allow-same-origin"
+          ></iframe>
+          <div class="media-token-watermark">${this.escapeHtml(normalized.watermarkText || 'Embedded preview')}</div>
+        </div>
+      `;
     }
 
     const browserAssetAttrs = normalized.browserAssetKey
@@ -9723,12 +9765,15 @@ Return ONLY a JSON object with this exact format, no other text:
       mediaSection.appendChild(zoomPanel);
     }
 
+    const isEmbed = this.isEmbeddableMediaUrl(url);
     zoomPanel.innerHTML = `
       <div class="topic-media-zoom-header">
         <span>${this.escapeHtml(caption || 'Topic media')}</span>
-        <button class="topic-media-zoom-close" data-action="close-topic-media-zoom" title="Close image zoom">Close</button>
+        <button class="topic-media-zoom-close" data-action="close-topic-media-zoom" title="Close media zoom">Close</button>
       </div>
-      <img src="${this.escapeHtml(url)}" alt="${this.escapeHtml(caption || 'Topic media')}" class="topic-media-zoom-image">
+      ${isEmbed
+        ? `<iframe src="${this.escapeHtml(url)}" title="${this.escapeHtml(caption || 'Topic media')}" class="topic-media-zoom-embed" sandbox="allow-scripts allow-same-origin"></iframe>`
+        : `<img src="${this.escapeHtml(url)}" alt="${this.escapeHtml(caption || 'Topic media')}" class="topic-media-zoom-image">`}
     `;
     zoomPanel.classList.remove('hidden');
     zoomPanel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
