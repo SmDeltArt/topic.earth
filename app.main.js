@@ -16,7 +16,7 @@ import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-2026
 import { Settings } from './lib/settings.js?v=topic-earth-greek-language-20260521';
 import { LanguageManager } from './lib/language.js?v=topic-earth-greek-language-20260521';
 import { ReadTranslationService } from './lib/read-translation.js?v=topic-earth-warning-panel-collapse-20260430';
-import { TTSManager } from './lib/tts.js?v=topic-earth-audio-direct-play-20260524';
+import { TTSManager } from './lib/tts.js?v=topic-earth-recorded-audio-index-20260524';
 import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-audio-cache-first-20260524';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
 import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-warning-panel-collapse-20260430';
@@ -2013,7 +2013,11 @@ class TopicEarthApp {
       onStart: ({ source } = {}) => {
         this.startTTSHighlight();
         this.updateTTSVignette({
-          status: source === 'ai' ? 'Reading with linked OpenAI voice...' : 'Reading with browser voice...'
+          status: source === 'cache'
+            ? 'Reading recorded message...'
+            : source === 'ai'
+              ? 'Reading with linked OpenAI voice...'
+              : 'Reading with browser voice...'
         });
       },
       onBoundary: (event) => {

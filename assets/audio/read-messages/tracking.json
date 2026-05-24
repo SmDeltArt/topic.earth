@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-24T09:25:55.114Z",
+  "generatedAt": "2026-05-24T11:56:46.864Z",
   "manifestPath": "assets/audio/read-messages/manifest.json",
   "csvPath": "shared/topic-earth-ui.csv",
   "totalMessages": 1391,
@@ -8,7 +8,7 @@
   "missingCsvRows": 0,
   "missingAudioRows": 1391,
   "mp3FilesTracked": 0,
-  "webmFilesTracked": 54,
+  "webmFilesTracked": 564,
   "messages": [
     {
       "id": "api-settings-safe-en",
@@ -42,7 +42,7 @@
       "mp3": "fever-loop-best-1975-full-de.mp3",
       "webm": "fever-loop-best-1975-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -60,7 +60,7 @@
       "mp3": "fever-loop-best-1975-full-en.mp3",
       "webm": "fever-loop-best-1975-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -78,7 +78,7 @@
       "mp3": "fever-loop-best-1975-full-fr.mp3",
       "webm": "fever-loop-best-1975-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -96,7 +96,7 @@
       "mp3": "fever-loop-best-1975-full-hi.mp3",
       "webm": "fever-loop-best-1975-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -114,7 +114,7 @@
       "mp3": "fever-loop-best-1975-full-nl.mp3",
       "webm": "fever-loop-best-1975-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -132,7 +132,7 @@
       "mp3": "fever-loop-best-1975-full-ru.mp3",
       "webm": "fever-loop-best-1975-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -150,7 +150,7 @@
       "mp3": "fever-loop-best-1975-full-uk.mp3",
       "webm": "fever-loop-best-1975-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -168,7 +168,7 @@
       "mp3": "fever-loop-best-1975-full-zh.mp3",
       "webm": "fever-loop-best-1975-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -186,7 +186,7 @@
       "mp3": "fever-loop-best-1975-normal-de.mp3",
       "webm": "fever-loop-best-1975-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -204,7 +204,7 @@
       "mp3": "fever-loop-best-1975-normal-en.mp3",
       "webm": "fever-loop-best-1975-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -222,7 +222,7 @@
       "mp3": "fever-loop-best-1975-normal-fr.mp3",
       "webm": "fever-loop-best-1975-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -240,7 +240,7 @@
       "mp3": "fever-loop-best-1975-normal-hi.mp3",
       "webm": "fever-loop-best-1975-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -258,7 +258,7 @@
       "mp3": "fever-loop-best-1975-normal-nl.mp3",
       "webm": "fever-loop-best-1975-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -276,7 +276,7 @@
       "mp3": "fever-loop-best-1975-normal-ru.mp3",
       "webm": "fever-loop-best-1975-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -294,7 +294,7 @@
       "mp3": "fever-loop-best-1975-normal-uk.mp3",
       "webm": "fever-loop-best-1975-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -312,7 +312,7 @@
       "mp3": "fever-loop-best-1975-normal-zh.mp3",
       "webm": "fever-loop-best-1975-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -330,7 +330,7 @@
       "mp3": "fever-loop-best-1975-short-de.mp3",
       "webm": "fever-loop-best-1975-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -348,7 +348,7 @@
       "mp3": "fever-loop-best-1975-short-en.mp3",
       "webm": "fever-loop-best-1975-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -366,7 +366,7 @@
       "mp3": "fever-loop-best-1975-short-fr.mp3",
       "webm": "fever-loop-best-1975-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -384,7 +384,7 @@
       "mp3": "fever-loop-best-1975-short-hi.mp3",
       "webm": "fever-loop-best-1975-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -402,7 +402,7 @@
       "mp3": "fever-loop-best-1975-short-nl.mp3",
       "webm": "fever-loop-best-1975-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -420,7 +420,7 @@
       "mp3": "fever-loop-best-1975-short-ru.mp3",
       "webm": "fever-loop-best-1975-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -438,7 +438,7 @@
       "mp3": "fever-loop-best-1975-short-uk.mp3",
       "webm": "fever-loop-best-1975-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -456,7 +456,7 @@
       "mp3": "fever-loop-best-1975-short-zh.mp3",
       "webm": "fever-loop-best-1975-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -474,7 +474,7 @@
       "mp3": "fever-loop-best-2000-full-de.mp3",
       "webm": "fever-loop-best-2000-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -492,7 +492,7 @@
       "mp3": "fever-loop-best-2000-full-en.mp3",
       "webm": "fever-loop-best-2000-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -510,7 +510,7 @@
       "mp3": "fever-loop-best-2000-full-fr.mp3",
       "webm": "fever-loop-best-2000-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -528,7 +528,7 @@
       "mp3": "fever-loop-best-2000-full-hi.mp3",
       "webm": "fever-loop-best-2000-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -546,7 +546,7 @@
       "mp3": "fever-loop-best-2000-full-nl.mp3",
       "webm": "fever-loop-best-2000-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -564,7 +564,7 @@
       "mp3": "fever-loop-best-2000-full-ru.mp3",
       "webm": "fever-loop-best-2000-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -582,7 +582,7 @@
       "mp3": "fever-loop-best-2000-full-uk.mp3",
       "webm": "fever-loop-best-2000-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -600,7 +600,7 @@
       "mp3": "fever-loop-best-2000-full-zh.mp3",
       "webm": "fever-loop-best-2000-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -618,7 +618,7 @@
       "mp3": "fever-loop-best-2000-normal-de.mp3",
       "webm": "fever-loop-best-2000-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -636,7 +636,7 @@
       "mp3": "fever-loop-best-2000-normal-en.mp3",
       "webm": "fever-loop-best-2000-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -654,7 +654,7 @@
       "mp3": "fever-loop-best-2000-normal-fr.mp3",
       "webm": "fever-loop-best-2000-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -672,7 +672,7 @@
       "mp3": "fever-loop-best-2000-normal-hi.mp3",
       "webm": "fever-loop-best-2000-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -690,7 +690,7 @@
       "mp3": "fever-loop-best-2000-normal-nl.mp3",
       "webm": "fever-loop-best-2000-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -708,7 +708,7 @@
       "mp3": "fever-loop-best-2000-normal-ru.mp3",
       "webm": "fever-loop-best-2000-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -726,7 +726,7 @@
       "mp3": "fever-loop-best-2000-normal-uk.mp3",
       "webm": "fever-loop-best-2000-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -744,7 +744,7 @@
       "mp3": "fever-loop-best-2000-normal-zh.mp3",
       "webm": "fever-loop-best-2000-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -762,7 +762,7 @@
       "mp3": "fever-loop-best-2000-short-de.mp3",
       "webm": "fever-loop-best-2000-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -780,7 +780,7 @@
       "mp3": "fever-loop-best-2000-short-en.mp3",
       "webm": "fever-loop-best-2000-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -798,7 +798,7 @@
       "mp3": "fever-loop-best-2000-short-fr.mp3",
       "webm": "fever-loop-best-2000-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -816,7 +816,7 @@
       "mp3": "fever-loop-best-2000-short-hi.mp3",
       "webm": "fever-loop-best-2000-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -834,7 +834,7 @@
       "mp3": "fever-loop-best-2000-short-nl.mp3",
       "webm": "fever-loop-best-2000-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -852,7 +852,7 @@
       "mp3": "fever-loop-best-2000-short-ru.mp3",
       "webm": "fever-loop-best-2000-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -870,7 +870,7 @@
       "mp3": "fever-loop-best-2000-short-uk.mp3",
       "webm": "fever-loop-best-2000-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -888,7 +888,7 @@
       "mp3": "fever-loop-best-2000-short-zh.mp3",
       "webm": "fever-loop-best-2000-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -906,7 +906,7 @@
       "mp3": "fever-loop-best-2025-full-de.mp3",
       "webm": "fever-loop-best-2025-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -924,7 +924,7 @@
       "mp3": "fever-loop-best-2025-full-en.mp3",
       "webm": "fever-loop-best-2025-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -942,7 +942,7 @@
       "mp3": "fever-loop-best-2025-full-fr.mp3",
       "webm": "fever-loop-best-2025-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -960,7 +960,7 @@
       "mp3": "fever-loop-best-2025-full-hi.mp3",
       "webm": "fever-loop-best-2025-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -978,7 +978,7 @@
       "mp3": "fever-loop-best-2025-full-nl.mp3",
       "webm": "fever-loop-best-2025-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -996,7 +996,7 @@
       "mp3": "fever-loop-best-2025-full-ru.mp3",
       "webm": "fever-loop-best-2025-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1014,7 +1014,7 @@
       "mp3": "fever-loop-best-2025-full-uk.mp3",
       "webm": "fever-loop-best-2025-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1032,7 +1032,7 @@
       "mp3": "fever-loop-best-2025-full-zh.mp3",
       "webm": "fever-loop-best-2025-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1050,7 +1050,7 @@
       "mp3": "fever-loop-best-2025-normal-de.mp3",
       "webm": "fever-loop-best-2025-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1068,7 +1068,7 @@
       "mp3": "fever-loop-best-2025-normal-en.mp3",
       "webm": "fever-loop-best-2025-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1086,7 +1086,7 @@
       "mp3": "fever-loop-best-2025-normal-fr.mp3",
       "webm": "fever-loop-best-2025-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1104,7 +1104,7 @@
       "mp3": "fever-loop-best-2025-normal-hi.mp3",
       "webm": "fever-loop-best-2025-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1122,7 +1122,7 @@
       "mp3": "fever-loop-best-2025-normal-nl.mp3",
       "webm": "fever-loop-best-2025-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1140,7 +1140,7 @@
       "mp3": "fever-loop-best-2025-normal-ru.mp3",
       "webm": "fever-loop-best-2025-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1158,7 +1158,7 @@
       "mp3": "fever-loop-best-2025-normal-uk.mp3",
       "webm": "fever-loop-best-2025-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1176,7 +1176,7 @@
       "mp3": "fever-loop-best-2025-normal-zh.mp3",
       "webm": "fever-loop-best-2025-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1194,7 +1194,7 @@
       "mp3": "fever-loop-best-2025-short-de.mp3",
       "webm": "fever-loop-best-2025-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1212,7 +1212,7 @@
       "mp3": "fever-loop-best-2025-short-en.mp3",
       "webm": "fever-loop-best-2025-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1230,7 +1230,7 @@
       "mp3": "fever-loop-best-2025-short-fr.mp3",
       "webm": "fever-loop-best-2025-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1248,7 +1248,7 @@
       "mp3": "fever-loop-best-2025-short-hi.mp3",
       "webm": "fever-loop-best-2025-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1266,7 +1266,7 @@
       "mp3": "fever-loop-best-2025-short-nl.mp3",
       "webm": "fever-loop-best-2025-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1284,7 +1284,7 @@
       "mp3": "fever-loop-best-2025-short-ru.mp3",
       "webm": "fever-loop-best-2025-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1302,7 +1302,7 @@
       "mp3": "fever-loop-best-2025-short-uk.mp3",
       "webm": "fever-loop-best-2025-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1320,7 +1320,7 @@
       "mp3": "fever-loop-best-2025-short-zh.mp3",
       "webm": "fever-loop-best-2025-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1338,7 +1338,7 @@
       "mp3": "fever-loop-best-2050-full-de.mp3",
       "webm": "fever-loop-best-2050-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1356,7 +1356,7 @@
       "mp3": "fever-loop-best-2050-full-en.mp3",
       "webm": "fever-loop-best-2050-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1374,7 +1374,7 @@
       "mp3": "fever-loop-best-2050-full-fr.mp3",
       "webm": "fever-loop-best-2050-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1392,7 +1392,7 @@
       "mp3": "fever-loop-best-2050-full-hi.mp3",
       "webm": "fever-loop-best-2050-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1410,7 +1410,7 @@
       "mp3": "fever-loop-best-2050-full-nl.mp3",
       "webm": "fever-loop-best-2050-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1428,7 +1428,7 @@
       "mp3": "fever-loop-best-2050-full-ru.mp3",
       "webm": "fever-loop-best-2050-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1446,7 +1446,7 @@
       "mp3": "fever-loop-best-2050-full-uk.mp3",
       "webm": "fever-loop-best-2050-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1464,7 +1464,7 @@
       "mp3": "fever-loop-best-2050-full-zh.mp3",
       "webm": "fever-loop-best-2050-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1482,7 +1482,7 @@
       "mp3": "fever-loop-best-2050-normal-de.mp3",
       "webm": "fever-loop-best-2050-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1500,7 +1500,7 @@
       "mp3": "fever-loop-best-2050-normal-en.mp3",
       "webm": "fever-loop-best-2050-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1518,7 +1518,7 @@
       "mp3": "fever-loop-best-2050-normal-fr.mp3",
       "webm": "fever-loop-best-2050-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1536,7 +1536,7 @@
       "mp3": "fever-loop-best-2050-normal-hi.mp3",
       "webm": "fever-loop-best-2050-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1554,7 +1554,7 @@
       "mp3": "fever-loop-best-2050-normal-nl.mp3",
       "webm": "fever-loop-best-2050-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1572,7 +1572,7 @@
       "mp3": "fever-loop-best-2050-normal-ru.mp3",
       "webm": "fever-loop-best-2050-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1590,7 +1590,7 @@
       "mp3": "fever-loop-best-2050-normal-uk.mp3",
       "webm": "fever-loop-best-2050-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1608,7 +1608,7 @@
       "mp3": "fever-loop-best-2050-normal-zh.mp3",
       "webm": "fever-loop-best-2050-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1626,7 +1626,7 @@
       "mp3": "fever-loop-best-2050-short-de.mp3",
       "webm": "fever-loop-best-2050-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1644,7 +1644,7 @@
       "mp3": "fever-loop-best-2050-short-en.mp3",
       "webm": "fever-loop-best-2050-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1662,7 +1662,7 @@
       "mp3": "fever-loop-best-2050-short-fr.mp3",
       "webm": "fever-loop-best-2050-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1680,7 +1680,7 @@
       "mp3": "fever-loop-best-2050-short-hi.mp3",
       "webm": "fever-loop-best-2050-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1698,7 +1698,7 @@
       "mp3": "fever-loop-best-2050-short-nl.mp3",
       "webm": "fever-loop-best-2050-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1716,7 +1716,7 @@
       "mp3": "fever-loop-best-2050-short-ru.mp3",
       "webm": "fever-loop-best-2050-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1734,7 +1734,7 @@
       "mp3": "fever-loop-best-2050-short-uk.mp3",
       "webm": "fever-loop-best-2050-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1752,7 +1752,7 @@
       "mp3": "fever-loop-best-2050-short-zh.mp3",
       "webm": "fever-loop-best-2050-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1770,7 +1770,7 @@
       "mp3": "fever-loop-best-2075-full-de.mp3",
       "webm": "fever-loop-best-2075-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1788,7 +1788,7 @@
       "mp3": "fever-loop-best-2075-full-en.mp3",
       "webm": "fever-loop-best-2075-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1806,7 +1806,7 @@
       "mp3": "fever-loop-best-2075-full-fr.mp3",
       "webm": "fever-loop-best-2075-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1824,7 +1824,7 @@
       "mp3": "fever-loop-best-2075-full-hi.mp3",
       "webm": "fever-loop-best-2075-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1842,7 +1842,7 @@
       "mp3": "fever-loop-best-2075-full-nl.mp3",
       "webm": "fever-loop-best-2075-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1860,7 +1860,7 @@
       "mp3": "fever-loop-best-2075-full-ru.mp3",
       "webm": "fever-loop-best-2075-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1878,7 +1878,7 @@
       "mp3": "fever-loop-best-2075-full-uk.mp3",
       "webm": "fever-loop-best-2075-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1896,7 +1896,7 @@
       "mp3": "fever-loop-best-2075-full-zh.mp3",
       "webm": "fever-loop-best-2075-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1914,7 +1914,7 @@
       "mp3": "fever-loop-best-2075-normal-de.mp3",
       "webm": "fever-loop-best-2075-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1932,7 +1932,7 @@
       "mp3": "fever-loop-best-2075-normal-en.mp3",
       "webm": "fever-loop-best-2075-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1950,7 +1950,7 @@
       "mp3": "fever-loop-best-2075-normal-fr.mp3",
       "webm": "fever-loop-best-2075-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1968,7 +1968,7 @@
       "mp3": "fever-loop-best-2075-normal-hi.mp3",
       "webm": "fever-loop-best-2075-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -1986,7 +1986,7 @@
       "mp3": "fever-loop-best-2075-normal-nl.mp3",
       "webm": "fever-loop-best-2075-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2004,7 +2004,7 @@
       "mp3": "fever-loop-best-2075-normal-ru.mp3",
       "webm": "fever-loop-best-2075-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2022,7 +2022,7 @@
       "mp3": "fever-loop-best-2075-normal-uk.mp3",
       "webm": "fever-loop-best-2075-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2040,7 +2040,7 @@
       "mp3": "fever-loop-best-2075-normal-zh.mp3",
       "webm": "fever-loop-best-2075-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2058,7 +2058,7 @@
       "mp3": "fever-loop-best-2075-short-de.mp3",
       "webm": "fever-loop-best-2075-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2076,7 +2076,7 @@
       "mp3": "fever-loop-best-2075-short-en.mp3",
       "webm": "fever-loop-best-2075-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2094,7 +2094,7 @@
       "mp3": "fever-loop-best-2075-short-fr.mp3",
       "webm": "fever-loop-best-2075-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2112,7 +2112,7 @@
       "mp3": "fever-loop-best-2075-short-hi.mp3",
       "webm": "fever-loop-best-2075-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2130,7 +2130,7 @@
       "mp3": "fever-loop-best-2075-short-nl.mp3",
       "webm": "fever-loop-best-2075-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2148,7 +2148,7 @@
       "mp3": "fever-loop-best-2075-short-ru.mp3",
       "webm": "fever-loop-best-2075-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2166,7 +2166,7 @@
       "mp3": "fever-loop-best-2075-short-uk.mp3",
       "webm": "fever-loop-best-2075-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2184,7 +2184,7 @@
       "mp3": "fever-loop-best-2075-short-zh.mp3",
       "webm": "fever-loop-best-2075-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2202,7 +2202,7 @@
       "mp3": "fever-loop-best-2100-full-de.mp3",
       "webm": "fever-loop-best-2100-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2220,7 +2220,7 @@
       "mp3": "fever-loop-best-2100-full-en.mp3",
       "webm": "fever-loop-best-2100-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2238,7 +2238,7 @@
       "mp3": "fever-loop-best-2100-full-fr.mp3",
       "webm": "fever-loop-best-2100-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2256,7 +2256,7 @@
       "mp3": "fever-loop-best-2100-full-hi.mp3",
       "webm": "fever-loop-best-2100-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2274,7 +2274,7 @@
       "mp3": "fever-loop-best-2100-full-nl.mp3",
       "webm": "fever-loop-best-2100-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2292,7 +2292,7 @@
       "mp3": "fever-loop-best-2100-full-ru.mp3",
       "webm": "fever-loop-best-2100-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2310,7 +2310,7 @@
       "mp3": "fever-loop-best-2100-full-uk.mp3",
       "webm": "fever-loop-best-2100-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2328,7 +2328,7 @@
       "mp3": "fever-loop-best-2100-full-zh.mp3",
       "webm": "fever-loop-best-2100-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2346,7 +2346,7 @@
       "mp3": "fever-loop-best-2100-normal-de.mp3",
       "webm": "fever-loop-best-2100-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2364,7 +2364,7 @@
       "mp3": "fever-loop-best-2100-normal-en.mp3",
       "webm": "fever-loop-best-2100-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2382,7 +2382,7 @@
       "mp3": "fever-loop-best-2100-normal-fr.mp3",
       "webm": "fever-loop-best-2100-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2400,7 +2400,7 @@
       "mp3": "fever-loop-best-2100-normal-hi.mp3",
       "webm": "fever-loop-best-2100-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2418,7 +2418,7 @@
       "mp3": "fever-loop-best-2100-normal-nl.mp3",
       "webm": "fever-loop-best-2100-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2436,7 +2436,7 @@
       "mp3": "fever-loop-best-2100-normal-ru.mp3",
       "webm": "fever-loop-best-2100-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2454,7 +2454,7 @@
       "mp3": "fever-loop-best-2100-normal-uk.mp3",
       "webm": "fever-loop-best-2100-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2472,7 +2472,7 @@
       "mp3": "fever-loop-best-2100-normal-zh.mp3",
       "webm": "fever-loop-best-2100-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2490,7 +2490,7 @@
       "mp3": "fever-loop-best-2100-short-de.mp3",
       "webm": "fever-loop-best-2100-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2508,7 +2508,7 @@
       "mp3": "fever-loop-best-2100-short-en.mp3",
       "webm": "fever-loop-best-2100-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2526,7 +2526,7 @@
       "mp3": "fever-loop-best-2100-short-fr.mp3",
       "webm": "fever-loop-best-2100-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2544,7 +2544,7 @@
       "mp3": "fever-loop-best-2100-short-hi.mp3",
       "webm": "fever-loop-best-2100-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2562,7 +2562,7 @@
       "mp3": "fever-loop-best-2100-short-nl.mp3",
       "webm": "fever-loop-best-2100-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2580,7 +2580,7 @@
       "mp3": "fever-loop-best-2100-short-ru.mp3",
       "webm": "fever-loop-best-2100-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2598,7 +2598,7 @@
       "mp3": "fever-loop-best-2100-short-uk.mp3",
       "webm": "fever-loop-best-2100-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2616,7 +2616,7 @@
       "mp3": "fever-loop-best-2100-short-zh.mp3",
       "webm": "fever-loop-best-2100-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2634,7 +2634,7 @@
       "mp3": "fever-loop-best-2125-full-de.mp3",
       "webm": "fever-loop-best-2125-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2652,7 +2652,7 @@
       "mp3": "fever-loop-best-2125-full-en.mp3",
       "webm": "fever-loop-best-2125-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2670,7 +2670,7 @@
       "mp3": "fever-loop-best-2125-full-fr.mp3",
       "webm": "fever-loop-best-2125-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2688,7 +2688,7 @@
       "mp3": "fever-loop-best-2125-full-hi.mp3",
       "webm": "fever-loop-best-2125-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2706,7 +2706,7 @@
       "mp3": "fever-loop-best-2125-full-nl.mp3",
       "webm": "fever-loop-best-2125-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2724,7 +2724,7 @@
       "mp3": "fever-loop-best-2125-full-ru.mp3",
       "webm": "fever-loop-best-2125-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2742,7 +2742,7 @@
       "mp3": "fever-loop-best-2125-full-uk.mp3",
       "webm": "fever-loop-best-2125-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2760,7 +2760,7 @@
       "mp3": "fever-loop-best-2125-full-zh.mp3",
       "webm": "fever-loop-best-2125-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2778,7 +2778,7 @@
       "mp3": "fever-loop-best-2125-normal-de.mp3",
       "webm": "fever-loop-best-2125-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2796,7 +2796,7 @@
       "mp3": "fever-loop-best-2125-normal-en.mp3",
       "webm": "fever-loop-best-2125-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2814,7 +2814,7 @@
       "mp3": "fever-loop-best-2125-normal-fr.mp3",
       "webm": "fever-loop-best-2125-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2832,7 +2832,7 @@
       "mp3": "fever-loop-best-2125-normal-hi.mp3",
       "webm": "fever-loop-best-2125-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2850,7 +2850,7 @@
       "mp3": "fever-loop-best-2125-normal-nl.mp3",
       "webm": "fever-loop-best-2125-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2868,7 +2868,7 @@
       "mp3": "fever-loop-best-2125-normal-ru.mp3",
       "webm": "fever-loop-best-2125-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2886,7 +2886,7 @@
       "mp3": "fever-loop-best-2125-normal-uk.mp3",
       "webm": "fever-loop-best-2125-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2904,7 +2904,7 @@
       "mp3": "fever-loop-best-2125-normal-zh.mp3",
       "webm": "fever-loop-best-2125-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2922,7 +2922,7 @@
       "mp3": "fever-loop-best-2125-short-de.mp3",
       "webm": "fever-loop-best-2125-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2940,7 +2940,7 @@
       "mp3": "fever-loop-best-2125-short-en.mp3",
       "webm": "fever-loop-best-2125-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2958,7 +2958,7 @@
       "mp3": "fever-loop-best-2125-short-fr.mp3",
       "webm": "fever-loop-best-2125-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2976,7 +2976,7 @@
       "mp3": "fever-loop-best-2125-short-hi.mp3",
       "webm": "fever-loop-best-2125-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -2994,7 +2994,7 @@
       "mp3": "fever-loop-best-2125-short-nl.mp3",
       "webm": "fever-loop-best-2125-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3012,7 +3012,7 @@
       "mp3": "fever-loop-best-2125-short-ru.mp3",
       "webm": "fever-loop-best-2125-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3030,7 +3030,7 @@
       "mp3": "fever-loop-best-2125-short-uk.mp3",
       "webm": "fever-loop-best-2125-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3048,7 +3048,7 @@
       "mp3": "fever-loop-best-2125-short-zh.mp3",
       "webm": "fever-loop-best-2125-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3066,7 +3066,7 @@
       "mp3": "fever-loop-feedback-en.mp3",
       "webm": "fever-loop-feedback-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": false,
       "newSinceLastRun": false
     },
@@ -3084,7 +3084,7 @@
       "mp3": "fever-loop-feedback-fr.mp3",
       "webm": "fever-loop-feedback-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": false,
       "newSinceLastRun": false
     },
@@ -3102,7 +3102,7 @@
       "mp3": "fever-loop-high-1975-full-de.mp3",
       "webm": "fever-loop-high-1975-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3120,7 +3120,7 @@
       "mp3": "fever-loop-high-1975-full-en.mp3",
       "webm": "fever-loop-high-1975-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3138,7 +3138,7 @@
       "mp3": "fever-loop-high-1975-full-fr.mp3",
       "webm": "fever-loop-high-1975-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3156,7 +3156,7 @@
       "mp3": "fever-loop-high-1975-full-hi.mp3",
       "webm": "fever-loop-high-1975-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3174,7 +3174,7 @@
       "mp3": "fever-loop-high-1975-full-nl.mp3",
       "webm": "fever-loop-high-1975-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3192,7 +3192,7 @@
       "mp3": "fever-loop-high-1975-full-ru.mp3",
       "webm": "fever-loop-high-1975-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3210,7 +3210,7 @@
       "mp3": "fever-loop-high-1975-full-uk.mp3",
       "webm": "fever-loop-high-1975-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3228,7 +3228,7 @@
       "mp3": "fever-loop-high-1975-full-zh.mp3",
       "webm": "fever-loop-high-1975-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3246,7 +3246,7 @@
       "mp3": "fever-loop-high-1975-normal-de.mp3",
       "webm": "fever-loop-high-1975-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3264,7 +3264,7 @@
       "mp3": "fever-loop-high-1975-normal-en.mp3",
       "webm": "fever-loop-high-1975-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3282,7 +3282,7 @@
       "mp3": "fever-loop-high-1975-normal-fr.mp3",
       "webm": "fever-loop-high-1975-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3300,7 +3300,7 @@
       "mp3": "fever-loop-high-1975-normal-hi.mp3",
       "webm": "fever-loop-high-1975-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3318,7 +3318,7 @@
       "mp3": "fever-loop-high-1975-normal-nl.mp3",
       "webm": "fever-loop-high-1975-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3336,7 +3336,7 @@
       "mp3": "fever-loop-high-1975-normal-ru.mp3",
       "webm": "fever-loop-high-1975-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3354,7 +3354,7 @@
       "mp3": "fever-loop-high-1975-normal-uk.mp3",
       "webm": "fever-loop-high-1975-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3372,7 +3372,7 @@
       "mp3": "fever-loop-high-1975-normal-zh.mp3",
       "webm": "fever-loop-high-1975-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3390,7 +3390,7 @@
       "mp3": "fever-loop-high-1975-short-de.mp3",
       "webm": "fever-loop-high-1975-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3408,7 +3408,7 @@
       "mp3": "fever-loop-high-1975-short-en.mp3",
       "webm": "fever-loop-high-1975-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3426,7 +3426,7 @@
       "mp3": "fever-loop-high-1975-short-fr.mp3",
       "webm": "fever-loop-high-1975-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3444,7 +3444,7 @@
       "mp3": "fever-loop-high-1975-short-hi.mp3",
       "webm": "fever-loop-high-1975-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3462,7 +3462,7 @@
       "mp3": "fever-loop-high-1975-short-nl.mp3",
       "webm": "fever-loop-high-1975-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3480,7 +3480,7 @@
       "mp3": "fever-loop-high-1975-short-ru.mp3",
       "webm": "fever-loop-high-1975-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3498,7 +3498,7 @@
       "mp3": "fever-loop-high-1975-short-uk.mp3",
       "webm": "fever-loop-high-1975-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3516,7 +3516,7 @@
       "mp3": "fever-loop-high-1975-short-zh.mp3",
       "webm": "fever-loop-high-1975-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3534,7 +3534,7 @@
       "mp3": "fever-loop-high-2000-full-de.mp3",
       "webm": "fever-loop-high-2000-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3552,7 +3552,7 @@
       "mp3": "fever-loop-high-2000-full-en.mp3",
       "webm": "fever-loop-high-2000-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3570,7 +3570,7 @@
       "mp3": "fever-loop-high-2000-full-fr.mp3",
       "webm": "fever-loop-high-2000-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3588,7 +3588,7 @@
       "mp3": "fever-loop-high-2000-full-hi.mp3",
       "webm": "fever-loop-high-2000-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3606,7 +3606,7 @@
       "mp3": "fever-loop-high-2000-full-nl.mp3",
       "webm": "fever-loop-high-2000-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3624,7 +3624,7 @@
       "mp3": "fever-loop-high-2000-full-ru.mp3",
       "webm": "fever-loop-high-2000-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3642,7 +3642,7 @@
       "mp3": "fever-loop-high-2000-full-uk.mp3",
       "webm": "fever-loop-high-2000-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3660,7 +3660,7 @@
       "mp3": "fever-loop-high-2000-full-zh.mp3",
       "webm": "fever-loop-high-2000-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3678,7 +3678,7 @@
       "mp3": "fever-loop-high-2000-normal-de.mp3",
       "webm": "fever-loop-high-2000-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3696,7 +3696,7 @@
       "mp3": "fever-loop-high-2000-normal-en.mp3",
       "webm": "fever-loop-high-2000-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3714,7 +3714,7 @@
       "mp3": "fever-loop-high-2000-normal-fr.mp3",
       "webm": "fever-loop-high-2000-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3732,7 +3732,7 @@
       "mp3": "fever-loop-high-2000-normal-hi.mp3",
       "webm": "fever-loop-high-2000-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3750,7 +3750,7 @@
       "mp3": "fever-loop-high-2000-normal-nl.mp3",
       "webm": "fever-loop-high-2000-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3768,7 +3768,7 @@
       "mp3": "fever-loop-high-2000-normal-ru.mp3",
       "webm": "fever-loop-high-2000-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3786,7 +3786,7 @@
       "mp3": "fever-loop-high-2000-normal-uk.mp3",
       "webm": "fever-loop-high-2000-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3804,7 +3804,7 @@
       "mp3": "fever-loop-high-2000-normal-zh.mp3",
       "webm": "fever-loop-high-2000-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3822,7 +3822,7 @@
       "mp3": "fever-loop-high-2000-short-de.mp3",
       "webm": "fever-loop-high-2000-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3840,7 +3840,7 @@
       "mp3": "fever-loop-high-2000-short-en.mp3",
       "webm": "fever-loop-high-2000-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3858,7 +3858,7 @@
       "mp3": "fever-loop-high-2000-short-fr.mp3",
       "webm": "fever-loop-high-2000-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3876,7 +3876,7 @@
       "mp3": "fever-loop-high-2000-short-hi.mp3",
       "webm": "fever-loop-high-2000-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3894,7 +3894,7 @@
       "mp3": "fever-loop-high-2000-short-nl.mp3",
       "webm": "fever-loop-high-2000-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3912,7 +3912,7 @@
       "mp3": "fever-loop-high-2000-short-ru.mp3",
       "webm": "fever-loop-high-2000-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3930,7 +3930,7 @@
       "mp3": "fever-loop-high-2000-short-uk.mp3",
       "webm": "fever-loop-high-2000-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3948,7 +3948,7 @@
       "mp3": "fever-loop-high-2000-short-zh.mp3",
       "webm": "fever-loop-high-2000-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3966,7 +3966,7 @@
       "mp3": "fever-loop-high-2025-full-de.mp3",
       "webm": "fever-loop-high-2025-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -3984,7 +3984,7 @@
       "mp3": "fever-loop-high-2025-full-en.mp3",
       "webm": "fever-loop-high-2025-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4002,7 +4002,7 @@
       "mp3": "fever-loop-high-2025-full-fr.mp3",
       "webm": "fever-loop-high-2025-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4020,7 +4020,7 @@
       "mp3": "fever-loop-high-2025-full-hi.mp3",
       "webm": "fever-loop-high-2025-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4038,7 +4038,7 @@
       "mp3": "fever-loop-high-2025-full-nl.mp3",
       "webm": "fever-loop-high-2025-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4056,7 +4056,7 @@
       "mp3": "fever-loop-high-2025-full-ru.mp3",
       "webm": "fever-loop-high-2025-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4074,7 +4074,7 @@
       "mp3": "fever-loop-high-2025-full-uk.mp3",
       "webm": "fever-loop-high-2025-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4092,7 +4092,7 @@
       "mp3": "fever-loop-high-2025-full-zh.mp3",
       "webm": "fever-loop-high-2025-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4110,7 +4110,7 @@
       "mp3": "fever-loop-high-2025-normal-de.mp3",
       "webm": "fever-loop-high-2025-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4128,7 +4128,7 @@
       "mp3": "fever-loop-high-2025-normal-en.mp3",
       "webm": "fever-loop-high-2025-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4146,7 +4146,7 @@
       "mp3": "fever-loop-high-2025-normal-fr.mp3",
       "webm": "fever-loop-high-2025-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4164,7 +4164,7 @@
       "mp3": "fever-loop-high-2025-normal-hi.mp3",
       "webm": "fever-loop-high-2025-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4182,7 +4182,7 @@
       "mp3": "fever-loop-high-2025-normal-nl.mp3",
       "webm": "fever-loop-high-2025-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4200,7 +4200,7 @@
       "mp3": "fever-loop-high-2025-normal-ru.mp3",
       "webm": "fever-loop-high-2025-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4218,7 +4218,7 @@
       "mp3": "fever-loop-high-2025-normal-uk.mp3",
       "webm": "fever-loop-high-2025-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4236,7 +4236,7 @@
       "mp3": "fever-loop-high-2025-normal-zh.mp3",
       "webm": "fever-loop-high-2025-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4254,7 +4254,7 @@
       "mp3": "fever-loop-high-2025-short-de.mp3",
       "webm": "fever-loop-high-2025-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4272,7 +4272,7 @@
       "mp3": "fever-loop-high-2025-short-en.mp3",
       "webm": "fever-loop-high-2025-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4290,7 +4290,7 @@
       "mp3": "fever-loop-high-2025-short-fr.mp3",
       "webm": "fever-loop-high-2025-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4308,7 +4308,7 @@
       "mp3": "fever-loop-high-2025-short-hi.mp3",
       "webm": "fever-loop-high-2025-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4326,7 +4326,7 @@
       "mp3": "fever-loop-high-2025-short-nl.mp3",
       "webm": "fever-loop-high-2025-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4344,7 +4344,7 @@
       "mp3": "fever-loop-high-2025-short-ru.mp3",
       "webm": "fever-loop-high-2025-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4362,7 +4362,7 @@
       "mp3": "fever-loop-high-2025-short-uk.mp3",
       "webm": "fever-loop-high-2025-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4380,7 +4380,7 @@
       "mp3": "fever-loop-high-2025-short-zh.mp3",
       "webm": "fever-loop-high-2025-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4398,7 +4398,7 @@
       "mp3": "fever-loop-high-2050-full-de.mp3",
       "webm": "fever-loop-high-2050-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4416,7 +4416,7 @@
       "mp3": "fever-loop-high-2050-full-en.mp3",
       "webm": "fever-loop-high-2050-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4434,7 +4434,7 @@
       "mp3": "fever-loop-high-2050-full-fr.mp3",
       "webm": "fever-loop-high-2050-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4452,7 +4452,7 @@
       "mp3": "fever-loop-high-2050-full-hi.mp3",
       "webm": "fever-loop-high-2050-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4470,7 +4470,7 @@
       "mp3": "fever-loop-high-2050-full-nl.mp3",
       "webm": "fever-loop-high-2050-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4488,7 +4488,7 @@
       "mp3": "fever-loop-high-2050-full-ru.mp3",
       "webm": "fever-loop-high-2050-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4506,7 +4506,7 @@
       "mp3": "fever-loop-high-2050-full-uk.mp3",
       "webm": "fever-loop-high-2050-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4524,7 +4524,7 @@
       "mp3": "fever-loop-high-2050-full-zh.mp3",
       "webm": "fever-loop-high-2050-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4542,7 +4542,7 @@
       "mp3": "fever-loop-high-2050-normal-de.mp3",
       "webm": "fever-loop-high-2050-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4560,7 +4560,7 @@
       "mp3": "fever-loop-high-2050-normal-en.mp3",
       "webm": "fever-loop-high-2050-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4578,7 +4578,7 @@
       "mp3": "fever-loop-high-2050-normal-fr.mp3",
       "webm": "fever-loop-high-2050-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4596,7 +4596,7 @@
       "mp3": "fever-loop-high-2050-normal-hi.mp3",
       "webm": "fever-loop-high-2050-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4614,7 +4614,7 @@
       "mp3": "fever-loop-high-2050-normal-nl.mp3",
       "webm": "fever-loop-high-2050-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4632,7 +4632,7 @@
       "mp3": "fever-loop-high-2050-normal-ru.mp3",
       "webm": "fever-loop-high-2050-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4650,7 +4650,7 @@
       "mp3": "fever-loop-high-2050-normal-uk.mp3",
       "webm": "fever-loop-high-2050-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4668,7 +4668,7 @@
       "mp3": "fever-loop-high-2050-normal-zh.mp3",
       "webm": "fever-loop-high-2050-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4686,7 +4686,7 @@
       "mp3": "fever-loop-high-2050-short-de.mp3",
       "webm": "fever-loop-high-2050-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4704,7 +4704,7 @@
       "mp3": "fever-loop-high-2050-short-en.mp3",
       "webm": "fever-loop-high-2050-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4722,7 +4722,7 @@
       "mp3": "fever-loop-high-2050-short-fr.mp3",
       "webm": "fever-loop-high-2050-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4740,7 +4740,7 @@
       "mp3": "fever-loop-high-2050-short-hi.mp3",
       "webm": "fever-loop-high-2050-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4758,7 +4758,7 @@
       "mp3": "fever-loop-high-2050-short-nl.mp3",
       "webm": "fever-loop-high-2050-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4776,7 +4776,7 @@
       "mp3": "fever-loop-high-2050-short-ru.mp3",
       "webm": "fever-loop-high-2050-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4794,7 +4794,7 @@
       "mp3": "fever-loop-high-2050-short-uk.mp3",
       "webm": "fever-loop-high-2050-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4812,7 +4812,7 @@
       "mp3": "fever-loop-high-2050-short-zh.mp3",
       "webm": "fever-loop-high-2050-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4830,7 +4830,7 @@
       "mp3": "fever-loop-high-2075-full-de.mp3",
       "webm": "fever-loop-high-2075-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4848,7 +4848,7 @@
       "mp3": "fever-loop-high-2075-full-en.mp3",
       "webm": "fever-loop-high-2075-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4866,7 +4866,7 @@
       "mp3": "fever-loop-high-2075-full-fr.mp3",
       "webm": "fever-loop-high-2075-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4884,7 +4884,7 @@
       "mp3": "fever-loop-high-2075-full-hi.mp3",
       "webm": "fever-loop-high-2075-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4902,7 +4902,7 @@
       "mp3": "fever-loop-high-2075-full-nl.mp3",
       "webm": "fever-loop-high-2075-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4920,7 +4920,7 @@
       "mp3": "fever-loop-high-2075-full-ru.mp3",
       "webm": "fever-loop-high-2075-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4938,7 +4938,7 @@
       "mp3": "fever-loop-high-2075-full-uk.mp3",
       "webm": "fever-loop-high-2075-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4956,7 +4956,7 @@
       "mp3": "fever-loop-high-2075-full-zh.mp3",
       "webm": "fever-loop-high-2075-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4974,7 +4974,7 @@
       "mp3": "fever-loop-high-2075-normal-de.mp3",
       "webm": "fever-loop-high-2075-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -4992,7 +4992,7 @@
       "mp3": "fever-loop-high-2075-normal-en.mp3",
       "webm": "fever-loop-high-2075-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5010,7 +5010,7 @@
       "mp3": "fever-loop-high-2075-normal-fr.mp3",
       "webm": "fever-loop-high-2075-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5028,7 +5028,7 @@
       "mp3": "fever-loop-high-2075-normal-hi.mp3",
       "webm": "fever-loop-high-2075-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5046,7 +5046,7 @@
       "mp3": "fever-loop-high-2075-normal-nl.mp3",
       "webm": "fever-loop-high-2075-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5064,7 +5064,7 @@
       "mp3": "fever-loop-high-2075-normal-ru.mp3",
       "webm": "fever-loop-high-2075-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5082,7 +5082,7 @@
       "mp3": "fever-loop-high-2075-normal-uk.mp3",
       "webm": "fever-loop-high-2075-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5100,7 +5100,7 @@
       "mp3": "fever-loop-high-2075-normal-zh.mp3",
       "webm": "fever-loop-high-2075-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5118,7 +5118,7 @@
       "mp3": "fever-loop-high-2075-short-de.mp3",
       "webm": "fever-loop-high-2075-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5136,7 +5136,7 @@
       "mp3": "fever-loop-high-2075-short-en.mp3",
       "webm": "fever-loop-high-2075-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5154,7 +5154,7 @@
       "mp3": "fever-loop-high-2075-short-fr.mp3",
       "webm": "fever-loop-high-2075-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5172,7 +5172,7 @@
       "mp3": "fever-loop-high-2075-short-hi.mp3",
       "webm": "fever-loop-high-2075-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5190,7 +5190,7 @@
       "mp3": "fever-loop-high-2075-short-nl.mp3",
       "webm": "fever-loop-high-2075-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5208,7 +5208,7 @@
       "mp3": "fever-loop-high-2075-short-ru.mp3",
       "webm": "fever-loop-high-2075-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5226,7 +5226,7 @@
       "mp3": "fever-loop-high-2075-short-uk.mp3",
       "webm": "fever-loop-high-2075-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5244,7 +5244,7 @@
       "mp3": "fever-loop-high-2075-short-zh.mp3",
       "webm": "fever-loop-high-2075-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5262,7 +5262,7 @@
       "mp3": "fever-loop-high-2100-full-de.mp3",
       "webm": "fever-loop-high-2100-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5280,7 +5280,7 @@
       "mp3": "fever-loop-high-2100-full-en.mp3",
       "webm": "fever-loop-high-2100-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5298,7 +5298,7 @@
       "mp3": "fever-loop-high-2100-full-fr.mp3",
       "webm": "fever-loop-high-2100-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5316,7 +5316,7 @@
       "mp3": "fever-loop-high-2100-full-hi.mp3",
       "webm": "fever-loop-high-2100-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5334,7 +5334,7 @@
       "mp3": "fever-loop-high-2100-full-nl.mp3",
       "webm": "fever-loop-high-2100-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5352,7 +5352,7 @@
       "mp3": "fever-loop-high-2100-full-ru.mp3",
       "webm": "fever-loop-high-2100-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5370,7 +5370,7 @@
       "mp3": "fever-loop-high-2100-full-uk.mp3",
       "webm": "fever-loop-high-2100-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5388,7 +5388,7 @@
       "mp3": "fever-loop-high-2100-full-zh.mp3",
       "webm": "fever-loop-high-2100-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5406,7 +5406,7 @@
       "mp3": "fever-loop-high-2100-normal-de.mp3",
       "webm": "fever-loop-high-2100-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5424,7 +5424,7 @@
       "mp3": "fever-loop-high-2100-normal-en.mp3",
       "webm": "fever-loop-high-2100-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5442,7 +5442,7 @@
       "mp3": "fever-loop-high-2100-normal-fr.mp3",
       "webm": "fever-loop-high-2100-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5460,7 +5460,7 @@
       "mp3": "fever-loop-high-2100-normal-hi.mp3",
       "webm": "fever-loop-high-2100-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5478,7 +5478,7 @@
       "mp3": "fever-loop-high-2100-normal-nl.mp3",
       "webm": "fever-loop-high-2100-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5496,7 +5496,7 @@
       "mp3": "fever-loop-high-2100-normal-ru.mp3",
       "webm": "fever-loop-high-2100-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5514,7 +5514,7 @@
       "mp3": "fever-loop-high-2100-normal-uk.mp3",
       "webm": "fever-loop-high-2100-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5532,7 +5532,7 @@
       "mp3": "fever-loop-high-2100-normal-zh.mp3",
       "webm": "fever-loop-high-2100-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5550,7 +5550,7 @@
       "mp3": "fever-loop-high-2100-short-de.mp3",
       "webm": "fever-loop-high-2100-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5568,7 +5568,7 @@
       "mp3": "fever-loop-high-2100-short-en.mp3",
       "webm": "fever-loop-high-2100-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5586,7 +5586,7 @@
       "mp3": "fever-loop-high-2100-short-fr.mp3",
       "webm": "fever-loop-high-2100-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5604,7 +5604,7 @@
       "mp3": "fever-loop-high-2100-short-hi.mp3",
       "webm": "fever-loop-high-2100-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5622,7 +5622,7 @@
       "mp3": "fever-loop-high-2100-short-nl.mp3",
       "webm": "fever-loop-high-2100-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5640,7 +5640,7 @@
       "mp3": "fever-loop-high-2100-short-ru.mp3",
       "webm": "fever-loop-high-2100-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5658,7 +5658,7 @@
       "mp3": "fever-loop-high-2100-short-uk.mp3",
       "webm": "fever-loop-high-2100-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5676,7 +5676,7 @@
       "mp3": "fever-loop-high-2100-short-zh.mp3",
       "webm": "fever-loop-high-2100-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5694,7 +5694,7 @@
       "mp3": "fever-loop-high-2125-full-de.mp3",
       "webm": "fever-loop-high-2125-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5712,7 +5712,7 @@
       "mp3": "fever-loop-high-2125-full-en.mp3",
       "webm": "fever-loop-high-2125-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5730,7 +5730,7 @@
       "mp3": "fever-loop-high-2125-full-fr.mp3",
       "webm": "fever-loop-high-2125-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5748,7 +5748,7 @@
       "mp3": "fever-loop-high-2125-full-hi.mp3",
       "webm": "fever-loop-high-2125-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5766,7 +5766,7 @@
       "mp3": "fever-loop-high-2125-full-nl.mp3",
       "webm": "fever-loop-high-2125-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5784,7 +5784,7 @@
       "mp3": "fever-loop-high-2125-full-ru.mp3",
       "webm": "fever-loop-high-2125-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5802,7 +5802,7 @@
       "mp3": "fever-loop-high-2125-full-uk.mp3",
       "webm": "fever-loop-high-2125-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5820,7 +5820,7 @@
       "mp3": "fever-loop-high-2125-full-zh.mp3",
       "webm": "fever-loop-high-2125-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5838,7 +5838,7 @@
       "mp3": "fever-loop-high-2125-normal-de.mp3",
       "webm": "fever-loop-high-2125-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5856,7 +5856,7 @@
       "mp3": "fever-loop-high-2125-normal-en.mp3",
       "webm": "fever-loop-high-2125-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5874,7 +5874,7 @@
       "mp3": "fever-loop-high-2125-normal-fr.mp3",
       "webm": "fever-loop-high-2125-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5892,7 +5892,7 @@
       "mp3": "fever-loop-high-2125-normal-hi.mp3",
       "webm": "fever-loop-high-2125-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5910,7 +5910,7 @@
       "mp3": "fever-loop-high-2125-normal-nl.mp3",
       "webm": "fever-loop-high-2125-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5928,7 +5928,7 @@
       "mp3": "fever-loop-high-2125-normal-ru.mp3",
       "webm": "fever-loop-high-2125-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5946,7 +5946,7 @@
       "mp3": "fever-loop-high-2125-normal-uk.mp3",
       "webm": "fever-loop-high-2125-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5964,7 +5964,7 @@
       "mp3": "fever-loop-high-2125-normal-zh.mp3",
       "webm": "fever-loop-high-2125-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -5982,7 +5982,7 @@
       "mp3": "fever-loop-high-2125-short-de.mp3",
       "webm": "fever-loop-high-2125-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6000,7 +6000,7 @@
       "mp3": "fever-loop-high-2125-short-en.mp3",
       "webm": "fever-loop-high-2125-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6018,7 +6018,7 @@
       "mp3": "fever-loop-high-2125-short-fr.mp3",
       "webm": "fever-loop-high-2125-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6036,7 +6036,7 @@
       "mp3": "fever-loop-high-2125-short-hi.mp3",
       "webm": "fever-loop-high-2125-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6054,7 +6054,7 @@
       "mp3": "fever-loop-high-2125-short-nl.mp3",
       "webm": "fever-loop-high-2125-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6072,7 +6072,7 @@
       "mp3": "fever-loop-high-2125-short-ru.mp3",
       "webm": "fever-loop-high-2125-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6090,7 +6090,7 @@
       "mp3": "fever-loop-high-2125-short-uk.mp3",
       "webm": "fever-loop-high-2125-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6108,7 +6108,7 @@
       "mp3": "fever-loop-high-2125-short-zh.mp3",
       "webm": "fever-loop-high-2125-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6126,7 +6126,7 @@
       "mp3": "fever-loop-intro-en.mp3",
       "webm": "fever-loop-intro-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": false,
       "newSinceLastRun": false
     },
@@ -6144,7 +6144,7 @@
       "mp3": "fever-loop-intro-fr.mp3",
       "webm": "fever-loop-intro-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": false,
       "newSinceLastRun": false
     },
@@ -6162,7 +6162,7 @@
       "mp3": "fever-loop-objective-1975-full-de.mp3",
       "webm": "fever-loop-objective-1975-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6180,7 +6180,7 @@
       "mp3": "fever-loop-objective-1975-full-en.mp3",
       "webm": "fever-loop-objective-1975-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6198,7 +6198,7 @@
       "mp3": "fever-loop-objective-1975-full-fr.mp3",
       "webm": "fever-loop-objective-1975-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6216,7 +6216,7 @@
       "mp3": "fever-loop-objective-1975-full-hi.mp3",
       "webm": "fever-loop-objective-1975-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6234,7 +6234,7 @@
       "mp3": "fever-loop-objective-1975-full-nl.mp3",
       "webm": "fever-loop-objective-1975-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6252,7 +6252,7 @@
       "mp3": "fever-loop-objective-1975-full-ru.mp3",
       "webm": "fever-loop-objective-1975-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6270,7 +6270,7 @@
       "mp3": "fever-loop-objective-1975-full-uk.mp3",
       "webm": "fever-loop-objective-1975-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6288,7 +6288,7 @@
       "mp3": "fever-loop-objective-1975-full-zh.mp3",
       "webm": "fever-loop-objective-1975-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6306,7 +6306,7 @@
       "mp3": "fever-loop-objective-1975-normal-de.mp3",
       "webm": "fever-loop-objective-1975-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6324,7 +6324,7 @@
       "mp3": "fever-loop-objective-1975-normal-en.mp3",
       "webm": "fever-loop-objective-1975-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6342,7 +6342,7 @@
       "mp3": "fever-loop-objective-1975-normal-fr.mp3",
       "webm": "fever-loop-objective-1975-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6360,7 +6360,7 @@
       "mp3": "fever-loop-objective-1975-normal-hi.mp3",
       "webm": "fever-loop-objective-1975-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6378,7 +6378,7 @@
       "mp3": "fever-loop-objective-1975-normal-nl.mp3",
       "webm": "fever-loop-objective-1975-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6396,7 +6396,7 @@
       "mp3": "fever-loop-objective-1975-normal-ru.mp3",
       "webm": "fever-loop-objective-1975-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6414,7 +6414,7 @@
       "mp3": "fever-loop-objective-1975-normal-uk.mp3",
       "webm": "fever-loop-objective-1975-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6432,7 +6432,7 @@
       "mp3": "fever-loop-objective-1975-normal-zh.mp3",
       "webm": "fever-loop-objective-1975-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6450,7 +6450,7 @@
       "mp3": "fever-loop-objective-1975-short-de.mp3",
       "webm": "fever-loop-objective-1975-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6468,7 +6468,7 @@
       "mp3": "fever-loop-objective-1975-short-en.mp3",
       "webm": "fever-loop-objective-1975-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6486,7 +6486,7 @@
       "mp3": "fever-loop-objective-1975-short-fr.mp3",
       "webm": "fever-loop-objective-1975-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6504,7 +6504,7 @@
       "mp3": "fever-loop-objective-1975-short-hi.mp3",
       "webm": "fever-loop-objective-1975-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6522,7 +6522,7 @@
       "mp3": "fever-loop-objective-1975-short-nl.mp3",
       "webm": "fever-loop-objective-1975-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6540,7 +6540,7 @@
       "mp3": "fever-loop-objective-1975-short-ru.mp3",
       "webm": "fever-loop-objective-1975-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6558,7 +6558,7 @@
       "mp3": "fever-loop-objective-1975-short-uk.mp3",
       "webm": "fever-loop-objective-1975-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6576,7 +6576,7 @@
       "mp3": "fever-loop-objective-1975-short-zh.mp3",
       "webm": "fever-loop-objective-1975-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6594,7 +6594,7 @@
       "mp3": "fever-loop-objective-2000-full-de.mp3",
       "webm": "fever-loop-objective-2000-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6612,7 +6612,7 @@
       "mp3": "fever-loop-objective-2000-full-en.mp3",
       "webm": "fever-loop-objective-2000-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6630,7 +6630,7 @@
       "mp3": "fever-loop-objective-2000-full-fr.mp3",
       "webm": "fever-loop-objective-2000-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6648,7 +6648,7 @@
       "mp3": "fever-loop-objective-2000-full-hi.mp3",
       "webm": "fever-loop-objective-2000-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6666,7 +6666,7 @@
       "mp3": "fever-loop-objective-2000-full-nl.mp3",
       "webm": "fever-loop-objective-2000-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6684,7 +6684,7 @@
       "mp3": "fever-loop-objective-2000-full-ru.mp3",
       "webm": "fever-loop-objective-2000-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6702,7 +6702,7 @@
       "mp3": "fever-loop-objective-2000-full-uk.mp3",
       "webm": "fever-loop-objective-2000-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6720,7 +6720,7 @@
       "mp3": "fever-loop-objective-2000-full-zh.mp3",
       "webm": "fever-loop-objective-2000-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6738,7 +6738,7 @@
       "mp3": "fever-loop-objective-2000-normal-de.mp3",
       "webm": "fever-loop-objective-2000-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6756,7 +6756,7 @@
       "mp3": "fever-loop-objective-2000-normal-en.mp3",
       "webm": "fever-loop-objective-2000-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6774,7 +6774,7 @@
       "mp3": "fever-loop-objective-2000-normal-fr.mp3",
       "webm": "fever-loop-objective-2000-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6792,7 +6792,7 @@
       "mp3": "fever-loop-objective-2000-normal-hi.mp3",
       "webm": "fever-loop-objective-2000-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6810,7 +6810,7 @@
       "mp3": "fever-loop-objective-2000-normal-nl.mp3",
       "webm": "fever-loop-objective-2000-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6828,7 +6828,7 @@
       "mp3": "fever-loop-objective-2000-normal-ru.mp3",
       "webm": "fever-loop-objective-2000-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6846,7 +6846,7 @@
       "mp3": "fever-loop-objective-2000-normal-uk.mp3",
       "webm": "fever-loop-objective-2000-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6864,7 +6864,7 @@
       "mp3": "fever-loop-objective-2000-normal-zh.mp3",
       "webm": "fever-loop-objective-2000-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6882,7 +6882,7 @@
       "mp3": "fever-loop-objective-2000-short-de.mp3",
       "webm": "fever-loop-objective-2000-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6900,7 +6900,7 @@
       "mp3": "fever-loop-objective-2000-short-en.mp3",
       "webm": "fever-loop-objective-2000-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6918,7 +6918,7 @@
       "mp3": "fever-loop-objective-2000-short-fr.mp3",
       "webm": "fever-loop-objective-2000-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6936,7 +6936,7 @@
       "mp3": "fever-loop-objective-2000-short-hi.mp3",
       "webm": "fever-loop-objective-2000-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6954,7 +6954,7 @@
       "mp3": "fever-loop-objective-2000-short-nl.mp3",
       "webm": "fever-loop-objective-2000-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6972,7 +6972,7 @@
       "mp3": "fever-loop-objective-2000-short-ru.mp3",
       "webm": "fever-loop-objective-2000-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -6990,7 +6990,7 @@
       "mp3": "fever-loop-objective-2000-short-uk.mp3",
       "webm": "fever-loop-objective-2000-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7008,7 +7008,7 @@
       "mp3": "fever-loop-objective-2000-short-zh.mp3",
       "webm": "fever-loop-objective-2000-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7026,7 +7026,7 @@
       "mp3": "fever-loop-objective-2025-full-de.mp3",
       "webm": "fever-loop-objective-2025-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7044,7 +7044,7 @@
       "mp3": "fever-loop-objective-2025-full-en.mp3",
       "webm": "fever-loop-objective-2025-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7062,7 +7062,7 @@
       "mp3": "fever-loop-objective-2025-full-fr.mp3",
       "webm": "fever-loop-objective-2025-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7080,7 +7080,7 @@
       "mp3": "fever-loop-objective-2025-full-hi.mp3",
       "webm": "fever-loop-objective-2025-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7098,7 +7098,7 @@
       "mp3": "fever-loop-objective-2025-full-nl.mp3",
       "webm": "fever-loop-objective-2025-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7116,7 +7116,7 @@
       "mp3": "fever-loop-objective-2025-full-ru.mp3",
       "webm": "fever-loop-objective-2025-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7134,7 +7134,7 @@
       "mp3": "fever-loop-objective-2025-full-uk.mp3",
       "webm": "fever-loop-objective-2025-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7152,7 +7152,7 @@
       "mp3": "fever-loop-objective-2025-full-zh.mp3",
       "webm": "fever-loop-objective-2025-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7170,7 +7170,7 @@
       "mp3": "fever-loop-objective-2025-normal-de.mp3",
       "webm": "fever-loop-objective-2025-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7188,7 +7188,7 @@
       "mp3": "fever-loop-objective-2025-normal-en.mp3",
       "webm": "fever-loop-objective-2025-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7206,7 +7206,7 @@
       "mp3": "fever-loop-objective-2025-normal-fr.mp3",
       "webm": "fever-loop-objective-2025-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7224,7 +7224,7 @@
       "mp3": "fever-loop-objective-2025-normal-hi.mp3",
       "webm": "fever-loop-objective-2025-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7242,7 +7242,7 @@
       "mp3": "fever-loop-objective-2025-normal-nl.mp3",
       "webm": "fever-loop-objective-2025-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7260,7 +7260,7 @@
       "mp3": "fever-loop-objective-2025-normal-ru.mp3",
       "webm": "fever-loop-objective-2025-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7278,7 +7278,7 @@
       "mp3": "fever-loop-objective-2025-normal-uk.mp3",
       "webm": "fever-loop-objective-2025-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7296,7 +7296,7 @@
       "mp3": "fever-loop-objective-2025-normal-zh.mp3",
       "webm": "fever-loop-objective-2025-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7314,7 +7314,7 @@
       "mp3": "fever-loop-objective-2025-short-de.mp3",
       "webm": "fever-loop-objective-2025-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7332,7 +7332,7 @@
       "mp3": "fever-loop-objective-2025-short-en.mp3",
       "webm": "fever-loop-objective-2025-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7350,7 +7350,7 @@
       "mp3": "fever-loop-objective-2025-short-fr.mp3",
       "webm": "fever-loop-objective-2025-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7368,7 +7368,7 @@
       "mp3": "fever-loop-objective-2025-short-hi.mp3",
       "webm": "fever-loop-objective-2025-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7386,7 +7386,7 @@
       "mp3": "fever-loop-objective-2025-short-nl.mp3",
       "webm": "fever-loop-objective-2025-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7404,7 +7404,7 @@
       "mp3": "fever-loop-objective-2025-short-ru.mp3",
       "webm": "fever-loop-objective-2025-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7422,7 +7422,7 @@
       "mp3": "fever-loop-objective-2025-short-uk.mp3",
       "webm": "fever-loop-objective-2025-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7440,7 +7440,7 @@
       "mp3": "fever-loop-objective-2025-short-zh.mp3",
       "webm": "fever-loop-objective-2025-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7458,7 +7458,7 @@
       "mp3": "fever-loop-objective-2050-full-de.mp3",
       "webm": "fever-loop-objective-2050-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7476,7 +7476,7 @@
       "mp3": "fever-loop-objective-2050-full-en.mp3",
       "webm": "fever-loop-objective-2050-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7494,7 +7494,7 @@
       "mp3": "fever-loop-objective-2050-full-fr.mp3",
       "webm": "fever-loop-objective-2050-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7512,7 +7512,7 @@
       "mp3": "fever-loop-objective-2050-full-hi.mp3",
       "webm": "fever-loop-objective-2050-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7530,7 +7530,7 @@
       "mp3": "fever-loop-objective-2050-full-nl.mp3",
       "webm": "fever-loop-objective-2050-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7548,7 +7548,7 @@
       "mp3": "fever-loop-objective-2050-full-ru.mp3",
       "webm": "fever-loop-objective-2050-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7566,7 +7566,7 @@
       "mp3": "fever-loop-objective-2050-full-uk.mp3",
       "webm": "fever-loop-objective-2050-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7584,7 +7584,7 @@
       "mp3": "fever-loop-objective-2050-full-zh.mp3",
       "webm": "fever-loop-objective-2050-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7602,7 +7602,7 @@
       "mp3": "fever-loop-objective-2050-normal-de.mp3",
       "webm": "fever-loop-objective-2050-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7620,7 +7620,7 @@
       "mp3": "fever-loop-objective-2050-normal-en.mp3",
       "webm": "fever-loop-objective-2050-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7638,7 +7638,7 @@
       "mp3": "fever-loop-objective-2050-normal-fr.mp3",
       "webm": "fever-loop-objective-2050-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7656,7 +7656,7 @@
       "mp3": "fever-loop-objective-2050-normal-hi.mp3",
       "webm": "fever-loop-objective-2050-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7674,7 +7674,7 @@
       "mp3": "fever-loop-objective-2050-normal-nl.mp3",
       "webm": "fever-loop-objective-2050-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7692,7 +7692,7 @@
       "mp3": "fever-loop-objective-2050-normal-ru.mp3",
       "webm": "fever-loop-objective-2050-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7710,7 +7710,7 @@
       "mp3": "fever-loop-objective-2050-normal-uk.mp3",
       "webm": "fever-loop-objective-2050-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7728,7 +7728,7 @@
       "mp3": "fever-loop-objective-2050-normal-zh.mp3",
       "webm": "fever-loop-objective-2050-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7746,7 +7746,7 @@
       "mp3": "fever-loop-objective-2050-short-de.mp3",
       "webm": "fever-loop-objective-2050-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7764,7 +7764,7 @@
       "mp3": "fever-loop-objective-2050-short-en.mp3",
       "webm": "fever-loop-objective-2050-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7782,7 +7782,7 @@
       "mp3": "fever-loop-objective-2050-short-fr.mp3",
       "webm": "fever-loop-objective-2050-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7800,7 +7800,7 @@
       "mp3": "fever-loop-objective-2050-short-hi.mp3",
       "webm": "fever-loop-objective-2050-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7818,7 +7818,7 @@
       "mp3": "fever-loop-objective-2050-short-nl.mp3",
       "webm": "fever-loop-objective-2050-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7836,7 +7836,7 @@
       "mp3": "fever-loop-objective-2050-short-ru.mp3",
       "webm": "fever-loop-objective-2050-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7854,7 +7854,7 @@
       "mp3": "fever-loop-objective-2050-short-uk.mp3",
       "webm": "fever-loop-objective-2050-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7872,7 +7872,7 @@
       "mp3": "fever-loop-objective-2050-short-zh.mp3",
       "webm": "fever-loop-objective-2050-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7890,7 +7890,7 @@
       "mp3": "fever-loop-objective-2075-full-de.mp3",
       "webm": "fever-loop-objective-2075-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7908,7 +7908,7 @@
       "mp3": "fever-loop-objective-2075-full-en.mp3",
       "webm": "fever-loop-objective-2075-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7926,7 +7926,7 @@
       "mp3": "fever-loop-objective-2075-full-fr.mp3",
       "webm": "fever-loop-objective-2075-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7944,7 +7944,7 @@
       "mp3": "fever-loop-objective-2075-full-hi.mp3",
       "webm": "fever-loop-objective-2075-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7962,7 +7962,7 @@
       "mp3": "fever-loop-objective-2075-full-nl.mp3",
       "webm": "fever-loop-objective-2075-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7980,7 +7980,7 @@
       "mp3": "fever-loop-objective-2075-full-ru.mp3",
       "webm": "fever-loop-objective-2075-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -7998,7 +7998,7 @@
       "mp3": "fever-loop-objective-2075-full-uk.mp3",
       "webm": "fever-loop-objective-2075-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8016,7 +8016,7 @@
       "mp3": "fever-loop-objective-2075-full-zh.mp3",
       "webm": "fever-loop-objective-2075-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8034,7 +8034,7 @@
       "mp3": "fever-loop-objective-2075-normal-de.mp3",
       "webm": "fever-loop-objective-2075-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8052,7 +8052,7 @@
       "mp3": "fever-loop-objective-2075-normal-en.mp3",
       "webm": "fever-loop-objective-2075-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8070,7 +8070,7 @@
       "mp3": "fever-loop-objective-2075-normal-fr.mp3",
       "webm": "fever-loop-objective-2075-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8088,7 +8088,7 @@
       "mp3": "fever-loop-objective-2075-normal-hi.mp3",
       "webm": "fever-loop-objective-2075-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8106,7 +8106,7 @@
       "mp3": "fever-loop-objective-2075-normal-nl.mp3",
       "webm": "fever-loop-objective-2075-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8124,7 +8124,7 @@
       "mp3": "fever-loop-objective-2075-normal-ru.mp3",
       "webm": "fever-loop-objective-2075-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8142,7 +8142,7 @@
       "mp3": "fever-loop-objective-2075-normal-uk.mp3",
       "webm": "fever-loop-objective-2075-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8160,7 +8160,7 @@
       "mp3": "fever-loop-objective-2075-normal-zh.mp3",
       "webm": "fever-loop-objective-2075-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8178,7 +8178,7 @@
       "mp3": "fever-loop-objective-2075-short-de.mp3",
       "webm": "fever-loop-objective-2075-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8196,7 +8196,7 @@
       "mp3": "fever-loop-objective-2075-short-en.mp3",
       "webm": "fever-loop-objective-2075-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8214,7 +8214,7 @@
       "mp3": "fever-loop-objective-2075-short-fr.mp3",
       "webm": "fever-loop-objective-2075-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8232,7 +8232,7 @@
       "mp3": "fever-loop-objective-2075-short-hi.mp3",
       "webm": "fever-loop-objective-2075-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8250,7 +8250,7 @@
       "mp3": "fever-loop-objective-2075-short-nl.mp3",
       "webm": "fever-loop-objective-2075-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8268,7 +8268,7 @@
       "mp3": "fever-loop-objective-2075-short-ru.mp3",
       "webm": "fever-loop-objective-2075-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8286,7 +8286,7 @@
       "mp3": "fever-loop-objective-2075-short-uk.mp3",
       "webm": "fever-loop-objective-2075-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8304,7 +8304,7 @@
       "mp3": "fever-loop-objective-2075-short-zh.mp3",
       "webm": "fever-loop-objective-2075-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8322,7 +8322,7 @@
       "mp3": "fever-loop-objective-2100-full-de.mp3",
       "webm": "fever-loop-objective-2100-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8340,7 +8340,7 @@
       "mp3": "fever-loop-objective-2100-full-en.mp3",
       "webm": "fever-loop-objective-2100-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8358,7 +8358,7 @@
       "mp3": "fever-loop-objective-2100-full-fr.mp3",
       "webm": "fever-loop-objective-2100-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8376,7 +8376,7 @@
       "mp3": "fever-loop-objective-2100-full-hi.mp3",
       "webm": "fever-loop-objective-2100-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8394,7 +8394,7 @@
       "mp3": "fever-loop-objective-2100-full-nl.mp3",
       "webm": "fever-loop-objective-2100-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8412,7 +8412,7 @@
       "mp3": "fever-loop-objective-2100-full-ru.mp3",
       "webm": "fever-loop-objective-2100-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8430,7 +8430,7 @@
       "mp3": "fever-loop-objective-2100-full-uk.mp3",
       "webm": "fever-loop-objective-2100-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8448,7 +8448,7 @@
       "mp3": "fever-loop-objective-2100-full-zh.mp3",
       "webm": "fever-loop-objective-2100-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8466,7 +8466,7 @@
       "mp3": "fever-loop-objective-2100-normal-de.mp3",
       "webm": "fever-loop-objective-2100-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8484,7 +8484,7 @@
       "mp3": "fever-loop-objective-2100-normal-en.mp3",
       "webm": "fever-loop-objective-2100-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8502,7 +8502,7 @@
       "mp3": "fever-loop-objective-2100-normal-fr.mp3",
       "webm": "fever-loop-objective-2100-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8520,7 +8520,7 @@
       "mp3": "fever-loop-objective-2100-normal-hi.mp3",
       "webm": "fever-loop-objective-2100-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8538,7 +8538,7 @@
       "mp3": "fever-loop-objective-2100-normal-nl.mp3",
       "webm": "fever-loop-objective-2100-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8556,7 +8556,7 @@
       "mp3": "fever-loop-objective-2100-normal-ru.mp3",
       "webm": "fever-loop-objective-2100-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8574,7 +8574,7 @@
       "mp3": "fever-loop-objective-2100-normal-uk.mp3",
       "webm": "fever-loop-objective-2100-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8592,7 +8592,7 @@
       "mp3": "fever-loop-objective-2100-normal-zh.mp3",
       "webm": "fever-loop-objective-2100-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8610,7 +8610,7 @@
       "mp3": "fever-loop-objective-2100-short-de.mp3",
       "webm": "fever-loop-objective-2100-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8628,7 +8628,7 @@
       "mp3": "fever-loop-objective-2100-short-en.mp3",
       "webm": "fever-loop-objective-2100-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8646,7 +8646,7 @@
       "mp3": "fever-loop-objective-2100-short-fr.mp3",
       "webm": "fever-loop-objective-2100-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8664,7 +8664,7 @@
       "mp3": "fever-loop-objective-2100-short-hi.mp3",
       "webm": "fever-loop-objective-2100-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8682,7 +8682,7 @@
       "mp3": "fever-loop-objective-2100-short-nl.mp3",
       "webm": "fever-loop-objective-2100-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8700,7 +8700,7 @@
       "mp3": "fever-loop-objective-2100-short-ru.mp3",
       "webm": "fever-loop-objective-2100-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8718,7 +8718,7 @@
       "mp3": "fever-loop-objective-2100-short-uk.mp3",
       "webm": "fever-loop-objective-2100-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8736,7 +8736,7 @@
       "mp3": "fever-loop-objective-2100-short-zh.mp3",
       "webm": "fever-loop-objective-2100-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8754,7 +8754,7 @@
       "mp3": "fever-loop-objective-2125-full-de.mp3",
       "webm": "fever-loop-objective-2125-full-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8772,7 +8772,7 @@
       "mp3": "fever-loop-objective-2125-full-en.mp3",
       "webm": "fever-loop-objective-2125-full-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8790,7 +8790,7 @@
       "mp3": "fever-loop-objective-2125-full-fr.mp3",
       "webm": "fever-loop-objective-2125-full-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8808,7 +8808,7 @@
       "mp3": "fever-loop-objective-2125-full-hi.mp3",
       "webm": "fever-loop-objective-2125-full-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8826,7 +8826,7 @@
       "mp3": "fever-loop-objective-2125-full-nl.mp3",
       "webm": "fever-loop-objective-2125-full-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8844,7 +8844,7 @@
       "mp3": "fever-loop-objective-2125-full-ru.mp3",
       "webm": "fever-loop-objective-2125-full-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8862,7 +8862,7 @@
       "mp3": "fever-loop-objective-2125-full-uk.mp3",
       "webm": "fever-loop-objective-2125-full-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8880,7 +8880,7 @@
       "mp3": "fever-loop-objective-2125-full-zh.mp3",
       "webm": "fever-loop-objective-2125-full-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8898,7 +8898,7 @@
       "mp3": "fever-loop-objective-2125-normal-de.mp3",
       "webm": "fever-loop-objective-2125-normal-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8916,7 +8916,7 @@
       "mp3": "fever-loop-objective-2125-normal-en.mp3",
       "webm": "fever-loop-objective-2125-normal-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8934,7 +8934,7 @@
       "mp3": "fever-loop-objective-2125-normal-fr.mp3",
       "webm": "fever-loop-objective-2125-normal-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8952,7 +8952,7 @@
       "mp3": "fever-loop-objective-2125-normal-hi.mp3",
       "webm": "fever-loop-objective-2125-normal-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8970,7 +8970,7 @@
       "mp3": "fever-loop-objective-2125-normal-nl.mp3",
       "webm": "fever-loop-objective-2125-normal-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -8988,7 +8988,7 @@
       "mp3": "fever-loop-objective-2125-normal-ru.mp3",
       "webm": "fever-loop-objective-2125-normal-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -9006,7 +9006,7 @@
       "mp3": "fever-loop-objective-2125-normal-uk.mp3",
       "webm": "fever-loop-objective-2125-normal-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -9024,7 +9024,7 @@
       "mp3": "fever-loop-objective-2125-normal-zh.mp3",
       "webm": "fever-loop-objective-2125-normal-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -9042,7 +9042,7 @@
       "mp3": "fever-loop-objective-2125-short-de.mp3",
       "webm": "fever-loop-objective-2125-short-de.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -9060,7 +9060,7 @@
       "mp3": "fever-loop-objective-2125-short-en.mp3",
       "webm": "fever-loop-objective-2125-short-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -9078,7 +9078,7 @@
       "mp3": "fever-loop-objective-2125-short-fr.mp3",
       "webm": "fever-loop-objective-2125-short-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -9096,7 +9096,7 @@
       "mp3": "fever-loop-objective-2125-short-hi.mp3",
       "webm": "fever-loop-objective-2125-short-hi.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -9114,7 +9114,7 @@
       "mp3": "fever-loop-objective-2125-short-nl.mp3",
       "webm": "fever-loop-objective-2125-short-nl.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -9132,7 +9132,7 @@
       "mp3": "fever-loop-objective-2125-short-ru.mp3",
       "webm": "fever-loop-objective-2125-short-ru.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -9150,7 +9150,7 @@
       "mp3": "fever-loop-objective-2125-short-uk.mp3",
       "webm": "fever-loop-objective-2125-short-uk.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -9168,7 +9168,7 @@
       "mp3": "fever-loop-objective-2125-short-zh.mp3",
       "webm": "fever-loop-objective-2125-short-zh.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": true,
       "newSinceLastRun": false
     },
@@ -9186,7 +9186,7 @@
       "mp3": "fever-loop-tipping-en.mp3",
       "webm": "fever-loop-tipping-en.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": false,
       "newSinceLastRun": false
     },
@@ -9204,7 +9204,7 @@
       "mp3": "fever-loop-tipping-fr.mp3",
       "webm": "fever-loop-tipping-fr.webm",
       "mp3Exists": false,
-      "webmExists": false,
+      "webmExists": true,
       "generated": false,
       "newSinceLastRun": false
     },
