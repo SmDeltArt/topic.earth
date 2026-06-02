@@ -19,7 +19,12 @@
     'https://cloudinary.smdeltart.com',
     'https://studio.smdeltart.com',
     'https://images.smdeltart.com',
-    'https://widgets.smdeltart.com'
+    'https://widgets.smdeltart.com',
+    // Centralized api-settings host (CAD-AI product, serves ALL apps)
+    'https://api-caddeltai.vercel.app',
+    'https://topic.earth',
+    'https://www.topic.earth',
+    'https://topic-earth.vercel.app'
   ];
   const WIDGET_ALLOWED_DEV_ORIGINS = [
     'http://localhost:5500',
@@ -35,7 +40,10 @@
     'http://localhost:8000',
     'http://127.0.0.1:8000'
   ];
-  const WIDGET_ALLOWED_VERCEL_PATTERN = /^https:\/\/smdeltart[a-z0-9-]*\.vercel\.app$/;
+  const WIDGET_ALLOWED_VERCEL_PATTERN = /^https:\/\/(smdeltart|api-caddeltai|topic-earth)[a-z0-9-]*\.vercel\.app$/;
+  const WIDGET_ALLOWED_SECRET_ORIGINS = new Set([
+    'https://api-caddeltai.vercel.app'
+  ]);
   const API_SETTINGS_CHANNEL_NAME = 'smdeltart-api-settings-sync';
   const LEGACY_API_SECRET_KEY = 'Sm\u0394rt2025!ApiKey#Secure';
 
@@ -429,7 +437,7 @@
     }
 
     canAcceptSecretSettings(origin) {
-      return Boolean(origin && origin === global.location?.origin);
+      return Boolean(origin && (origin === global.location?.origin || WIDGET_ALLOWED_SECRET_ORIGINS.has(origin)));
     }
 
     stripSecretSettings(settings = {}) {
@@ -456,6 +464,7 @@
         global.localStorage?.setItem(storageKey, JSON.stringify(settingsToImport));
         if (storageKey === 'smdeltartApiSettings') {
           global.localStorage?.setItem('smartApiSettings', JSON.stringify(settingsToImport));
+          global.localStorage?.setItem('cadAiApiSettings', JSON.stringify(settingsToImport));
         }
         if (storageKey === 'smdeltartPreferences') {
           console.warn('[Smart AI API] Ignored API keys from cross-origin api-settings message; imported preferences only.');

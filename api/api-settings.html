@@ -1,0 +1,3540 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CAD-ΔI API Settings</title>
+    <!-- Favicon: animated delta triangle managed by initAnimatedFavicon() in api-settings.js -->
+    <link
+      rel="icon"
+      id="dynamicFavicon"
+      type="image/svg+xml"
+      href="cad-deltai-logo-128.svg"
+    />
+    <script>
+      document.documentElement.classList.add(
+        window.self === window.top ? "detached-mode" : "in-iframe",
+      );
+      if (new URLSearchParams(location.search).get("embed") === "true")
+        document.documentElement.classList.add("embed-mode");
+    </script>
+    <!-- Domain & CDN guard — edit domain-config.js to change allowed hosts -->
+    <script src="domain-config.js"></script>
+    <link rel="stylesheet" href="shared/smart-spa-base.css" />
+    <!-- smart-favicon.js and smart-nav-manager.js NOT loaded here:
+         api-settings has its own initAnimatedFavicon() and handleApiSettingsBack() -->
+
+    <!-- Brand meta from brand/brand.json (shared with index.html + banner). -->
+    <script type="module">
+      import { applyBrandMeta } from "./brand/source/brand-meta.js";
+      applyBrandMeta({
+        pageUrl: "https://api.smdeltart.com/api-settings.html",
+        keepTitle: true,
+      }).catch((e) => console.warn("brand-meta:", e));
+    </script>
+    <style>
+      :root {
+        --primary-color: #6d9eeb;
+        --secondary-color: #8bb0f0;
+        --accent-color: #5a87d6;
+        --background-color: #151620;
+        --card-bg: #1a1d2e;
+        --text-color: #e0e0e0;
+        --success-color: #4ade80;
+        --error-color: #f87171;
+        --warning-color: #fbbf24;
+        --info-color: #60a5fa;
+        --shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+        --radius: 8px;
+        --border-color: #333;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, var(--background-color), #0f1419);
+        color: var(--text-color);
+        line-height: 1.5;
+        font-size: 14px;
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+      }
+
+      /* Animated title I that matches delta color */
+      .title-delta-i {
+        display: inline-block;
+        font-weight: 700;
+        font-size: 1.1em;
+        transition:
+          color 0.3s ease,
+          text-shadow 0.3s ease;
+        color: #00ffff;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+      }
+
+      /* Body fills iframe when embedded */
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100dvh;
+        height: 100dvh;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        background: var(--card-bg);
+      }
+
+      /* In iframe mode - fill height, but cap width so api-settings
+         doesn't stretch to full screen when opened from clipboard
+         (clipboard opens us in a full-viewport iframe). */
+      .in-iframe,
+      .in-iframe body {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .in-iframe body {
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+      }
+
+      .in-iframe .main-container {
+        width: 100%;
+        max-width: 460px;
+        height: 100%;
+        max-height: 100dvh;
+        margin: 0 auto;
+        border-radius: 0;
+        box-shadow: none;
+        overflow-y: auto !important;
+        overflow-x: hidden;
+      }
+
+      .main-container {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100dvh;
+        margin: 0;
+        background: var(--card-bg);
+        border-radius: 0;
+        box-shadow: none;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      /* Embed mode - keep overlay controls visible for parent app return */
+      .embed-mode .back-btn {
+        display: none !important;
+      }
+      .embed-mode .close-btn {
+        display: flex !important;
+        z-index: 20;
+      }
+
+      /* Standalone mode (new tab) - match clipboard height */
+      .detached-mode .main-container {
+        max-width: 420px;
+        max-height: calc(100dvh - 20px);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+
+      .header {
+        background: linear-gradient(135deg, #2d3a5a, #1a2332);
+        padding: 20px;
+        text-align: center;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+      }
+
+      .header h1 {
+        font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        white-space: nowrap;
+      }
+
+      .header img {
+        height: 2em;
+        width: auto;
+        object-fit: contain;
+      }
+
+      /* Header title - NO clickable, NO hover */
+      .header-title-text {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: inherit;
+        padding: 4px 8px;
+      }
+
+      /* ΔI text - just styled, not clickable */
+      .delta-i-text {
+        color: #00ffff;
+        font-weight: bold;
+        transition:
+          color 0.5s ease,
+          text-shadow 0.5s ease;
+      }
+
+      .header-logo-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: opacity 0.2s ease;
+      }
+      .header-logo-link:hover {
+        opacity: 0.75;
+      }
+
+      /* Detached window mode - subtle styling, no sync badge */
+      .detached-mode .header {
+        background: linear-gradient(135deg, #1e3a5f, #0d1b2a);
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(248, 113, 113, 0.1);
+        border: none;
+        color: #f87171;
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        z-index: 10;
+      }
+
+      .close-btn:hover {
+        background: rgba(248, 113, 113, 0.2);
+        transform: scale(1.1);
+      }
+
+      /* Back button - always visible */
+      .back-btn {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: rgba(109, 158, 235, 0.2);
+        border: none;
+        color: #6d9eeb;
+        width: 28px;
+        height: 28px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        z-index: 10;
+      }
+
+      .back-btn:hover {
+        background: rgba(109, 158, 235, 0.3);
+        transform: scale(1.1);
+      }
+
+      /* close-btn removed — parent app (media-forge overlay) owns dismiss. */
+
+      .api-settings-container {
+        padding: 20px;
+      }
+
+      .api-category {
+        margin-bottom: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: #2d3a5a;
+      }
+
+      .api-category-btn {
+        width: 100%;
+        padding: 12px 15px;
+        background: #2d3a5a;
+        border: none;
+        color: var(--text-color);
+        font-size: 0.95em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: background-color 0.2s ease;
+      }
+
+      .api-category-btn:hover {
+        background: #3a4a6a;
+      }
+
+      .api-category-btn .category-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+      }
+
+      .category-status {
+        font-size: 1.1em;
+        min-width: 20px;
+        margin-left: auto;
+      }
+
+      .category-arrow {
+        transition: transform 0.2s ease;
+        flex-shrink: 0;
+        color: #ffffff;
+      }
+
+      .api-category.expanded .category-arrow {
+        transform: rotate(180deg);
+      }
+
+      .api-category-content {
+        display: none;
+        padding: 15px;
+        background: #232946;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .api-category.expanded .api-category-content {
+        display: block;
+      }
+
+      /* Floating notification toast */
+      .floating-toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: linear-gradient(135deg, #1a1a2e 0%, #232946 100%);
+        border: 1px solid #3b82f6;
+        border-radius: 8px;
+        padding: 10px 20px;
+        color: #e0e0e0;
+        font-size: 0.9em;
+        z-index: 10000;
+        opacity: 0;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        max-width: 90%;
+        text-align: center;
+      }
+
+      .floating-toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .floating-toast.success {
+        border-color: #22c55e;
+      }
+
+      .floating-toast.error {
+        border-color: #ef4444;
+      }
+
+      .floating-toast.warning {
+        border-color: #f59e0b;
+      }
+
+      .floating-toast.info {
+        border-color: #3b82f6;
+      }
+
+      .api-option {
+        margin-bottom: 15px;
+        padding: 12px;
+        background: #1e2a47;
+        border-radius: 6px;
+        border: 1px solid #3a4a6a;
+      }
+
+      .api-radio-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        font-size: 0.9em;
+      }
+
+      .api-radio-label input[type="radio"] {
+        margin-right: 8px;
+        accent-color: var(--primary-color);
+      }
+
+      .api-status {
+        font-size: 1.1em;
+        min-width: 20px;
+      }
+
+      .api-inputs {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #4a5568;
+      }
+
+      .api-select,
+      .api-key-input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 8px;
+        background: #2d3a5a;
+        border: 1px solid #4a5568;
+        color: var(--text-color);
+        border-radius: 4px;
+        font-size: 0.85em;
+      }
+
+      .api-select:focus,
+      .api-key-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(109, 158, 235, 0.2);
+      }
+
+      .key-format-hint {
+        font-size: 0.75em;
+        color: #9ca3af;
+        margin-bottom: 8px;
+      }
+
+      .api-info-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 0.8em;
+        display: inline-block;
+        margin-bottom: 8px;
+      }
+
+      .api-info-link:hover {
+        text-decoration: underline;
+      }
+
+      .api-settings-actions {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 15px;
+        background: #1a2332;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .export-btn,
+      .load-btn,
+      .test-apis-btn,
+      .locally-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.8em;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        text-align: center;
+        color: #1e3a5f;
+      }
+
+      .export-btn {
+        background: #a78bfa;
+      }
+
+      .load-btn {
+        background: #86efac;
+      }
+
+      .test-apis-btn {
+        background: #a5b4fc;
+      }
+
+      .locally-btn {
+        background: #fcd34d;
+      }
+
+      .vault-save-btn {
+        background: #86efac;
+        color: #1e3a5f;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85em;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+
+      .vault-save-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+      }
+
+      .vault-save-btn:disabled {
+        background: #444;
+        color: #888;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .vault-btn-header {
+        background: #c4b5fd;
+        color: #1e3a5f;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85em;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+
+      .vault-btn-header:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+      }
+
+      .vault-btn-header.vault-locked {
+        background: #fca5a5;
+      }
+
+      .vault-btn-header.vault-unlocked {
+        background: #86efac;
+      }
+
+      .export-btn:hover,
+      .load-btn:hover,
+      .test-apis-btn:hover,
+      .locally-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .api-log-container {
+        padding: 20px;
+      }
+
+      .status-message {
+        padding: 10px;
+        border-radius: 6px;
+        margin: 10px 0;
+        font-size: 0.9em;
+        border: 1px solid;
+        transition: all 0.3s ease;
+      }
+
+      .status-message.success {
+        background: rgba(34, 197, 94, 0.1);
+        border-color: #22c55e;
+        color: #22c55e;
+      }
+
+      .status-message.error {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: #ef4444;
+        color: #ef4444;
+      }
+
+      .status-message.info {
+        background: rgba(59, 130, 246, 0.1);
+        border-color: #3b82f6;
+        color: #3b82f6;
+      }
+
+      .api-log-container {
+        padding: 20px;
+        background: #1a2332;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .api-log-container h3 {
+        margin-bottom: 15px;
+        color: var(--text-color);
+        font-size: 1.1em;
+      }
+
+      .api-log-display {
+        background: #0f1419;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 10px;
+        height: 72px;
+        overflow-y: auto;
+        font-family: "Courier New", monospace;
+        font-size: 0.75em;
+        line-height: 1.3;
+        transition: height 0.3s ease;
+      }
+
+      .api-log-display.expanded {
+        height: 160px;
+      }
+
+      /* Help Toggle */
+      .help-toggle {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 0.85em;
+        font-weight: bold;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .help-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+      }
+
+      .help-toggle.active {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+        }
+      }
+
+      /* Help log messages */
+      .help-log-entry {
+        background: linear-gradient(
+          90deg,
+          rgba(59, 130, 246, 0.15),
+          transparent
+        );
+        border-left: 3px solid #3b82f6;
+        padding: 4px 8px;
+        margin: 4px 0;
+        border-radius: 0 4px 4px 0;
+        color: #93c5fd;
+      }
+
+      .help-log-entry.tip {
+        background: linear-gradient(
+          90deg,
+          rgba(34, 197, 94, 0.15),
+          transparent
+        );
+        border-left-color: #22c55e;
+        color: #86efac;
+      }
+
+      .help-log-entry.warning {
+        background: linear-gradient(
+          90deg,
+          rgba(245, 158, 11, 0.15),
+          transparent
+        );
+        border-left-color: #f59e0b;
+        color: #fcd34d;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .api-log-empty {
+        color: #6b7280;
+        font-style: italic;
+        text-align: center;
+        padding: 15px 10px;
+        font-size: 0.75em;
+      }
+
+      .log-entry {
+        margin-bottom: 4px;
+        padding: 4px 6px;
+        border-radius: 3px;
+        word-wrap: break-word;
+        font-size: 0.75em;
+        line-height: 1.2;
+      }
+
+      .log-entry.success {
+        background: rgba(74, 222, 128, 0.1);
+        border-left: 3px solid #4ade80;
+        color: #86efac;
+      }
+
+      .log-entry.error {
+        background: rgba(248, 113, 113, 0.1);
+        border-left: 3px solid #f87171;
+        color: #fca5a5;
+      }
+
+      .log-entry.warning {
+        background: rgba(251, 191, 36, 0.1);
+        border-left: 3px solid #fbbf24;
+        color: #fcd34d;
+      }
+
+      .log-entry.info {
+        background: rgba(96, 165, 250, 0.1);
+        border-left: 3px solid #60a5fa;
+        color: #93c5fd;
+      }
+
+      .timestamp {
+        color: #9ca3af;
+        font-size: 0.65em;
+        margin-right: 6px;
+      }
+
+      /* Comparison Dashboard Styles */
+      .comparison-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #1e2a47;
+        border-radius: 6px;
+        border: 1px solid #3a4a6a;
+      }
+
+      .comparison-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .dashboard-btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.85em;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .dashboard-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .table-container {
+        overflow-x: auto;
+        border-radius: 6px;
+        margin-bottom: 12px;
+      }
+
+      #priceTable {
+        width: 100%;
+        background: #2d3a5a;
+        color: #d4e1f5;
+        border-radius: 6px;
+        font-size: 0.75em;
+        border-collapse: collapse;
+      }
+
+      #priceTable th {
+        padding: 8px;
+        text-align: left;
+        background: #232946;
+        border-bottom: 1px solid #4a5568;
+        font-size: 0.7em;
+        font-weight: 600;
+      }
+
+      #priceTable td {
+        padding: 6px 8px;
+        border-bottom: 1px solid rgba(74, 85, 104, 0.3);
+      }
+
+      #priceTable tr:hover {
+        background: rgba(109, 158, 235, 0.1);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 480px) {
+        body {
+          padding: 5px;
+        }
+
+        .main-container {
+          max-width: 100%;
+          max-height: calc(100vh - 10px);
+          margin: 0;
+          border-radius: 0;
+        }
+
+        .header {
+          padding: 15px;
+        }
+
+        .header h1 {
+          font-size: 1.1rem;
+        }
+
+        .api-settings-container {
+          padding: 15px;
+        }
+
+        .api-settings-actions {
+          grid-template-columns: repeat(2, 1fr);
+          padding: 10px;
+          gap: 6px;
+        }
+
+        .comparison-header {
+          flex-direction: column;
+          gap: 8px;
+          align-items: stretch;
+        }
+
+        .close-btn {
+          top: 5px;
+          right: 5px;
+          width: 18px;
+          height: 18px;
+        }
+
+        .api-log-display {
+          height: 60px;
+          font-size: 0.7em;
+        }
+      }
+
+      @media (min-width: 481px) {
+        .main-container {
+          margin: 20px auto;
+        }
+      }
+
+      @media (max-height: 700px) {
+        .main-container {
+          max-height: calc(100vh - 40px);
+        }
+      }
+
+      /* Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .api-category-content {
+        animation: fadeIn 0.3s ease;
+      }
+
+      /* Scrollbar Styling */
+      .main-container::-webkit-scrollbar,
+      .api-log-display::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .main-container::-webkit-scrollbar-track,
+      .api-log-display::-webkit-scrollbar-track {
+        background: #1a2332;
+      }
+
+      .main-container::-webkit-scrollbar-thumb,
+      .api-log-display::-webkit-scrollbar-thumb {
+        background: #4a5568;
+        border-radius: 3px;
+      }
+
+      .main-container::-webkit-scrollbar-thumb:hover,
+      .api-log-display::-webkit-scrollbar-thumb:hover {
+        background: #6b7280;
+      }
+
+      /* ====================================================================
+           🔐 API VAULT DIALOG STYLES
+           ==================================================================== */
+      .vault-dialog-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.2s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .vault-dialog {
+        background: var(--card-bg, #1a1d2e);
+        border: 1px solid var(--border-color, #333);
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 380px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        animation: slideUp 0.3s ease;
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .vault-dialog-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .vault-dialog-header span {
+        font-size: 1.8em;
+      }
+
+      .vault-dialog-header h3 {
+        margin: 0;
+        font-size: 1.2em;
+        color: var(--text-color, #e0e0e0);
+      }
+
+      .vault-input {
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--background-color, #151620);
+        border: 1px solid var(--border-color, #333);
+        border-radius: 8px;
+        color: var(--text-color, #e0e0e0);
+        font-size: 1em;
+        outline: none;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .vault-input:focus {
+        border-color: var(--primary-color, #6d9eeb);
+        box-shadow: 0 0 0 3px rgba(109, 158, 235, 0.2);
+      }
+
+      .vault-input-error {
+        border-color: var(--error-color, #f87171) !important;
+        animation: shake 0.3s ease;
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+
+      .vault-dialog-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .vault-btn {
+        flex: 1;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9em;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .vault-btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color, #6d9eeb),
+          var(--accent-color, #5a87d6)
+        );
+        color: white;
+      }
+
+      .vault-btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(109, 158, 235, 0.4);
+      }
+
+      .vault-btn-secondary {
+        background: transparent;
+        border: 1px solid var(--border-color, #333);
+        color: #888;
+      }
+
+      .vault-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-color, #e0e0e0);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="main-container">
+      <div class="header">
+        <button class="back-btn" onclick="handleApiSettingsBack()" title="Back">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M19 12H5M12 19L5 12L12 5"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+        <h1>
+          <a
+            href="https://api.caddeltai.com/api-settings"
+            target="_blank"
+            rel="noopener"
+            class="header-logo-link"
+            title="Open CAD-ΔI API Settings standalone"
+          >
+            <img
+              src="cad-deltai-logo-128.svg"
+              alt="CAD-ΔI"
+              style="
+                height: 2em;
+                width: auto;
+                margin-right: 8px;
+                vertical-align: middle;
+                object-fit: contain;
+              "
+            />
+            <span
+              >CAD-<span class="delta-i-text" id="titleDeltaI">ΔI</span> API
+              Settings</span
+            >
+          </a>
+          <span
+            style="
+              font-size: 0.4em;
+              color: #4ade80;
+              font-weight: 300;
+              margin-left: 8px;
+              opacity: 0.8;
+            "
+            >v2.2 ✅</span
+          >
+        </h1>
+        <p style="font-size: 0.9em; opacity: 0.8; margin: 0">
+          Configure your AI API providers and test connections
+        </p>
+      </div>
+
+      <div class="api-settings-container">
+        <!-- Text API Category -->
+        <div class="api-category" data-category="text">
+          <button class="api-category-btn" data-category="text">
+            <svg
+              class="category-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 12 12"
+            >
+              <polygon
+                points="6,2 11,10 1,10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+            </svg>
+            <span class="category-label">🤖 AI Text API</span>
+            <span class="category-status" id="textApiStatus">❌</span>
+          </button>
+          <div class="api-category-content" id="textApiContent">
+            <div class="api-option">
+              <label class="api-radio-label">
+                <span>
+                  <input
+                    type="radio"
+                    name="textApiProvider"
+                    value="paid"
+                    id="paidTextApiRadio"
+                    checked
+                  />
+                  Paid APIs
+                </span>
+                <span class="api-status" id="paidTextStatus">❌</span>
+              </label>
+              <div class="api-inputs" id="paidTextInputs">
+                <select id="paidTextApi" class="api-select">
+                  <option value="">Select Paid API</option>
+                  <optgroup label="🏆 Top Tier (Best Quality)">
+                    <option value="openai" data-key-format="sk-">
+                      🥇 OpenAI (Select Model ↓)
+                    </option>
+                    <option value="anthropic" data-key-format="sk-">
+                      🥈 Anthropic Claude 3.5
+                    </option>
+                    <option value="google" data-key-format="AIza">
+                      🥉 Google Gemini Pro
+                    </option>
+                  </optgroup>
+                  <optgroup label="⚡ Fast & Affordable">
+                    <option value="xai" data-key-format="xai-">xAI Grok</option>
+                    <option value="deepseek" data-key-format="sk-">
+                      DeepSeek (Cheap)
+                    </option>
+                    <option value="mistral" data-key-format="32-char key">
+                      Mistral AI
+                    </option>
+                    <option value="cohere" data-key-format="co-">
+                      Cohere Command
+                    </option>
+                  </optgroup>
+                </select>
+                <input
+                  type="password"
+                  id="paidTextApiKey"
+                  class="api-key-input"
+                  placeholder="Enter API Key"
+                  autocomplete="off"
+                  data-lpignore="true"
+                  data-form-type="other"
+                  style="display: none"
+                />
+                <div
+                  class="key-format-hint"
+                  id="paidTextKeyHint"
+                  style="display: none"
+                ></div>
+                <!-- OpenAI Model Selector (shown when OpenAI is selected) -->
+                <div
+                  id="openaiTextModelSelector"
+                  style="display: none; margin-top: 8px"
+                >
+                  <label style="font-size: 0.75em; color: #888"
+                    >Chat Model:</label
+                  >
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: 1fr 1fr;
+                      gap: 6px;
+                      margin: 6px 0;
+                    "
+                  >
+                    <input
+                      type="text"
+                      id="openaiProjectLabel"
+                      class="api-key-input"
+                      placeholder="OpenAI project label"
+                      autocomplete="off"
+                      style="display: block; font-size: 0.78em"
+                    />
+                    <input
+                      type="text"
+                      id="openaiKeyLabel"
+                      class="api-key-input"
+                      placeholder="Key label / origin"
+                      autocomplete="off"
+                      style="display: block; font-size: 0.78em"
+                    />
+                  </div>
+                  <select
+                    id="openaiTextModel"
+                    class="api-select"
+                    style="font-size: 0.85em"
+                  >
+                    <optgroup label="⚡ Recommended (High TPM)">
+                      <option value="gpt-5.4" selected>
+                        gpt-5.4 (500K TPM, $$)
+                      </option>
+                      <option value="gpt-5.3-codex">
+                        gpt-5.3-codex (500K TPM, $$)
+                      </option>
+                      <option value="gpt-5-mini">
+                        gpt-5-mini (500K TPM, $)
+                      </option>
+                      <option value="gpt-5">gpt-5 (500K TPM, $$)</option>
+                      <option value="gpt-5.1">gpt-5.1 (500K TPM, $$$)</option>
+                    </optgroup>
+                    <optgroup label="🧠 Premium">
+                      <option value="gpt-5.4-pro">
+                        gpt-5.4-pro (30K TPM, $$$)
+                      </option>
+                      <option value="gpt-5.1-chat-latest">
+                        gpt-5.1-chat-latest (30K TPM, $$$)
+                      </option>
+                      <option value="gpt-4o">gpt-4o (30K TPM, $$)</option>
+                    </optgroup>
+                    <optgroup label="💨 Fast/Light">
+                      <option value="gpt-4o-mini">
+                        gpt-4o-mini (200K TPM, $)
+                      </option>
+                      <option value="gpt-4.1-mini">
+                        gpt-4.1-mini (200K TPM, $)
+                      </option>
+                    </optgroup>
+                  </select>
+                  <div
+                    id="openaiTextModelStatus"
+                    style="
+                      margin-top: 6px;
+                      padding: 6px 8px;
+                      border-radius: 6px;
+                      background: rgba(96, 165, 250, 0.09);
+                      color: #b8c1ec;
+                      font-size: 0.72em;
+                      line-height: 1.45;
+                    "
+                  >
+                    Current: saved model · Max: click Refresh All or Test Text
+                    API
+                  </div>
+                </div>
+                <a
+                  href="#"
+                  id="paidTextApiLink"
+                  class="api-info-link"
+                  target="_blank"
+                  style="display: none"
+                  >Get API Key</a
+                >
+                <button
+                  id="testPaidTextBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #22c55e;
+                    color: white;
+                    font-size: 0.8em;
+                    padding: 6px 10px;
+                    margin-top: 8px;
+                    display: none;
+                  "
+                >
+                  🧪 Test Text API
+                </button>
+              </div>
+            </div>
+
+            <div class="api-option">
+              <label class="api-radio-label">
+                <span>
+                  <input
+                    type="radio"
+                    name="textApiProvider"
+                    value="free"
+                    id="freeTextApiRadio"
+                  />
+                  Free APIs
+                </span>
+                <span class="api-status" id="freeTextStatus">❌</span>
+              </label>
+              <div class="api-inputs" id="freeTextInputs" style="display: none">
+                <select id="freeTextApi" class="api-select">
+                  <option value="">Select Free API</option>
+                  <optgroup label="🆓 No Key Required">
+                    <option
+                      value="sambanova"
+                      data-key-format=""
+                      data-free="true"
+                    >
+                      🥇 SambaNova (No Key, Public)
+                    </option>
+                    <option value="ollama" data-key-format="" data-free="true">
+                      🥈 Ollama Local (No Key, Self-hosted)
+                    </option>
+                  </optgroup>
+                  <optgroup label="🔑 Free Key Required">
+                    <option
+                      value="groq"
+                      data-key-format="gsk_"
+                      data-free-key="true"
+                    >
+                      🥇 Groq (Fast, High Quality)
+                    </option>
+                    <option
+                      value="together-ai"
+                      data-key-format="together-"
+                      data-free-key="true"
+                    >
+                      🥈 Together AI (Many Models)
+                    </option>
+                    <option
+                      value="huggingface"
+                      data-key-format="hf_"
+                      data-free-key="true"
+                    >
+                      🥉 Hugging Face (Open Source)
+                    </option>
+                    <option
+                      value="google-free"
+                      data-key-format="AIza"
+                      data-free-key="true"
+                    >
+                      Google Gemini Free
+                    </option>
+                    <option
+                      value="deepseek-free"
+                      data-key-format="sk-"
+                      data-free-key="true"
+                    >
+                      DeepSeek Free (V3 / R1 / Coder)
+                    </option>
+                    <option
+                      value="perplexity-free"
+                      data-key-format="pplx-"
+                      data-free-key="true"
+                    >
+                      Perplexity Free
+                    </option>
+                    <option
+                      value="replicate-free"
+                      data-key-format="r8_"
+                      data-free-key="true"
+                    >
+                      Replicate Free
+                    </option>
+                    <option
+                      value="cerebras"
+                      data-key-format="crbrs-"
+                      data-free-key="true"
+                    >
+                      Cerebras (Fast Inference)
+                    </option>
+                    <option
+                      value="fireworks-ai"
+                      data-key-format=""
+                      data-free-key="true"
+                    >
+                      Fireworks AI
+                    </option>
+                  </optgroup>
+                </select>
+                <input
+                  type="password"
+                  id="freeTextApiKey"
+                  class="api-key-input"
+                  placeholder="Enter API Key (if required)"
+                  autocomplete="off"
+                  data-lpignore="true"
+                  data-form-type="other"
+                  style="display: none"
+                />
+                <div
+                  class="key-format-hint"
+                  id="freeTextKeyHint"
+                  style="display: none"
+                ></div>
+                <!-- Ollama Model Selector (shown when Ollama is selected) -->
+                <div
+                  id="ollamaModelSelector"
+                  style="display: none; margin-top: 8px"
+                >
+                  <!-- Ollama server host (local or remote) -->
+                  <div style="margin-bottom: 8px">
+                    <label style="font-size: 0.75em; color: #888"
+                      >🌐 Ollama Server:</label
+                    >
+                    <div
+                      style="
+                        display: flex;
+                        gap: 4px;
+                        margin-top: 3px;
+                        align-items: stretch;
+                      "
+                    >
+                      <input
+                        type="text"
+                        id="ollamaHost"
+                        class="api-key-input"
+                        value="http://localhost:11434"
+                        placeholder="http://localhost:11434"
+                        style="flex: 1; margin-bottom: 0; font-size: 0.85em"
+                      />
+                      <select
+                        class="api-select"
+                        style="
+                          width: auto;
+                          font-size: 0.78em;
+                          margin-bottom: 0;
+                          padding: 4px 6px;
+                        "
+                        title="Quick host presets"
+                        onchange="
+                          if (this.value) {
+                            document.getElementById('ollamaHost').value =
+                              this.value;
+                            this.value = '';
+                          }
+                        "
+                      >
+                        <option value="">⬇️ preset</option>
+                        <option value="http://localhost:11434">
+                          🖥 localhost
+                        </option>
+                        <option value="http://127.0.0.1:11434">
+                          🖥 127.0.0.1
+                        </option>
+                        <option value="http://0.0.0.0:11434">
+                          🌐 0.0.0.0 (LAN)
+                        </option>
+                      </select>
+                    </div>
+                    <div
+                      style="font-size: 0.68em; color: #555; margin-top: 2px"
+                    >
+                      Local default · Or paste any Ollama-compatible URL
+                    </div>
+                  </div>
+                  <label style="font-size: 0.75em; color: #888"
+                    >🦙 Select installed model:</label
+                  >
+                  <div
+                    style="
+                      display: flex;
+                      gap: 4px;
+                      margin-top: 4px;
+                      align-items: stretch;
+                    "
+                  >
+                    <select
+                      id="ollamaModelList"
+                      class="api-select"
+                      style="flex: 1; margin-bottom: 0"
+                      title="Your installed Ollama models"
+                    >
+                      <option value="">— click Refresh to detect —</option>
+                    </select>
+                    <button
+                      type="button"
+                      id="refreshOllamaModelsBtn"
+                      class="dashboard-btn"
+                      title="Query /api/tags and list installed models"
+                      style="
+                        background: #3b82f6;
+                        color: white;
+                        font-size: 0.85em;
+                        padding: 4px 10px;
+                        white-space: nowrap;
+                      "
+                    >
+                      🔄 Refresh
+                    </button>
+                  </div>
+                  <div
+                    id="ollamaModelInfo"
+                    style="font-size: 0.7em; color: #666; margin-top: 4px"
+                  >
+                    ☁️ <em>cloud</em> models need an
+                    <a
+                      href="https://ollama.com/pricing"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style="color: #3b82f6"
+                      >Ollama Cloud</a
+                    >
+                    subscription · 📥 <code>ollama pull &lt;name&gt;</code> to
+                    add local ones
+                  </div>
+                </div>
+                <!-- DeepSeek Cloud Model Selector (shown when deepseek-free selected) -->
+                <div
+                  id="deepseekCloudSelector"
+                  style="display: none; margin-top: 8px"
+                >
+                  <label style="font-size: 0.75em; color: #888"
+                    >🧠 DeepSeek Model:</label
+                  >
+                  <div
+                    style="
+                      display: flex;
+                      gap: 4px;
+                      margin-top: 3px;
+                      flex-wrap: wrap;
+                    "
+                  >
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Best for coding & general tasks"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #0ea5e9;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('deepseekCloudModel').value =
+                          'deepseek-v3'
+                      "
+                    >
+                      💻 V3
+                    </button>
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Reasoning / thinking model"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #f59e0b;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('deepseekCloudModel').value =
+                          'deepseek-r1'
+                      "
+                    >
+                      🧠 R1
+                    </button>
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Latest R1 snapshot (May 2025)"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #8b5cf6;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('deepseekCloudModel').value =
+                          'deepseek-r1-0528'
+                      "
+                    >
+                      🧠 R1-0528
+                    </button>
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      title="Code specialist"
+                      style="
+                        font-size: 0.75em;
+                        padding: 3px 8px;
+                        background: #6366f1;
+                        color: #fff;
+                      "
+                      onclick="
+                        document.getElementById('deepseekCloudModel').value =
+                          'deepseek-coder'
+                      "
+                    >
+                      📦 Coder
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    id="deepseekCloudModel"
+                    class="api-key-input"
+                    value="deepseek-v3"
+                    placeholder="deepseek-v3, deepseek-r1, deepseek-coder..."
+                    style="margin-top: 4px; font-size: 0.85em"
+                  />
+                  <div style="font-size: 0.68em; color: #555; margin-top: 2px">
+                    🌐 api.deepseek.com ·
+                    <a
+                      href="https://platform.deepseek.com/api_keys"
+                      target="_blank"
+                      rel="noopener"
+                      >Get free key</a
+                    >
+                  </div>
+                </div>
+                <a
+                  href="#"
+                  id="freeTextApiLink"
+                  class="api-info-link"
+                  target="_blank"
+                  style="display: none"
+                  >Get API Key</a
+                >
+                <button
+                  id="testFreeTextBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #22c55e;
+                    color: white;
+                    font-size: 0.8em;
+                    padding: 6px 10px;
+                    margin-top: 8px;
+                    display: none;
+                  "
+                >
+                  🧪 Test Text API
+                </button>
+                <div
+                  id="freeTextStatus"
+                  style="
+                    font-size: 0.75em;
+                    margin-top: 6px;
+                    color: #9ca3af;
+                    display: none;
+                  "
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Image API Category -->
+        <div class="api-category" data-category="image">
+          <button class="api-category-btn" data-category="image">
+            <svg
+              class="category-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 12 12"
+            >
+              <polygon
+                points="6,2 11,10 1,10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+            </svg>
+            <span class="category-label">🎨 AI Image Generation API</span>
+            <span class="category-status" id="imageApiStatus">✅</span>
+          </button>
+          <div class="api-category-content" id="imageApiContent">
+            <div class="api-option">
+              <label class="api-radio-label">
+                <span>
+                  <input
+                    type="radio"
+                    name="imageApiProvider"
+                    value="paid"
+                    id="paidImageApiRadio"
+                    checked
+                  />
+                  Paid APIs
+                </span>
+                <span class="api-status" id="paidImageStatus">❌</span>
+              </label>
+              <div class="api-inputs" id="paidImageInputs">
+                <select id="paidImageApi" class="api-select">
+                  <option value="">Select Paid API</option>
+                  <optgroup label="🎨 Image Generation (2025)">
+                    <option
+                      value="openai-dalle"
+                      data-key-format="sk-"
+                      data-url="https://api.openai.com/v1/images/generations"
+                    >
+                      🥇 OpenAI Images (Select Model ↓)
+                    </option>
+                    <option
+                      value="stable-diffusion-3"
+                      data-key-format="sk-"
+                      data-url="https://api.stability.ai/v2beta/stable-image/generate/sd3"
+                    >
+                      🥈 Stability AI SD3 (Latest)
+                    </option>
+                    <option
+                      value="stable-diffusion"
+                      data-key-format="sk-"
+                      data-url="https://api.stability.ai/v1/generation"
+                    >
+                      Stability AI SDXL
+                    </option>
+                    <option
+                      value="stability-inpaint"
+                      data-key-format="sk-"
+                      data-url="https://api.stability.ai/v2beta/stable-image/edit/inpaint"
+                    >
+                      🖌️ Stability AI Inpaint
+                    </option>
+                    <option
+                      value="flux-1.1-pro"
+                      data-key-format=""
+                      data-url="https://api.bfl.ml/v1/flux-pro-1.1"
+                    >
+                      🆕 FLUX 1.1 Pro (Black Forest)
+                    </option>
+                    <option
+                      value="flux-pro"
+                      data-key-format=""
+                      data-url="https://api.bfl.ml/v1/flux-pro"
+                    >
+                      FLUX Pro
+                    </option>
+                    <option value="midjourney" data-key-format="" data-url="">
+                      Midjourney (Discord)
+                    </option>
+                    <option
+                      value="leonardo-ai"
+                      data-key-format=""
+                      data-url="https://cloud.leonardo.ai/api/rest/v1/generations"
+                    >
+                      Leonardo AI
+                    </option>
+                    <option
+                      value="ideogram-v2"
+                      data-key-format=""
+                      data-url="https://api.ideogram.ai/generate"
+                    >
+                      🆕 Ideogram V2 (Text in Images)
+                    </option>
+                    <option
+                      value="recraft-v3"
+                      data-key-format=""
+                      data-url="https://external.api.recraft.ai/v1/images/generations"
+                    >
+                      🆕 Recraft V3 (Vector Style)
+                    </option>
+                    <option
+                      value="imagen-3"
+                      data-key-format=""
+                      data-url="https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001"
+                    >
+                      🆕 Google Imagen 3
+                    </option>
+                  </optgroup>
+                  <optgroup label="👁️ Vision / Analysis">
+                    <option
+                      value="openai-vision"
+                      data-key-format="sk-"
+                      data-url="https://api.openai.com/v1/chat/completions"
+                    >
+                      OpenAI Vision (GPT-4o)
+                    </option>
+                    <option
+                      value="google-vision"
+                      data-key-format="AIza"
+                      data-url="https://vision.googleapis.com/v1/images:annotate"
+                    >
+                      Google Cloud Vision
+                    </option>
+                    <option
+                      value="claude-vision"
+                      data-key-format="sk-"
+                      data-url="https://api.anthropic.com/v1/messages"
+                    >
+                      Claude Vision (Anthropic)
+                    </option>
+                    <option
+                      value="gemini-vision"
+                      data-key-format=""
+                      data-url="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash"
+                    >
+                      🆕 Gemini 2.0 Flash Vision
+                    </option>
+                  </optgroup>
+                </select>
+                <input
+                  type="password"
+                  id="paidImageApiKey"
+                  class="api-key-input"
+                  placeholder="Enter API Key"
+                  autocomplete="off"
+                  data-lpignore="true"
+                  data-form-type="other"
+                  style="display: none"
+                />
+                <div
+                  class="key-format-hint"
+                  id="paidImageKeyHint"
+                  style="display: none"
+                ></div>
+                <!-- OpenAI Image Model Selector -->
+                <div
+                  id="openaiImageModelSelector"
+                  style="display: none; margin-top: 8px"
+                >
+                  <label style="font-size: 0.75em; color: #888"
+                    >Image Model:</label
+                  >
+                  <select
+                    id="openaiImageModel"
+                    class="api-select"
+                    style="font-size: 0.85em"
+                  >
+                    <optgroup label="🎨 Generation">
+                      <option value="gpt-image-1" selected>
+                        gpt-image-1 (5 img/min, $$$)
+                      </option>
+                      <option value="gpt-image-1-mini">
+                        gpt-image-1-mini (5 img/min, $$)
+                      </option>
+                      <option value="dall-e-3">dall-e-3 (5 img/min, $$)</option>
+                      <option value="dall-e-2">dall-e-2 (50 img/min, $)</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <a
+                  href="#"
+                  id="paidImageApiLink"
+                  class="api-info-link"
+                  target="_blank"
+                  style="display: none"
+                  >Get API Key</a
+                >
+                <button
+                  id="testPaidImageBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #22c55e;
+                    color: white;
+                    font-size: 0.8em;
+                    padding: 6px 10px;
+                    margin-top: 8px;
+                    display: none;
+                  "
+                >
+                  🧪 Test Image API
+                </button>
+              </div>
+            </div>
+
+            <div class="api-option">
+              <label class="api-radio-label">
+                <span>
+                  <input
+                    type="radio"
+                    name="imageApiProvider"
+                    value="free"
+                    id="freeImageApiRadio"
+                  />
+                  Free APIs
+                </span>
+                <span class="api-status" id="freeImageStatus">❌</span>
+              </label>
+              <div
+                class="api-inputs"
+                id="freeImageInputs"
+                style="display: none"
+              >
+                <select id="freeImageApi" class="api-select">
+                  <option value="">Select Free API</option>
+                  <optgroup label="🆓 No Key Required (2025)">
+                    <option
+                      value="ollama-vision"
+                      data-key-format=""
+                      data-free="true"
+                      data-url="http://localhost:11434/api/generate"
+                    >
+                      🥇 Ollama Vision (Local, Self-hosted)
+                    </option>
+                    <option
+                      value="pollinations"
+                      data-key-format=""
+                      data-free="true"
+                      data-url="https://image.pollinations.ai/prompt/"
+                    >
+                      🥈 Pollinations (Free, CORS-friendly)
+                    </option>
+                    <option
+                      value="prodia"
+                      data-key-format=""
+                      data-free="true"
+                      data-url="https://api.prodia.com/v1/sd/generate"
+                    >
+                      🥈 Prodia (Free, Fast SDXL)
+                    </option>
+                    <option
+                      value="dezgo"
+                      data-key-format=""
+                      data-free="true"
+                      data-url="https://api.dezgo.com/text2image"
+                    >
+                      Dezgo (Free, Multiple Models)
+                    </option>
+                    <option
+                      value="picsum"
+                      data-key-format=""
+                      data-free="true"
+                      data-url="https://picsum.photos/"
+                    >
+                      Picsum (Random Photos)
+                    </option>
+                    <option
+                      value="unsplash-source"
+                      data-key-format=""
+                      data-free="true"
+                      data-url="https://source.unsplash.com/"
+                    >
+                      Unsplash Source (Stock)
+                    </option>
+                  </optgroup>
+                  <optgroup label="🔑 Free Tier with Key (2025)">
+                    <option
+                      value="huggingface-image"
+                      data-key-format="hf_"
+                      data-free-key="true"
+                      data-url="https://api-inference.huggingface.co/models/"
+                    >
+                      🥇 Hugging Face (FLUX, SD3)
+                    </option>
+                    <option
+                      value="replicate"
+                      data-key-format="r8_"
+                      data-free-key="true"
+                      data-url="https://api.replicate.com/v1/predictions"
+                    >
+                      🥈 Replicate (FLUX 1.1)
+                    </option>
+                    <option
+                      value="together-ai-image"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://api.together.xyz/v1/images/generations"
+                    >
+                      Together AI (FLUX)
+                    </option>
+                    <option
+                      value="fal-ai"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://fal.run/"
+                    >
+                      🆕 FAL.ai (Fast FLUX 1.1)
+                    </option>
+                    <option
+                      value="fireworks-ai-image"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://api.fireworks.ai/inference/v1/image_generation"
+                    >
+                      Fireworks AI
+                    </option>
+                    <option
+                      value="deepinfra-image"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://api.deepinfra.com/v1/inference"
+                    >
+                      🆕 DeepInfra (FLUX, SDXL)
+                    </option>
+                    <option
+                      value="getimg-ai"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://api.getimg.ai/v1/stable-diffusion/text-to-image"
+                    >
+                      GetImg AI
+                    </option>
+                    <option
+                      value="segmind"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://api.segmind.com/v1/"
+                    >
+                      Segmind Models
+                    </option>
+                    <option
+                      value="runpod"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://api.runpod.ai/v2/"
+                    >
+                      RunPod Serverless
+                    </option>
+                  </optgroup>
+                </select>
+                <input
+                  type="password"
+                  id="freeImageApiKey"
+                  class="api-key-input"
+                  placeholder="Enter API Key (if required)"
+                  autocomplete="off"
+                  data-lpignore="true"
+                  data-form-type="other"
+                  style="display: none"
+                />
+                <div
+                  class="key-format-hint"
+                  id="freeImageKeyHint"
+                  style="display: none"
+                ></div>
+                <!-- Ollama Vision Model Selector (shown when Ollama Vision is selected) -->
+                <div
+                  id="ollamaVisionModelSelector"
+                  style="display: none; margin-top: 8px"
+                >
+                  <label style="font-size: 0.75em; color: #888"
+                    >👁️ Ollama Vision Model:</label
+                  >
+                  <input
+                    type="text"
+                    id="ollamaVisionModel"
+                    class="api-key-input"
+                    value="llama3.2-vision"
+                    placeholder="llama3.2-vision, llava, bakllava, etc."
+                    style="display: block; margin-top: 4px"
+                  />
+                  <div style="font-size: 0.7em; color: #666; margin-top: 4px">
+                    👁️ Vision models can analyze images<br />
+                    💡 Run <code>ollama list</code> to see available models<br />
+                    📥 Pull new: <code>ollama pull llama3.2-vision</code>
+                  </div>
+                </div>
+                <a
+                  href="#"
+                  id="freeImageApiLink"
+                  class="api-info-link"
+                  target="_blank"
+                  style="display: none"
+                  >Get API Key</a
+                >
+                <button
+                  id="testFreeImageBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #22c55e;
+                    color: white;
+                    font-size: 0.8em;
+                    padding: 6px 10px;
+                    margin-top: 8px;
+                    display: none;
+                  "
+                >
+                  🧪 Test Image API
+                </button>
+                <div
+                  id="freeImageStatusMsg"
+                  style="
+                    font-size: 0.75em;
+                    margin-top: 6px;
+                    color: #9ca3af;
+                    display: none;
+                  "
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STT/TTS Audio API Category -->
+        <div class="api-category" data-category="sttts">
+          <button class="api-category-btn" data-category="sttts">
+            <svg
+              class="category-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 12 12"
+            >
+              <polygon
+                points="6,2 11,10 1,10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+            </svg>
+            <span class="category-label">🎤🗣️ STT/TTS Audio API</span>
+            <span class="category-status" id="stttsApiStatus">✅</span>
+          </button>
+          <div class="api-category-content" id="stttsApiContent">
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- STT (Speech-to-Text) Section -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <div
+              style="
+                border-bottom: 1px solid var(--border-color);
+                padding-bottom: 12px;
+                margin-bottom: 12px;
+              "
+            >
+              <h4
+                style="
+                  margin: 0 0 10px 0;
+                  font-size: 0.9em;
+                  color: var(--text-muted);
+                "
+              >
+                🎤 Speech-to-Text (STT)
+              </h4>
+
+              <div class="api-option">
+                <label class="api-radio-label">
+                  <span>
+                    <input
+                      type="radio"
+                      name="sttApiProvider"
+                      value="browser"
+                      id="browserSttRadio"
+                      checked
+                    />
+                    Browser Web Speech API (Built-in, FREE)
+                  </span>
+                  <span class="api-status" id="browserSttStatus">✅</span>
+                </label>
+              </div>
+
+              <div class="api-option">
+                <label class="api-radio-label">
+                  <span>
+                    <input
+                      type="radio"
+                      name="sttApiProvider"
+                      value="external"
+                      id="externalSttApiRadio"
+                    />
+                    External STT APIs
+                  </span>
+                  <span class="api-status" id="externalSttStatus">❌</span>
+                </label>
+                <div
+                  class="api-inputs"
+                  id="externalSttInputs"
+                  style="display: none"
+                >
+                  <select id="externalSttApi" class="api-select">
+                    <option value="">Select STT API</option>
+                    <optgroup label="🆓 Free APIs">
+                      <option
+                        value="groq-whisper"
+                        data-key-format="gsk_"
+                        data-free="true"
+                      >
+                        🥇 Groq Whisper (FREE, Fast)
+                      </option>
+                      <option
+                        value="browser-speech"
+                        data-key-format=""
+                        data-free="true"
+                      >
+                        🥈 Web Speech API (Built-in)
+                      </option>
+                    </optgroup>
+                    <optgroup label="💳 Paid APIs (Best Quality)">
+                      <option
+                        value="openai-whisper"
+                        data-key-format="sk-"
+                        data-paid="true"
+                      >
+                        🥇 OpenAI Whisper (Select Model ↓)
+                      </option>
+                      <option
+                        value="deepgram"
+                        data-key-format=""
+                        data-paid="true"
+                      >
+                        Deepgram (Real-time)
+                      </option>
+                      <option
+                        value="assemblyai"
+                        data-key-format=""
+                        data-paid="true"
+                      >
+                        AssemblyAI (Real-time)
+                      </option>
+                      <option
+                        value="azure-speech"
+                        data-key-format=""
+                        data-paid="true"
+                      >
+                        Azure Speech (Enterprise)
+                      </option>
+                      <option
+                        value="google-speech"
+                        data-key-format=""
+                        data-paid="true"
+                      >
+                        Google Speech-to-Text
+                      </option>
+                      <option
+                        value="elevenlabs-scribe"
+                        data-key-format=""
+                        data-paid="true"
+                      >
+                        ElevenLabs Scribe
+                      </option>
+                    </optgroup>
+                  </select>
+                  <input
+                    type="password"
+                    id="externalSttApiKey"
+                    class="api-key-input"
+                    placeholder="Enter API Key"
+                    autocomplete="off"
+                    data-lpignore="true"
+                    data-form-type="other"
+                    style="display: none"
+                  />
+                  <div
+                    class="key-format-hint"
+                    id="externalSttKeyHint"
+                    style="display: none"
+                  ></div>
+                  <!-- OpenAI Whisper Model Selector -->
+                  <div
+                    id="openaiSttModelSelector"
+                    style="display: none; margin-top: 8px"
+                  >
+                    <label style="font-size: 0.75em; color: #888"
+                      >STT Model:</label
+                    >
+                    <select
+                      id="openaiSttModel"
+                      class="api-select"
+                      style="font-size: 0.85em"
+                    >
+                      <option value="whisper-1" selected>
+                        whisper-1 (Classic, Fast)
+                      </option>
+                      <option value="gpt-4o-transcribe">
+                        gpt-4o-transcribe (Highest Accuracy)
+                      </option>
+                      <option value="gpt-4o-mini-transcribe">
+                        gpt-4o-mini-transcribe (Cost-effective)
+                      </option>
+                      <option value="gpt-4o-transcribe-diarize">
+                        gpt-4o-transcribe-diarize (Speaker ID)
+                      </option>
+                    </select>
+                  </div>
+                  <a
+                    href="#"
+                    id="externalSttApiLink"
+                    class="api-info-link"
+                    target="_blank"
+                    style="display: none"
+                    >Get API Key</a
+                  >
+                  <button
+                    id="testExternalSttBtn"
+                    class="dashboard-btn"
+                    style="
+                      background: #22c55e;
+                      color: white;
+                      font-size: 0.8em;
+                      padding: 6px 10px;
+                      margin-top: 8px;
+                    "
+                  >
+                    🧪 Test STT API
+                  </button>
+                  <div
+                    id="externalSttStatusMsg"
+                    style="font-size: 0.75em; margin-top: 6px; color: #9ca3af"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <!-- TTS (Text-to-Speech) Section -->
+            <!-- ═══════════════════════════════════════════════════════════ -->
+            <div style="padding-top: 4px">
+              <h4
+                style="
+                  margin: 0 0 10px 0;
+                  font-size: 0.9em;
+                  color: var(--text-muted);
+                "
+              >
+                🗣️ Text-to-Speech (TTS)
+              </h4>
+
+              <div class="api-option">
+                <label class="api-radio-label">
+                  <span>
+                    <input
+                      type="radio"
+                      name="ttsApiProvider"
+                      value="browser"
+                      id="browserTtsRadio"
+                      checked
+                    />
+                    Browser TTS API (Built-in)
+                  </span>
+                  <span class="api-status" id="browserTtsStatus">✅</span>
+                </label>
+              </div>
+
+              <div class="api-option">
+                <label class="api-radio-label">
+                  <span>
+                    <input
+                      type="radio"
+                      name="ttsApiProvider"
+                      value="external"
+                      id="externalTtsApiRadio"
+                    />
+                    External TTS APIs
+                  </span>
+                  <span class="api-status" id="externalTtsStatus">❌</span>
+                </label>
+                <div
+                  class="api-inputs"
+                  id="externalTtsInputs"
+                  style="display: none"
+                >
+                  <select id="externalTtsApi" class="api-select">
+                    <option value="">Select TTS API</option>
+                    <optgroup label="🆓 Free APIs (No Key Required)">
+                      <option
+                        value="edge-tts"
+                        data-key-format=""
+                        data-free="true"
+                      >
+                        🥇 Microsoft Edge TTS (Free, High Quality)
+                      </option>
+                      <option
+                        value="speechsynthesis"
+                        data-key-format=""
+                        data-free="true"
+                      >
+                        🥈 Web Speech API (Browser Built-in)
+                      </option>
+                      <option
+                        value="coqui-tts"
+                        data-key-format=""
+                        data-free="true"
+                      >
+                        🥉 Coqui TTS (Open Source)
+                      </option>
+                      <option
+                        value="espeak"
+                        data-key-format=""
+                        data-free="true"
+                      >
+                        eSpeak (Lightweight)
+                      </option>
+                    </optgroup>
+                    <optgroup label="💳 Paid APIs (Best Quality)">
+                      <option
+                        value="elevenlabs"
+                        data-key-format=""
+                        data-paid="true"
+                      >
+                        🥇 ElevenLabs (Best Quality)
+                      </option>
+                      <option
+                        value="openai-tts"
+                        data-key-format="sk-"
+                        data-paid="true"
+                      >
+                        🥈 OpenAI TTS (Select Model ↓)
+                      </option>
+                      <option
+                        value="azure-tts"
+                        data-key-format=""
+                        data-paid="true"
+                      >
+                        Azure Speech (Enterprise)
+                      </option>
+                      <option
+                        value="google-tts"
+                        data-key-format=""
+                        data-paid="true"
+                      >
+                        Google Cloud TTS
+                      </option>
+                      <option
+                        value="amazon-polly"
+                        data-key-format=""
+                        data-paid="true"
+                      >
+                        Amazon Polly
+                      </option>
+                      <option
+                        value="playht"
+                        data-key-format=""
+                        data-paid="true"
+                      >
+                        Play.ht (Voice Cloning)
+                      </option>
+                    </optgroup>
+                  </select>
+                  <input
+                    type="password"
+                    id="externalTtsApiKey"
+                    class="api-key-input"
+                    placeholder="Enter API Key (if required)"
+                    autocomplete="off"
+                    data-lpignore="true"
+                    data-form-type="other"
+                    style="display: none"
+                  />
+                  <div
+                    class="key-format-hint"
+                    id="externalTtsKeyHint"
+                    style="display: none"
+                  ></div>
+                  <!-- OpenAI TTS Model Selector -->
+                  <div
+                    id="openaiTtsModelSelector"
+                    style="display: none; margin-top: 8px"
+                  >
+                    <label style="font-size: 0.75em; color: #888"
+                      >TTS Model:</label
+                    >
+                    <select
+                      id="openaiTtsModel"
+                      class="api-select"
+                      style="font-size: 0.85em"
+                    >
+                      <option value="tts-1" selected>tts-1 (Fast, $)</option>
+                      <option value="tts-1-hd">
+                        tts-1-hd (HQ exports, $$)
+                      </option>
+                    </select>
+                    <label
+                      style="
+                        font-size: 0.75em;
+                        color: #888;
+                        margin-top: 6px;
+                        display: block;
+                      "
+                      >Voice:</label
+                    >
+                    <select
+                      id="openaiTtsVoice"
+                      class="api-select"
+                      style="font-size: 0.85em"
+                    >
+                      <option value="alloy" selected>Alloy (Neutral)</option>
+                      <option value="echo">Echo (Male)</option>
+                      <option value="fable">Fable (British)</option>
+                      <option value="onyx">Onyx (Deep Male)</option>
+                      <option value="nova">Nova (Female)</option>
+                      <option value="shimmer">Shimmer (Female)</option>
+                    </select>
+                  </div>
+                  <!-- Edge TTS Voice Selector -->
+                  <div
+                    id="edgeTtsVoiceSelector"
+                    style="display: none; margin-top: 8px"
+                  >
+                    <label style="font-size: 0.75em; color: #888">Voice:</label>
+                    <select
+                      id="edgeTtsVoice"
+                      class="api-select"
+                      style="font-size: 0.85em"
+                    >
+                      <option value="en-US-AriaNeural" selected>
+                        Aria (US Female)
+                      </option>
+                      <option value="en-US-GuyNeural">Guy (US Male)</option>
+                      <option value="en-GB-SoniaNeural">
+                        Sonia (UK Female)
+                      </option>
+                      <option value="en-GB-RyanNeural">Ryan (UK Male)</option>
+                      <option value="fr-FR-DeniseNeural">
+                        Denise (FR Female)
+                      </option>
+                      <option value="fr-FR-HenriNeural">Henri (FR Male)</option>
+                      <option value="de-DE-KatjaNeural">
+                        Katja (DE Female)
+                      </option>
+                      <option value="de-DE-ConradNeural">
+                        Conrad (DE Male)
+                      </option>
+                      <option value="es-ES-ElviraNeural">
+                        Elvira (ES Female)
+                      </option>
+                      <option value="es-ES-AlvaroNeural">
+                        Alvaro (ES Male)
+                      </option>
+                      <option value="nl-NL-ColetteNeural">
+                        Colette (NL Female)
+                      </option>
+                      <option value="nl-NL-MaartenNeural">
+                        Maarten (NL Male)
+                      </option>
+                    </select>
+                  </div>
+                  <!-- ElevenLabs Voice Selector -->
+                  <div
+                    id="elevenlabsVoiceSelector"
+                    style="display: none; margin-top: 8px"
+                  >
+                    <label style="font-size: 0.75em; color: #888">Voice:</label>
+                    <select
+                      id="elevenlabsVoice"
+                      class="api-select"
+                      style="font-size: 0.85em"
+                    >
+                      <option value="rachel" selected>
+                        Rachel (Calm Female)
+                      </option>
+                      <option value="drew">Drew (News Male)</option>
+                      <option value="clyde">Clyde (War Veteran)</option>
+                      <option value="paul">Paul (News Male)</option>
+                      <option value="domi">Domi (Assertive Female)</option>
+                      <option value="dave">
+                        Dave (British Conversational)
+                      </option>
+                      <option value="fin">Fin (Irish Male)</option>
+                      <option value="sarah">Sarah (Soft News Female)</option>
+                      <option value="antoni">Antoni (Well Rounded Male)</option>
+                      <option value="thomas">Thomas (Calm Male)</option>
+                    </select>
+                  </div>
+                  <a
+                    href="#"
+                    id="externalTtsApiLink"
+                    class="api-info-link"
+                    target="_blank"
+                    style="display: none"
+                    >Get API Key</a
+                  >
+                  <button
+                    id="testExternalTtsBtn"
+                    class="dashboard-btn"
+                    style="
+                      background: #22c55e;
+                      color: white;
+                      font-size: 0.8em;
+                      padding: 6px 10px;
+                      margin-top: 8px;
+                    "
+                  >
+                    🧪 Test TTS API
+                  </button>
+                  <div
+                    id="externalTtsStatusMsg"
+                    style="font-size: 0.75em; margin-top: 6px; color: #9ca3af"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video API Category -->
+        <div class="api-category" data-category="video">
+          <button class="api-category-btn" data-category="video">
+            <svg
+              class="category-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 12 12"
+            >
+              <polygon
+                points="6,2 11,10 1,10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+            </svg>
+            <span class="category-label">🎥 Video Generation API</span>
+            <span class="category-status" id="videoApiStatus">❌</span>
+          </button>
+          <div class="api-category-content" id="videoApiContent">
+            <div class="api-option">
+              <label class="api-radio-label">
+                <span>
+                  <input
+                    type="radio"
+                    name="videoApiProvider"
+                    value="none"
+                    id="noVideoRadio"
+                    checked
+                  />
+                  No Video API (Disabled)
+                </span>
+                <span class="api-status" id="noVideoStatus">✅</span>
+              </label>
+            </div>
+
+            <div class="api-option">
+              <label class="api-radio-label">
+                <span>
+                  <input
+                    type="radio"
+                    name="videoApiProvider"
+                    value="paid"
+                    id="paidVideoApiRadio"
+                  />
+                  Paid Video APIs
+                </span>
+                <span class="api-status" id="paidVideoStatus">❌</span>
+              </label>
+              <div
+                class="api-inputs"
+                id="paidVideoInputs"
+                style="display: none"
+              >
+                <select id="paidVideoApi" class="api-select">
+                  <option value="">Select Video API</option>
+                  <optgroup label="🏆 Premium (Best Quality)">
+                    <option
+                      value="runway-gen3"
+                      data-key-format="rw_"
+                      data-url="https://app.runwayml.com/signup"
+                      data-pricing="$0.05/sec"
+                    >
+                      🥇 Runway Gen-3 Alpha
+                    </option>
+                    <option
+                      value="openai-sora"
+                      data-key-format="sk-"
+                      data-url="https://platform.openai.com/signup"
+                      data-pricing="$0.10/sec"
+                    >
+                      🥈 OpenAI Sora (Select Model ↓)
+                    </option>
+                    <option
+                      value="google-veo"
+                      data-key-format="AIza"
+                      data-url="https://aistudio.google.com/apikey"
+                      data-pricing="$0.07/sec"
+                    >
+                      🥉 Google Veo 2
+                    </option>
+                  </optgroup>
+                  <optgroup label="🎥 Pro Video">
+                    <option
+                      value="kling-ai"
+                      data-key-format=""
+                      data-url="https://klingai.com/pricing"
+                      data-pricing="$0.03/sec"
+                    >
+                      Kling AI 1.5
+                    </option>
+                    <option
+                      value="pika-labs"
+                      data-key-format=""
+                      data-url="https://pika.art/pricing"
+                      data-pricing="$0.04/sec"
+                    >
+                      Pika Labs 2.0
+                    </option>
+                    <option
+                      value="luma-dream"
+                      data-key-format="luma-"
+                      data-url="https://lumalabs.ai/dream-machine/api"
+                      data-pricing="$0.032/sec"
+                    >
+                      Luma Dream Machine
+                    </option>
+                    <option
+                      value="minimax-video"
+                      data-key-format=""
+                      data-url="https://hailuoai.com/pricing"
+                      data-pricing="$0.025/sec"
+                    >
+                      MiniMax/Hailuo
+                    </option>
+                    <option
+                      value="haiper-ai"
+                      data-key-format=""
+                      data-url="https://haiper.ai/pricing"
+                      data-pricing="$0.02/sec"
+                    >
+                      Haiper 2.0
+                    </option>
+                  </optgroup>
+                  <optgroup label="🎨 Image-to-Video">
+                    <option
+                      value="runway-i2v"
+                      data-key-format="rw_"
+                      data-url="https://app.runwayml.com/signup"
+                      data-pricing="$0.05/sec"
+                    >
+                      Runway I2V
+                    </option>
+                    <option
+                      value="stable-i2v"
+                      data-key-format="sk-"
+                      data-url="https://platform.stability.ai/account/keys"
+                      data-pricing="$0.02/sec"
+                    >
+                      Stability SVD
+                    </option>
+                  </optgroup>
+                  <optgroup label="🏢 Enterprise">
+                    <option
+                      value="synthesia"
+                      data-key-format=""
+                      data-url="https://www.synthesia.io/pricing"
+                      data-pricing="Custom"
+                    >
+                      Synthesia (Avatars)
+                    </option>
+                    <option
+                      value="heygen"
+                      data-key-format=""
+                      data-url="https://www.heygen.com/pricing"
+                      data-pricing="Custom"
+                    >
+                      HeyGen (Presenter)
+                    </option>
+                    <option
+                      value="d-id"
+                      data-key-format=""
+                      data-url="https://studio.d-id.com/pricing"
+                      data-pricing="$0.05/sec"
+                    >
+                      D-ID (Talking)
+                    </option>
+                  </optgroup>
+                </select>
+                <input
+                  type="password"
+                  id="paidVideoApiKey"
+                  class="api-key-input"
+                  placeholder="Enter API Key"
+                  autocomplete="off"
+                  data-lpignore="true"
+                  data-form-type="other"
+                  style="display: none"
+                />
+                <div
+                  class="key-format-hint"
+                  id="paidVideoKeyHint"
+                  style="display: none"
+                ></div>
+                <!-- OpenAI Sora Model Selector -->
+                <div
+                  id="openaiVideoModelSelector"
+                  style="display: none; margin-top: 8px"
+                >
+                  <label style="font-size: 0.75em; color: #888"
+                    >Sora Model:</label
+                  >
+                  <select
+                    id="openaiVideoModel"
+                    class="api-select"
+                    style="font-size: 0.85em"
+                  >
+                    <option value="sora" selected>
+                      sora (Best Quality, $$$)
+                    </option>
+                    <option value="sora-turbo">sora-turbo (Fast, $$)</option>
+                  </select>
+                </div>
+                <a
+                  href="#"
+                  id="paidVideoApiLink"
+                  class="api-info-link"
+                  target="_blank"
+                  style="display: none"
+                  >Get API Key</a
+                >
+                <button
+                  id="testPaidVideoBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #22c55e;
+                    color: white;
+                    font-size: 0.8em;
+                    padding: 6px 10px;
+                    margin-top: 8px;
+                    display: none;
+                  "
+                >
+                  🧪 Test Video API
+                </button>
+              </div>
+            </div>
+
+            <div class="api-option">
+              <label class="api-radio-label">
+                <span>
+                  <input
+                    type="radio"
+                    name="videoApiProvider"
+                    value="free"
+                    id="freeVideoApiRadio"
+                  />
+                  Free Video APIs
+                </span>
+                <span class="api-status" id="freeVideoStatus">❌</span>
+              </label>
+              <div
+                class="api-inputs"
+                id="freeVideoInputs"
+                style="display: none"
+              >
+                <select id="freeVideoApi" class="api-select">
+                  <option value="">Select Free API</option>
+                  <optgroup label="🆓 Free Tier with Key">
+                    <option
+                      value="replicate-video"
+                      data-key-format="r8_"
+                      data-free-key="true"
+                      data-url="https://replicate.com/account/api-tokens"
+                      data-pricing="Pay-per-use"
+                    >
+                      🥇 Replicate (Multi-Model)
+                    </option>
+                    <option
+                      value="fal-video"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://fal.ai/dashboard/keys"
+                      data-pricing="$0.001/step"
+                    >
+                      🥈 FAL.ai (Fast)
+                    </option>
+                    <option
+                      value="huggingface-video"
+                      data-key-format="hf_"
+                      data-free-key="true"
+                      data-url="https://huggingface.co/settings/tokens"
+                      data-pricing="Free/Limited"
+                    >
+                      🥉 Hugging Face
+                    </option>
+                  </optgroup>
+                  <optgroup label="🔬 Open Source (Local)">
+                    <option
+                      value="cogvideox"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://github.com/THUDM/CogVideo#quick-start"
+                      data-pricing="Free (GPU)"
+                    >
+                      CogVideoX
+                    </option>
+                    <option
+                      value="animatediff"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://github.com/guoyww/AnimateDiff#getting-started"
+                      data-pricing="Free (GPU)"
+                    >
+                      AnimateDiff
+                    </option>
+                    <option
+                      value="mochi-video"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://github.com/genmoai/mochi#installation"
+                      data-pricing="Free (GPU)"
+                    >
+                      Mochi-1
+                    </option>
+                  </optgroup>
+                  <optgroup label="🌐 Web-Based (No Key)">
+                    <option
+                      value="pika-free"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://pika.art/login"
+                      data-pricing="Free Trial"
+                    >
+                      Pika Free
+                    </option>
+                    <option
+                      value="luma-free"
+                      data-key-format=""
+                      data-free-key="true"
+                      data-url="https://lumalabs.ai/dream-machine/login"
+                      data-pricing="30/month"
+                    >
+                      Luma Free
+                    </option>
+                  </optgroup>
+                </select>
+                <input
+                  type="password"
+                  id="freeVideoApiKey"
+                  class="api-key-input"
+                  placeholder="Enter API Key (if required)"
+                  autocomplete="off"
+                  data-lpignore="true"
+                  data-form-type="other"
+                  style="display: none"
+                />
+                <div
+                  class="key-format-hint"
+                  id="freeVideoKeyHint"
+                  style="display: none"
+                ></div>
+                <a
+                  href="#"
+                  id="freeVideoApiLink"
+                  class="api-info-link"
+                  target="_blank"
+                  style="display: none"
+                  >Get API Key</a
+                >
+                <button
+                  id="testFreeVideoBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #22c55e;
+                    color: white;
+                    font-size: 0.8em;
+                    padding: 6px 10px;
+                    margin-top: 8px;
+                    display: none;
+                  "
+                >
+                  🧪 Test Video API
+                </button>
+                <div
+                  id="freeVideoStatusMsg"
+                  style="
+                    font-size: 0.75em;
+                    margin-top: 6px;
+                    color: #9ca3af;
+                    display: none;
+                  "
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparison Dashboard -->
+        <div class="api-category" data-category="comparison">
+          <button class="api-category-btn" data-category="comparison">
+            <svg
+              class="category-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 12 12"
+            >
+              <polygon
+                points="6,2 11,10 1,10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+            </svg>
+            <span class="category-label">📈 Comparison Dashboard</span>
+            <span class="category-status" id="comparisonApiStatus">📈</span>
+          </button>
+          <div class="api-category-content" id="comparisonApiContent">
+            <!-- Provider Models Refresher Section -->
+            <div
+              class="comparison-section"
+              style="
+                background: linear-gradient(135deg, #142036 0%, #0f1a2e 100%);
+                border: 1px solid #22c55e;
+                margin-bottom: 12px;
+              "
+            >
+              <div class="comparison-header">
+                <h4 style="margin: 0; color: #4ade80; font-size: 1em">
+                  🔧 Provider Models
+                </h4>
+                <button
+                  type="button"
+                  class="dashboard-btn"
+                  id="refreshAllModelsBtn"
+                  style="
+                    background: #22c55e;
+                    color: #0b1320;
+                    font-size: 0.8em;
+                    padding: 5px 10px;
+                    font-weight: 600;
+                  "
+                  title="Query each provider's /v1/models with your saved keys, refresh local cache"
+                >
+                  🔄 Refresh All
+                </button>
+              </div>
+              <p
+                style="
+                  font-size: 0.75em;
+                  color: #9ca3af;
+                  margin: 4px 0 8px 0;
+                  line-height: 1.4;
+                "
+              >
+                Pulls live model lists directly from your browser to each
+                provider (OpenAI, Groq, DeepSeek, Google, Ollama). Keys never
+                leave this page. Cached locally for 24h.
+              </p>
+              <div
+                id="providerModelsStatus"
+                style="
+                  font-size: 0.75em;
+                  color: #b8c1ec;
+                  background: rgba(34, 197, 94, 0.08);
+                  border-radius: 4px;
+                  padding: 6px 8px;
+                  min-height: 20px;
+                  font-family: &quot;Courier New&quot;, monospace;
+                  line-height: 1.5;
+                "
+              >
+                Click <strong>Refresh All</strong> to update model lists.
+              </div>
+            </div>
+
+            <!-- API Revision Detector Section -->
+            <div
+              class="comparison-section"
+              style="
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                border: 1px solid #3b82f6;
+                margin-bottom: 12px;
+              "
+            >
+              <div class="comparison-header">
+                <h4 style="margin: 0; color: #60a5fa; font-size: 1em">
+                  🔄 Latest AI API Revision
+                </h4>
+                <span
+                  id="apiRevBadge"
+                  style="
+                    background: #22c55e;
+                    color: #000;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    font-size: 0.75em;
+                    font-weight: bold;
+                  "
+                  >v2025.11.28</span
+                >
+              </div>
+              <div
+                style="display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0"
+              >
+                <button
+                  class="dashboard-btn"
+                  id="checkApiUpdatesBtn"
+                  style="
+                    background: #8b5cf6;
+                    color: white;
+                    font-size: 0.8em;
+                    padding: 5px 10px;
+                  "
+                >
+                  🔍 Check Updates
+                </button>
+                <button
+                  class="dashboard-btn"
+                  id="applyApiUpdatesBtn"
+                  style="
+                    background: #22c55e;
+                    color: white;
+                    font-size: 0.8em;
+                    padding: 5px 10px;
+                    display: none;
+                  "
+                >
+                  ⬆️ Apply Updates
+                </button>
+              </div>
+              <div
+                id="apiRevStatus"
+                style="font-size: 0.8em; color: #9ca3af; margin-top: 4px"
+              >
+                Last checked: Never
+              </div>
+              <div
+                id="apiRevChanges"
+                style="
+                  font-size: 0.75em;
+                  color: #b8c1ec;
+                  margin-top: 6px;
+                  display: none;
+                "
+              ></div>
+            </div>
+
+            <!-- Price & Model Comparison Section -->
+            <div class="comparison-section">
+              <div class="comparison-header">
+                <h4 style="margin: 0; color: #b8c1ec; font-size: 1em">
+                  💲 API Price Comparison
+                </h4>
+                <button
+                  class="dashboard-btn"
+                  id="updateAllBtn"
+                  style="background: #3b82f6; color: white"
+                >
+                  Update All
+                </button>
+              </div>
+              <div
+                id="logArea"
+                style="
+                  color: #9ca3af;
+                  font-size: 0.85em;
+                  margin-bottom: 6px;
+                  min-height: 16px;
+                "
+              ></div>
+
+              <!-- Price Comparison Table -->
+              <div class="table-container">
+                <table id="priceTable">
+                  <thead>
+                    <tr>
+                      <th>API</th>
+                      <th>Model</th>
+                      <th>Price</th>
+                      <th style="text-align: center">Quality</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody id="priceTableBody">
+                    <!-- JS will populate -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Price Comparison Details -->
+              <div
+                id="priceComparatif"
+                style="
+                  background: #232946;
+                  padding: 8px 12px;
+                  border-radius: 6px;
+                  color: #b8c1ec;
+                  font-size: 0.85em;
+                  margin-bottom: 12px;
+                "
+              ></div>
+            </div>
+
+            <!-- Smart API Selector Section -->
+            <div class="comparison-section">
+              <h4 style="margin: 0 0 8px 0; color: #b8c1ec; font-size: 1em">
+                🤖 Smart API Selector
+              </h4>
+              <div
+                style="
+                  display: flex;
+                  gap: 6px;
+                  flex-wrap: wrap;
+                  align-items: center;
+                  margin-bottom: 8px;
+                "
+              >
+                <label
+                  for="purposeSel"
+                  style="font-size: 0.85em; color: #9ca3af"
+                  >Purpose:</label
+                >
+                <select
+                  id="purposeSel"
+                  style="
+                    flex: 1;
+                    min-width: 80px;
+                    padding: 4px;
+                    border-radius: 4px;
+                    background: #2d3a5a;
+                    color: #d4e1f5;
+                    border: 1px solid #4a5568;
+                    font-size: 0.85em;
+                  "
+                >
+                  <option value="">Choose...</option>
+                  <option value="text">Text</option>
+                  <option value="image">Image</option>
+                  <option value="video">🎥 Video</option>
+                  <option value="doc">Document</option>
+                  <option value="tts">TTS (Speech)</option>
+                  <option value="transcribe">Transcribe</option>
+                </select>
+                <label for="qtySel" style="font-size: 0.85em; color: #9ca3af"
+                  >Volume:</label
+                >
+                <select
+                  id="qtySel"
+                  style="
+                    flex: 1;
+                    min-width: 80px;
+                    padding: 4px;
+                    border-radius: 4px;
+                    background: #2d3a5a;
+                    color: #d4e1f5;
+                    border: 1px solid #4a5568;
+                    font-size: 0.85em;
+                  "
+                >
+                  <option value="">Choose...</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+              <button
+                class="dashboard-btn"
+                id="suggestApiBtn"
+                style="
+                  background: #22c55e;
+                  color: white;
+                  padding: 6px 12px;
+                  font-size: 0.85em;
+                  margin-bottom: 8px;
+                "
+              >
+                Suggest API
+              </button>
+              <div
+                id="smartRec"
+                style="
+                  font-size: 0.85em;
+                  color: #b8c1ec;
+                  min-height: 20px;
+                  padding: 4px 0;
+                "
+              ></div>
+            </div>
+
+            <!-- Speed Test Section -->
+            <div class="comparison-section">
+              <h4 style="margin: 0 0 8px 0; color: #b8c1ec; font-size: 1em">
+                ⚡ Speed Test
+              </h4>
+              <button
+                class="dashboard-btn"
+                id="testSpeedBtn"
+                style="
+                  background: #f59e0b;
+                  color: white;
+                  padding: 6px 12px;
+                  font-size: 0.85em;
+                  margin-bottom: 8px;
+                "
+              >
+                Test All APIs Speed
+              </button>
+              <div
+                id="speedResults"
+                style="font-size: 0.8em; margin-top: 8px"
+              ></div>
+            </div>
+
+            <!-- Quality Test Section -->
+            <div class="comparison-section">
+              <h4 style="margin: 0 0 8px 0; color: #b8c1ec; font-size: 1em">
+                🎯 Quality Test
+              </h4>
+              <button
+                class="dashboard-btn"
+                id="testQualityBtn"
+                style="
+                  background: #8b5cf6;
+                  color: white;
+                  padding: 6px 12px;
+                  font-size: 0.85em;
+                  margin-bottom: 8px;
+                "
+              >
+                Test Response Quality
+              </button>
+              <div
+                id="qualityResults"
+                style="font-size: 0.8em; margin-top: 8px"
+              ></div>
+            </div>
+
+            <!-- Llama Install Guide Section -->
+            <div class="comparison-section">
+              <h4 style="margin: 0 0 8px 0; color: #4ade80; font-size: 1em">
+                🦙 Llama Install Guide
+              </h4>
+              <p style="font-size: 0.8em; color: #9ca3af; margin-bottom: 8px">
+                Install Meta's Llama 3.1 locally for 100% private AI processing
+              </p>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <button
+                  class="dashboard-btn"
+                  id="llamaQuickSetupBtn"
+                  style="
+                    background: #3b82f6;
+                    color: white;
+                    padding: 6px 12px;
+                    font-size: 0.85em;
+                  "
+                >
+                  ⚡ Quick Setup Widget
+                </button>
+              </div>
+              <div
+                style="
+                  font-size: 0.75em;
+                  color: #6b7280;
+                  margin-top: 8px;
+                  line-height: 1.4;
+                "
+              >
+                <div
+                  class="privacy-badge"
+                  style="
+                    background: #4ade80;
+                    color: #000;
+                    padding: 2px 6px;
+                    border-radius: 8px;
+                    font-size: 0.7em;
+                    font-weight: bold;
+                    display: inline-block;
+                    margin-right: 4px;
+                  "
+                >
+                  🔒 PRIVACY COMPLIANT
+                </div>
+                <div
+                  class="privacy-badge"
+                  style="
+                    background: #3b82f6;
+                    color: white;
+                    padding: 2px 6px;
+                    border-radius: 8px;
+                    font-size: 0.7em;
+                    font-weight: bold;
+                    display: inline-block;
+                    margin-right: 4px;
+                  "
+                >
+                  📡 NO EXTERNAL CALLS
+                </div>
+                <div
+                  class="privacy-badge"
+                  style="
+                    background: #8b5cf6;
+                    color: white;
+                    padding: 2px 6px;
+                    border-radius: 8px;
+                    font-size: 0.7em;
+                    font-weight: bold;
+                    display: inline-block;
+                  "
+                >
+                  💻 LOCAL PROCESSING
+                </div>
+              </div>
+            </div>
+
+            <!-- Privacy & Data Sharing Information -->
+            <div
+              class="comparison-section"
+              style="
+                border-top: 1px solid rgba(184, 193, 236, 0.2);
+                margin-top: 15px;
+                padding-top: 15px;
+              "
+            >
+              <h4 style="margin: 0 0 8px 0; color: #f87171; font-size: 1em">
+                🔒 Privacy & Data Sharing
+              </h4>
+              <div style="font-size: 0.75em; line-height: 1.4; color: #a8b3cf">
+                <p style="margin: 4px 0">
+                  <strong>⚠️ Data Collection by APIs:</strong>
+                </p>
+                <ul style="margin: 4px 0 8px 18px; padding: 0">
+                  <li>
+                    <strong>US/OpenAI:</strong> Logs prompts, may train models
+                    on data
+                  </li>
+                  <li>
+                    <strong>Chinese APIs (DeepSeek, Kimi):</strong> Subject to
+                    Chinese data laws
+                  </li>
+                  <li>
+                    <strong>Google/Gemini:</strong> Integrates with Google
+                    services
+                  </li>
+                  <li>
+                    <strong>Groq/SambaNova:</strong> Generally more
+                    privacy-focused
+                  </li>
+                </ul>
+                <p style="margin: 4px 0">
+                  <strong>🛡️ Max Privacy Tips:</strong>
+                </p>
+                <ul style="margin: 4px 0 8px 18px; padding: 0">
+                  <li>
+                    Use <strong>local models (Ollama)</strong> for sensitive
+                    data
+                  </li>
+                  <li>Avoid personal info in prompts</li>
+                  <li>Check each API's privacy policy</li>
+                  <li>Consider data residency laws (US vs EU vs China)</li>
+                </ul>
+                <div
+                  style="
+                    margin: 8px 0 4px 0;
+                    padding: 6px;
+                    background: rgba(248, 113, 113, 0.1);
+                    border-radius: 4px;
+                    border-left: 3px solid #f87171;
+                  "
+                >
+                  <strong>Test Logs:</strong> API tests are logged in
+                  <span
+                    id="logLinkText"
+                    style="color: #60a5fa; cursor: pointer"
+                    onclick="scrollToLogs()"
+                    >main log area ↓</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="api-settings-actions">
+        <button id="exportApiSettingsBtn" class="export-btn">
+          💾 File Export
+        </button>
+        <button id="importApiSettingsBtn" class="load-btn">
+          📁 File Import
+        </button>
+        <input
+          type="file"
+          id="importApiSettingsFile"
+          accept=".ghfav,.scs,.json"
+          style="display: none"
+        />
+        <button id="testAllApisBtn" class="test-apis-btn">🧪 Test APIs</button>
+        <button
+          id="saveApiSettingsBtn"
+          class="locally-btn"
+          title="⚠️ Saves UNENCRYPTED to localStorage"
+        >
+          💾 Locally
+        </button>
+        <button
+          id="saveToVaultBtn"
+          class="vault-save-btn"
+          title="Save encrypted to vault"
+        >
+          💾 Vault
+        </button>
+        <button
+          id="vaultBtn"
+          class="vault-btn-header"
+          title="Manage encrypted API vault"
+        >
+          🔐
+        </button>
+      </div>
+
+      <!-- Clipboard Status -->
+      <div
+        id="clipboardStatus"
+        class="status-message"
+        style="display: none"
+      ></div>
+
+      <!-- API Test Log -->
+      <div class="api-log-container">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+          "
+        >
+          <h3 style="margin: 0">🧪 API Test Log</h3>
+          <button
+            id="helpToggle"
+            class="help-toggle"
+            title="Toggle help mode - shows tips in log"
+          >
+            ?
+          </button>
+        </div>
+        <div class="api-log-display" id="apiLogDisplay">
+          <div class="api-log-empty">No API tests performed yet</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function notifyApiSettingsHost(action) {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage(
+            { type: "smart-widget", action, data: { source: "api-settings" } },
+            "*",
+          );
+          return true;
+        }
+        return false;
+      }
+
+      function handleApiSettingsBack() {
+        if (notifyApiSettingsHost("api-settings-back")) {
+          return;
+        }
+        if (window.SmartNav && typeof window.SmartNav.goBack === "function") {
+          window.SmartNav.goBack();
+          return;
+        }
+        if (window.history.length > 1) {
+          window.history.back();
+        }
+      }
+
+      function handleApiSettingsClose() {
+        if (notifyApiSettingsHost("api-settings-close")) {
+          return;
+        }
+        window.close();
+      }
+    </script>
+
+    <script src="src/api-settings.js"></script>
+    <script src="src/api-model-updater.js" defer></script>
+
+    <!-- SmΔrt Popup Library (optional - for popup integration) -->
+    <!-- The library path is relative to parent app, not the widget itself -->
+    <!-- <script src="../libs/smart-popup-library.js"></script> -->
+  </body>
+</html>

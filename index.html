@@ -216,7 +216,7 @@
         </div>
     </div>
 
-    <script src="./shared/smart-ai-api-bridge.js?v=topic-earth-api-caddeltai-20260602"></script>
+    <script src="./shared/smart-ai-api-bridge.js?v=topic-earth-api-settings-bridge-20260602"></script>
     <script>
       window.TOPIC_EARTH_PROFILE = window.TOPIC_EARTH_PROFILE || (['localhost', '127.0.0.1'].includes(location.hostname) ? 'admin' : 'demo');
     </script>
@@ -250,12 +250,13 @@
         var close   = document.getElementById('apiSettingsClose');
 
         function openPanel() {
-          if (!frame.src || frame.src === 'about:blank') frame.src = API_SETTINGS_URL;
+          if (!frame.getAttribute('src') || frame.src === 'about:blank') frame.src = API_SETTINGS_URL;
           overlay.style.display = 'block';
         }
         function closePanel() { overlay.style.display = 'none'; }
 
-        btn.addEventListener('click', openPanel);
+        btn?.addEventListener('click', openPanel);
+        window.addEventListener('openApiSettingsOverlay', openPanel);
         back.addEventListener('click', closePanel);
         close.addEventListener('click', closePanel);
         overlay.addEventListener('click', function(e) { if (e.target === overlay) closePanel(); });
@@ -263,7 +264,7 @@
       })();
     </script>
 
-  <script type="module" src="./app.main.js?v=topic-earth-local-space-logo-20260602"></script>
+  <script type="module" src="./app.main.js?v=topic-earth-api-settings-bridge-20260602"></script>
   
   <style>
     /* Mobile panel visibility rules */

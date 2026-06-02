@@ -31,14 +31,18 @@ class SmartAppBinding {
   // Allowed origins for production and development
   // See: docs/DEPLOYMENT_ARCHITECTURE.md for full mapping
   static TRUSTED_ORIGINS = [
-    // Production hosts
+    // Production hosts — smdeltart.com
     "https://smdeltart.com",
     "https://portal.smdeltart.com",
-    "https://studio.smdeltart.com",
     "https://images.smdeltart.com",
     "https://widgets.smdeltart.com",
+    // caddeltai.com (streaming studio pro)
+    "https://studio.caddeltai.com",
+    // Centralized api-settings host — serves ALL apps cross-origin
+    "https://api-caddeltai.vercel.app",
     "https://topic.earth",
     "https://www.topic.earth",
+    "https://topic-earth.vercel.app",
     // Vercel preview deployments (pattern matched in isAllowedOrigin)
     // Development (localhost)
     "http://localhost:5500", // Widgets server
@@ -47,8 +51,12 @@ class SmartAppBinding {
     "http://127.0.0.1:3000",
     "http://localhost:8080", // Portal server
     "http://127.0.0.1:8080",
+    "http://localhost:8000", // VS Code Live Server (stable, no auto-reload)
+    "http://127.0.0.1:8000",
     "http://localhost:8088", // Smart SVG/3D editor server
     "http://127.0.0.1:8088",
+    "http://localhost:8123", // Local widget preview server
+    "http://127.0.0.1:8123",
     "http://localhost:8125", // Widgets direct server
     "http://127.0.0.1:8125",
     "http://localhost:8765", // topic.earth local dev server
@@ -84,7 +92,7 @@ class SmartAppBinding {
       paths: ["/studio", "/app", "/"],
       permissions: ["read"],
       icon: "🎥",
-      subdomain: "studio.smdeltart.com",
+      subdomain: "studio.caddeltai.com",
     },
     "images-suite": {
       name: "Images Production Suite",

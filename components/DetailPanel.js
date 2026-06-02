@@ -561,6 +561,8 @@ export class DetailPanel {
         this.applyTopicWindowUpdate();
       } else if (action === 'add-topic-window-source') {
         this.applyTopicWindowUpdate({ sourceOnly: true });
+      } else if (action === 'check-current-topic-www') {
+        this.checkCurrentTopicWebUpdate(target);
       } else if (action === 'prefill-meteo-confirmation-source') {
         this.prefillMeteoConfirmationSource(target);
       } else if (action === 'prefill-smart-topic-source') {
@@ -5168,7 +5170,12 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
         <div class="form-group">
           <label>Summary</label>
           <textarea id="topic-update-summary" rows="5" class="news-search-input" placeholder="Update the public summary">${this.escapeHtml(topic.summary || '')}</textarea>
-          <div class="setting-hint">Edit only what should appear on the topic card/details.</div>
+          <div class="topic-summary-actions">
+            <button type="button" class="btn-secondary topic-www-check-btn" data-action="check-current-topic-www">
+              Check WWW
+            </button>
+            <span class="setting-hint" data-topic-update-www-status>Prepare a current web/news check link for this topic.</span>
+          </div>
         </div>
         <div class="form-group">
           <label>Source URL</label>
@@ -5194,6 +5201,71 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
         </div>
       </div>
     `;
+  }
+
+  buildCurrentTopicWebSearch(topic = {}) {
+    const layer = this.layers.find(item => item.id === topic.category);
+    const title = String(topic.title || '').trim();
+    const summary = this.firstSentence(topic.summary || topic.insight || '');
+    const location = [topic.region, topic.country].filter(Boolean).join(' ');
+    const date = String(topic.date || topic.updatedAt || '').slice(0, 10);
+    const layerName = layer?.name || topic.category || '';
+    const terms = [
+      title,
+      summary,
+      location,
+      layerName,
+      date ? `after:${date}` : 'current latest update'
+    ].filter(Boolean).join(' ');
+    const query = terms || 'topic earth current update';
+
+    return {
+      query,
+      url: `https://www.google.com/search?tbm=nws&q=${encodeURIComponent(query)}`,
+      name: `Current web/news check for ${title || 'topic'}`
+    };
+  }
+
+  checkCurrentTopicWebUpdate(button = null) {
+    const topic = this.newsUpdateTargetTopic || this.currentPoint;
+    const content = this.container.querySelector('#detail-content');
+    if (!topic || !content) return;
+
+    const search = this.buildCurrentTopicWebSearch(topic);
+    const sourceUrlInput = content.querySelector('#topic-update-source-url');
+    const sourceNameInput = content.querySelector('#topic-update-source-name');
+    const sourceCategoryInput = content.querySelector('#topic-update-source-category');
+    const sourceReliabilityInput = content.querySelector('#topic-update-source-reliability');
+    const noteInput = content.querySelector('#topic-update-note');
+    const status = content.querySelector('[data-topic-update-www-status]');
+
+    if (sourceUrlInput && !String(sourceUrlInput.value || '').trim()) {
+      sourceUrlInput.value = search.url;
+    }
+    if (sourceNameInput && !String(sourceNameInput.value || '').trim()) {
+      sourceNameInput.value = search.name;
+    }
+    if (sourceCategoryInput) sourceCategoryInput.value = 'source-search';
+    if (sourceReliabilityInput) sourceReliabilityInput.value = 'needs-review';
+    if (noteInput) {
+      const existing = String(noteInput.value || '').trim();
+      const note = [
+        `WWW check query: ${search.query}`,
+        `Review the prepared news search, then replace it with the best official/source URL before publishing when possible.`,
+        `Generated: ${new Date().toISOString()}`
+      ].join('\n');
+      noteInput.value = [existing, note].filter(Boolean).join('\n\n');
+    }
+    if (status) {
+      status.innerHTML = `Search link prepared. Review it, then add the best source or save a draft update.`;
+    }
+    if (button) {
+      const originalHTML = button.innerHTML;
+      button.innerHTML = 'Prepared';
+      window.setTimeout(() => {
+        button.innerHTML = originalHTML;
+      }, 1400);
+    }
   }
 
   applyTopicWindowUpdate(options = {}) {

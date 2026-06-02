@@ -10,7 +10,7 @@ import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-topics-
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=topic-earth-local-space-logo-20260602';
+import { TopBar } from './components/TopBar.js?v=topic-earth-api-settings-bridge-20260602';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-climate-indicators-20260601';
 import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-smart-source-shortcuts-20260601';

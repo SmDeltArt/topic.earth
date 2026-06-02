@@ -53,6 +53,8 @@ export class TopBar {
       window.dispatchEvent(new CustomEvent('topicFullscreenToggleRequested'));
     } else if (target.dataset.action === 'update-news') {
       window.dispatchEvent(new CustomEvent('newsUpdateClicked'));
+    } else if (target.dataset.action === 'open-api-settings') {
+      window.dispatchEvent(new CustomEvent('openApiSettingsOverlay'));
     } else if (target.dataset.action === 'open-fever-monitor') {
       window.dispatchEvent(new CustomEvent('openFeverMonitorRequested'));
     }
@@ -232,6 +234,13 @@ export class TopBar {
             <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
             <path d="M8 1L8 3M8 13L8 15M15 8L13 8M3 8L1 8M13.5 2.5L12 4M4 12L2.5 13.5M13.5 13.5L12 12M4 4L2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
+        </button>
+        <button id="apiSettingsBtn" class="news-update-btn api-settings-top-btn" data-action="open-api-settings" title="Open API Settings" aria-label="Open API Settings">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span class="header-label">AI Keys</span>
         </button>
         ${canToggleAdmin ? `
         <button id="admin-toggle-btn" class="admin-toggle-btn ${isAdmin ? 'active' : ''}" data-tutorial-id="admin-toggle" title="${this.escapeHtml(this.t('nav.toggleAdminMode'))}">
