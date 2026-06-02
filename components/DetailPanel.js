@@ -7734,9 +7734,9 @@ ${body}
 
     const directImageUrl = this.getDirectImageUrl(url);
     const host = this.getHostFromUrl(url);
-    const youtubeMeta = this.getYoutubeVideoMeta(url);
-    const youtubeDetails = youtubeMeta ? await this.fetchYoutubeMetadata(url) : null;
-    const isVideoOrSiteMedia = Boolean(youtubeMeta) || /(?:vimeo\.com|cloudinary\.com)/i.test(url);
+    const videoMeta = this.getVideoEmbedMeta(url);
+    const videoDetails = videoMeta ? await this.fetchVideoMetadata(url) : null;
+    const isVideoOrSiteMedia = Boolean(videoMeta) || /(?:vimeo\.com|cloudinary\.com)/i.test(url);
     const existingSource = this.topicSources.some(source => String(source.url || '') === url);
     let added = false;
 
@@ -7764,29 +7764,29 @@ ${body}
 
     if (!existingSource) {
       this.topicSources.push({
-        name: youtubeDetails?.title || host || (isVideoOrSiteMedia ? 'Linked media' : 'Source link'),
+        name: videoDetails?.title || host || (isVideoOrSiteMedia ? 'Linked media' : 'Source link'),
         url,
         category: isVideoOrSiteMedia ? 'media' : 'source',
         reliability: 'unknown',
         verified: true,
         linkOnly: true,
-        provider: youtubeMeta ? 'youtube' : '',
-        authorName: youtubeDetails?.authorName || ''
+        provider: videoMeta?.provider || '',
+        authorName: videoDetails?.authorName || ''
       });
       added = true;
     }
 
-    if (youtubeMeta) {
+    if (videoMeta) {
       const mediaToken = this.createMediaToken({
-        url: youtubeMeta.thumbnailUrl,
+        url: videoDetails?.thumbnailUrl || videoMeta.thumbnailUrl,
         sourceUrl: url,
-        sourceName: youtubeDetails?.title || host || 'YouTube',
-        provider: 'youtube',
-        mediaType: 'youtube',
-        embedUrl: youtubeMeta.embedUrl,
-        thumbnailUrl: youtubeDetails?.thumbnailUrl || youtubeMeta.thumbnailUrl,
-        videoId: youtubeMeta.videoId,
-        authorName: youtubeDetails?.authorName || ''
+        sourceName: videoDetails?.title || host || videoMeta.label,
+        provider: videoMeta.provider,
+        mediaType: videoMeta.provider,
+        embedUrl: videoMeta.embedUrl,
+        thumbnailUrl: videoDetails?.thumbnailUrl || videoMeta.thumbnailUrl,
+        videoId: videoMeta.videoId,
+        authorName: videoDetails?.authorName || ''
       });
       added = this.addMediaTokenToCurrentPoint(mediaToken) || added;
     }
@@ -9802,6 +9802,50 @@ Return ONLY a JSON object with this exact format, no other text:
     }
   }
 
+  getVimeoVideoMeta(url = '') {
+    const safeUrl = this.sanitizeUrl(url);
+    if (!safeUrl) return null;
+
+    try {
+      const parsed = new URL(safeUrl);
+      const host = parsed.hostname.replace(/^www\./, '').toLowerCase();
+      if (!(host === 'vimeo.com' || host.endsWith('.vimeo.com'))) return null;
+
+      const parts = parsed.pathname.split('/').filter(Boolean);
+      let videoId = '';
+      if (host === 'player.vimeo.com' && parts[0] === 'video') {
+        videoId = parts[1] || '';
+      } else {
+        videoId = parts.find(part => /^\d{5,}$/.test(part)) || '';
+      }
+      if (!/^\d{5,}$/.test(videoId)) return null;
+
+      const hash = parsed.searchParams.get('h') || '';
+      const embedUrl = new URL(`https://player.vimeo.com/video/${videoId}`);
+      if (hash) embedUrl.searchParams.set('h', hash);
+
+      return {
+        provider: 'vimeo',
+        label: 'Vimeo',
+        videoId,
+        hash,
+        watchUrl: `https://vimeo.com/${videoId}`,
+        embedUrl: embedUrl.toString(),
+        thumbnailUrl: ''
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  getVideoEmbedMeta(url = '') {
+    const youtubeMeta = this.getYoutubeVideoMeta(url);
+    if (youtubeMeta) {
+      return { ...youtubeMeta, provider: 'youtube', label: 'YouTube' };
+    }
+    return this.getVimeoVideoMeta(url);
+  }
+
   async fetchYoutubeMetadata(url = '') {
     const youtubeMeta = this.getYoutubeVideoMeta(url);
     if (!youtubeMeta) return null;
@@ -9824,25 +9868,55 @@ Return ONLY a JSON object with this exact format, no other text:
     }
   }
 
+  async fetchVimeoMetadata(url = '') {
+    const vimeoMeta = this.getVimeoVideoMeta(url);
+    if (!vimeoMeta) return null;
+
+    try {
+      const endpoint = `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`;
+      const response = await fetch(endpoint, { cache: 'force-cache' });
+      if (!response.ok) throw new Error(`Vimeo metadata returned ${response.status}`);
+      const data = await response.json();
+      return {
+        ...vimeoMeta,
+        title: String(data.title || '').trim(),
+        authorName: String(data.author_name || '').trim(),
+        authorUrl: String(data.author_url || '').trim(),
+        thumbnailUrl: String(data.thumbnail_url || '').trim()
+      };
+    } catch (error) {
+      console.warn('[Vimeo Evidence] Metadata fallback only:', error);
+      return vimeoMeta;
+    }
+  }
+
+  async fetchVideoMetadata(url = '') {
+    const youtubeMeta = this.getYoutubeVideoMeta(url);
+    if (youtubeMeta) return this.fetchYoutubeMetadata(url);
+    const vimeoMeta = this.getVimeoVideoMeta(url);
+    if (vimeoMeta) return this.fetchVimeoMetadata(url);
+    return null;
+  }
+
   renderSourcePreviewControls(source = {}, index = 0) {
-    const youtubeMeta = this.getYoutubeVideoMeta(source.url || '');
+    const videoMeta = this.getVideoEmbedMeta(source.url || '');
     const notes = String(source.adminNotes || source.transcript || '').trim();
-    const metadataLine = youtubeMeta
-      ? [source.authorName, youtubeMeta.videoId].filter(Boolean).join(' | ')
+    const metadataLine = videoMeta
+      ? [source.authorName, videoMeta.label, videoMeta.videoId].filter(Boolean).join(' | ')
       : '';
 
     return `
       <textarea
         class="source-notes-input"
-        rows="${youtubeMeta ? 4 : 2}"
-        placeholder="${youtubeMeta ? 'Paste YouTube transcript or notes here to summarize into the topic' : 'Optional evidence notes'}"
+        rows="${videoMeta ? 4 : 2}"
+        placeholder="${videoMeta ? 'Paste transcript, captions, or notes here to summarize into the topic' : 'Optional evidence notes'}"
         data-index="${index}"
         data-field="adminNotes"
       >${this.escapeHtml(notes)}</textarea>
-      ${youtubeMeta ? `
+      ${videoMeta ? `
         <div class="youtube-evidence-editor-preview">
-          <button type="button" class="youtube-preview-button" data-action="zoom-topic-media" data-media-url="${this.escapeHtml(youtubeMeta.embedUrl)}" data-media-caption="${this.escapeHtml(source.name || 'YouTube evidence')}">
-            <img src="${this.escapeHtml(youtubeMeta.thumbnailUrl)}" alt="" loading="lazy">
+          <button type="button" class="youtube-preview-button" data-action="zoom-topic-media" data-media-url="${this.escapeHtml(videoMeta.embedUrl)}" data-media-caption="${this.escapeHtml(source.name || `${videoMeta.label} evidence`)}">
+            ${videoMeta.thumbnailUrl ? `<img src="${this.escapeHtml(videoMeta.thumbnailUrl)}" alt="" loading="lazy">` : '<span class="media-token-play-badge">Play</span>'}
             <span>Play inline</span>
           </button>
           <button type="button" class="source-action-text-btn" data-action="summarize-youtube-evidence" data-index="${index}">
@@ -9855,19 +9929,19 @@ Return ONLY a JSON object with this exact format, no other text:
   }
 
   renderYoutubeSourcePreview(source = {}) {
-    const youtubeMeta = this.getYoutubeVideoMeta(source.url || '');
-    if (!youtubeMeta) return '';
+    const videoMeta = this.getVideoEmbedMeta(source.url || '');
+    if (!videoMeta) return '';
 
     return `
       <button
         type="button"
         class="youtube-source-preview"
         data-action="zoom-topic-media"
-        data-media-url="${this.escapeHtml(youtubeMeta.embedUrl)}"
-        data-media-caption="${this.escapeHtml(source.name || 'YouTube evidence')}"
+        data-media-url="${this.escapeHtml(videoMeta.embedUrl)}"
+        data-media-caption="${this.escapeHtml(source.name || `${videoMeta.label} evidence`)}"
         title="Play video inside the panel"
       >
-        <img src="${this.escapeHtml(youtubeMeta.thumbnailUrl)}" alt="" loading="lazy">
+        ${videoMeta.thumbnailUrl ? `<img src="${this.escapeHtml(videoMeta.thumbnailUrl)}" alt="" loading="lazy">` : '<span class="media-token-play-badge">Play</span>'}
         <span>Inline video</span>
       </button>
     `;
@@ -9910,10 +9984,11 @@ Return ONLY a JSON object with this exact format, no other text:
     const transcript = String(liveNotes ?? source.adminNotes ?? source.transcript ?? '').trim();
     source.adminNotes = transcript;
     source.transcript = transcript;
-    const metadata = await this.fetchYoutubeMetadata(source.url || '');
+    const metadata = await this.fetchVideoMetadata(source.url || '');
+    const providerLabel = metadata?.label || metadata?.provider || 'Video';
     const metadataText = [
       metadata?.title ? `Title: ${metadata.title}` : '',
-      metadata?.authorName ? `Channel: ${metadata.authorName}` : '',
+      metadata?.authorName ? `Channel/author: ${metadata.authorName}` : '',
       metadata?.watchUrl ? `URL: ${metadata.watchUrl}` : (source.url ? `URL: ${source.url}` : ''),
       metadata?.videoId ? `Video ID: ${metadata.videoId}` : ''
     ].filter(Boolean).join('\n');
@@ -9930,11 +10005,11 @@ Return ONLY a JSON object with this exact format, no other text:
         messages: [
           {
             role: 'system',
-            content: 'You turn YouTube evidence into cautious topic.earth draft metadata. Return strict JSON only. Be factual, concise, and separate transcript-supported claims from metadata-only hints.'
+            content: 'You turn video evidence into cautious topic.earth draft metadata. Return strict JSON only. Be factual, concise, and separate transcript-supported claims from metadata-only hints.'
           },
           {
             role: 'user',
-            content: `Use this YouTube evidence to help fill a topic.earth draft. Prefer transcript/notes when present. If transcript is missing, use only public metadata and clearly mark the evidence as metadata-only.
+            content: `Use this ${providerLabel} evidence to help fill a topic.earth draft. Prefer transcript/notes when present. If transcript is missing, use only public metadata and clearly mark the evidence as metadata-only.
 
 Current draft:
 Title: ${this.topicFormState.title || ''}
@@ -9942,7 +10017,7 @@ Layer/category: ${this.topicFormState.category || ''}
 Summary: ${this.topicFormState.summary || ''}
 Location: ${[this.topicFormState.region, this.topicFormState.country].filter(Boolean).join(', ') || ''}
 
-YouTube metadata:
+Video metadata:
 ${metadataText || `URL: ${source.url || ''}`}
 
 ${transcript ? `Transcript or notes:\n${transcript}` : 'Transcript status: captions or transcript were not provided.'}
@@ -10130,7 +10205,7 @@ Rules:
           data-media-watermark="${this.escapeHtml(normalized.watermarkText)}"
           ${browserAssetAttrs}
         >
-        ${normalized.mediaType === 'youtube' ? '<div class="media-token-play-badge">Play</div>' : ''}
+        ${['youtube', 'vimeo'].includes(normalized.mediaType) ? '<div class="media-token-play-badge">Play</div>' : ''}
         <div class="media-token-watermark">${this.escapeHtml(normalized.watermarkText)}</div>
       </div>
     `;
@@ -10508,7 +10583,8 @@ Rules:
 
     const safeUrl = this.sanitizeUrl(url);
     if (!safeUrl) return;
-    const isVideoEmbed = /youtube(?:-nocookie)?\.com\/embed\//i.test(safeUrl);
+    const isVideoEmbed = /youtube(?:-nocookie)?\.com\/embed\//i.test(safeUrl)
+      || /player\.vimeo\.com\/video\/\d+/i.test(safeUrl);
 
     zoomPanel.innerHTML = `
       <div class="topic-media-zoom-header">
@@ -10520,7 +10596,8 @@ Rules:
           class="topic-media-zoom-video"
           src="${this.escapeHtml(safeUrl)}"
           title="${this.escapeHtml(caption || 'Topic video')}"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
           allowfullscreen
         ></iframe>
       ` : `

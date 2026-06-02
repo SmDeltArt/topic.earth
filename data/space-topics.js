@@ -13,7 +13,9 @@ const makeSpaceTopic = ({
   composition,
   atmosphere,
   insight,
-  latestNews = ''
+  latestNews = '',
+  researchSources = [],
+  mediaTokens = []
 }) => ({
   id,
   spaceOrder: order,
@@ -29,7 +31,9 @@ const makeSpaceTopic = ({
   isPlanet: true,
   isSpaceTopic: true,
   isCustom: false,
-  researchSources: [],
+  researchSources,
+  mediaTokens,
+  media: mediaTokens.map(token => token.url || token.thumbnailUrl || '').filter(Boolean),
   planetData: {
     name: object,
     type,
@@ -224,5 +228,57 @@ export const SPACE_TOPICS = [
     composition: 'Silicate material with possible metallic inclusions',
     atmosphere: 'None',
     insight: 'Keeping multiple asteroid topics makes Space mode ready for a future near-Earth object feed.'
+  }),
+  makeSpaceTopic({
+    id: 'space_esa_earth_observation',
+    order: 15,
+    object: 'Earth',
+    title: 'ESA Earth Observation',
+    type: 'Civil Space Agency',
+    summary: 'European Space Agency Earth-observation missions monitor climate, oceans, ice, land, atmosphere, and disaster signals for public-interest science and sustainability.',
+    diameter: 'Agency / satellite network topic',
+    temperature: 'Focuses on Earth climate and environmental indicators',
+    composition: 'Civil satellite missions, science data services, open observation programs',
+    atmosphere: 'Atmospheric monitoring through missions such as Copernicus Sentinel and ESA climate programs',
+    insight: 'This topic keeps Space mode connected to Earth care: satellites are useful here when they help observe climate risk, protect ecosystems, and support transparent public knowledge.',
+    latestNews: 'ESA Earth observation, climate, and sustainability updates',
+    researchSources: [
+      {
+        name: 'ESA Earth Observation',
+        url: 'https://www.esa.int/Applications/Observing_the_Earth',
+        category: 'official',
+        reliability: 'high',
+        verified: true
+      },
+      {
+        name: 'ESA Vimeo evidence',
+        url: 'https://player.vimeo.com/video/1197557002?h=220b6f5a22',
+        category: 'media',
+        reliability: 'needs-review',
+        verified: true,
+        provider: 'vimeo'
+      },
+      {
+        name: 'Copernicus programme',
+        url: 'https://www.copernicus.eu/',
+        category: 'official',
+        reliability: 'high',
+        verified: true
+      }
+    ],
+    mediaTokens: [
+      {
+        id: 'media_esa_vimeo_1197557002',
+        url: '',
+        thumbnailUrl: '',
+        sourceUrl: 'https://player.vimeo.com/video/1197557002?h=220b6f5a22',
+        sourceName: 'ESA Vimeo evidence',
+        provider: 'vimeo',
+        mediaType: 'vimeo',
+        embedUrl: 'https://player.vimeo.com/video/1197557002?h=220b6f5a22',
+        videoId: '1197557002',
+        watermarkText: 'ESA Vimeo | topic.earth research'
+      }
+    ]
   })
 ];
