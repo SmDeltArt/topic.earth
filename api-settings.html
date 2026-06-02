@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
@@ -26,10 +26,11 @@
           "smdeltart.com",
           "localhost",
           "127.0.0.1",
+        "topic.earth",
         ],
         allowSubdomains: true,
         allowFileProtocol: true,
-        officialUrl: "https://smdeltart.vercel.app/widgets/api-settings.html",
+        officialUrl: "https://topic.earth/api-settings.html",
       };
 
       window.SMART_CDN_POLICY = {
@@ -41,6 +42,15 @@
     <script src="shared/smart-favicon.js"></script>
     <script src="shared/smart-nav-manager.js"></script>
     <script src="shared/smart-app-binding.js"></script>
+
+    <!-- Brand meta from brand/brand.json (shared with index.html + banner). -->
+    <script type="module">
+      import { applyBrandMeta } from "./brand/source/brand-meta.js";
+      applyBrandMeta({
+        pageUrl: "https://api.smdeltart.com/api-settings.html",
+        keepTitle: true,
+      }).catch((e) => console.warn("brand-meta:", e));
+    </script>
     <style>
       :root {
         --primary-color: #6d9eeb;
@@ -3769,7 +3779,7 @@
       }
     </script>
 
-    <script src="src/api-settings.js?v=topic-earth-ollama-host-20260521"></script>
+    <script src="src/api-settings.js"></script>
     <script src="src/api-model-updater.js" defer></script>
 
     <!-- SmΔrt Popup Library (optional - for popup integration) -->

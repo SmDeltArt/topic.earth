@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -23,6 +23,12 @@
     <meta property="og:url" content="https://topic.earth/">
     <meta property="og:title" content="topic.earth | Global Intelligence Dashboard">
     <meta property="og:description" content="Interactive Earth intelligence for climate signals, regional updates, space context, Fever scenarios, and AI-assisted topic research.">
+    <meta property="og:image" content="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779360411/topic-earth-github-vignette-600-short_vgmezc.gif">
+    <meta property="og:image:secure_url" content="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779360411/topic-earth-github-vignette-600-short_vgmezc.gif">
+    <meta property="og:image:type" content="image/gif">
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="315">
+    <meta property="og:image:alt" content="topic.earth five-panel global intelligence preview">
     <meta property="og:image" content="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779347218/topic-earth-vignette-animated_kuwzdo.svg">
     <meta property="og:image:secure_url" content="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779347218/topic-earth-vignette-animated_kuwzdo.svg">
     <meta property="og:image:type" content="image/svg+xml">
@@ -42,7 +48,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="topic.earth | Global Intelligence Dashboard">
     <meta name="twitter:description" content="Interactive Earth intelligence for climate signals, regional updates, space context, Fever scenarios, and AI-assisted topic research.">
-    <meta name="twitter:image" content="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779347220/topic-earth-vignette-first-en_s0qs9a.png">
+    <meta name="twitter:image" content="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779360411/topic-earth-github-vignette-600-short_vgmezc.gif">
     <meta name="twitter:image:alt" content="topic.earth global intelligence vignette preview">
     <script type="application/ld+json">
       {
@@ -54,6 +60,27 @@
             "name": "topic.earth",
             "url": "https://topic.earth/",
             "logo": "https://res.cloudinary.com/dsbfcgtdv/image/upload/w_512,h_512,c_pad,b_rgb:0a0e1a/f_png/v1778010556/topic.earth_64x64_frtsvs.svg",
+            "email": "info@topic.earth",
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "email": "info@topic.earth",
+                "contactType": "general inquiries",
+                "availableLanguage": ["en", "fr"]
+              },
+              {
+                "@type": "ContactPoint",
+                "email": "support@topic.earth",
+                "contactType": "support",
+                "availableLanguage": ["en", "fr"]
+              },
+              {
+                "@type": "ContactPoint",
+                "email": "contact@topic.earth",
+                "contactType": "partnerships and publishing",
+                "availableLanguage": ["en", "fr"]
+              }
+            ],
             "sameAs": [
               "https://github.com/SmDeltArt/topic.earth"
             ]
@@ -77,6 +104,7 @@
             "browserRequirements": "Requires a modern browser with WebGL support.",
             "description": "Interactive Earth intelligence for climate signals, regional updates, space context, Fever scenarios, and AI-assisted topic research.",
             "image": [
+              "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779360411/topic-earth-github-vignette-600-short_vgmezc.gif",
               "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779347218/topic-earth-vignette-animated_kuwzdo.svg",
               "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779347216/topic-earth-header-app-animated_pquyoj.gif",
               "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779347222/topic-earth-vignette-resume_igcvxj.png"
@@ -99,21 +127,19 @@
       }
     </script>
     <link rel="icon" type="image/svg+xml" sizes="24x24" data-topic-favicon data-local-href="./assets/icons/topic.earth_24x24.svg?v=topic-earth-icons-20260506" data-cloud-href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg" href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg">
-    <link rel="preload" as="image" href="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg">
+    <link rel="preload" as="image" href="./assets/logo/topic-earth-header-app-space-animated.svg?v=topic-earth-local-space-logo-20260602">
     <link rel="preload" as="image" href="./assets/logo/topic-earth-vignette-animated.svg?v=topic-earth-loading-vignette-20260521">
     <script src="./shared/topic-favicon.js?v=topic-earth-svg-groups-20260506"></script>
     <link rel="stylesheet" href="./assets/fonts/space-mono.css?v=topic-earth-local-vendor-20260506">
-  <link rel="stylesheet" href="styles.css?v=topic-earth-fever-no-horizontal-scroll-20260524">
+  <link rel="stylesheet" href="styles.css?v=topic-earth-local-space-logo-20260602">
     <script src="./vendor/chart/chart.umd.min.js?v=4.4.0"></script>
 </head>
 <body>
     <div id="app">
         <!-- Top Bar -->
         <header id="top-bar">
-            <div class="logo" aria-label="topic.earth">
-                <span class="logo-word logo-word-topic">topic</span>
-                <img class="logo-mark" src="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010556/topic.earth_64x64_frtsvs.svg" data-fallback-src="./assets/icons/topic.earth_64x64.svg?v=topic-earth-icons-20260505" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc;" alt="" aria-hidden="true">
-                <span class="logo-word logo-word-earth">earth</span>
+            <div class="logo logo-image-brand" aria-label="topic.earth">
+                <img class="logo-header-mark" src="./assets/logo/topic-earth-header-app-space-animated.svg?v=topic-earth-local-space-logo-20260602" data-fallback-src="./assets/icons/topic.earth_64x64.svg?v=topic-earth-icons-20260505" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc;" alt="" aria-hidden="true">
             </div>
             <div class="status">
                 <span class="status-dot"></span>
@@ -125,6 +151,13 @@
                     <path d="M8 5V8L10.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
                 Search
+            </button>
+            <button id="apiSettingsBtn" class="news-update-btn" title="Open API Settings" aria-label="Open API Settings" style="margin-left:8px">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                AI Keys
             </button>
         </header>
 
@@ -159,13 +192,17 @@
             <div id="detail-content"></div>
         </aside>
 
-        <button id="fever-loop-quick-btn" class="fever-loop-quick-btn" type="button" aria-label="Open Fever loop monitor" title="Fever loop monitor" aria-pressed="false">
-            <span class="fever-loop-ring" aria-hidden="true"></span>
-            <span class="fever-loop-pulse" aria-hidden="true"></span>
-        </button>
-
         <!-- Fever Debug Bar (Admin only) -->
         <div id="fever-debug-bar"></div>
+
+        <button id="fever-monitor-dock" class="fever-monitor-dock" type="button" title="Open Fever monitor" aria-label="Open Fever monitor">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path d="M9 2.5V10.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M6.8 12C6.8 10.8 7.8 9.8 9 9.8C10.2 9.8 11.2 10.8 11.2 12C11.2 13.2 10.2 14.2 9 14.2C7.8 14.2 6.8 13.2 6.8 12Z" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M2.5 12.4C3.8 9.8 4.9 8.8 6.2 9.6C7.8 10.7 8.5 14 10.6 13C12.1 12.3 13.1 10.4 15.5 6.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            <span>Monitor</span>
+        </button>
 
         <!-- Loading Indicator -->
         <div id="loading">
@@ -179,13 +216,54 @@
         </div>
     </div>
 
-    <script src="./shared/smart-ai-api-bridge.js?v=topic-earth-ollama-host-20260521"></script>
+    <script src="./shared/smart-ai-api-bridge.js?v=topic-earth-api-caddeltai-20260602"></script>
     <script>
-      window.TOPIC_EARTH_PROFILE = window.TOPIC_EARTH_PROFILE || 'admin';
-      window.TOPIC_EARTH_AUDIO_BASE_URL = window.TOPIC_EARTH_AUDIO_BASE_URL
-        || 'https://raw.githubusercontent.com/SmDeltArt/fever/main/assets/audio/read-messages';
+      window.TOPIC_EARTH_PROFILE = window.TOPIC_EARTH_PROFILE || (['localhost', '127.0.0.1'].includes(location.hostname) ? 'admin' : 'demo');
     </script>
-  <script type="module" src="./app.main.js?v=topic-earth-recorded-audio-index-20260524"></script>
+
+    <!-- API Settings overlay panel (env-aware: local vs production) -->
+    <div id="apiSettingsOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000" aria-modal="true" role="dialog" aria-label="API Settings">
+      <div id="apiSettingsPanel" style="position:absolute;top:0;right:0;width:460px;max-width:100vw;height:100vh;background:#111;box-shadow:-4px 0 24px rgba(0,0,0,0.5);overflow:hidden">
+        <button id="apiSettingsBack" title="Close API Settings" style="position:absolute;top:14px;left:12px;z-index:10;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:6px;padding:6px 10px;cursor:pointer;font-size:14px">←</button>
+        <button id="apiSettingsClose" title="Close" style="position:absolute;top:14px;right:12px;z-index:10;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:16px">×</button>
+        <iframe id="apiSettingsFrame"
+          src=""
+          style="width:100%;height:100%;border:none;display:block"
+          title="API Settings"
+          allow="clipboard-read; clipboard-write"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+    </div>
+
+    <script>
+      (function() {
+        var isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+        var API_SETTINGS_URL = isLocal
+          ? './api/api-settings.html?embed=true'
+          : 'https://api-caddeltai.vercel.app/api-settings.html?embed=true';
+
+        var overlay = document.getElementById('apiSettingsOverlay');
+        var frame   = document.getElementById('apiSettingsFrame');
+        var btn     = document.getElementById('apiSettingsBtn');
+        var back    = document.getElementById('apiSettingsBack');
+        var close   = document.getElementById('apiSettingsClose');
+
+        function openPanel() {
+          if (!frame.src || frame.src === 'about:blank') frame.src = API_SETTINGS_URL;
+          overlay.style.display = 'block';
+        }
+        function closePanel() { overlay.style.display = 'none'; }
+
+        btn.addEventListener('click', openPanel);
+        back.addEventListener('click', closePanel);
+        close.addEventListener('click', closePanel);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) closePanel(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePanel(); });
+      })();
+    </script>
+
+  <script type="module" src="./app.main.js?v=topic-earth-local-space-logo-20260602"></script>
   
   <style>
     /* Mobile panel visibility rules */

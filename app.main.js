@@ -1,23 +1,25 @@
-import { GlobeRenderer } from './lib/globe.js?v=topic-earth-fever-loading-20260524';
+import { GlobeRenderer } from './lib/globe.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
-import { LAYERS } from './data/layers.js?v=topic-earth-regional-layer-tabs-20260523';
-import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-cloud-over-20260423';
-import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-media-embed-preview-20260524';
+import { LAYERS } from './data/layers.js?v=topic-earth-good-initiatives-watch-20260601';
+import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
+import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-climate-studies-watch-20260601';
+import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
 import { FEVER_TOPICS } from './data/fever-topics.js?v=topic-earth-embedded-story-20260521';
-import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-media-embed-preview-20260524';
+import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
 import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-topics-20260505';
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
+import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=topic-earth-mobile-compose-20260523';
-import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-embedded-story-20260521';
-import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-mode-layer-state-20260524';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-audio-cache-first-20260524';
-import { LocalStorage } from './lib/storage.js?v=topic-earth-regional-state-20260506';
+import { TopBar } from './components/TopBar.js?v=topic-earth-local-space-logo-20260602';
+import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-meteo-cloud-severity-20260601';
+import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-climate-indicators-20260601';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-smart-source-shortcuts-20260601';
+import { LocalStorage } from './lib/storage.js?v=topic-earth-meteo-draft-20260531';
 import { Settings } from './lib/settings.js?v=topic-earth-greek-language-20260521';
-import { LanguageManager } from './lib/language.js?v=topic-earth-greek-language-20260521';
+import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
 import { ReadTranslationService } from './lib/read-translation.js?v=topic-earth-warning-panel-collapse-20260430';
-import { TTSManager } from './lib/tts.js?v=topic-earth-recorded-audio-index-20260524';
-import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-audio-cache-first-20260524';
+import { TTSManager } from './lib/tts.js?v=topic-earth-legacy-key-decode-20260520';
+import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-meteo-draft-20260531';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
 import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-warning-panel-collapse-20260430';
 import { installAiApiBridge } from './lib/ai-api-bridge.js?v=topic-earth-bridge-cleanup-20260520';
@@ -32,6 +34,8 @@ const BROWSER_MODE_TITLES = {
   fever: 'topic.earth | Fever Monitor'
 };
 const LOGO_MODE_CLASSES = ['topic-mode-main', 'topic-mode-regional', 'topic-mode-space', 'topic-mode-fever'];
+const REGIONAL_MOBILITY_LAYER_IDS = ['bike-ways', 'ev-charging', 'hydrogen-charging'];
+const REGIONAL_CHARGING_LAYER_IDS = ['ev-charging', 'hydrogen-charging'];
 const TIPPING_BOUNDARY_COLORS = {
   climate_change: ['#ff5f57', '#ffb020', '#ff2d55'],
   novel_entities: ['#ff5eea', '#b777ff', '#00d4ff'],
@@ -70,7 +74,15 @@ class TopicEarthApp {
     this.meteoRealtimeStatus = null;
     this.meteoRefreshPromise = null;
     this.meteoLastFetchTime = 0;
+    this.climateIndicatorPoints = [];
+    this.climateIndicatorStatus = null;
+    this.climateIndicatorRefreshPromise = null;
+    this.climateIndicatorLastFetchTime = 0;
+    this.goodInitiativePoints = [];
+    this.goodInitiativeStatus = null;
+    this.goodInitiativeLastFetchTime = 0;
     this.regionalContext = null;
+    this.regionalMobilityCheck = null;
     this.regionalAutoLocateRequested = false;
     this.regionalAutoLocatePending = null;
     this.tutorialGuide = null;
@@ -122,12 +134,12 @@ class TopicEarthApp {
     const baseIds = new Set(basePoints.map(point => String(point.id)));
     const customOnlyPoints = this.customPoints.filter(point => point && !baseIds.has(String(point.id)));
 
-    this.allPoints = [...mergedBasePoints, ...customOnlyPoints, ...this.realtimeMeteoPoints];
+    this.allPoints = [...mergedBasePoints, ...customOnlyPoints, ...this.realtimeMeteoPoints, ...this.climateIndicatorPoints, ...this.goodInitiativePoints];
     return this.allPoints;
   }
 
   async init() {
-      await LanguageManager.loadTranslationCatalog('./shared/topic-earth-ui.csv?v=topic-earth-greek-language-20260521');
+      await LanguageManager.loadTranslationCatalog('./shared/topic-earth-ui.csv?v=topic-earth-regional-mobility-20260531');
 
     // Initialize settings early
     await this.initSettings();
@@ -149,11 +161,11 @@ class TopicEarthApp {
       console.log(`[AMOC Sync] Toggle from ${source}: ${visible ? 'enabled' : 'disabled'}`);
       
       if (visible) {
-        this.layerPanel.setLayerActiveForFilter?.('amoc-watch', 'fever', true, { emit: false, render: false });
+        this.layerPanel.activeLayers.add('amoc-watch');
         const icon = document.querySelector(`.layer-icon[data-layer-id="amoc-watch"]`);
         if (icon) icon.classList.add('active');
       } else {
-        this.layerPanel.setLayerActiveForFilter?.('amoc-watch', 'fever', false, { emit: false, render: false });
+        this.layerPanel.activeLayers.delete('amoc-watch');
         const icon = document.querySelector(`.layer-icon[data-layer-id="amoc-watch"]`);
         if (icon) icon.classList.remove('active');
       }
@@ -179,7 +191,9 @@ class TopicEarthApp {
     // Add markers
     this.updateMarkers();
     this.syncRealtimeMeteoLayers();
-    this.refreshRealtimeMeteo();
+    this.refreshRealtimeMeteo({ launchAuto: true });
+    this.refreshClimateIndicators({ launchAuto: true });
+    this.refreshGoodInitiatives({ launchAuto: true });
 
     // Setup news update button
     this.setupNewsUpdate();
@@ -189,7 +203,6 @@ class TopicEarthApp {
     
     // Setup view toggle
     this.setupViewToggle();
-    this.setupFeverLoopQuickButton();
     
     // Setup settings change listener
     this.setupSettingsListener();
@@ -199,6 +212,7 @@ class TopicEarthApp {
     
     // Setup fever warning history access
     this.setupFeverWarningAccess();
+    this.setupFeverMonitorDock();
 
     // Initialize debug tools if admin
     this.initDebugTools();
@@ -288,8 +302,8 @@ class TopicEarthApp {
   ensureRegionalTopicLayerActive(point = null) {
     const layerId = point?.regionalState?.layerId || point?.category;
     if (!layerId || !this.isRegionalLayerId(layerId)) return false;
-    if (!this.layerPanel?.getActiveLayersForFilter?.('regional')?.has(layerId)) {
-      this.layerPanel?.setLayerActiveForFilter?.(layerId, 'regional', true, { emit: false, render: false });
+    if (!this.layerPanel?.activeLayers?.has(layerId)) {
+      this.layerPanel?.setLayerActive?.(layerId, true);
       this.layerPanel?.updateData?.(this.allLayers, this.allPoints);
     }
     return true;
@@ -703,6 +717,10 @@ class TopicEarthApp {
         updateBtn.disabled = false;
       }
     });
+
+    window.addEventListener('openFeverMonitorRequested', () => {
+      this.openFeverMonitorPanel();
+    });
   }
   
   initDebugTools() {
@@ -782,6 +800,15 @@ class TopicEarthApp {
     });
   }
 
+  setupFeverMonitorDock() {
+    const dockButton = document.getElementById('fever-monitor-dock');
+    if (!dockButton) return;
+
+    dockButton.addEventListener('click', () => {
+      this.openFeverMonitorPanel();
+    });
+  }
+
   applyTutorialMode(settings = Settings.get()) {
     document.body.classList.toggle('tutorial-mode-off', settings.tutorialModeEnabled === false);
   }
@@ -801,11 +828,6 @@ class TopicEarthApp {
       document.title = nextTitle;
     }
     this.updateLogoModeState(mode);
-    if (mode === 'fever' && !this.globe?.inFeverMode) {
-      this.feverLoadingStartedAt = this.feverLoadingStartedAt || this.showFeverModeLoading();
-    } else if (mode !== 'fever' && this.feverLoadingStartedAt) {
-      this.hideFeverModeLoading(this.feverLoadingStartedAt);
-    }
 
     const favicon = document.querySelector('link[data-topic-favicon]') || document.querySelector('link[rel~="icon"]');
     if (favicon) {
@@ -889,7 +911,21 @@ class TopicEarthApp {
       // Store current filter
       this.currentLayerFilter = filter;
       this.updateBrowserTabState(filter);
-      this.updateFeverLoopQuickButton();
+      
+      // Save/restore layer states when switching modes
+      if (filter === 'fever' || filter === 'space') {
+        // Entering special mode - save current layer states and disable non-matching layers
+        if (previous === 'main' || previous === 'regional') {
+          this.savedLayerStates = new Set(this.layerPanel.getActiveLayers());
+        }
+        this.layerPanel.disableNonFilteredLayers(filter);
+      } else if ((filter === 'main' || filter === 'regional') && (previous === 'fever' || previous === 'space')) {
+        // Exiting special mode - restore saved layer states
+        if (this.savedLayerStates) {
+          this.layerPanel.restoreLayerStates(this.savedLayerStates);
+          this.savedLayerStates = null;
+        }
+      }
       
       // Clean exit from previous mode
       if (filter !== 'space' && this.globe.inSolarSystemView) {
@@ -1034,84 +1070,27 @@ class TopicEarthApp {
   
   async enterFeverMode(transitionToken = this.modeTransitionToken) {
     const wasAlreadyInFever = this.globe.inFeverMode;
-    const needsFeverWarmup = !wasAlreadyInFever;
-    const loadingStartedAt = needsFeverWarmup
-      ? (this.feverLoadingStartedAt || this.showFeverModeLoading())
-      : 0;
-
     if (!wasAlreadyInFever && this.globe.getFeverSoundEnabled?.()) {
       this.detailPanel.primeFeverAudioFromGesture?.();
     }
-    try {
-      await this.globe.toggleFeverMode();
-      if (!this.isCurrentModeTransition(transitionToken) || this.currentLayerFilter !== 'fever') {
-        if (this.globe.inFeverMode) {
-          this.globe.exitFeverMode();
-        }
-        if (this.feverSimulationActive) {
-          this.hideFeverSimulation();
-        }
-        return;
+    await this.globe.toggleFeverMode();
+    if (!this.isCurrentModeTransition(transitionToken) || this.currentLayerFilter !== 'fever') {
+      if (this.globe.inFeverMode) {
+        this.globe.exitFeverMode();
       }
-
-      // Mobile: keep both panels available; CSS prevents overlap.
-      if (window.innerWidth <= 768) {
-        document.getElementById('layer-panel')?.classList.remove('mobile-hidden');
+      if (this.feverSimulationActive) {
+        this.hideFeverSimulation();
       }
-
-      // Always show fever simulation panel, even when restarting
-      this.showFeverSimulation();
-    } catch (error) {
-      console.error('[Fever] Failed to enter Fever mode:', error);
-      this.switchLayerFilter('main');
-    } finally {
-      if (needsFeverWarmup) {
-        this.hideFeverModeLoading(loadingStartedAt);
-      }
+      return;
     }
-  }
-
-  showFeverModeLoading() {
-    let overlay = document.getElementById('fever-mode-loading');
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.id = 'fever-mode-loading';
-      overlay.className = 'fever-mode-loading';
-      overlay.setAttribute('role', 'status');
-      overlay.setAttribute('aria-live', 'polite');
-      overlay.innerHTML = `
-        <div class="fever-mode-loading-card">
-          <span class="fever-mode-loading-pulse" aria-hidden="true"></span>
-          <span class="fever-mode-loading-text">Loading Fever loop</span>
-          <span class="fever-mode-loading-bar" aria-hidden="true"><span></span></span>
-        </div>
-      `;
-      document.body.appendChild(overlay);
+    
+    // Mobile: keep both panels available; CSS prevents overlap.
+    if (window.innerWidth <= 768) {
+      document.getElementById('layer-panel')?.classList.remove('mobile-hidden');
     }
-
-    window.clearTimeout(this.feverLoadingTimer);
-    overlay.classList.remove('fade-out');
-    document.body.classList.add('fever-mode-loading-active');
-    this.feverLoadingStartedAt = performance.now();
-    return this.feverLoadingStartedAt;
-  }
-
-  hideFeverModeLoading(startedAt = 0) {
-    const overlay = document.getElementById('fever-mode-loading');
-    if (!overlay) return;
-
-    const elapsed = startedAt ? performance.now() - startedAt : 0;
-    const delay = Math.max(0, 420 - elapsed);
-    window.clearTimeout(this.feverLoadingTimer);
-    this.feverLoadingTimer = window.setTimeout(() => {
-      overlay.classList.add('fade-out');
-      document.body.classList.remove('fever-mode-loading-active');
-      this.feverLoadingStartedAt = 0;
-      this.feverLoadingTimer = window.setTimeout(() => {
-        overlay.remove();
-        this.feverLoadingTimer = null;
-      }, 260);
-    }, delay);
+    
+    // Always show fever simulation panel, even when restarting
+    this.showFeverSimulation();
   }
   
   exitSpecialModes() {
@@ -1187,6 +1166,176 @@ class TopicEarthApp {
     window.dispatchEvent(new CustomEvent('regionalContextChanged', {
       detail: { context: this.regionalContext }
     }));
+
+    this.updateRegionalMobilityCheck(this.regionalContext);
+
+    this.refreshRealtimeMeteo({
+      force: this.currentLayerFilter === 'regional',
+      regionalContext: this.regionalContext,
+      reason: 'regional-context'
+    });
+    this.refreshGoodInitiatives({
+      force: this.currentLayerFilter === 'regional',
+      regionalContext: this.regionalContext,
+      reason: 'regional-context'
+    });
+  }
+
+  getRegionalDistanceKm(source = {}, target = {}) {
+    const sourceLat = Number(source?.lat);
+    const sourceLon = Number(source?.lon);
+    const targetLat = Number(target?.lat);
+    const targetLon = Number(target?.lon);
+
+    if (!Number.isFinite(sourceLat) || !Number.isFinite(sourceLon) || !Number.isFinite(targetLat) || !Number.isFinite(targetLon)) {
+      return Number.POSITIVE_INFINITY;
+    }
+
+    const toRadians = (value) => (value * Math.PI) / 180;
+    const earthRadiusKm = 6371;
+    const deltaLat = toRadians(targetLat - sourceLat);
+    const deltaLon = toRadians(targetLon - sourceLon);
+    const a = Math.sin(deltaLat / 2) ** 2
+      + Math.cos(toRadians(sourceLat)) * Math.cos(toRadians(targetLat)) * Math.sin(deltaLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return earthRadiusKm * c;
+  }
+
+  formatRegionalDistance(distanceKm) {
+    if (!Number.isFinite(distanceKm)) return '';
+    if (distanceKm < 1) return '<1 km';
+    if (distanceKm < 10) return `${distanceKm.toFixed(1)} km`;
+    return `${Math.round(distanceKm)} km`;
+  }
+
+  getPointCoordinateCandidates(point = {}) {
+    const coordinates = [];
+    const add = (lat, lon) => {
+      const numericLat = Number(lat);
+      const numericLon = Number(lon);
+      if (Number.isFinite(numericLat) && Number.isFinite(numericLon)) {
+        coordinates.push({ lat: numericLat, lon: numericLon });
+      }
+    };
+    const addPair = (pair) => {
+      if (!Array.isArray(pair) || pair.length < 2) return;
+      add(pair[0], pair[1]);
+    };
+
+    add(point.lat, point.lon);
+    (point.regionalState?.path || []).forEach(addPair);
+    (point.regionalState?.route?.waypoints || []).forEach(addPair);
+    (point.regionalState?.route?.geometry || []).forEach(addPair);
+    return coordinates;
+  }
+
+  getNearestDistanceToPoint(point = {}, context = {}) {
+    return this.getPointCoordinateCandidates(point)
+      .reduce((nearest, coordinate) => Math.min(nearest, this.getRegionalDistanceKm(coordinate, context)), Number.POSITIVE_INFINITY);
+  }
+
+  getNearestRegionalMobility(context = this.regionalContext, limitPerLayer = 1) {
+    if (!context) return [];
+
+    return REGIONAL_MOBILITY_LAYER_IDS.flatMap((layerId) => {
+      return this.allPoints
+        .filter(point => point?.category === layerId)
+        .map(point => ({
+          ...point,
+          _regionalDistance: this.getNearestDistanceToPoint(point, context)
+        }))
+        .filter(point => Number.isFinite(point._regionalDistance))
+        .sort((a, b) => {
+          const distanceDelta = a._regionalDistance - b._regionalDistance;
+          if (distanceDelta !== 0) return distanceDelta;
+          return new Date(b.date) - new Date(a.date);
+        })
+        .slice(0, limitPerLayer)
+        .map(point => ({
+          id: point.id,
+          title: point.title,
+          layerId,
+          distanceKm: point._regionalDistance
+        }));
+    });
+  }
+
+  getNearestRecordedBikeTrips(context = this.regionalContext, limit = 2) {
+    if (!context) return [];
+
+    return this.allPoints
+      .filter(point => {
+        const route = point?.regionalState?.route;
+        const path = point?.regionalState?.path;
+        return point?.category === 'bike-ways' && (
+          (route && (route.profile || 'bike') === 'bike')
+          || (Array.isArray(path) && path.length >= 2)
+        );
+      })
+      .map(point => ({
+        ...point,
+        _regionalDistance: this.getNearestDistanceToPoint(point, context)
+      }))
+      .filter(point => Number.isFinite(point._regionalDistance))
+      .sort((a, b) => a._regionalDistance - b._regionalDistance)
+      .slice(0, limit)
+      .map(point => ({
+        id: point.id,
+        title: point.title,
+        distanceKm: point._regionalDistance
+      }));
+  }
+
+  updateRegionalMobilityCheck(context = this.regionalContext) {
+    if (!context) return null;
+
+    const nearest = this.getNearestRegionalMobility(context, 1);
+    const recordedBikeTrips = this.getNearestRecordedBikeTrips(context, 1);
+    const nearestCharging = nearest.find(item => REGIONAL_CHARGING_LAYER_IDS.includes(item.layerId));
+    const nearestBikeWay = nearest.find(item => item.layerId === 'bike-ways');
+    const language = this.getCurrentUiLanguage();
+    const statusParts = [];
+
+    if (nearestCharging) {
+      statusParts.push(LanguageManager.formatLabel('regional.mobilityNearestCharging', language, {
+        name: nearestCharging.title,
+        distance: this.formatRegionalDistance(nearestCharging.distanceKm)
+      }));
+    }
+
+    if (nearestBikeWay) {
+      statusParts.push(LanguageManager.formatLabel('regional.mobilityNearestBike', language, {
+        name: nearestBikeWay.title,
+        distance: this.formatRegionalDistance(nearestBikeWay.distanceKm)
+      }));
+    }
+
+    if (recordedBikeTrips[0]) {
+      statusParts.push(LanguageManager.formatLabel('regional.mobilityRecordedTrip', language, {
+        name: recordedBikeTrips[0].title,
+        distance: this.formatRegionalDistance(recordedBikeTrips[0].distanceKm)
+      }));
+    }
+
+    this.regionalMobilityCheck = {
+      context,
+      nearest,
+      recordedBikeTrips,
+      updatedAt: new Date().toISOString()
+    };
+
+    window.dispatchEvent(new CustomEvent('regionalMobilityCheckUpdated', {
+      detail: { check: this.regionalMobilityCheck }
+    }));
+
+    if (statusParts.length && this.currentLayerFilter === 'regional' && this.regionalMap?.visible) {
+      this.regionalMap.setStatus(
+        LanguageManager.formatLabel('regional.mobilityCheckStatus', language, { items: statusParts.join(' | ') }),
+        'ready'
+      );
+    }
+
+    return this.regionalMobilityCheck;
   }
 
   handleRegionalMapPointDraft(context = null) {
@@ -1620,62 +1769,11 @@ class TopicEarthApp {
   showFeverSimulation() {
     this.feverSimulationActive = true;
     this.detailPanel.showFeverSimulation(this.globe);
-    this.updateFeverLoopQuickButton();
   }
   
   hideFeverSimulation() {
     this.feverSimulationActive = false;
     this.detailPanel.hide();
-    this.updateFeverLoopQuickButton();
-  }
-
-  setupFeverLoopQuickButton() {
-    this.feverLoopQuickButton = document.getElementById('fever-loop-quick-btn');
-    if (!this.feverLoopQuickButton) return;
-
-    this.feverLoopQuickButton.addEventListener('click', () => {
-      const detailOpen = this.detailPanel?.isVisible?.();
-      const isFeverMonitorOpen = detailOpen && this.detailPanel?.mode === 'fever-simulation';
-
-      if (this.currentLayerFilter !== 'fever') {
-        this.switchLayerFilter('fever');
-        return;
-      }
-
-      if (isFeverMonitorOpen) {
-        this.hideFeverSimulation();
-      } else {
-        this.showFeverSimulation();
-      }
-    });
-
-    if (this.detailPanel?.container) {
-      const detailObserver = new MutationObserver(() => this.updateFeverLoopQuickButton());
-      detailObserver.observe(this.detailPanel.container, {
-        attributes: true,
-        attributeFilter: ['class']
-      });
-      this.feverLoopQuickButtonObserver = detailObserver;
-    }
-
-    this.updateFeverLoopQuickButton();
-  }
-
-  updateFeverLoopQuickButton() {
-    const button = this.feverLoopQuickButton || document.getElementById('fever-loop-quick-btn');
-    if (!button) return;
-
-    const monitorOpen = this.currentLayerFilter === 'fever'
-      && this.detailPanel?.isVisible?.()
-      && this.detailPanel?.mode === 'fever-simulation';
-
-    button.classList.toggle('is-active', monitorOpen);
-    button.setAttribute('aria-pressed', String(monitorOpen));
-    button.setAttribute(
-      'aria-label',
-      monitorOpen ? 'Hide Fever loop monitor' : 'Open Fever loop monitor'
-    );
-    button.title = monitorOpen ? 'Hide Fever loop monitor' : 'Fever loop monitor';
   }
 
   setupTextSelection() {
@@ -1746,16 +1844,37 @@ class TopicEarthApp {
           const vignetteId = this.ttsVignetteState?.id;
 
           try {
-            const translated = await ReadTranslationService.translateText(text, translationLang);
+            console.info('[Read Test] Translate + Read started in local-first mode.', {
+              targetLanguage: translationLang,
+              tts: 'browser-forced',
+              linkedAiTranslation: 'skipped-unless-called-elsewhere'
+            });
+            this.updateTTSVignette({
+              status: `No API first: checking local ${targetLanguage} translation...`,
+              debugLabel: 'NO API FIRST',
+              debugTone: 'local'
+            });
+            const translated = await ReadTranslationService.translateText(text, translationLang, { localOnly: true });
             if (!this.isActiveTTSVignette(vignetteId)) return;
             const translatedSpeechLang = translated.speechLang || LanguageManager.getSpeechCode(translated.language || translationLang);
             const status = translated.provider === 'original' && translationLang !== 'en'
-              ? `No translation available yet. Reading original text.`
-              : `Reading in ${targetLanguage}`;
+              ? `No local translation available. Reading original text with browser voice.`
+              : `Reading in ${targetLanguage} with browser voice`;
+            console.info('[Read Test] Translation route resolved.', {
+              provider: translated.provider,
+              speechLang: translatedSpeechLang,
+              paidTts: false
+            });
             this.updateTTSVignette({
               translatedText: translated.text,
               status,
               provider: translated.provider,
+              debugLabel: translated.provider === 'csv'
+                ? 'CSV LOCAL'
+                : translated.provider === 'browser'
+                  ? 'BROWSER TRANSLATION'
+                  : 'LOCAL ORIGINAL',
+              debugTone: translated.provider === 'original' ? 'warn' : 'local',
               speechLang: translatedSpeechLang
             });
             this.speakFromVignette(translated.text, translatedSpeechLang);
@@ -1765,23 +1884,32 @@ class TopicEarthApp {
             const fallbackSpeechLang = speechLang;
             this.updateTTSVignette({
               translatedText: text,
-              status: 'Translation failed. Reading original text.',
+              status: 'Translation failed. Reading original text with browser voice.',
               provider: 'original',
+              debugLabel: 'LOCAL FALLBACK',
+              debugTone: 'warn',
               speechLang: fallbackSpeechLang
             });
             this.speakFromVignette(text, fallbackSpeechLang);
           }
         } else {
           actionButton.querySelector('span').textContent = 'Reading...';
-          this.removeTTSVignette({ stopAudio: true });
-          this.ttsManager?.speak(text, speechLang, {
-            priority: 'manual',
-            channel: 'selection',
-            aiVoiceFallbackToBrowser: false,
-            onError: (error) => {
-              console.warn('[Selected Read] Linked TTS failed:', error?.message || error);
-            }
+          console.info('[Read Test] Read started in browser-only mode.', {
+            speechLang,
+            paidTts: false
           });
+          this.showTTSVignette({
+            mode: 'Read',
+            originalText: text,
+            translatedText: text,
+            languageLabel: LanguageManager.getLanguageInfo(currentLang)?.nativeName || currentLang,
+            status: 'Reading with browser voice...',
+            provider: 'browserTts',
+            debugLabel: 'BROWSER TTS',
+            debugTone: 'local',
+            speechLang
+          });
+          this.speakFromVignette(text, speechLang);
         }
 
         this.removeTTSButton();
@@ -1839,6 +1967,8 @@ class TopicEarthApp {
     languageLabel = '',
     status = 'Ready',
     provider = '',
+    debugLabel = '',
+    debugTone = '',
     speechLang = 'en'
   } = {}) {
     this.removeTTSVignette({ stopAudio: true });
@@ -1853,6 +1983,7 @@ class TopicEarthApp {
         <div>
           <div class="tts-vignette-kicker"></div>
           <div class="tts-vignette-status"></div>
+          <div class="tts-vignette-debug-badge" data-tts-vignette-debug></div>
         </div>
         <button type="button" class="tts-vignette-close" data-tts-vignette-action="close" aria-label="Close reading panel">&times;</button>
       </div>
@@ -1899,6 +2030,8 @@ class TopicEarthApp {
       languageLabel,
       status,
       provider,
+      debugLabel,
+      debugTone,
       speechLang
     });
   }
@@ -1923,12 +2056,19 @@ class TopicEarthApp {
       ai: 'AI translation',
       browser: 'Browser translation',
       cache: 'Cached translation',
-      original: 'Original text'
+      original: 'Original text',
+      browserTts: 'Browser TTS'
     };
 
     this.ttsVignette.querySelector('.tts-vignette-kicker').textContent =
       state.languageLabel ? `${state.mode || 'Read'} - ${state.languageLabel}` : (state.mode || 'Read');
     this.ttsVignette.querySelector('.tts-vignette-status').textContent = state.status || 'Ready';
+    const debugBadge = this.ttsVignette.querySelector('[data-tts-vignette-debug]');
+    if (debugBadge) {
+      debugBadge.textContent = state.debugLabel || '';
+      debugBadge.dataset.tone = state.debugTone || '';
+      debugBadge.hidden = !state.debugLabel;
+    }
     this.ttsVignette.querySelector('[data-tts-vignette-translation-label]').textContent =
       providerLabels[state.provider] || 'Text to read';
 
@@ -2006,18 +2146,37 @@ class TopicEarthApp {
       cancelled: false
     });
 
+    console.info('[Read Test] Browser speech requested.', {
+      speechLang,
+      paidTts: false,
+      source: 'selection-vignette'
+    });
     this.ttsManager?.speak(text, speechLang, {
       priority: 'manual',
       channel: 'selection',
+      forceBrowser: true,
       aiVoiceFallbackToBrowser: false,
       onStart: ({ source } = {}) => {
         this.startTTSHighlight();
+        const statusBySource = {
+          ai: 'Reading with linked OpenAI voice...',
+          cache: 'Reading cached repo audio...',
+          browser: 'Reading with browser voice...'
+        };
+        const labelBySource = {
+          ai: 'LINKED AI TTS',
+          cache: 'CACHED AUDIO',
+          browser: 'BROWSER TTS'
+        };
+        const toneBySource = {
+          ai: 'paid',
+          cache: 'done',
+          browser: 'local'
+        };
         this.updateTTSVignette({
-          status: source === 'cache'
-            ? 'Reading recorded message...'
-            : source === 'ai'
-              ? 'Reading with linked OpenAI voice...'
-              : 'Reading with browser voice...'
+          status: statusBySource[source] || statusBySource.browser,
+          debugLabel: labelBySource[source] || labelBySource.browser,
+          debugTone: toneBySource[source] || toneBySource.browser
         });
       },
       onBoundary: (event) => {
@@ -2025,15 +2184,37 @@ class TopicEarthApp {
       },
       onEnd: () => {
         this.stopTTSHighlight();
-        this.updateTTSVignette({ status: 'Finished' });
+        this.updateTTSVignette({
+          status: 'Finished',
+          debugLabel: 'LOCAL TEST OK',
+          debugTone: 'done'
+        });
       },
       onError: (error) => {
         this.stopTTSHighlight();
+        console.warn('[Read Test] Browser speech failed:', error?.message || error);
         this.updateTTSVignette({
-          status: `Linked TTS unavailable: ${error?.message || 'check API Settings'}`
+          status: `Browser voice unavailable: ${error?.message || 'check browser voices'}`,
+          debugLabel: 'VOICE ERROR',
+          debugTone: 'error'
         });
       }
     });
+
+  }
+
+  openFeverMonitorPanel() {
+    if (this.currentLayerFilter !== 'fever') {
+      this.topBar?.setLayerFilter?.('fever');
+    }
+    window.setTimeout(() => {
+      if (!this.globe?.inFeverMode) {
+        this.currentLayerFilter = 'fever';
+        this.enterFeverMode(this.modeTransitionToken);
+      }
+      this.showFeverSimulation();
+      document.getElementById('layer-panel')?.classList.remove('mobile-hidden');
+    }, 80);
   }
 
   startTTSHighlight() {
@@ -2134,9 +2315,18 @@ class TopicEarthApp {
 
   showTranscript(text) {
     if (this.ttsVignette) {
-      this.updateTTSVignette({ translatedText: text });
+      this.updateTTSVignette({
+        translatedText: text,
+        debugLabel: this.ttsVignetteState?.debugLabel || 'TRANSCRIPT',
+        debugTone: this.ttsVignetteState?.debugTone || 'local'
+      });
       return;
     }
+
+    console.info('[Read Test] Transcript preview shown.', {
+      mode: 'local-transcript',
+      paidTts: false
+    });
 
     // Remove existing transcript
     let transcript = document.querySelector('.tts-transcript');
@@ -2147,7 +2337,11 @@ class TopicEarthApp {
     // Create new transcript
     transcript = document.createElement('div');
     transcript.className = 'tts-transcript';
-    transcript.textContent = text;
+    transcript.innerHTML = `
+      <div class="tts-transcript-badge">LOCAL TRANSCRIPT</div>
+      <div class="tts-transcript-text"></div>
+    `;
+    transcript.querySelector('.tts-transcript-text').textContent = text;
     document.body.appendChild(transcript);
     
     // Auto-hide after 8 seconds
@@ -2196,24 +2390,17 @@ class TopicEarthApp {
     });
   }
 
-  toggleFullscreenView() {
-    const target = document.documentElement;
-    try {
-      if (!document.fullscreenElement) {
-        target.requestFullscreen?.();
-      } else {
-        document.exitFullscreen?.();
-      }
-    } catch (error) {
-      console.warn('[Fullscreen] Could not toggle fullscreen:', error);
-    }
-  }
-
   initLayerPanel() {
     const container = document.getElementById('layer-panel');
     this.layerPanel = new LayerPanel(container, this.allLayers, this.allPoints, {
       onLayerToggle: (layerId, visible) => {
         if (this.handleRealtimeMeteoLayerToggle(layerId, visible)) {
+          return;
+        }
+        if (this.handleClimateIndicatorLayerToggle(layerId, visible)) {
+          return;
+        }
+        if (this.handleGoodInitiativeLayerToggle(layerId, visible)) {
           return;
         }
 
@@ -2316,6 +2503,19 @@ class TopicEarthApp {
     return focused;
   }
 
+  toggleFullscreenView() {
+    const target = document.documentElement;
+    try {
+      if (!document.fullscreenElement) {
+        target.requestFullscreen?.();
+      } else {
+        document.exitFullscreen?.();
+      }
+    } catch (error) {
+      console.warn('[Fullscreen] Could not toggle fullscreen:', error);
+    }
+  }
+
   restoreRegionalTopicState(point = {}) {
     if (!point?.regionalState || this.currentLayerFilter !== 'regional' || !this.regionalMap?.visible) {
       return false;
@@ -2415,6 +2615,7 @@ class TopicEarthApp {
           this.currentLocationMarker = null;
         }
         document.getElementById('layer-panel')?.classList.remove('mobile-hidden');
+        this.layerPanel?.reopen?.();
       },
       onLayerCreate: (layer) => {
         this.handleNewLayer(layer);
@@ -2497,11 +2698,27 @@ class TopicEarthApp {
   initRegionalMap(globeContainer) {
     this.regionalMap = new RegionalMap(globeContainer, {
       onTopicSelect: (point) => this.focusRegionalTopic(point, { openDetail: true }),
+      onMeteoTopicDraft: (point) => this.openMeteoTopicDraft(point),
       onLocationFocus: (context) => this.handleRegionalContextChange(context),
       onMapPointDraft: (context) => this.handleRegionalMapPointDraft(context),
       onTopicMove: (point, context) => this.handleRegionalTopicMove(point, context),
       onTopicRegionalStateChange: (point, state) => this.handleRegionalTopicStateRecord(point, state)
     });
+  }
+
+  openMeteoTopicDraft(point = {}) {
+    if (!point) return;
+    if (this.currentLayerFilter !== 'regional') {
+      this.switchLayerFilter('regional', { force: true });
+    }
+    this.detailPanel?.showMeteoTopicDraft?.(point, {
+      regionalContext: this.regionalContext || null
+    });
+    const lat = Number(point.lat);
+    const lon = Number(point.lon);
+    if (this.regionalMap?.visible && Number.isFinite(lat) && Number.isFinite(lon)) {
+      this.regionalMap.focusCoordinate(lat, lon, point.title || 'Live meteo signal');
+    }
   }
 
   updateMarkers() {
@@ -2567,7 +2784,11 @@ class TopicEarthApp {
           marker.visible = false;
         } else {
           // Respect the current tab's layer ownership and toggle state.
-          const isActive = activeLayers.has(category)
+          const isHiddenWorldMeteo = filter === 'main'
+            && category === METEO_REALTIME_LAYER_ID
+            && marker.userData.visibleInWorldMeteo === false;
+          const isActive = !isHiddenWorldMeteo
+            && activeLayers.has(category)
             && this.layerBelongsToFilter(this.getLayerById(category), filter);
           marker.visible = isActive;
         }
@@ -2604,6 +2825,41 @@ class TopicEarthApp {
     return true;
   }
 
+  handleClimateIndicatorLayerToggle(layerId, visible) {
+    if (layerId !== CLIMATE_LAYER_ID) {
+      return false;
+    }
+
+    if (visible) {
+      this.refreshClimateIndicators({ force: !this.climateIndicatorPoints.length });
+    }
+
+    this.updateMarkersByFilter(this.currentLayerFilter);
+    if (this.currentLayerFilter === 'regional') {
+      this.refreshRegionalMap();
+    }
+
+    return true;
+  }
+
+  handleGoodInitiativeLayerToggle(layerId, visible) {
+    const initiativeLayerIds = new Set(['good-initiatives-world', 'good-initiatives-eu', 'community-projects']);
+    if (!initiativeLayerIds.has(layerId)) {
+      return false;
+    }
+
+    if (visible) {
+      this.refreshGoodInitiatives({ force: !this.goodInitiativePoints.length });
+    }
+
+    this.updateMarkersByFilter(this.currentLayerFilter);
+    if (this.currentLayerFilter === 'regional') {
+      this.refreshRegionalMap();
+    }
+
+    return true;
+  }
+
   syncRealtimeMeteoLayers(filter = this.currentLayerFilter, activeLayers = null) {
     if (!this.globe) return;
 
@@ -2620,7 +2876,8 @@ class TopicEarthApp {
   async refreshRealtimeMeteo(options = {}) {
     const active = this.layerPanel?.getActiveLayers?.() || new Set();
     const wantsMeteo = active.has(METEO_CLOUD_LAYER_ID) || active.has(METEO_REALTIME_LAYER_ID);
-    if (!wantsMeteo) return null;
+    const shouldRefresh = wantsMeteo || options.force || options.launchAuto || this.currentLayerFilter === 'regional';
+    if (!shouldRefresh) return null;
 
     const now = Date.now();
     const maxAge = 15 * 60 * 1000;
@@ -2633,12 +2890,23 @@ class TopicEarthApp {
       return this.meteoRefreshPromise;
     }
 
-    this.meteoRefreshPromise = fetchRealtimeMeteoSnapshot()
+    const regionalContext = options.regionalContext
+      || this.regionalContext
+      || (Settings.get().regionalAutoLocate
+        ? await this.fetchRegionalIpLocation(Settings.get().regionalLocationPrecision || 'region').catch(() => null)
+        : null);
+
+    this.meteoRefreshPromise = fetchRealtimeMeteoSnapshot({
+      regionalContext,
+      pastHours: options.pastHours || 12,
+      forecastHours: options.forecastHours || 36
+    })
       .then(snapshot => {
         this.meteoRealtimeStatus = snapshot;
         this.meteoLastFetchTime = Date.now();
         this.realtimeMeteoPoints = snapshot.points || [];
         window.topicEarthMeteoSnapshot = snapshot;
+        window.topicEarthWorldMeteoWatch = snapshot.worldMeteoWatch || null;
 
         const cloudLayer = this.getLayerById(METEO_CLOUD_LAYER_ID);
         this.globe?.updateCloudLayer(snapshot.cloudSamples || [], cloudLayer?.renderer || {});
@@ -2648,7 +2916,7 @@ class TopicEarthApp {
         this.updateMarkers();
         this.syncRealtimeMeteoLayers();
 
-        console.log(`[Meteo] Loaded ${this.realtimeMeteoPoints.length} ${snapshot.live ? 'realtime' : 'fallback'} meteo samples`);
+        console.log(`[Meteo] Loaded ${snapshot.livePoints?.length || 0} ${snapshot.live ? 'realtime' : 'fallback'} meteo samples and ${snapshot.eventPoints?.length || 0} auto event(s)`);
         return snapshot;
       })
       .catch(error => {
@@ -2661,6 +2929,87 @@ class TopicEarthApp {
 
     return this.meteoRefreshPromise;
   }
+
+  async refreshClimateIndicators(options = {}) {
+    const active = this.layerPanel?.getActiveLayers?.() || new Set();
+    const wantsClimate = active.has(CLIMATE_LAYER_ID);
+    const shouldRefresh = wantsClimate || options.force || options.launchAuto;
+    if (!shouldRefresh) return null;
+
+    const now = Date.now();
+    const maxAge = 6 * 60 * 60 * 1000;
+    if (!options.force && this.climateIndicatorStatus && now - this.climateIndicatorLastFetchTime < maxAge) {
+      return this.climateIndicatorStatus;
+    }
+
+    if (this.climateIndicatorRefreshPromise) {
+      return this.climateIndicatorRefreshPromise;
+    }
+
+    this.climateIndicatorRefreshPromise = fetchClimateIndicatorSnapshot()
+      .then(snapshot => {
+        this.climateIndicatorStatus = snapshot;
+        this.climateIndicatorLastFetchTime = Date.now();
+        this.climateIndicatorPoints = snapshot.points || [];
+        window.topicEarthClimateIndicatorSnapshot = snapshot;
+
+        this.rebuildAllPoints();
+        this.layerPanel?.updateData(this.allLayers, this.allPoints);
+        this.detailPanel?.updateLayers?.(this.allLayers);
+        this.updateMarkers();
+
+        console.log(`[Climate Indicators] Loaded ${snapshot.points?.length || 0} ${snapshot.sourceStatus || 'runtime'} climate signal(s)`);
+        if (Array.isArray(snapshot.errors) && snapshot.errors.length) {
+          console.warn('[Climate Indicators] Source warnings:', snapshot.errors);
+        }
+        return snapshot;
+      })
+      .catch(error => {
+        console.error('[Climate Indicators] Could not refresh climate indicator layer:', error);
+        return null;
+      })
+      .finally(() => {
+        this.climateIndicatorRefreshPromise = null;
+      });
+
+    return this.climateIndicatorRefreshPromise;
+  }
+
+  async refreshGoodInitiatives(options = {}) {
+    const active = this.layerPanel?.getActiveLayers?.() || new Set();
+    const wantsInitiatives = active.has('good-initiatives-world')
+      || active.has('good-initiatives-eu')
+      || active.has('community-projects');
+    const shouldRefresh = wantsInitiatives || options.force || options.launchAuto || this.currentLayerFilter === 'regional';
+    if (!shouldRefresh) return null;
+
+    const now = Date.now();
+    const maxAge = 6 * 60 * 60 * 1000;
+    if (!options.force && this.goodInitiativeStatus && now - this.goodInitiativeLastFetchTime < maxAge) {
+      return this.goodInitiativeStatus;
+    }
+
+    const snapshot = fetchGoodInitiativesSnapshot({
+      regionalContext: options.regionalContext || this.regionalContext
+    });
+
+    this.goodInitiativeStatus = snapshot;
+    this.goodInitiativeLastFetchTime = Date.now();
+    this.goodInitiativePoints = snapshot.points || [];
+    window.topicEarthGoodInitiativesSnapshot = snapshot;
+
+    this.rebuildAllPoints();
+    this.layerPanel?.updateData(this.allLayers, this.allPoints);
+    this.detailPanel?.updateLayers?.(this.allLayers);
+    this.updateMarkers();
+    if (this.currentLayerFilter === 'regional') {
+      this.refreshRegionalMap();
+    }
+
+    console.log(`[Good Initiatives] Loaded ${snapshot.points?.length || 0} ${snapshot.sourceStatus || 'runtime'} source-watch signal(s)`);
+    return snapshot;
+  }
+
   clusterPoints(points) {
     // Globe is for world/country intelligence, not dense local events
     // Cluster only when events truly overlap at world/country scale
@@ -2733,6 +3082,7 @@ class TopicEarthApp {
     
     // Update UI
     this.layerPanel.updateData(this.allLayers, this.allPoints);
+    this.updateRegionalMobilityCheck(this.regionalContext);
     this.detailPanel.updateLayers(this.allLayers);
   }
 
@@ -2837,7 +3187,7 @@ class TopicEarthApp {
     this.customPoints = this.customPoints.filter(point => point.category !== layer.id);
     LocalStorage.saveCustomLayers(this.customLayers);
     this.persistCustomPoints('the layer removal');
-    this.layerPanel.removeLayerFromAllStates?.(layer.id);
+    this.layerPanel.activeLayers.delete(layer.id);
     this.layerPanel.expandedLayers.delete(layer.id);
     this.refreshAdminDataViews();
 
@@ -2853,6 +3203,7 @@ class TopicEarthApp {
     this.detailPanel.updateLayers(this.allLayers);
     this.updateMarkers();
     this.updateMarkersByFilter(this.currentLayerFilter);
+    this.updateRegionalMobilityCheck(this.regionalContext);
     if (this.currentLayerFilter === 'regional') {
       this.refreshRegionalMap(true);
     }
@@ -2970,6 +3321,7 @@ class TopicEarthApp {
       
       // Update UI and globe
       this.layerPanel.updateData(this.allLayers, this.allPoints);
+      this.updateRegionalMobilityCheck(this.regionalContext);
       
       // If coordinates changed, force marker re-render
       if (coordsChanged) {

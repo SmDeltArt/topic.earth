@@ -2,8 +2,9 @@ import { Settings } from '../lib/settings.js?v=topic-earth-fever-scenario-layer-
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-fever-scenario-layer-20260521';
 import { ReadTranslationService } from '../lib/read-translation.js';
+import { buildFeverAudioText } from '../lib/fever-audio-manifest.mjs';
 import { getFeverWarmingTranslation } from '../lib/fever-warming-translations.js?v=topic-earth-fever-json-i18n-20260422';
-import { LocalStorage } from '../lib/storage.js?v=topic-earth-regional-initiative-20260424';
+import { LocalStorage } from '../lib/storage.js?v=topic-earth-meteo-draft-20260531';
 import {
   createMediaToken as createTopicMediaToken,
   getDirectImageUrl as getTopicDirectImageUrl,
@@ -51,8 +52,6 @@ export class DetailPanel {
       enabled: false,
       title: '',
       style: 'story-card',
-      audience: 'general',
-      under16Only: false,
       html: ''
     };
     this.isCompact = false;
@@ -238,46 +237,6 @@ export class DetailPanel {
     });
   }
 
-  getFeverNarrationProfile() {
-    const speed = Number(this.currentGlobe?.feverSpeed || 2 / 3);
-    if (Number.isFinite(speed) && speed >= 0.99) return 'short';
-    if (Number.isFinite(speed) && speed >= 0.6) return 'normal';
-    return 'full';
-  }
-
-  getFeverNarrationLanguage(language) {
-    return LanguageManager.normalizeLanguageCode(language || this.getCurrentLanguage());
-  }
-
-  getFeverNarrationCacheUrls({ scenario, year, language }) {
-    const lg = this.getFeverNarrationLanguage(language);
-    const profile = this.getFeverNarrationProfile();
-    const id = `fever-loop-${scenario}-${year}-${profile}-${lg}`;
-    const base = `./assets/audio/read-messages/${id}`;
-    return [`${base}.webm`, `${base}.mp3`];
-  }
-
-  async speakFeverNarrationWithCache(text, language, context = {}) {
-    if (!window.ttsManager) return;
-
-    const urls = this.getFeverNarrationCacheUrls({
-      scenario: context.scenario || this.currentGlobe?.getFeverScenario?.() || 'objective',
-      year: context.year,
-      language
-    });
-
-    const usedCache = await window.ttsManager.speakCachedAudio(urls, text, language, {
-      channel: 'fever',
-      onCacheMiss: () => {
-        console.info('[Fever Voice] Cached narration unavailable; using browser speech.', { urls });
-      }
-    });
-
-    if (!usedCache) {
-      this.speakFeverNarration(text, language);
-    }
-  }
-
   getFeverSegmentSeconds() {
     const speed = Number(this.currentGlobe?.feverSpeed || 2 / 3);
     const safeSpeed = Math.max(speed, 0.01);
@@ -345,35 +304,14 @@ export class DetailPanel {
 
   getFeverNarrationText({ year, scenario, title, text }) {
     const speed = Number(this.currentGlobe?.feverSpeed || 2 / 3);
-    const maxWords = this.getFeverNarrationWordBudget();
-    const lead = this.normalizeNarrationSentence(title || this.firstSentence(text) || text);
-    const firstMessage = this.normalizeNarrationSentence(this.firstSentence(text));
-    const fullMessage = this.normalizeNarrationSentence(text);
-    const metricSentence = this.getFeverMetricSentence(year, scenario);
-    const bridgeSentence = this.getFeverBridgeSentence(scenario);
-    const parts = [];
+    const milestone = this.getScenarioMilestoneData(year, scenario);
 
-    if (speed >= 0.99) {
-      return this.trimWords(title || this.firstSentence(text) || text, maxWords);
-    }
-
-    this.appendNarrationSentence(parts, lead, maxWords);
-
-    if (speed >= 0.6) {
-      if (firstMessage && firstMessage !== lead) {
-        this.appendNarrationSentence(parts, firstMessage, maxWords);
-      }
-      this.appendNarrationSentence(parts, metricSentence, maxWords);
-      return parts.join(' ') || this.trimWords(lead, maxWords);
-    }
-
-    if (fullMessage && fullMessage !== lead) {
-      this.appendNarrationSentence(parts, fullMessage, maxWords);
-    }
-    this.appendNarrationSentence(parts, metricSentence, maxWords);
-    this.appendNarrationSentence(parts, bridgeSentence, maxWords);
-
-    return parts.join(' ') || this.trimWords(lead, maxWords);
+    return buildFeverAudioText({
+      title,
+      text,
+      milestone,
+      speed
+    });
   }
 
   async localizeFeverWarning(warning) {
@@ -443,25 +381,6 @@ export class DetailPanel {
     if (closeBtn) {
       closeBtn.addEventListener('click', () => this.hide());
     }
-
-    const collapseBtn = this.container.querySelector('.detail-collapse-btn');
-    if (collapseBtn && collapseBtn.dataset.boundDetailCollapse !== 'true') {
-      collapseBtn.dataset.boundDetailCollapse = 'true';
-      const handlePanelSizeToggle = (event) => {
-        const now = Date.now();
-        if (now - (this.lastPanelSizeToggleAt || 0) < 260) {
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        }
-        this.lastPanelSizeToggleAt = now;
-        event.preventDefault();
-        event.stopPropagation();
-        this.toggleCompactMode();
-      };
-      collapseBtn.addEventListener('click', handlePanelSizeToggle);
-      collapseBtn.addEventListener('pointerup', handlePanelSizeToggle);
-    }
     
     // Listen for settings button from TopBar
     window.addEventListener('openSettings', () => {
@@ -486,7 +405,7 @@ export class DetailPanel {
     
     // Handle source input changes
     this.container.addEventListener('input', (e) => {
-      if (e.target.classList.contains('source-name-input') || e.target.classList.contains('source-url-input')) {
+      if (e.target.classList.contains('source-name-input') || e.target.classList.contains('source-url-input') || e.target.classList.contains('source-notes-input')) {
         const index = parseInt(e.target.dataset.index);
         const field = e.target.dataset.field;
         if (!isNaN(index) && this.topicSources[index]) {
@@ -565,6 +484,8 @@ export class DetailPanel {
         this.copyOutput();
       } else if (action === 'apply-composer-input') {
         this.applyComposerInput();
+      } else if (action === 'autopopulate-topic-draft') {
+        this.autopopulateTopicDraft(target);
       } else if (action === 'toggle-topic-dictation') {
         this.toggleTopicDictation(target);
       } else if (action === 'generate-summary') {
@@ -595,6 +516,8 @@ export class DetailPanel {
         this.removeSource(target);
       } else if (action === 'verify-source') {
         this.verifySource(target);
+      } else if (action === 'autopopulate-source') {
+        this.autopopulateTopicDraft(target);
       } else if (action === 'ai-generate-image') {
         this.aiGenerateImage();
       } else if (action === 'import-media') {
@@ -616,12 +539,14 @@ export class DetailPanel {
         this.previewTopicStory();
       } else if (action === 'generate-topic-story') {
         this.generateTopicStoryFromAi(target);
-      } else if (action === 'apply-topic-story-preset') {
-        this.applyTopicStoryPreset(target);
       } else if (action === 'insert-topic-story-starter') {
         this.insertTopicStoryStarter();
       } else if (action === 'clear-topic-story') {
         this.clearTopicStory();
+      } else if (action === 'expand-topic-story') {
+        this.expandTopicStory(target);
+      } else if (action === 'summarize-youtube-evidence') {
+        this.summarizeYoutubeEvidence(target);
       } else if (action === 'source-media-search') {
         this.findMediaFromSources();
       } else if (action === 'ai-gen-update') {
@@ -630,10 +555,16 @@ export class DetailPanel {
         this.manageSources();
       } else if (action === 'check-topic-update') {
         this.checkTopicUpdate();
+      } else if (action === 'draft-meteo-topic') {
+        this.showMeteoTopicDraft(this.currentPoint || {});
       } else if (action === 'apply-topic-window-update') {
         this.applyTopicWindowUpdate();
       } else if (action === 'add-topic-window-source') {
         this.applyTopicWindowUpdate({ sourceOnly: true });
+      } else if (action === 'prefill-meteo-confirmation-source') {
+        this.prefillMeteoConfirmationSource(target);
+      } else if (action === 'prefill-smart-topic-source') {
+        this.prefillSmartTopicSource(target);
       } else if (action === 'cancel-topic-update') {
         this.show(this.newsUpdateTargetTopic || this.currentPoint);
       } else if (action === 'submit-topic-package') {
@@ -1272,6 +1203,7 @@ export class DetailPanel {
     this.mode = 'fever-simulation';
     this.currentGlobe = globe;
     this.feverYears = this.getFeverYearsFromConfig();
+    this.setPanelSize('compact');
     this.renderFeverSimulation();
     this.container.classList.remove('hidden');
     this.updateTopicNavigation();
@@ -2336,7 +2268,7 @@ export class DetailPanel {
         scenario,
         text: localizedWarning.text
       });
-      this.speakFeverNarrationWithCache(spokenWarning, this.getFeverTtsLanguage(localizedWarning), { scenario, year });
+      this.speakFeverNarration(spokenWarning, this.getFeverTtsLanguage(localizedWarning));
     }
   }
   
@@ -2437,7 +2369,7 @@ export class DetailPanel {
         title: localizedWarning.title,
         text: localizedWarning.full
       });
-      this.speakFeverNarrationWithCache(spokenWarning, localizedWarning.ttsLanguage, { scenario, year });
+      this.speakFeverNarration(spokenWarning, localizedWarning.ttsLanguage);
     }
   }
   
@@ -2981,11 +2913,11 @@ Keep response concise (3-4 sentences).`;
                   type="button" 
                   class="topic-media-zoom-btn" 
                   data-action="zoom-topic-media"
-                  data-media-url="${this.escapeHtml(token.url)}"
+                  data-media-url="${this.escapeHtml(token.embedUrl || token.url)}"
                   data-media-caption="${this.escapeHtml(token.watermarkText || `${point.title || 'Topic'} image ${index + 1}`)}"
                   title="Zoom image inside the detail panel"
                 >
-                  ${this.renderMediaTokenImage(token, 'topic-media-image', `${point.title || 'Topic'} image ${index + 1}`)}
+                  ${this.renderMediaTokenImage(token, 'topic-media-image', `${point.title || 'Topic'} media ${index + 1}`)}
                   <span class="topic-media-zoom-label">Zoom</span>
                 </button>
               </div>
@@ -3010,6 +2942,8 @@ Keep response concise (3-4 sentences).`;
                 <div class="source-content">
                   <div class="source-text">${this.escapeHtml(source.name || 'Source')}</div>
                   ${source.url ? `<a href="${this.escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer" class="source-link">${this.escapeHtml(this.getHostFromUrl(source.url) || source.url)}</a>` : ''}
+                  ${this.renderExternalSourceBadge(source)}
+                  ${this.renderYoutubeSourcePreview(source)}
                 </div>
                 ${point.isCustom && canManageTopicSources ? `
                   <button class="source-edit-btn" data-action="edit-source" title="Edit this source">
@@ -3032,6 +2966,11 @@ Keep response concise (3-4 sentences).`;
         <button class="btn-secondary topic-action-btn" data-action="check-topic-update" title="Check latest news against this topic">
           Check Topic Update
         </button>
+        ${point.isAutoMeteoEvent ? `
+          <button class="btn-primary-alt topic-action-btn" data-action="draft-meteo-topic" title="Create an editable browser-local topic draft from this live meteo signal">
+            Draft Meteo Topic
+          </button>
+        ` : ''}
         ${canManageTopicSources ? `
           <button class="btn-secondary topic-action-btn" data-action="manage-sources" title="Manage evidence and add media">
             Evidence & Media
@@ -3076,6 +3015,7 @@ Keep response concise (3-4 sentences).`;
     const insightHtml = point.insight && point.insight.includes('<') 
       ? `<div class="insight-content">${point.insight}</div>`
       : `<div class="section-content compact">${point.insight || 'No analysis available.'}</div>`;
+    const topicStoryHtml = this.renderTopicStoryBadge(point.topicStory);
 
     content.innerHTML = `
       <div class="detail-header" data-tutorial-id="topic-detail">
@@ -3091,6 +3031,7 @@ Keep response concise (3-4 sentences).`;
 
       ${carbonHistoryBannerHtml}
       ${mediaHtml}
+      ${topicStoryHtml}
 
       <div class="detail-section">
         <div class="section-label">Summary</div>
@@ -3712,6 +3653,8 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
         'meteo': ['scientific', 'official'],
         'climate': ['scientific', 'official'],
         'carbon-history': ['official', 'scientific', 'media'],
+        'good-initiatives-world': ['official', 'scientific', 'media'],
+        'good-initiatives-eu': ['official', 'media'],
         'eu': ['official', 'media'],
         'country-news': ['media', 'official'],
         'regional-news': ['media', 'official'],
@@ -4704,6 +4647,473 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
     this.showNewsUpdate([this.currentPoint], { topic: this.currentPoint, scoped: true });
   }
 
+  isMeteoTopic(topic = {}) {
+    return Boolean(
+      topic?.isRealtimeMeteo ||
+      topic?.isAutoMeteoEvent ||
+      topic?.category === 'meteo-live' ||
+      topic?.meteo
+    );
+  }
+
+  getTopicUpdateDefaults(topic = {}) {
+    const meteo = topic.meteo || {};
+    const isMeteo = this.isMeteoTopic(topic);
+    const isOnlineSignal = Boolean(topic.onlineLayerSignal || topic.climateIndicator);
+    const isCarbonHistory = Boolean(topic.isCarbonHistory || topic.carbonHistory || topic.category === 'carbon-history');
+    const sourceUrl = topic.sourceUrl || meteo.sourceUrl || (isMeteo ? 'https://open-meteo.com/en/docs' : '');
+    const sourceName = topic.source || topic.sourceName || (isMeteo ? 'Open-Meteo forecast model' : '');
+    const noteParts = [];
+
+    if (isMeteo) {
+      if (topic.eventType) noteParts.push(`Event type: ${topic.eventType}`);
+      if (topic.severity) noteParts.push(`Severity: ${topic.severity}`);
+      if (topic.confidence) noteParts.push(`Confidence: ${topic.confidence}`);
+      if (meteo.weatherLabel) noteParts.push(`Weather: ${meteo.weatherLabel}`);
+
+      const temperature = Number(meteo.temperature);
+      const temperatureAvg = Number(meteo.temperatureAvgC);
+      if (Number.isFinite(temperature)) {
+        noteParts.push(`Temperature: ${temperature.toFixed(1)} deg C`);
+      }
+      if (Number.isFinite(temperature) && Number.isFinite(temperatureAvg)) {
+        noteParts.push(`Short-window anomaly: ${(temperature - temperatureAvg).toFixed(1)} deg C`);
+      }
+
+      const precipitationMax = Number(meteo.precipitationMaxMmH);
+      if (Number.isFinite(precipitationMax)) {
+        noteParts.push(`Precipitation max: ${precipitationMax.toFixed(1)} mm/h`);
+      }
+
+      const windGustMax = Number(meteo.windGustMaxKmh ?? meteo.windGust);
+      if (Number.isFinite(windGustMax)) {
+        noteParts.push(`Wind gust max: ${windGustMax.toFixed(0)} km/h`);
+      }
+
+      const capeMax = Number(meteo.capeMax);
+      if (Number.isFinite(capeMax)) {
+        noteParts.push(`CAPE max: ${Math.round(capeMax)}`);
+      }
+
+      if (meteo.time) noteParts.push(`Updated: ${meteo.time}`);
+      noteParts.push('Model guidance only; review official local warnings before safety decisions.');
+    } else if (isOnlineSignal) {
+      if (topic.climateIndicator?.indicator) noteParts.push(`Indicator: ${topic.climateIndicator.indicator}`);
+      if (topic.climateIndicator?.value !== null && topic.climateIndicator?.value !== undefined) {
+        noteParts.push(`Value: ${topic.climateIndicator.value} ${topic.climateIndicator.unit || ''}`.trim());
+      }
+      if (topic.climateIndicator?.baseline) noteParts.push(`Baseline: ${topic.climateIndicator.baseline}`);
+      if (topic.confidence) noteParts.push(`Confidence: ${topic.confidence}`);
+      if (topic.reviewState) noteParts.push(`Review state: ${topic.reviewState}`);
+      if (topic.updatedAt) noteParts.push(`Checked: ${topic.updatedAt}`);
+      noteParts.push('Runtime signal only; review the linked scientific/official source before publishing a narrative topic.');
+    } else if (isCarbonHistory) {
+      const meta = topic.carbonHistory || {};
+      if (meta.track) noteParts.push(`Track: ${meta.track}`);
+      if (meta.confidence) noteParts.push(`Confidence: ${meta.confidence}`);
+      if (meta.sensitivity) noteParts.push(`Sensitivity: ${meta.sensitivity}`);
+      if (meta.reviewStatus) noteParts.push(`Review status: ${meta.reviewStatus}`);
+      noteParts.push('Source-led history marker. Keep fact, interpretation, and sensitive accountability claims separated.');
+    }
+
+    return {
+      sourceUrl,
+      sourceName,
+      note: topic.updateNote || noteParts.join('\n'),
+      noticeTitle: isMeteo ? 'Structured meteo update' : (isOnlineSignal ? 'Runtime source update' : (isCarbonHistory ? 'Source-led history update' : 'Manual scoped update')),
+      noticeText: isMeteo
+        ? 'This topic already carries live Open-Meteo model data. Source and analysis fields are prefilled so you can decide whether to add the source only or save a draft update.'
+        : (isOnlineSignal
+          ? 'This topic carries a runtime online signal. Add measured/official evidence, then decide whether to keep it as a draft or update the topic.'
+          : (isCarbonHistory
+            ? 'This chronology topic should stay source-led. Add or confirm a scholarly/official source before changing interpretation.'
+            : 'This window updates only the opened topic. Add a source link, adjust the summary, or keep a short note without scanning other topics.')),
+      sourceUrlPlaceholder: isMeteo ? 'https://open-meteo.com/en/docs' : 'https://example.com/article-or-source',
+      sourceNamePlaceholder: isMeteo ? 'Open-Meteo forecast model' : (isOnlineSignal ? 'NASA, NOAA, Copernicus, WMO...' : 'Publisher, official source, document title...')
+    };
+  }
+
+  getMeteoConfirmationSources(topic = {}) {
+    if (!this.isMeteoTopic(topic)) return [];
+
+    const country = String(topic.country || '').trim();
+    const region = String(topic.region || '').trim();
+    const eventType = String(topic.eventType || topic.meteo?.weatherLabel || 'weather warning').trim();
+    const locationLabel = [region, country].filter(Boolean).join(', ') || topic.title || 'local area';
+    const normalizedCountry = country.toLowerCase();
+    const normalizedRegion = region.toLowerCase();
+    const isBelgium = normalizedCountry.includes('belgium')
+      || normalizedRegion.includes('belgium')
+      || normalizedRegion.includes('brussels')
+      || normalizedRegion.includes('wallonia')
+      || normalizedRegion.includes('flanders');
+    const europeanCountries = new Set([
+      'belgium', 'france', 'netherlands', 'germany', 'luxembourg', 'spain', 'portugal', 'italy',
+      'switzerland', 'austria', 'ireland', 'united kingdom', 'norway', 'sweden', 'denmark',
+      'finland', 'poland', 'czechia', 'slovakia', 'slovenia', 'croatia', 'greece', 'romania'
+    ]);
+    const isEurope = normalizedRegion.includes('europe') || europeanCountries.has(normalizedCountry);
+    const query = encodeURIComponent(`${locationLabel} ${eventType} official weather warning`);
+    const candidates = [
+      {
+        id: 'open-meteo-model',
+        label: 'Model',
+        name: 'Open-Meteo forecast model',
+        url: topic.sourceUrl || topic.meteo?.sourceUrl || 'https://open-meteo.com/en/docs',
+        category: 'meteo',
+        reliability: 'model-signal',
+        note: 'Keep the original model snapshot as the baseline. Add official/local confirmation before treating this as validated.'
+      }
+    ];
+
+    if (isBelgium) {
+      candidates.push({
+        id: 'rmi-belgium-warning',
+        label: 'Official',
+        name: 'Royal Meteorological Institute of Belgium warning overview',
+        url: 'https://www.meteo.be/en/weather/warnings/info-warnings',
+        category: 'official',
+        reliability: 'official-warning',
+        note: 'Official Belgian warning source. Compare warning color/type and validity period against the Open-Meteo model signal.'
+      });
+      candidates.push({
+        id: 'belgium-lightning',
+        label: 'Lightning',
+        name: 'MeteoBelgique lightning impacts',
+        url: 'https://www.meteobelgique.be/observations/animation/impacts-de-foudre-suivi-orages',
+        category: 'local',
+        reliability: 'local-confirmation',
+        note: 'Lightning/orage confirmation source. Use for storm/orage signals, not as a replacement for official warnings.'
+      });
+    } else if (isEurope) {
+      candidates.push({
+        id: 'meteoalarm-europe',
+        label: 'Official',
+        name: 'MeteoAlarm European warnings',
+        url: 'https://meteoalarm.org/en/live/',
+        category: 'official',
+        reliability: 'official-warning',
+        note: 'European official warning portal. Use to confirm warning type, severity color, area, and validity period.'
+      });
+    }
+
+    candidates.push({
+      id: 'lightning-live',
+      label: 'Lightning',
+      name: 'LightningMaps live lightning',
+      url: 'https://www.lightningmaps.org/',
+      category: 'local',
+      reliability: 'local-confirmation',
+      note: 'Live lightning map for storm/orage confirmation. Use only as supporting evidence.'
+    });
+    candidates.push({
+      id: 'official-search',
+      label: 'Find',
+      name: `Official warning search for ${locationLabel}`,
+      url: `https://www.google.com/search?q=${query}`,
+      category: 'official-search',
+      reliability: 'needs-review',
+      note: 'Search result helper, not evidence by itself. Open an official authority result, then replace this URL before saving.'
+    });
+
+    return candidates;
+  }
+
+  renderMeteoConfirmationShortcuts(topic = {}) {
+    const candidates = this.getMeteoConfirmationSources(topic);
+    if (!candidates.length) return '';
+
+    return `
+      <div class="meteo-confirmation-panel">
+        <div class="meteo-confirmation-title">Confirmation sources</div>
+        <div class="meteo-confirmation-hint">Prefill one source, review it, then add source only or save a draft update.</div>
+        <div class="meteo-confirmation-actions">
+          ${candidates.map((candidate, index) => `
+            <button
+              type="button"
+              class="meteo-confirmation-btn"
+              data-action="prefill-meteo-confirmation-source"
+              data-source-index="${index}"
+              title="${this.escapeHtml(candidate.note || candidate.name)}"
+            >${this.escapeHtml(candidate.label)}</button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  prefillMeteoConfirmationSource(target) {
+    const topic = this.newsUpdateTargetTopic || this.currentPoint || {};
+    const index = Number(target?.dataset?.sourceIndex);
+    const candidate = this.getMeteoConfirmationSources(topic)[index];
+    if (!candidate) return;
+
+    const content = this.container.querySelector('#detail-content');
+    const sourceUrlInput = content?.querySelector('#topic-update-source-url');
+    const sourceNameInput = content?.querySelector('#topic-update-source-name');
+    const noteInput = content?.querySelector('#topic-update-note');
+    if (sourceUrlInput) sourceUrlInput.value = candidate.url || '';
+    if (sourceNameInput) sourceNameInput.value = candidate.name || '';
+    const categoryInput = content?.querySelector('#topic-update-source-category');
+    const reliabilityInput = content?.querySelector('#topic-update-source-reliability');
+    if (categoryInput) categoryInput.value = candidate.category || 'source';
+    if (reliabilityInput) reliabilityInput.value = candidate.reliability || 'needs-review';
+    if (noteInput) {
+      const existing = String(noteInput.value || '').trim();
+      const note = [
+        `Confirmation source: ${candidate.name}`,
+        `Reliability: ${candidate.reliability}`,
+        candidate.note || ''
+      ].filter(Boolean).join('\n');
+      noteInput.value = [existing, note].filter(Boolean).join('\n\n');
+    }
+  }
+
+  getSmartTopicSourceCandidates(topic = {}) {
+    const category = String(topic.category || '').trim();
+    const title = topic.title || 'topic';
+    const candidates = [];
+
+    if (category === 'climate' || topic.climateIndicator || topic.onlineLayerSignal) {
+      candidates.push(
+        {
+          id: 'nasa-gistemp',
+          label: 'NASA Temp',
+          name: 'NASA GISTEMP global temperature index',
+          url: 'https://data.giss.nasa.gov/gistemp/',
+          category: 'scientific',
+          reliability: 'measured',
+          note: 'Measured global temperature anomaly source. Use for climate indicator values and trend context.'
+        },
+        {
+          id: 'noaa-co2',
+          label: 'NOAA CO2',
+          name: 'NOAA GML Mauna Loa CO2 trends',
+          url: 'https://gml.noaa.gov/ccgg/trends/',
+          category: 'scientific',
+          reliability: 'measured',
+          note: 'Measured atmospheric CO2 source. Use for greenhouse gas indicator updates.'
+        },
+        {
+          id: 'copernicus-indicators',
+          label: 'Copernicus',
+          name: 'Copernicus Climate Indicators',
+          url: 'https://climate.copernicus.eu/climate-indicators/about-data',
+          category: 'scientific',
+          reliability: 'measured',
+          note: 'Climate indicator source family for temperature, sea level, greenhouse gases, cryosphere and related datasets.'
+        },
+        {
+          id: 'wmo-state-climate',
+          label: 'WMO',
+          name: 'WMO State of the Climate',
+          url: 'https://wmo.int/publication-series/state-of-climate-update-cop',
+          category: 'official',
+          reliability: 'official-report',
+          note: 'Official climate report source. Best for yearly/COP-period synthesis and global climate status.'
+        }
+      );
+    }
+
+    if (category === 'carbon-history' || topic.isCarbonHistory || topic.carbonHistory) {
+      candidates.push(
+        {
+          id: 'aip-climate-history',
+          label: 'AIP',
+          name: 'AIP History of Climate Science',
+          url: 'https://history.aip.org/climate/index.htm',
+          category: 'scientific',
+          reliability: 'scholarly-history',
+          note: 'Scholarly climate science history reference. Use for greenhouse science chronology and interpretation.'
+        },
+        {
+          id: 'ipcc-history',
+          label: 'IPCC',
+          name: 'IPCC history',
+          url: 'https://www.ipcc.ch/about/history/',
+          category: 'official',
+          reliability: 'official-history',
+          note: 'Official source for IPCC creation and assessment history.'
+        },
+        {
+          id: 'unfccc-history',
+          label: 'UNFCCC',
+          name: 'UNFCCC process and meetings',
+          url: 'https://unfccc.int/process-and-meetings',
+          category: 'official',
+          reliability: 'official-history',
+          note: 'Official treaty/process source for climate governance chronology.'
+        },
+        {
+          id: 'carbon-majors',
+          label: 'Carbon Majors',
+          name: 'Carbon Majors / Climate Accountability Institute',
+          url: 'https://climateaccountability.org/carbon-majors/',
+          category: 'scientific',
+          reliability: 'needs-review',
+          note: 'Sensitive accountability source. Keep claims source-led and reviewed before publication.'
+        }
+      );
+    }
+
+    if (category === 'extreme' || topic.eventType) {
+      candidates.push(
+        {
+          id: 'world-weather-attribution',
+          label: 'WWA',
+          name: 'World Weather Attribution',
+          url: 'https://www.worldweatherattribution.org/',
+          category: 'scientific',
+          reliability: 'attribution-source',
+          note: 'Use only when an event-specific attribution report exists. Do not infer attribution from live meteo alone.'
+        },
+        {
+          id: 'climate-central-csi',
+          label: 'Climate Central',
+          name: 'Climate Central Attribution Science',
+          url: 'https://www.climatecentral.org/climate-shift-index',
+          category: 'scientific',
+          reliability: 'attribution-source',
+          note: 'Attribution and Climate Shift Index source. Match event/date/region carefully.'
+        },
+        {
+          id: 'gdacs',
+          label: 'GDACS',
+          name: 'GDACS global disaster alerts',
+          url: 'https://www.gdacs.org/',
+          category: 'official',
+          reliability: 'disaster-alert',
+          note: 'Global disaster context source for major floods, tropical cyclones and multi-hazard events.'
+        }
+      );
+    }
+
+    if (
+      category === 'good-initiatives-world' ||
+      category === 'good-initiatives-eu' ||
+      category === 'community-projects' ||
+      topic.initiativeType ||
+      topic.communityStatus
+    ) {
+      candidates.push(
+        {
+          id: 'coact-database',
+          label: 'CoAct',
+          name: 'CoAct climate action initiatives database',
+          url: 'https://globaldatalab.org/coact/',
+          category: 'database',
+          reliability: 'verified-initiative-source',
+          note: 'Database source for voluntary climate action initiatives. Use to classify actors, SDGs, action type and evidence.'
+        },
+        {
+          id: 'un-sdg-good-practices',
+          label: 'UN SDG',
+          name: 'UN SDG Good Practices',
+          url: 'https://sdgs.un.org/partnerships/good-practices',
+          category: 'official',
+          reliability: 'official-practice-source',
+          note: 'Official sustainable development practice source. Use for reviewed hopeful examples, not generic optimism.'
+        },
+        {
+          id: 'wipo-green',
+          label: 'WIPO',
+          name: 'WIPO GREEN climate solution exchange',
+          url: 'https://www3.wipo.int/wipogreen/en/',
+          category: 'database',
+          reliability: 'solution-source',
+          note: 'Climate and environmental technology solution source. Confirm maturity and practical limits before publishing.'
+        },
+        {
+          id: 'earth-negotiations-bulletin',
+          label: 'ENB',
+          name: 'Earth Negotiations Bulletin',
+          url: 'https://enb.iisd.org/',
+          category: 'media',
+          reliability: 'conference-summary',
+          note: 'Negotiation and conference summary source. Use for implementation signals from COP, biodiversity, water and sustainability meetings.'
+        }
+      );
+
+      const place = [topic.region, topic.country].filter(Boolean).join(' ') || topic.title || 'sustainable initiative';
+      candidates.push({
+        id: 'official-initiative-search',
+        label: 'Find',
+        name: `Official initiative source search for ${place}`,
+        url: `https://www.google.com/search?q=${encodeURIComponent(`${place} ${topic.initiativeType || 'sustainable initiative'} official source`)}`,
+        category: 'official-search',
+        reliability: 'needs-review',
+        note: 'Search helper only. Replace with a direct official, organizer, database or institutional source before publication.'
+      });
+    }
+
+    if (!candidates.length && title) {
+      const query = encodeURIComponent(`${title} official source update`);
+      candidates.push({
+        id: 'official-topic-search',
+        label: 'Find',
+        name: `Official source search for ${title}`,
+        url: `https://www.google.com/search?q=${query}`,
+        category: 'official-search',
+        reliability: 'needs-review',
+        note: 'Search helper only. Replace with an actual official/scientific source before publication.'
+      });
+    }
+
+    return candidates;
+  }
+
+  renderSmartTopicSourceShortcuts(topic = {}) {
+    if (this.isMeteoTopic(topic)) return '';
+    const candidates = this.getSmartTopicSourceCandidates(topic);
+    if (!candidates.length) return '';
+
+    return `
+      <div class="meteo-confirmation-panel smart-source-panel">
+        <div class="meteo-confirmation-title">Smart source shortcuts</div>
+        <div class="meteo-confirmation-hint">Prefill a trusted source family, then add source only or save a reviewed draft update.</div>
+        <div class="meteo-confirmation-actions">
+          ${candidates.map((candidate, index) => `
+            <button
+              type="button"
+              class="meteo-confirmation-btn"
+              data-action="prefill-smart-topic-source"
+              data-source-index="${index}"
+              title="${this.escapeHtml(candidate.note || candidate.name)}"
+            >${this.escapeHtml(candidate.label)}</button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  prefillSmartTopicSource(target) {
+    const topic = this.newsUpdateTargetTopic || this.currentPoint || {};
+    const index = Number(target?.dataset?.sourceIndex);
+    const candidate = this.getSmartTopicSourceCandidates(topic)[index];
+    if (!candidate) return;
+
+    const content = this.container.querySelector('#detail-content');
+    const sourceUrlInput = content?.querySelector('#topic-update-source-url');
+    const sourceNameInput = content?.querySelector('#topic-update-source-name');
+    const categoryInput = content?.querySelector('#topic-update-source-category');
+    const reliabilityInput = content?.querySelector('#topic-update-source-reliability');
+    const noteInput = content?.querySelector('#topic-update-note');
+
+    if (sourceUrlInput) sourceUrlInput.value = candidate.url || '';
+    if (sourceNameInput) sourceNameInput.value = candidate.name || '';
+    if (categoryInput) categoryInput.value = candidate.category || 'source';
+    if (reliabilityInput) reliabilityInput.value = candidate.reliability || 'needs-review';
+    if (noteInput) {
+      const existing = String(noteInput.value || '').trim();
+      const note = [
+        `Smart source: ${candidate.name}`,
+        `Reliability: ${candidate.reliability}`,
+        candidate.note || ''
+      ].filter(Boolean).join('\n');
+      noteInput.value = [existing, note].filter(Boolean).join('\n\n');
+    }
+  }
+
   renderTopicUpdateEditor(topic) {
     const content = this.container.querySelector('#detail-content');
     if (!content || !topic) return;
@@ -4713,6 +5123,15 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
     const sourceRecords = Array.isArray(topic.researchSources) ? topic.researchSources : [];
     const sourceCount = sourceRecords.filter(source => source?.name || source?.url).length;
     const applyLabel = canModifyTopic ? 'Update this topic' : 'Save as draft update';
+    const updateDefaults = this.getTopicUpdateDefaults(topic);
+    const meteoConfirmationHtml = this.renderMeteoConfirmationShortcuts(topic);
+    const smartSourceHtml = this.renderSmartTopicSourceShortcuts(topic);
+    const defaultSourceCategory = this.isMeteoTopic(topic)
+      ? 'meteo'
+      : (topic.sourceType || (topic.onlineLayerSignal || topic.climateIndicator ? 'scientific' : (topic.category === 'carbon-history' ? 'history' : 'source')));
+    const defaultSourceReliability = this.isMeteoTopic(topic)
+      ? 'model-signal'
+      : (topic.confidence || topic.reviewState || (topic.onlineLayerSignal ? 'needs-review' : 'unknown'));
 
     content.innerHTML = `
       <div class="detail-header">
@@ -4735,12 +5154,15 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
       <div class="web-search-notice">
         <div class="notice-icon">&#128221;</div>
         <div class="notice-content">
-          <div class="notice-title">Manual scoped update</div>
+          <div class="notice-title">${this.escapeHtml(updateDefaults.noticeTitle)}</div>
           <div class="notice-text">
-            This window updates only the opened topic. Add a source link, adjust the summary, or keep a short note without scanning other topics.
+            ${this.escapeHtml(updateDefaults.noticeText)}
           </div>
         </div>
       </div>
+
+      ${meteoConfirmationHtml}
+      ${smartSourceHtml}
 
       <div class="news-search-panel topic-update-editor">
         <div class="form-group">
@@ -4750,16 +5172,18 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
         </div>
         <div class="form-group">
           <label>Source URL</label>
-          <input type="url" id="topic-update-source-url" placeholder="https://example.com/article-or-source" class="news-search-input">
+          <input type="url" id="topic-update-source-url" placeholder="${this.escapeHtml(updateDefaults.sourceUrlPlaceholder)}" value="${this.escapeHtml(updateDefaults.sourceUrl)}" class="news-search-input">
           <div class="setting-hint">Optional. The link is stored as evidence for this topic.</div>
         </div>
         <div class="form-group">
           <label>Source name</label>
-          <input type="text" id="topic-update-source-name" placeholder="Publisher, official source, document title..." class="news-search-input">
+          <input type="text" id="topic-update-source-name" placeholder="${this.escapeHtml(updateDefaults.sourceNamePlaceholder)}" value="${this.escapeHtml(updateDefaults.sourceName)}" class="news-search-input">
+          <input type="hidden" id="topic-update-source-category" value="${this.escapeHtml(defaultSourceCategory)}">
+          <input type="hidden" id="topic-update-source-reliability" value="${this.escapeHtml(defaultSourceReliability)}">
         </div>
         <div class="form-group">
           <label>Internal note / analysis</label>
-          <textarea id="topic-update-note" rows="3" class="news-search-input" placeholder="Optional admin or draft note"></textarea>
+          <textarea id="topic-update-note" rows="3" class="news-search-input" placeholder="Optional admin or draft note">${this.escapeHtml(updateDefaults.note)}</textarea>
         </div>
         <div class="topic-builder-actions">
           <button type="button" class="btn-secondary" data-action="cancel-topic-update">Cancel</button>
@@ -4781,6 +5205,8 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
     const sourceUrlRaw = String(content?.querySelector('#topic-update-source-url')?.value || '').trim();
     const sourceUrl = sourceUrlRaw ? this.sanitizeUrl(sourceUrlRaw) : '';
     const sourceName = String(content?.querySelector('#topic-update-source-name')?.value || '').trim();
+    const sourceCategory = String(content?.querySelector('#topic-update-source-category')?.value || '').trim();
+    const sourceReliability = String(content?.querySelector('#topic-update-source-reliability')?.value || '').trim();
     const note = String(content?.querySelector('#topic-update-note')?.value || '').trim();
     const sourceOnly = Boolean(options.sourceOnly);
 
@@ -4801,6 +5227,7 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
 
     const existingSources = Array.isArray(topic.researchSources) ? [...topic.researchSources] : [];
     const hasSource = sourceUrl || sourceName;
+    const isMeteo = this.isMeteoTopic(topic);
     if (hasSource) {
       const sourceKey = sourceUrl || sourceName.toLowerCase();
       const sourceExists = existingSources.some(source => (
@@ -4813,9 +5240,13 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
         existingSources.push({
           name: sourceName || this.getHostFromUrl(sourceUrl) || 'Topic update source',
           url: sourceUrl,
-          category: 'source',
-          reliability: 'unknown',
+          category: sourceCategory || (isMeteo ? 'meteo' : 'source'),
+          reliability: sourceReliability || (isMeteo ? 'model-signal' : 'unknown'),
           verified: Boolean(sourceUrl),
+          eventType: isMeteo ? (topic.eventType || '') : undefined,
+          severity: isMeteo ? (topic.severity || '') : undefined,
+          confidence: isMeteo ? (topic.confidence || 'model-signal') : undefined,
+          meteo: isMeteo ? (topic.meteo || null) : undefined,
           addedAt: new Date().toISOString()
         });
       }
@@ -5405,7 +5836,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       message: 'Review this candidate before recording it. Nothing is saved until you save it on this device.',
       originalTitle: draft.currentPoint?.originalTitle || ''
     });
-    this.renderCreateTopic();
+    this.renderCreateTopic({ preserveState: true });
     this.container.classList.remove('hidden');
     this.updateTopicNavigation();
     this.emitTutorialEvent('topicComposerOpened', { source: options.source || 'update-candidate' }, 80);
@@ -5604,7 +6035,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       timeScope: 'recent',
       outputIntent: 'social-post'
     };
-    this.renderCreateTopic();
+    this.renderCreateTopic({ preserveState: true });
     this.container.classList.remove('hidden');
     this.updateTopicNavigation();
     this.emitTutorialEvent('topicComposerOpened', { source: 'manual-topic' }, 80);
@@ -5698,6 +6129,140 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     }
   }
 
+  formatMeteoDraftMetric(value, suffix = '') {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return 'n/a';
+    const rounded = Math.abs(number) >= 10 ? number.toFixed(0) : number.toFixed(1);
+    return `${rounded}${suffix}`;
+  }
+
+  buildMeteoDraftInsight(point = {}) {
+    const meteo = point.meteo || {};
+    const rows = [
+      ['Event', point.eventType || 'live meteo signal'],
+      ['Severity', point.severity || 'watch'],
+      ['Score', Number.isFinite(Number(point.severityScore)) ? `${Math.round(Number(point.severityScore))}/100` : 'n/a'],
+      ['Temperature', this.formatMeteoDraftMetric(meteo.temperature, ' deg C')],
+      ['Rain max', this.formatMeteoDraftMetric(meteo.precipitationMaxMmH ?? meteo.precipitation, ' mm/h')],
+      ['Wind gust max', this.formatMeteoDraftMetric(meteo.windGustMaxKmh ?? meteo.windGust, ' km/h')],
+      ['CAPE max', this.formatMeteoDraftMetric(meteo.capeMax, '')],
+      ['Updated', meteo.time || point.updatedAt || new Date().toISOString()]
+    ];
+
+    return [
+      '<p><strong>Live meteo draft:</strong> This draft was seeded from the current Open-Meteo model snapshot and still needs human review before publication.</p>',
+      '<ul>',
+      ...rows.map(([label, value]) => `<li><strong>${this.escapeHtml(label)}:</strong> ${this.escapeHtml(value)}</li>`),
+      '</ul>',
+      point.summary ? `<p>${this.escapeHtml(point.summary)}</p>` : '',
+      '<p><em>Model guidance only. For safety decisions, check official local weather warnings and emergency services.</em></p>'
+    ].join('');
+  }
+
+  showMeteoTopicDraft(point = {}, options = {}) {
+    const lat = Number(point.lat);
+    const lon = Number(point.lon);
+    const regionalContext = options.regionalContext || this.getRegionalProposalContext(point) || {};
+    const regionalLabel = [point.region, point.country].filter(Boolean).join(', ')
+      || regionalContext.label
+      || 'Live meteo area';
+    const meteo = point.meteo || {};
+    const today = String(point.date || meteo.time || new Date().toISOString()).slice(0, 10);
+    const sourceUrl = point.sourceUrl || 'https://open-meteo.com/en/docs';
+    const sourceName = point.source || 'Open-Meteo forecast model';
+    const sourceNote = [
+      point.severity ? `Severity: ${point.severity}` : '',
+      point.eventType ? `Type: ${point.eventType}` : '',
+      Number.isFinite(Number(point.severityScore)) ? `Score: ${Math.round(Number(point.severityScore))}/100` : '',
+      point.confidence ? `Confidence: ${point.confidence}` : ''
+    ].filter(Boolean).join(' | ');
+
+    this.mode = 'create-topic';
+    this.setCompactMode(false);
+    this.editingTopicId = null;
+    this.topicBuilderTab = 'describe';
+    this.topicBuilderContext = {
+      type: 'regional-proposal',
+      defaultLayerId: 'meteo-live',
+      regionalContext: {
+        ...regionalContext,
+        label: regionalLabel,
+        lat: Number.isFinite(lat) ? lat : regionalContext.lat,
+        lon: Number.isFinite(lon) ? lon : regionalContext.lon,
+        region: point.region || regionalContext.region || '',
+        country: point.country || regionalContext.country || '',
+        precision: point.regionalScope || regionalContext.precision || 'region'
+      }
+    };
+    this.currentPoint = {
+      ...point,
+      id: `draft_${point.id || Date.now()}`,
+      media: [],
+      mediaTokens: [],
+      category: 'meteo-live',
+      source: sourceName,
+      sourceUrl,
+      topicStatus: 'proposal-local',
+      review: {
+        stage: 'regional-proposal',
+        requestedBy: 'regional-user',
+        userMessage: point.summary || ''
+      },
+      storage: {
+        origin: 'browser-localStorage'
+      },
+      storageMeta: {
+        ...(point.storageMeta || {}),
+        workflow: 'meteo-watch-draft',
+        regionalLabel,
+        sourcePointId: point.id || '',
+        provisional: true
+      }
+    };
+    this.topicFormState = {
+      title: point.title || `Live meteo signal near ${regionalLabel}`,
+      category: 'meteo-live',
+      date: today,
+      country: point.country || regionalContext.country || '',
+      region: point.region || regionalContext.region || regionalContext.city || '',
+      lat: Number.isFinite(lat) ? lat.toFixed(4) : '',
+      lon: Number.isFinite(lon) ? lon.toFixed(4) : '',
+      summary: point.summary || this.getMeteoTooltipLine?.(point) || 'Live meteo signal detected from model data.',
+      source: sourceName,
+      insight: this.buildMeteoDraftInsight(point),
+      searchHint: `Official local warning, storm report, outage, flood, heat, crop/garden risk, or damage evidence for ${regionalLabel}`,
+      locationPrecision: point.regionalScope || regionalContext.precision || 'region',
+      regionalLabel
+    };
+    this.topicSources = [{
+      name: sourceName,
+      url: sourceUrl,
+      adminNotes: sourceNote || point.summary || 'Open-Meteo model source for this live meteo draft.',
+      type: 'official',
+      verified: true,
+      transcript: sourceNote || ''
+    }];
+    this.showSourceEditor = true;
+    this.setTopicDraftStatus({
+      state: 'unsaved',
+      source: 'regional-proposal',
+      title: 'Live meteo topic draft',
+      message: 'Seeded from live meteo data. Save keeps it browser-local first; admin/export review can validate it later.'
+    });
+    this.topicResearchSettings = {
+      sources: new Set(['official', 'media']),
+      trustedOnly: true,
+      researchMode: 'research-brief',
+      geographicScope: 'regional',
+      timeScope: 'today',
+      outputIntent: 'brief'
+    };
+    this.renderCreateTopic({ preserveState: true });
+    this.container.classList.remove('hidden');
+    this.updateTopicNavigation();
+    this.emitTutorialEvent('topicComposerOpened', { source: 'meteo-watch-draft' }, 80);
+  }
+
   showSourceSearchTopic() {
     this.mode = 'create-topic';
     this.editingTopicId = null;
@@ -5741,7 +6306,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     setTimeout(() => {
       this.topicBuilderTab = 'evidence';
       this.showSourceEditor = true;
-      this.renderCreateTopic();
+      this.renderCreateTopic({ preserveState: true });
       this.emitTutorialEvent('topicComposerTabChanged', { tab: 'evidence', source: 'manage-sources' }, 60);
     }, 100);
   }
@@ -5863,31 +6428,22 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     const form = this.container.querySelector('#topic-form');
     if (!form) return;
 
-    const preserveWhenHidden = this.topicBuilderTab !== 'describe';
-    const readDraftField = (selector, key) => {
-      const field = form.querySelector(selector);
-      if (!field) return this.topicFormState[key] || '';
-      const value = field.value ?? '';
-      if (preserveWhenHidden && !String(value).trim() && String(this.topicFormState[key] || '').trim()) {
-        return this.topicFormState[key];
-      }
-      return value;
-    };
+    this.syncSourceEditorState(form);
     
     // Save all form values
     this.topicFormState = {
-      title: readDraftField('#topic-title', 'title'),
-      category: readDraftField('#topic-category', 'category'),
-      date: readDraftField('#topic-date', 'date'),
-      country: readDraftField('#topic-country', 'country'),
-      region: readDraftField('#topic-region', 'region'),
-      lat: readDraftField('#topic-lat', 'lat'),
-      lon: readDraftField('#topic-lon', 'lon'),
-      summary: readDraftField('#topic-summary', 'summary'),
-      source: readDraftField('#topic-source', 'source'),
-      insight: readDraftField('#topic-insight', 'insight'),
+      title: form.querySelector('#topic-title')?.value || '',
+      category: form.querySelector('#topic-category')?.value || '',
+      date: form.querySelector('#topic-date')?.value || '',
+      country: form.querySelector('#topic-country')?.value || '',
+      region: form.querySelector('#topic-region')?.value || '',
+      lat: form.querySelector('#topic-lat')?.value || '',
+      lon: form.querySelector('#topic-lon')?.value || '',
+      summary: form.querySelector('#topic-summary')?.value || '',
+      source: form.querySelector('#topic-source')?.value || '',
+      insight: form.querySelector('#topic-insight')?.value || '',
       topicStory: this.readTopicStoryForm(form),
-      searchHint: readDraftField('#topic-search-hint', 'searchHint') || this.topicFormState.searchHint || '',
+      searchHint: form.querySelector('#topic-search-hint')?.value || this.topicFormState.searchHint || '',
       locationPrecision: this.topicFormState.locationPrecision || this.currentPoint?.locationPrecision || this.topicBuilderContext?.regionalContext?.precision || this.topicBuilderContext?.regionalContext?.scope || '',
       regionalLabel: this.topicFormState.regionalLabel || this.getRegionalProposalContextLabel(this.topicBuilderContext?.regionalContext || {}) || this.currentPoint?.storageMeta?.regionalLabel || '',
       geographicScope: form.querySelector('#geographic-scope')?.value || this.topicResearchSettings.geographicScope,
@@ -5897,6 +6453,22 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     };
     this.composerSmartInput = form.querySelector('#topic-smart-input')?.value || this.composerSmartInput || '';
     this.topicStoryDraft = this.topicFormState.topicStory;
+  }
+
+  syncSourceEditorState(root = this.container) {
+    if (!root || !Array.isArray(this.topicSources)) return;
+
+    root.querySelectorAll('.source-name-input, .source-url-input, .source-notes-input').forEach(input => {
+      const index = parseInt(input.dataset.index, 10);
+      const field = input.dataset.field;
+      if (!Number.isFinite(index) || !field || !this.topicSources[index]) return;
+
+      const value = input.value || '';
+      this.topicSources[index][field] = value;
+      if (field === 'adminNotes') {
+        this.topicSources[index].transcript = value;
+      }
+    });
   }
 
   normalizeTopicBuilderTab(tab = '') {
@@ -5918,8 +6490,6 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       enabled: Boolean(source.enabled || html),
       title: String(source.title || '').trim(),
       style: String(source.style || 'story-card').trim() || 'story-card',
-      audience: String(source.audience || 'general').trim() || 'general',
-      under16Only: Boolean(source.under16Only),
       html,
       sanitizedHtml: String(source.sanitizedHtml || '').trim(),
       structuredStory: source.structuredStory && typeof source.structuredStory === 'object' ? source.structuredStory : null,
@@ -5936,8 +6506,6 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       enabled: form.querySelector('#topic-story-enabled')?.checked ?? previous.enabled,
       title: form.querySelector('#topic-story-title')?.value ?? previous.title,
       style: form.querySelector('#topic-story-style')?.value ?? previous.style,
-      audience: form.querySelector('#topic-story-audience')?.value ?? previous.audience,
-      under16Only: form.querySelector('#topic-story-under16')?.checked ?? previous.under16Only,
       html,
       structuredStory: previous.structuredStory || null
     };
@@ -5977,10 +6545,9 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
   wrapTopicStoryHtml(html = '', story = {}) {
     const body = this.sanitizeStoryHtml(html || story.html || '');
     const title = story.title || this.topicFormState.title || 'topic.earth story';
-    const language = this.getTopicStoryLanguageContext();
     if (!body) return '';
     return `<!doctype html>
-<html lang="${this.escapeHtml(language.code || 'en')}" dir="${this.escapeHtml(language.direction || 'ltr')}">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -5998,66 +6565,6 @@ ${body}
 </html>`;
   }
 
-  getTopicStoryAudienceProfiles() {
-    return {
-      general: {
-        label: 'General',
-        ageRange: 'mixed audience',
-        vocabulary: 'plain public vocabulary',
-        guidance: 'Clear, factual, calm, and suitable for a broad public audience.',
-        under16: false
-      },
-      'kid-6-8': {
-        label: '6-8',
-        ageRange: '6 to 8 years old',
-        vocabulary: 'very simple words, one idea per section',
-        guidance: 'Friendly and reassuring. Avoid frightening climate framing, doom language, and complex systems language. Include one tiny check question.',
-        under16: true
-      },
-      'kid-9-12': {
-        label: '9-12',
-        ageRange: '9 to 12 years old',
-        vocabulary: 'simple cause and effect vocabulary',
-        guidance: 'Explain cause and effect, keep risk honest but not scary, and include one local action or observation question.',
-        under16: true
-      },
-      teen: {
-        label: 'Teen',
-        ageRange: '13 to 16 years old',
-        vocabulary: 'teen-friendly systems vocabulary',
-        guidance: 'Use systems thinking, tradeoffs, and evidence links. Keep tone respectful and not childish.',
-        under16: true
-      },
-      'adult-simple': {
-        label: 'Adult simple',
-        ageRange: 'adult beginner',
-        vocabulary: 'clear adult vulgarization',
-        guidance: 'Explain plainly without childish tone. Use practical context and evidence.',
-        under16: false
-      },
-      'adult-deep': {
-        label: 'Adult deep',
-        ageRange: 'adult technical reader',
-        vocabulary: 'precise technical vocabulary with short explanations',
-        guidance: 'Use source-linked explanation, uncertainty, and an optional technical sidebar.',
-        under16: false
-      }
-    };
-  }
-
-  getTopicStoryAudienceProfile(audience = 'general', under16Only = false) {
-    const profiles = this.getTopicStoryAudienceProfiles();
-    const profile = profiles[audience] || profiles.general;
-    if (!under16Only) return profile;
-
-    return {
-      ...profile,
-      label: profile.under16 ? profile.label : `${profile.label} (<16 safe)`,
-      under16: true,
-      guidance: `${profile.guidance} Apply the under-16 safety filter: no frightening imagery, no manipulative calls to action, no adult technical overload, short exercise, adult-review friendly wording.`
-    };
-  }
-
   renderTopicStoryEditor() {
     const story = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
     const previewHtml = this.wrapTopicStoryHtml(story.sanitizedHtml || story.html, story);
@@ -6069,21 +6576,11 @@ ${body}
       ['micro-game', this.t('topic.story.microGame')],
       ['external-widget', this.t('topic.story.externalWidget')]
     ];
-    const audienceProfiles = this.getTopicStoryAudienceProfiles();
-    const audienceOptions = Object.entries(audienceProfiles);
-    const presetButtons = [
-      { label: '6-8', preset: 'kid-6-8', title: 'Generate a reassuring first lesson' },
-      { label: '9-12', preset: 'kid-9-12', title: 'Generate a short cause/effect lesson' },
-      { label: 'Teen', preset: 'teen', title: 'Generate a systems-thinking card' },
-      { label: 'Adult', preset: 'adult-simple', title: 'Generate a clear adult card' }
-    ];
     const manifest = {
       bridge: true,
       bridgeVersion: 'topic-story-1',
       origin: 'topic.earth',
       style: story.style,
-      audience: story.audience,
-      under16Only: story.under16Only,
       title: story.title || this.topicFormState.title || '',
       limits: {
         allowScripts: false,
@@ -6115,26 +6612,6 @@ ${body}
               ${storyTypeOptions.map(([value, label]) => `<option value="${value}" ${story.style === value ? 'selected' : ''}>${this.escapeHtml(label)}</option>`).join('')}
             </select>
           </label>
-          <label>
-            <span>Age profile</span>
-            <select id="topic-story-audience">
-              ${audienceOptions.map(([value, profile]) => `<option value="${this.escapeHtml(value)}" ${story.audience === value ? 'selected' : ''}>${this.escapeHtml(profile.label)}</option>`).join('')}
-            </select>
-          </label>
-        </div>
-
-        <div class="topic-story-audience-tools">
-          <label class="topic-story-toggle topic-story-age-filter">
-            <input type="checkbox" id="topic-story-under16" ${story.under16Only ? 'checked' : ''}>
-            <span>Filter for &lt;16</span>
-          </label>
-          <div class="topic-story-preset-actions" aria-label="AI generation presets by age">
-            ${presetButtons.map(preset => `
-              <button type="button" class="btn-media-action topic-story-preset-btn ${story.audience === preset.preset ? 'active' : ''}" data-action="apply-topic-story-preset" data-preset="${this.escapeHtml(preset.preset)}" title="${this.escapeHtml(preset.title)}">
-                ${this.escapeHtml(preset.label)}
-              </button>
-            `).join('')}
-          </div>
         </div>
 
         <textarea id="topic-story-html" rows="10" spellcheck="false" placeholder="${this.escapeHtml(this.t('topic.story.placeholder'))}">${this.escapeHtml(story.html || '')}</textarea>
@@ -6149,19 +6626,24 @@ ${body}
           ${this.escapeHtml(this.t('topic.story.aiCreateWrites'))}
         </div>
 
-        <div class="topic-story-preview-card">
+        <div class="topic-story-preview-card compact-preview">
           <div class="topic-story-preview-header">
             <span>${this.escapeHtml(this.t('topic.story.sandboxPreview'))}</span>
             <span>${this.escapeHtml(hasStory ? this.t('topic.story.scriptsBlocked') : this.t('topic.story.waitingForHtml'))}</span>
           </div>
           ${previewHtml ? `
-            <iframe
-              class="topic-story-preview-frame"
-              sandbox=""
-              referrerpolicy="no-referrer"
-              srcdoc="${this.escapeHtml(previewHtml)}"
-              title="${this.escapeHtml(story.title || 'Topic story preview')}"
-            ></iframe>
+            <button
+              type="button"
+              class="topic-story-badge"
+              data-action="expand-topic-story"
+              data-story-context="editor"
+              title="Open embedded HTML preview here"
+            >
+              <span class="topic-story-badge-kind">${this.escapeHtml(story.style || 'html')}</span>
+              <strong>${this.escapeHtml(story.title || this.topicFormState.title || 'Embedded preview')}</strong>
+              <span>Open preview</span>
+            </button>
+            <div class="topic-story-expanded hidden" data-topic-story-expanded></div>
           ` : `
             <div class="topic-story-empty-preview">${this.escapeHtml(this.t('topic.story.pasteHelp'))}</div>
           `}
@@ -6181,23 +6663,64 @@ ${body}
     this.renderCreateTopic();
   }
 
-  async applyTopicStoryPreset(button = null) {
-    this.saveFormState();
-    const preset = String(button?.dataset?.preset || 'general').trim() || 'general';
-    const profiles = this.getTopicStoryAudienceProfiles();
-    const profile = profiles[preset] || profiles.general;
-    const previous = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
+  renderTopicStoryBadge(storyInput = null) {
+    const story = this.normalizeTopicStory(storyInput);
+    if (!story.enabled || !story.html) return '';
 
-    const presetStory = {
-      ...previous,
-      enabled: true,
-      style: profile.under16 ? 'educational-scene' : previous.style || 'story-card',
-      audience: preset,
-      under16Only: Boolean(profile.under16 || previous.under16Only)
-    };
-    this.topicFormState.topicStory = presetStory;
-    this.topicStoryDraft = this.topicFormState.topicStory;
-    await this.generateTopicStoryFromAi(button, { storyOverride: presetStory });
+    const title = story.title || this.currentPoint?.title || 'Embedded HTML';
+    const kind = story.style === 'micro-game' ? 'Game' : story.style === 'external-widget' ? 'Embed' : 'Presentation';
+    return `
+      <div class="detail-section topic-story-detail-section">
+        <div class="section-label">Embedded HTML</div>
+        <button
+          type="button"
+          class="topic-story-badge"
+          data-action="expand-topic-story"
+          data-story-context="detail"
+          title="Open embedded HTML inside the panel"
+        >
+          <span class="topic-story-badge-kind">${this.escapeHtml(kind)}</span>
+          <strong>${this.escapeHtml(title)}</strong>
+          <span>Preview first, open here</span>
+        </button>
+        <div class="topic-story-expanded hidden" data-topic-story-expanded></div>
+      </div>
+    `;
+  }
+
+  expandTopicStory(target = null) {
+    const context = target?.dataset.storyContext || 'detail';
+    if (context === 'editor') {
+      this.saveFormState();
+    }
+
+    const story = context === 'editor'
+      ? this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft)
+      : this.normalizeTopicStory(this.currentPoint?.topicStory);
+    const html = this.wrapTopicStoryHtml(story.sanitizedHtml || story.html, story);
+    if (!html) return;
+
+    const container = target?.closest('.topic-story-preview-card, .topic-story-detail-section')?.querySelector('[data-topic-story-expanded]');
+    if (!container) return;
+
+    const isOpen = !container.classList.contains('hidden');
+    if (isOpen) {
+      container.classList.add('hidden');
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = `
+      <iframe
+        class="topic-story-preview-frame"
+        sandbox=""
+        referrerpolicy="no-referrer"
+        srcdoc="${this.escapeHtml(html)}"
+        title="${this.escapeHtml(story.title || 'Topic story preview')}"
+      ></iframe>
+    `;
+    container.classList.remove('hidden');
+    container.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
   parseAiJsonObject(content = '', label = 'AI JSON') {
@@ -6294,48 +6817,8 @@ ${body}
     this.topicSources = merged;
   }
 
-  getTopicStoryLanguageContext() {
-    const currentCode = LanguageManager.normalizeLanguageCode(this.getCurrentLanguage());
-    const text = [
-      this.topicFormState.title,
-      this.topicFormState.summary,
-      this.topicFormState.region,
-      this.topicFormState.country,
-      this.topicFormState.source,
-      ...(this.topicSources || []).flatMap(source => [source.name, source.adminNotes])
-    ].join(' ').toLowerCase();
-
-    let code = currentCode;
-    if (/[\u4e00-\u9fff]/.test(text)) {
-      code = 'zh';
-    } else if (/[\u0900-\u097f]/.test(text)) {
-      code = 'hi';
-    } else if (/[\u0370-\u03ff]/.test(text)) {
-      code = 'el';
-    } else if (/[\u0400-\u04ff]/.test(text)) {
-      code = 'ru';
-    } else if (/[àâçéèêëîïôùûüÿœæ]/i.test(text) || /\b(fete|fête|commune|animations|gratuites|dimanche|samedi|lundi|balade|tombola)\b/i.test(text)) {
-      code = 'fr';
-    } else if (/\b(und|oder|mit|stadt|gemeinde|nachrichten)\b/i.test(text)) {
-      code = 'de';
-    } else if (/\b(en|het|een|gemeente|nieuws)\b/i.test(text)) {
-      code = 'nl';
-    }
-
-    const info = LanguageManager.getLanguageInfo(code) || LanguageManager.getLanguageInfo(currentCode) || { code: 'en', name: 'English', nativeName: 'English' };
-    return {
-      code: info.code || code,
-      name: info.name || info.nativeName || code,
-      nativeName: info.nativeName || info.name || code,
-      direction: LanguageManager.getTextDirection(info.code || code)
-    };
-  }
-
   buildTopicStoryPrompt() {
     const settings = Settings.get();
-    const story = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
-    const audienceProfile = this.getTopicStoryAudienceProfile(story.audience, story.under16Only);
-    const language = this.getTopicStoryLanguageContext();
     const location = [
       this.topicFormState.region,
       this.topicFormState.country
@@ -6356,10 +6839,7 @@ ${body}
           'You create safe topic.earth story card data.',
           'Return strict JSON only. Do not return HTML.',
           'The app will render your JSON through a locked template with scripts disabled.',
-          'Keep it factual, educational, and evidence-aware. Separate known facts from assumptions.',
-          'Prefer a one-screen animated vignette: short title, very short sections, clear program or timeline when available.',
-          'If sources include a poster, program image, or image URL, extract visible schedule text when possible and turn it into ordered sections.',
-          'Respect the requested age profile exactly. For child or under-16 profiles, avoid frightening framing and any manipulative persuasion.'
+          'Keep it factual, educational, and evidence-aware. Separate known facts from assumptions.'
         ].join(' ')
       },
       {
@@ -6369,22 +6849,17 @@ ${body}
           requiredShape: {
             title: 'short title',
             style: 'story-card | educational-scene | interactive-croquis | micro-game',
-            audience: 'general | kid-6-8 | kid-9-12 | teen | adult-simple | adult-deep',
-            ageRange: 'age range label',
-            learningObjective: 'one sentence objective',
-            vocabularyLevel: 'short vocabulary note',
-            adultReviewRequired: true,
-            language: language.code,
+            audience: 'general | kid-9-12 | teen | adult-simple | adult-deep',
             summary: 'one sentence',
             sections: [
-              { label: 'Panel 1 label', body: 'plain language body, max 35 words' },
-              { label: 'Panel 2 label', body: 'plain language body, max 35 words' },
-              { label: 'Panel 3 label', body: 'plain language body, max 35 words' }
+              { label: 'Context', body: 'plain language body' },
+              { label: 'What changes', body: 'plain language body' },
+              { label: 'Action idea', body: 'plain language body' }
             ],
             visualPlan: {
-              type: 'animated-vignette',
+              type: 'annotated-svg',
               caption: 'short caption',
-              labels: ['3 to 5 visual labels for the SVG vignette']
+              labels: ['3 to 5 visual labels']
             },
             exercise: {
               question: 'optional short check question',
@@ -6402,26 +6877,6 @@ ${body}
             analysis: this.topicFormState.insight || '',
             sourceNote: this.topicFormState.source || ''
           },
-          language: {
-            code: language.code,
-            name: language.name,
-            nativeName: language.nativeName,
-            instruction: `Write all visible story text in ${language.nativeName}. Keep official names and place names unchanged when appropriate.`
-          },
-          layoutPreset: {
-            name: 'one-page animated vignette',
-            height: 'one viewport when possible',
-            interaction: 'horizontal scroll-snap panels; each panel is short enough to read in one stop',
-            animation: 'subtle CSS/SVG motion only; no scripts'
-          },
-          generationPreset: {
-            audience: story.audience,
-            under16Only: story.under16Only,
-            ageRange: audienceProfile.ageRange,
-            vocabulary: audienceProfile.vocabulary,
-            guidance: audienceProfile.guidance,
-            adultReviewRequired: Boolean(audienceProfile.under16 || story.under16Only)
-          },
           sources
         }, null, 2)
       }
@@ -6431,26 +6886,7 @@ ${body}
   renderTrustedTopicStoryHtml(data = {}) {
     const title = String(data.title || this.topicFormState.title || 'Topic Story').trim();
     const style = String(data.style || this.topicFormState.topicStory?.style || 'story-card').trim();
-    const story = this.normalizeTopicStory(this.topicFormState.topicStory || this.topicStoryDraft);
-    const audience = String(data.audience || story.audience || 'general').trim();
-    const audienceProfile = this.getTopicStoryAudienceProfile(audience, story.under16Only || data.adultReviewRequired);
     const summary = String(data.summary || this.topicFormState.summary || '').trim();
-    const language = {
-      ...this.getTopicStoryLanguageContext(),
-      code: LanguageManager.normalizeLanguageCode(data.language || this.getTopicStoryLanguageContext().code)
-    };
-    const fixedLabels = {
-      en: { live: 'topic.earth live vignette', age: 'Age', review: 'adult review', objective: 'Learning goal', check: 'Quick check', sources: 'Evidence', assumptions: 'Assumptions', next: 'Next' },
-      fr: { live: 'vignette vivante topic.earth', age: 'Age', review: 'validation adulte', objective: 'Objectif', check: 'Petite question', sources: 'Sources', assumptions: 'Hypotheses', next: 'Suite' },
-      nl: { live: 'topic.earth live vignette', age: 'Leeftijd', review: 'volwassen check', objective: 'Leerdoel', check: 'Korte vraag', sources: 'Bewijs', assumptions: 'Aannames', next: 'Volgende' },
-      de: { live: 'topic.earth Live-Vignette', age: 'Alter', review: 'Erwachsenencheck', objective: 'Lernziel', check: 'Kurzfrage', sources: 'Quellen', assumptions: 'Annahmen', next: 'Weiter' },
-      el: { live: 'topic.earth live vignette', age: 'Age', review: 'adult review', objective: 'Learning goal', check: 'Quick check', sources: 'Evidence', assumptions: 'Assumptions', next: 'Next' },
-      ru: { live: 'topic.earth live vignette', age: 'Age', review: 'adult review', objective: 'Learning goal', check: 'Quick check', sources: 'Evidence', assumptions: 'Assumptions', next: 'Next' },
-      uk: { live: 'topic.earth live vignette', age: 'Age', review: 'adult review', objective: 'Learning goal', check: 'Quick check', sources: 'Evidence', assumptions: 'Assumptions', next: 'Next' },
-      zh: { live: 'topic.earth live vignette', age: 'Age', review: 'adult review', objective: 'Learning goal', check: 'Quick check', sources: 'Evidence', assumptions: 'Assumptions', next: 'Next' },
-      hi: { live: 'topic.earth live vignette', age: 'Age', review: 'adult review', objective: 'Learning goal', check: 'Quick check', sources: 'Evidence', assumptions: 'Assumptions', next: 'Next' }
-    };
-    const ui = fixedLabels[language.code] || fixedLabels.en;
     const sections = Array.isArray(data.sections) && data.sections.length > 0
       ? data.sections.slice(0, 5)
       : [
@@ -6471,259 +6907,67 @@ ${body}
     const caption = data.visualPlan?.caption || 'Topic sketch';
     const evidenceLinks = Array.isArray(data.evidenceLinks) ? data.evidenceLinks.slice(0, 5) : [];
     const assumptions = Array.isArray(data.assumptions) ? data.assumptions.slice(0, 4) : [];
-    const navDots = sections.map((section, index) => `
-      <a href="#story-panel-${index + 1}" aria-label="${this.escapeHtml(`${ui.next}: ${section.label || index + 1}`)}">${index + 1}</a>
-    `).join('');
     const labelRows = labels.map((label, index) => {
-      const angle = (index / Math.max(labels.length, 1)) * Math.PI * 2;
-      const x = 220 + Math.cos(angle) * 118;
-      const y = 124 + Math.sin(angle) * 62;
+      const y = 42 + index * 38;
+      const x = index % 2 === 0 ? 34 : 258;
+      const lineX = index % 2 === 0 ? 188 : 236;
       return `
-        <g class="story-orbit-label" style="animation-delay:${(index * 0.4).toFixed(1)}s">
-          <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="${color}"/>
-          <text x="${Math.min(Math.max(x - 44, 16), 340).toFixed(1)}" y="${(y + 24).toFixed(1)}" fill="#eaf8ff" font-size="12" font-weight="800">${this.escapeHtml(label)}</text>
+        <g>
+          <circle cx="${lineX}" cy="${y}" r="5" fill="${color}"/>
+          <line x1="${lineX}" y1="${y}" x2="${x + 118}" y2="${y}" stroke="${color}" stroke-width="1.5" stroke-dasharray="4 5"/>
+          <text x="${x}" y="${y + 5}" fill="#eaf8ff" font-size="12" font-weight="700">${this.escapeHtml(label)}</text>
         </g>
       `;
     }).join('');
-    const sectionPanels = sections.map((section, index) => `
-      <section id="story-panel-${index + 1}" class="story-vignette-panel">
-        <p class="story-panel-step">${String(index + 1).padStart(2, '0')}</p>
-        <h2>${this.escapeHtml(section.label || 'Note')}</h2>
-        <p>${this.escapeHtml(section.body || '')}</p>
-      </section>
-    `).join('');
 
-    return `<article lang="${this.escapeHtml(language.code)}" dir="${this.escapeHtml(language.direction || 'ltr')}" class="topic-story-card topic-story-card-${this.escapeHtml(style)} topic-story-vignette" data-audience="${this.escapeHtml(audience)}" data-under16="${story.under16Only || audienceProfile.under16 ? 'true' : 'false'}">
-  <style>
-    .topic-story-vignette {
-      --story-color: ${color};
-      position: relative;
-      display: grid;
-      grid-template-columns: minmax(260px, 0.9fr) minmax(300px, 1.1fr);
-      gap: 0;
-      width: min(980px, 100%);
-      min-height: min(720px, 100dvh);
-      max-height: 760px;
-      margin: auto;
-      overflow: hidden;
-      border: 1px solid color-mix(in srgb, var(--story-color) 45%, transparent);
-      border-radius: 14px;
-      background: radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--story-color) 22%, transparent), transparent 34%), #07111f;
-      color: #eef8ff;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    .topic-story-vignette * { box-sizing: border-box; }
-    .story-vignette-hero {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 18px;
-      padding: clamp(18px, 4vw, 34px);
-      border-right: 1px solid rgba(255,255,255,.14);
-    }
-    .story-vignette-kicker {
-      margin: 0 0 10px;
-      color: var(--story-color);
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-    .topic-story-vignette h1 {
-      margin: 0;
-      font-size: clamp(34px, 7vw, 72px);
-      line-height: .94;
-      letter-spacing: 0;
-    }
-    .story-vignette-summary {
-      margin: 14px 0 0;
-      color: #cfe9f6;
-      font-size: clamp(15px, 2vw, 19px);
-      line-height: 1.45;
-    }
-    .story-vignette-badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 14px;
-    }
-    .story-vignette-badges span {
-      display: inline-flex;
-      padding: 6px 9px;
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 999px;
-      color: #dbeafa;
-      font-size: 12px;
-      font-weight: 800;
-    }
-    .story-vignette-visual {
-      display: block;
-      width: 100%;
-      height: auto;
-      max-height: 270px;
-      border: 1px solid color-mix(in srgb, var(--story-color) 24%, transparent);
-      border-radius: 12px;
-      background: #020814;
-    }
-    .story-vignette-main {
-      display: grid;
-      grid-template-rows: 1fr auto;
-      min-width: 0;
-      min-height: 0;
-    }
-    .story-vignette-rail {
-      display: grid;
-      grid-auto-flow: column;
-      grid-auto-columns: 100%;
-      overflow-x: auto;
-      overscroll-behavior-x: contain;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      min-height: 0;
-    }
-    .story-vignette-panel {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-width: 0;
-      padding: clamp(22px, 5vw, 54px);
-      scroll-snap-align: start;
-    }
-    .story-panel-step {
-      width: fit-content;
-      margin: 0 0 16px;
-      padding: 7px 10px;
-      border: 1px solid color-mix(in srgb, var(--story-color) 50%, transparent);
-      border-radius: 999px;
-      color: var(--story-color);
-      font-weight: 900;
-    }
-    .story-vignette-panel h2 {
-      margin: 0 0 12px;
-      color: #ffffff;
-      font-size: clamp(30px, 6vw, 64px);
-      line-height: .98;
-      letter-spacing: 0;
-    }
-    .story-vignette-panel p {
-      max-width: 42rem;
-      margin: 0;
-      color: #d8e8f2;
-      font-size: clamp(17px, 2vw, 23px);
-      line-height: 1.45;
-    }
-    .story-vignette-footer {
-      display: grid;
-      gap: 10px;
-      padding: 14px 18px 18px;
-      border-top: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.16);
-    }
-    .story-vignette-nav {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .story-vignette-nav a {
-      display: inline-grid;
-      width: 34px;
-      height: 34px;
-      place-items: center;
-      border: 1px solid color-mix(in srgb, var(--story-color) 38%, transparent);
-      border-radius: 50%;
-      color: #eef8ff;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 900;
-    }
-    .story-vignette-note {
-      margin: 0;
-      color: #a8b3c6;
-      font-size: 12px;
-      line-height: 1.4;
-    }
-    .story-vignette-note strong { color: var(--story-color); }
-    .story-orbit-core { animation: storyPulse 3.4s ease-in-out infinite; transform-origin: 220px 124px; }
-    .story-orbit-ring { animation: storyDash 9s linear infinite; }
-    .story-orbit-label { animation: storyFloat 4s ease-in-out infinite; }
-    @keyframes storyPulse { 0%, 100% { transform: scale(.96); opacity: .8; } 50% { transform: scale(1.04); opacity: 1; } }
-    @keyframes storyDash { to { stroke-dashoffset: -92; } }
-    @keyframes storyFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-    @media (max-width: 740px) {
-      .topic-story-vignette {
-        grid-template-columns: 1fr;
-        min-height: 100dvh;
-        max-height: none;
-      }
-      .story-vignette-hero {
-        border-right: 0;
-        border-bottom: 1px solid rgba(255,255,255,.14);
-      }
-      .story-vignette-visual { max-height: 210px; }
-      .story-vignette-panel { min-height: 42vh; }
-    }
-  </style>
-  <section class="story-vignette-hero">
-    <div>
-      <p class="story-vignette-kicker">${this.escapeHtml(ui.live)}</p>
-      <h1>${this.escapeHtml(title)}</h1>
-      <p class="story-vignette-summary">${this.escapeHtml(summary)}</p>
-      <div class="story-vignette-badges">
-        <span>${this.escapeHtml(ui.age)}: ${this.escapeHtml(audienceProfile.label)}</span>
-        <span>${this.escapeHtml(data.vocabularyLevel || audienceProfile.vocabulary)}</span>
-        ${story.under16Only || audienceProfile.under16 ? `<span>${this.escapeHtml(ui.review)}</span>` : ''}
-      </div>
-    </div>
-    <svg class="story-vignette-visual" viewBox="0 0 440 270" role="img" aria-label="${this.escapeHtml(caption)}">
+    return `<article class="topic-story-card topic-story-card-${this.escapeHtml(style)}" style="max-width:860px;margin:auto;padding:24px;border:1px solid ${color}66;border-radius:14px;background:#07111f;color:#eef8ff;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <p style="margin:0 0 10px;color:${color};font-weight:900;letter-spacing:.08em;text-transform:uppercase;">topic.earth live card</p>
+  <h1 style="margin:0 0 12px;font-size:clamp(28px,6vw,54px);line-height:1.02;">${this.escapeHtml(title)}</h1>
+  <p style="margin:0 0 20px;font-size:18px;line-height:1.55;color:#cfe9f6;">${this.escapeHtml(summary)}</p>
+  <svg viewBox="0 0 440 230" role="img" aria-label="${this.escapeHtml(caption)}" style="display:block;width:100%;height:auto;margin:18px 0;border-radius:12px;background:#020814;border:1px solid ${color}33;">
     <defs>
-      <radialGradient id="storyVignetteGlow" cx="50%" cy="45%" r="60%">
+      <radialGradient id="storyGlow" cx="50%" cy="45%" r="60%">
         <stop offset="0%" stop-color="${color}" stop-opacity=".42"/>
         <stop offset="65%" stop-color="${color}" stop-opacity=".08"/>
         <stop offset="100%" stop-color="#020814" stop-opacity="0"/>
       </radialGradient>
     </defs>
-    <rect x="0" y="0" width="440" height="270" fill="url(#storyVignetteGlow)"/>
-    <circle class="story-orbit-ring" cx="220" cy="124" r="86" fill="none" stroke="${color}" stroke-width="2" stroke-dasharray="12 11" opacity=".8"/>
-    <g class="story-orbit-core">
-      <circle cx="220" cy="124" r="56" fill="#14344f" stroke="${color}" stroke-width="2"/>
-      <path d="M184 130c30-54 82-44 78 3-20 13-48 18-78-3Z" fill="#7cd957" opacity=".92"/>
-      <path d="M190 94c34 16 58 7 84 26" stroke="#2a9dde" stroke-width="15" stroke-linecap="round" opacity=".82"/>
-      <path d="M204 145c30 2 54-9 76-2" stroke="#eef8ff" stroke-width="9" stroke-linecap="round"/>
-    </g>
+    <rect x="0" y="0" width="440" height="230" fill="url(#storyGlow)"/>
+    <circle cx="220" cy="112" r="58" fill="#14344f" stroke="${color}" stroke-width="2"/>
+    <path d="M186 116c28-52 78-42 76 4-17 12-44 18-76-4Z" fill="#7cd957" opacity=".92"/>
+    <path d="M188 83c34 16 58 7 84 26" stroke="#2a9dde" stroke-width="15" stroke-linecap="round" opacity=".82"/>
+    <path d="M204 130c28 2 50-9 74-2" stroke="#eef8ff" stroke-width="9" stroke-linecap="round"/>
     ${labelRows}
-    <text x="18" y="248" fill="${color}" font-size="12" font-weight="900">${this.escapeHtml(caption)}</text>
+    <text x="18" y="214" fill="${color}" font-size="12" font-weight="800">${this.escapeHtml(caption)}</text>
   </svg>
-  </section>
-  <section class="story-vignette-main">
-    <div class="story-vignette-rail" aria-label="Story panels">
-      ${sectionPanels}
-      ${data.exercise?.question ? `
-        <section id="story-panel-${sections.length + 1}" class="story-vignette-panel">
-          <p class="story-panel-step">?</p>
-          <h2>${this.escapeHtml(ui.check)}</h2>
-          <p>${this.escapeHtml(data.exercise.question)} ${this.escapeHtml(data.exercise.answer || '')}</p>
-        </section>
-      ` : ''}
-    </div>
-    <footer class="story-vignette-footer">
-      <nav class="story-vignette-nav" aria-label="Story panel navigation">${navDots}</nav>
-      ${data.learningObjective ? `<p class="story-vignette-note"><strong>${this.escapeHtml(ui.objective)}:</strong> ${this.escapeHtml(data.learningObjective)}</p>` : ''}
-      ${assumptions.length ? `<p class="story-vignette-note"><strong>${this.escapeHtml(ui.assumptions)}:</strong> ${assumptions.map(item => this.escapeHtml(item)).join('; ')}</p>` : ''}
-      ${evidenceLinks.length ? `<p class="story-vignette-note"><strong>${this.escapeHtml(ui.sources)}:</strong> ${evidenceLinks.map(link => this.escapeHtml(link.name || this.getHostFromUrl(link.url) || 'source')).join(' / ')}</p>` : ''}
+  <div style="display:grid;gap:12px;">
+    ${sections.map(section => `
+      <section style="padding:14px;border:1px solid #ffffff18;border-radius:10px;background:#ffffff08;">
+        <h2 style="margin:0 0 6px;color:${color};font-size:14px;text-transform:uppercase;letter-spacing:.06em;">${this.escapeHtml(section.label || 'Note')}</h2>
+        <p style="margin:0;color:#d8e8f2;line-height:1.55;">${this.escapeHtml(section.body || '')}</p>
+      </section>
+    `).join('')}
+  </div>
+  ${data.exercise?.question ? `
+    <section style="margin-top:14px;padding:14px;border:1px solid ${color}55;border-radius:10px;background:${color}14;">
+      <h2 style="margin:0 0 6px;color:${color};font-size:14px;text-transform:uppercase;letter-spacing:.06em;">Quick check</h2>
+      <p style="margin:0 0 8px;color:#eef8ff;">${this.escapeHtml(data.exercise.question)}</p>
+      <p style="margin:0;color:#b8c6d8;">${this.escapeHtml(data.exercise.answer || '')}</p>
+    </section>
+  ` : ''}
+  ${assumptions.length ? `
+    <p style="margin:14px 0 0;color:#a8b3c6;font-size:13px;">Assumptions: ${assumptions.map(item => this.escapeHtml(item)).join('; ')}</p>
+  ` : ''}
+  ${evidenceLinks.length ? `
+    <footer style="margin-top:16px;color:#a8b3c6;font-size:13px;">
+      Evidence: ${evidenceLinks.map(link => `<span>${this.escapeHtml(link.name || this.getHostFromUrl(link.url) || 'source')}</span>`).join(' / ')}
     </footer>
-  </section>
+  ` : ''}
 </article>`;
   }
 
-  async generateTopicStoryFromAi(button = null, options = {}) {
+  async generateTopicStoryFromAi(button = null) {
     this.saveFormState();
-    if (options.storyOverride) {
-      this.topicFormState.topicStory = {
-        ...this.normalizeTopicStory(this.topicFormState.topicStory),
-        ...this.normalizeTopicStory(options.storyOverride)
-      };
-      this.topicStoryDraft = this.topicFormState.topicStory;
-    }
 
     if (!window.ourEarthAI?.createChatCompletion) {
       alert(this.t('topic.story.aiCreateNotReady'));
@@ -6754,22 +6998,18 @@ ${body}
       const structuredStory = this.parseAiJsonObject(completion.content || '', 'topic story JSON');
       const nextTitle = structuredStory.title || title || 'Topic Story';
       const nextStyle = structuredStory.style || this.topicFormState.topicStory?.style || 'story-card';
-      const currentStory = this.normalizeTopicStory(this.topicFormState.topicStory);
       const html = this.renderTrustedTopicStoryHtml({
         ...structuredStory,
         title: nextTitle,
-        style: nextStyle,
-        audience: structuredStory.audience || currentStory.audience
+        style: nextStyle
       });
       const now = new Date().toISOString();
 
       this.topicFormState.topicStory = {
-        ...currentStory,
+        ...this.normalizeTopicStory(this.topicFormState.topicStory),
         enabled: true,
         title: nextTitle,
         style: nextStyle,
-        audience: structuredStory.audience || currentStory.audience,
-        under16Only: Boolean(currentStory.under16Only || structuredStory.adultReviewRequired),
         html,
         sanitizedHtml: this.sanitizeStoryHtml(html),
         structuredStory,
@@ -6778,7 +7018,7 @@ ${body}
       };
       this.topicStoryDraft = this.topicFormState.topicStory;
       this.topicBuilderTab = 'story';
-      this.renderCreateTopic();
+      this.renderCreateTopic({ preserveState: true });
     } catch (error) {
       console.error('[Topic Story] AI Create failed:', error);
       if (status) status.textContent = `${this.t('topic.story.aiCreateFailed')}: ${error.message || error}`;
@@ -6801,8 +7041,6 @@ ${body}
       enabled: true,
       title,
       style: this.topicFormState.topicStory?.style || 'story-card',
-      audience: this.topicFormState.topicStory?.audience || 'general',
-      under16Only: Boolean(this.topicFormState.topicStory?.under16Only),
       html: `<article class="topic-story-card" style="max-width:760px;margin:auto;padding:24px;border:1px solid #00d4ff55;border-radius:14px;background:#07111f;color:#eef8ff;font-family:system-ui,sans-serif;">
   <p style="margin:0 0 10px;color:#00d4ff;font-weight:800;letter-spacing:.08em;text-transform:uppercase;">topic.earth story</p>
   <h1 style="margin:0 0 14px;font-size:clamp(28px,6vw,52px);line-height:1.02;">${this.escapeHtml(title)}</h1>
@@ -6815,7 +7053,6 @@ ${body}
       structuredStory: {
         title,
         style: this.topicFormState.topicStory?.style || 'story-card',
-        audience: this.topicFormState.topicStory?.audience || 'general',
         summary,
         sections: [
           { label: 'Context', body: summary },
@@ -6851,8 +7088,6 @@ ${body}
       enabled: false,
       title: '',
       style: 'story-card',
-      audience: 'general',
-      under16Only: false,
       html: '',
       sanitizedHtml: '',
       structuredStory: null
@@ -6870,8 +7105,6 @@ ${body}
       enabled: true,
       type: story.style || 'story-card',
       style: story.style || 'story-card',
-      audience: story.audience || 'general',
-      under16Only: Boolean(story.under16Only),
       title: story.title || this.topicFormState.title || 'Topic story',
       html: story.html,
       sanitizedHtml: this.sanitizeStoryHtml(story.html),
@@ -6881,8 +7114,6 @@ ${body}
         bridgeVersion: 'topic-story-1',
         origin: 'topic.earth',
         style: story.style || 'story-card',
-        audience: story.audience || 'general',
-        under16Only: Boolean(story.under16Only),
         title: story.title || this.topicFormState.title || 'Topic story',
         limits: {
           allowScripts: false,
@@ -6958,6 +7189,8 @@ ${body}
     // Layer-specific defaults
     const layerDefaults = {
       'meteo': { geographicScope: 'regional', timeScope: 'today', outputIntent: 'brief', researchMode: 'research-brief' },
+      'meteo-live': { geographicScope: 'regional', timeScope: 'today', outputIntent: 'brief', researchMode: 'research-brief' },
+      'meteo-clouds': { geographicScope: 'regional', timeScope: 'today', outputIntent: 'brief', researchMode: 'research-brief' },
       'climate': { geographicScope: 'international', timeScope: 'recent', outputIntent: 'analysis', researchMode: 'research-brief' },
       'eu': { geographicScope: 'international', timeScope: 'recent', outputIntent: 'social-post', researchMode: 'post-draft' },
       'country-news': { geographicScope: 'national', timeScope: 'today', outputIntent: 'social-post', researchMode: 'post-draft' },
@@ -6976,8 +7209,10 @@ ${body}
     Object.assign(this.topicResearchSettings, defaults);
   }
 
-  renderCreateTopic() {
-    this.saveFormState(); // Save current form values before re-render
+  renderCreateTopic(options = {}) {
+    if (!options.preserveState) {
+      this.saveFormState(); // Save current form values before re-render
+    }
     
     const content = this.container.querySelector('#detail-content');
     const today = new Date().toISOString().split('T')[0];
@@ -7064,6 +7299,7 @@ ${body}
               >${this.escapeHtml(this.composerSmartInput || '')}</textarea>
               <div class="topic-smart-input-actions">
                 <button type="button" class="btn-primary-alt" data-action="apply-composer-input">Use in draft</button>
+                <button type="button" class="btn-primary" data-action="autopopulate-topic-draft" title="Use AI or source metadata to fill title, layer, location, and summary">Autopopulate</button>
                 <button type="button" class="simple-ai-btn topic-dictation-btn" data-action="toggle-topic-dictation" title="Dictate into the focused topic field">Mic</button>
                 <button type="button" class="simple-ai-btn" data-action="import-file">Add media</button>
               </div>
@@ -7121,7 +7357,7 @@ ${body}
                   required
                 >${this.escapeHtml(this.topicFormState.summary || '')}</textarea>
                 <div class="topic-summary-actions">
-                  <button type="button" class="btn-secondary topic-www-check-btn" data-action="check-draft-www" data-return-tab="describe">
+                  <button type="button" class="btn-secondary topic-www-check-btn" data-action="check-draft-www">
                     Check WWW
                   </button>
                   <span class="setting-hint" data-draft-www-status>Searches around the draft date, 1 week before and after.</span>
@@ -7421,12 +7657,14 @@ ${body}
       .trim();
   }
 
-  addComposerUrl(url = '') {
+  async addComposerUrl(url = '') {
     if (!url) return false;
 
     const directImageUrl = this.getDirectImageUrl(url);
     const host = this.getHostFromUrl(url);
-    const isVideoOrSiteMedia = /(?:youtube\.com|youtu\.be|vimeo\.com|cloudinary\.com)/i.test(url);
+    const youtubeMeta = this.getYoutubeVideoMeta(url);
+    const youtubeDetails = youtubeMeta ? await this.fetchYoutubeMetadata(url) : null;
+    const isVideoOrSiteMedia = Boolean(youtubeMeta) || /(?:vimeo\.com|cloudinary\.com)/i.test(url);
     const existingSource = this.topicSources.some(source => String(source.url || '') === url);
     let added = false;
 
@@ -7454,20 +7692,37 @@ ${body}
 
     if (!existingSource) {
       this.topicSources.push({
-        name: host || (isVideoOrSiteMedia ? 'Linked media' : 'Source link'),
+        name: youtubeDetails?.title || host || (isVideoOrSiteMedia ? 'Linked media' : 'Source link'),
         url,
         category: isVideoOrSiteMedia ? 'media' : 'source',
         reliability: 'unknown',
         verified: true,
-        linkOnly: true
+        linkOnly: true,
+        provider: youtubeMeta ? 'youtube' : '',
+        authorName: youtubeDetails?.authorName || ''
       });
       added = true;
+    }
+
+    if (youtubeMeta) {
+      const mediaToken = this.createMediaToken({
+        url: youtubeMeta.thumbnailUrl,
+        sourceUrl: url,
+        sourceName: youtubeDetails?.title || host || 'YouTube',
+        provider: 'youtube',
+        mediaType: 'youtube',
+        embedUrl: youtubeMeta.embedUrl,
+        thumbnailUrl: youtubeDetails?.thumbnailUrl || youtubeMeta.thumbnailUrl,
+        videoId: youtubeMeta.videoId,
+        authorName: youtubeDetails?.authorName || ''
+      });
+      added = this.addMediaTokenToCurrentPoint(mediaToken) || added;
     }
 
     return added;
   }
 
-  applyComposerInput() {
+  async applyComposerInput() {
     const form = this.container.querySelector('#topic-form');
     if (!form) return;
 
@@ -7502,7 +7757,7 @@ ${body}
       if (this.topicFormState.category) this.autoSetupForLayer(this.topicFormState.category);
     }
 
-    urls.forEach(url => this.addComposerUrl(url));
+    await Promise.all(urls.map(url => this.addComposerUrl(url)));
     if (urls.length > 0) this.showSourceEditor = true;
 
     this.composerSmartInput = '';
@@ -7564,12 +7819,16 @@ ${body}
                   data-index="${index}"
                   data-field="url"
                 >
+                ${this.renderSourcePreviewControls(source, index)}
               </div>
               <div class="source-editor-actions">
                 <button type="button" class="source-action-btn" data-action="verify-source" data-index="${index}" title="Verify source">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path d="M2 7L5 10L12 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                   </svg>
+                </button>
+                <button type="button" class="source-action-btn" data-action="autopopulate-source" data-index="${index}" title="Autopopulate draft from this source">
+                  AI
                 </button>
                 <button type="button" class="source-action-btn remove" data-action="remove-source" data-index="${index}" title="Remove source">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -7580,21 +7839,12 @@ ${body}
             </div>
           `).join('')}
         </div>
-        <div class="source-editor-add-actions">
-          <button type="button" class="btn-secondary source-web-search-btn" data-action="check-draft-www" data-return-tab="evidence">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <circle cx="6.2" cy="6.2" r="4.2" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M9.3 9.3L12.2 12.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            Web Search
-          </button>
-          <button type="button" class="btn-secondary source-add-row-btn" data-action="add-source">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M7 1V13M1 7H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            Add Evidence
-          </button>
-        </div>
+        <button type="button" class="btn-secondary" data-action="add-source" style="width: 100%; margin-top: 8px;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="display: inline-block; margin-right: 6px;">
+            <path d="M7 1V13M1 7H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Add Evidence
+        </button>
       </div>
     `;
   }
@@ -7712,15 +7962,174 @@ Prioritize official local sources, scientific journals, and reputable news outle
     const index = parseInt(btn.dataset.index);
     if (!isNaN(index) && confirm('Remove this source?')) {
       this.topicSources.splice(index, 1);
-      this.renderCreateTopic();
+      this.renderCreateTopic({ preserveState: true });
     }
+  }
+
+  getAutopopulateSourceFromDraft(target = null) {
+    const index = parseInt(target?.dataset.index, 10);
+    if (Number.isFinite(index) && this.topicSources[index]?.url) {
+      return this.topicSources[index];
+    }
+
+    const urls = this.extractComposerUrls(this.composerSmartInput || '');
+    if (urls.length > 0) {
+      const safeUrl = this.sanitizeUrl(urls[0]);
+      if (!safeUrl) return null;
+      return this.topicSources.find(source => String(source.url || '') === safeUrl) || { url: safeUrl };
+    }
+
+    return (this.topicSources || []).find(source => String(source.url || '').trim()) || null;
+  }
+
+  async autopopulateTopicDraft(target = null) {
+    const form = this.container.querySelector('#topic-form');
+    if (!form) return;
+
+    this.saveFormState();
+    this.syncSourceEditorState(form);
+
+    const source = this.getAutopopulateSourceFromDraft(target);
+    if (!source?.url) {
+      alert('Paste a website or YouTube URL in Topic input, or add one evidence URL first.');
+      return;
+    }
+
+    const safeUrl = this.sanitizeUrl(source.url || '');
+    if (!safeUrl) {
+      alert('Please enter a valid http(s) URL first.');
+      return;
+    }
+
+    const btn = target || this.container.querySelector('[data-action="autopopulate-topic-draft"]');
+    const originalHTML = btn?.innerHTML;
+    if (btn) {
+      btn.innerHTML = '<div class="spinner-small"></div> Filling...';
+      btn.disabled = true;
+    }
+
+    try {
+      if (!this.topicSources.some(item => String(item.url || '') === safeUrl)) {
+        await this.addComposerUrl(safeUrl);
+      }
+
+      const storedSource = this.topicSources.find(item => String(item.url || '') === safeUrl) || source;
+      storedSource.url = safeUrl;
+      storedSource.verified = true;
+
+      const youtubeMeta = this.getYoutubeVideoMeta(safeUrl);
+      const suggestion = youtubeMeta
+        ? await this.inferYoutubeDraftFromEvidence(storedSource)
+        : await this.inferDraftFromEvidenceSource(storedSource);
+
+      this.applyEvidenceDraftSuggestion(storedSource, suggestion, {
+        evidenceDriven: true,
+        forcePopulate: true
+      });
+
+      const mediaAdded = youtubeMeta
+        ? false
+        : await this.addEvidenceImageCandidate(storedSource, suggestion);
+
+      if (youtubeMeta) {
+        storedSource.category = storedSource.category || 'media';
+        storedSource.provider = 'youtube';
+      }
+
+      this.topicBuilderTab = 'describe';
+      this.showSourceEditor = true;
+      this.setTopicDraftStatus({
+        ...(this.topicDraftStatus || {}),
+        state: this.topicDraftStatus?.state || 'unsaved',
+        title: this.topicFormState.title || 'Topic draft',
+        message: youtubeMeta
+          ? 'YouTube metadata and available notes populated the draft. Review before saving.'
+          : (mediaAdded
+            ? 'Website source populated the draft and attached a media candidate. Review before saving.'
+            : 'Website source populated the draft fields that could be inferred. Review before saving.')
+      });
+      this.renderCreateTopic({ preserveState: true });
+    } catch (error) {
+      console.error('[Autopopulate] Could not populate topic draft:', error);
+      alert(this.getActionErrorMessage(error, 'Autopopulate'));
+      if (btn) {
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+      }
+    }
+  }
+
+  async inferYoutubeDraftFromEvidence(source = {}) {
+    const metadata = await this.fetchYoutubeMetadata(source.url || '');
+    const transcript = String(source.adminNotes || source.transcript || '').trim();
+    const fallbackSuggestion = this.buildYoutubeFallbackSuggestion(source, metadata, transcript);
+    if (!window.ourEarthAI?.createChatCompletion) {
+      return fallbackSuggestion;
+    }
+
+    const metadataText = [
+      metadata?.title ? `Title: ${metadata.title}` : '',
+      metadata?.authorName ? `Channel: ${metadata.authorName}` : '',
+      metadata?.watchUrl ? `URL: ${metadata.watchUrl}` : (source.url ? `URL: ${source.url}` : ''),
+      metadata?.videoId ? `Video ID: ${metadata.videoId}` : ''
+    ].filter(Boolean).join('\n');
+
+    const completion = await window.ourEarthAI.createChatCompletion({
+      messages: [
+        {
+          role: 'system',
+          content: 'You turn YouTube source metadata and optional pasted transcript notes into cautious topic.earth draft metadata. Return strict JSON only.'
+        },
+        {
+          role: 'user',
+          content: `Autopopulate a topic.earth draft from this YouTube evidence. Prefer transcript/notes when present; otherwise use metadata only and say metadata-only in the summary or evidence note.
+
+Current draft:
+Title: ${this.topicFormState.title || ''}
+Layer/category: ${this.topicFormState.category || ''}
+Summary: ${this.topicFormState.summary || ''}
+Location: ${[this.topicFormState.region, this.topicFormState.country].filter(Boolean).join(', ') || ''}
+
+YouTube metadata:
+${metadataText || `URL: ${source.url || ''}`}
+
+${transcript ? `Transcript or notes:\n${transcript}` : 'Transcript status: not provided.'}
+
+Available layer IDs and names:
+${this.layers.map(layer => `- ${layer.id}: ${layer.name}`).join('\n')}
+
+Return ONLY JSON:
+{
+  "title": "concise topic title",
+  "category": "best layer id from the list, or empty",
+  "summary": "1-2 sentence topic summary",
+  "country": "country if clear",
+  "region": "region, city, or subject location if clear",
+  "lat": 0,
+  "lon": 0,
+  "sourceName": "best source/video title"
+}
+
+Rules:
+- Do not invent location or coordinates.
+- If transcript is absent, do not claim facts beyond metadata.`
+        }
+      ],
+      json: true,
+      temperature: 0.2
+    });
+
+    return {
+      ...fallbackSuggestion,
+      ...this.parseAiJsonObject(completion.content || '', 'YouTube autopopulate JSON'),
+      sourceName: metadata?.title || fallbackSuggestion.sourceName || source.name || 'YouTube evidence'
+    };
   }
 
   async inferDraftFromEvidenceSource(source = {}) {
     const url = this.sanitizeUrl(source.url || '');
-    const fallbackSuggestion = this.buildEvidenceUrlFallbackSuggestion(source);
     if (!url || !window.ourEarthAI?.createChatCompletion) {
-      return fallbackSuggestion;
+      return this.buildEvidenceUrlFallbackSuggestion(source);
     }
 
     const prompt = `Use this evidence URL to help fill a topic.earth draft. Prefer facts visible in the URL, source title, and likely page metadata. If you cannot know a field, leave it empty instead of inventing.
@@ -7737,40 +8146,29 @@ Return ONLY JSON:
   "summary": "1-2 sentence summary",
   "country": "country if clear",
   "region": "city, commune, region, or locality if clear",
-  "lat": "",
-  "lon": "",
+  "lat": 0,
+  "lon": 0,
   "sourceName": "better source name",
   "imageUrl": "direct image URL if available",
   "imageCaption": "short caption"
 }`;
 
-    try {
-      const completion = await window.ourEarthAI.createChatCompletion({
-        messages: [
-          {
-            role: 'system',
-            content: 'You turn source URLs into cautious topic draft metadata. Return strict JSON only. Do not fabricate coordinates or image URLs.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        json: true,
-        temperature: 0.1
-      });
+    const completion = await window.ourEarthAI.createChatCompletion({
+      messages: [
+        {
+          role: 'system',
+          content: 'You turn source URLs into cautious topic draft metadata. Return strict JSON only. Do not fabricate coordinates or image URLs.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      json: true,
+      temperature: 0.1
+    });
 
-      return {
-        ...fallbackSuggestion,
-        ...Object.fromEntries(
-          Object.entries(this.parseAiJsonObject(completion.content || '', 'evidence source draft JSON'))
-            .filter(([, value]) => String(value ?? '').trim())
-        )
-      };
-    } catch (error) {
-      console.warn('[Evidence] AI source inference failed; using URL fallback:', error);
-      return fallbackSuggestion;
-    }
+    return this.parseAiJsonObject(completion.content || '', 'evidence source draft JSON');
   }
 
   buildEvidenceUrlFallbackSuggestion(source = {}) {
@@ -7787,16 +8185,13 @@ Return ONLY JSON:
         ?.replace(/\.[a-z0-9]+$/i, '')
         .replace(/[-_]+/g, ' ')
         .trim() || '';
-      const slugTitle = slugText
+      const title = slugText
         ? slugText.replace(/\b\w/g, char => char.toUpperCase())
         : '';
       const lowerHaystack = `${host} ${url.pathname}`.toLowerCase();
-      const sourceName = String(source.name || '').trim();
-      const title = sourceName || slugTitle;
       const suggestion = {
         title,
-        sourceName: sourceName || host,
-        sourceUrl: safeUrl
+        sourceName: source.name || host
       };
 
       if (host.endsWith('.be')) {
@@ -7805,11 +8200,6 @@ Return ONLY JSON:
       if (lowerHaystack.includes('anthisnes') || lowerHaystack.includes('limont')) {
         suggestion.region = 'Limont (Anthisnes)';
         suggestion.country = suggestion.country || 'Belgium';
-        suggestion.category = 'regional-news';
-        suggestion.summary = `${title || 'This source'} points to a local event or update in Limont, Anthisnes. Keep this as a draft until the source text is reviewed.`;
-      } else if (host.endsWith('.be') || lowerHaystack.includes('commune') || lowerHaystack.includes('event') || lowerHaystack.includes('fete')) {
-        suggestion.category = 'regional-news';
-        suggestion.summary = `${title || 'This source'} appears to be a local or regional source. Review the page, then refine the summary before saving.`;
       }
 
       return suggestion;
@@ -7818,35 +8208,50 @@ Return ONLY JSON:
     }
   }
 
-  applyEvidenceDraftSuggestion(source = {}, suggestion = {}) {
+  applyEvidenceDraftSuggestion(source = {}, suggestion = {}, options = {}) {
     const safeUrl = this.sanitizeUrl(source.url || '');
     const text = value => String(value || '').trim();
     const numericText = value => {
       const number = Number(value);
       return Number.isFinite(number) ? String(number) : '';
     };
+    const shouldPopulate = (field, currentValue = '') => {
+      if (options.forcePopulate) return true;
+      const value = text(currentValue).toLowerCase();
+      if (!value) return true;
+      if (field === 'title') {
+        return ['untitled draft', 'topic draft', 'new topic draft', 'saved topic'].includes(value);
+      }
+      if (field === 'category') {
+        return ['custom', 'world', 'regional-news'].includes(value) && Boolean(options.evidenceDriven);
+      }
+      return false;
+    };
 
-    if (text(suggestion.sourceName) && !text(source.name)) {
+    if (text(suggestion.sourceName) && (options.forcePopulate || !text(source.name))) {
       source.name = text(suggestion.sourceName);
     }
-    const inferredTitle = text(suggestion.title) || text(source.name) || text(suggestion.sourceName);
-    if (inferredTitle && !text(this.topicFormState.title)) {
-      this.topicFormState.title = inferredTitle.slice(0, 140);
+    if (text(suggestion.title) && shouldPopulate('title', this.topicFormState.title)) {
+      this.topicFormState.title = text(suggestion.title).slice(0, 140);
     }
-    if (text(suggestion.summary) && !text(this.topicFormState.summary)) {
+    const suggestedLayerId = this.getLayerIdFromSuggestion(suggestion);
+    if (suggestedLayerId && shouldPopulate('category', this.topicFormState.category)) {
+      this.topicFormState.category = suggestedLayerId;
+      this.autoSetupForLayer(suggestedLayerId);
+    }
+    if (text(suggestion.summary) && shouldPopulate('summary', this.topicFormState.summary)) {
       this.topicFormState.summary = text(suggestion.summary);
     }
-    if (text(suggestion.country) && !text(this.topicFormState.country)) {
+    if (text(suggestion.country) && shouldPopulate('country', this.topicFormState.country)) {
       this.topicFormState.country = text(suggestion.country);
     }
-    if (text(suggestion.region) && !text(this.topicFormState.region)) {
+    if (text(suggestion.region) && shouldPopulate('region', this.topicFormState.region)) {
       this.topicFormState.region = text(suggestion.region);
     }
 
     const lat = numericText(suggestion.lat);
     const lon = numericText(suggestion.lon);
-    const isEmptyCoordinatePlaceholder = Number(lat) === 0 && Number(lon) === 0;
-    if (lat && lon && !isEmptyCoordinatePlaceholder && !text(this.topicFormState.lat) && !text(this.topicFormState.lon)) {
+    if (lat && lon && !text(this.topicFormState.lat) && !text(this.topicFormState.lon)) {
       this.topicFormState.lat = lat;
       this.topicFormState.lon = lon;
     }
@@ -7854,27 +8259,55 @@ Return ONLY JSON:
     if (!text(this.topicFormState.source)) {
       this.topicFormState.source = source.name || this.getHostFromUrl(safeUrl) || safeUrl;
     }
+  }
 
-    const inferredCategory = text(suggestion.category)
-      || (this.isRegionalProposalWorkspace() ? this.getRegionalProposalDefaultLayerId() : '')
-      || (text(this.topicFormState.region) || text(this.topicFormState.country) ? 'regional-news' : '');
-    if (inferredCategory && !text(this.topicFormState.category)) {
-      const layerExists = this.layers.some(layer => layer.id === inferredCategory);
-      this.topicFormState.category = layerExists
-        ? inferredCategory
-        : this.layers.find(layer => !layer.isGroup)?.id || '';
-      if (this.topicFormState.category) {
-        this.autoSetupForLayer(this.topicFormState.category);
+  getLayerIdFromSuggestion(suggestion = {}) {
+    const raw = String(suggestion.category || suggestion.layer || suggestion.layerId || '').trim();
+    if (!raw) return '';
+
+    const normalized = raw.toLowerCase().replace(/[^\w]+/g, '');
+    const exact = this.layers.find(layer => String(layer.id || '').toLowerCase() === raw.toLowerCase());
+    if (exact) return exact.id;
+
+    const byName = this.layers.find(layer => {
+      const layerName = String(layer.name || '').toLowerCase().replace(/[^\w]+/g, '');
+      const layerId = String(layer.id || '').toLowerCase().replace(/[^\w]+/g, '');
+      return layerName === normalized || layerId === normalized || layerName.includes(normalized) || normalized.includes(layerName);
+    });
+
+    return byName?.id || '';
+  }
+
+  inferLayerIdFromEvidenceText(text = '') {
+    const value = String(text || '').toLowerCase();
+    const keywordMap = [
+      ['climate', ['climate', 'warming', 'temperature', 'el nino', 'el niño', 'superelnino', 'superelniño', 'ocean heat', 'carbon']],
+      ['extreme', ['hurricane', 'flood', 'wildfire', 'drought', 'heatwave', 'extreme event', 'storm']],
+      ['meteo', ['weather', 'forecast', 'rain', 'wind', 'cloud', 'meteo']],
+      ['space', ['space', 'satellite', 'solar', 'asteroid', 'orbit']],
+      ['world', ['global', 'world', 'international']]
+    ];
+
+    for (const [layerId, keywords] of keywordMap) {
+      if (keywords.some(keyword => value.includes(keyword))) {
+        return this.layers.some(layer => layer.id === layerId) ? layerId : '';
       }
     }
 
-    if (!text(this.composerSmartInput)) {
-      this.composerSmartInput = [
-        this.topicFormState.title,
-        this.topicFormState.summary,
-        safeUrl
-      ].filter(Boolean).join('\n');
-    }
+    return '';
+  }
+
+  buildYoutubeFallbackSuggestion(source = {}, metadata = null, transcript = '') {
+    const title = String(metadata?.title || source.name || '').trim();
+    const evidenceText = [title, metadata?.authorName, transcript, source.adminNotes].filter(Boolean).join('\n');
+    return {
+      title,
+      category: this.inferLayerIdFromEvidenceText(evidenceText),
+      summary: transcript
+        ? this.trimWords(transcript, 46)
+        : `Metadata-only YouTube evidence from ${metadata?.authorName || 'YouTube'}: ${title || metadata?.watchUrl || source.url || 'linked video'}.`,
+      sourceName: title || 'YouTube evidence'
+    };
   }
 
   async addEvidenceImageCandidate(source = {}, suggestion = {}) {
@@ -7919,18 +8352,13 @@ Return ONLY JSON:
       source.verified = true;
       source.url = this.sanitizeUrl(url.href) || url.href;
       this.saveFormState();
-      source.verified = true;
-      source.url = this.sanitizeUrl(url.href) || url.href;
       let mediaAdded = false;
       try {
         const suggestion = await this.inferDraftFromEvidenceSource(source);
         this.applyEvidenceDraftSuggestion(source, suggestion);
-        await this.ensureDraftCoordinatesFromPlace({ silent: true });
         mediaAdded = await this.addEvidenceImageCandidate(source, suggestion);
       } catch (hydrateError) {
         console.warn('[Evidence] Could not hydrate draft from source URL:', hydrateError);
-        this.applyEvidenceDraftSuggestion(source, this.buildEvidenceUrlFallbackSuggestion(source));
-        await this.ensureDraftCoordinatesFromPlace({ silent: true });
         mediaAdded = await this.addEvidenceImageCandidate(source, {});
       }
       
@@ -7942,8 +8370,7 @@ Return ONLY JSON:
           ? 'Evidence verified, draft fields updated, and a media candidate was attached.'
           : 'Evidence verified and draft fields updated where the source URL was clear.'
       });
-      
-      this.renderCreateTopic();
+      this.renderCreateTopic({ preserveState: true });
       
       setTimeout(() => {
         btn.innerHTML = originalHTML;
@@ -8012,7 +8439,7 @@ Return ONLY JSON:
         });
       }
       
-      this.renderCreateTopic();
+      this.renderCreateTopic({ preserveState: true });
       
       btn.innerHTML = 'Added';
       setTimeout(() => {
@@ -8106,6 +8533,25 @@ Return ONLY JSON:
     }
 
     try {
+      const youtubeMeta = this.getYoutubeVideoMeta(url);
+      if (youtubeMeta) {
+        const youtubeDetails = await this.fetchYoutubeMetadata(url);
+        this.mediaUrlPreviewToken = this.createMediaToken({
+          url: youtubeDetails?.thumbnailUrl || youtubeMeta.thumbnailUrl,
+          sourceUrl: youtubeMeta.watchUrl,
+          sourceName: youtubeDetails?.title || 'YouTube evidence',
+          provider: 'youtube',
+          mediaType: 'youtube',
+          embedUrl: youtubeMeta.embedUrl,
+          thumbnailUrl: youtubeDetails?.thumbnailUrl || youtubeMeta.thumbnailUrl,
+          videoId: youtubeMeta.videoId,
+          authorName: youtubeDetails?.authorName || ''
+        });
+        this.showMediaUrlInput = true;
+        this.renderCreateTopic({ preserveState: true });
+        return;
+      }
+
       const token = await this.resolveImageUrlToken(url);
       if (!token?.url) {
         this.mediaUrlPreviewToken = null;
@@ -8116,7 +8562,7 @@ Return ONLY JSON:
 
       this.mediaUrlPreviewToken = token;
       this.showMediaUrlInput = true;
-      this.renderCreateTopic();
+      this.renderCreateTopic({ preserveState: true });
     } catch (error) {
       console.error('Error previewing URL media:', error);
       alert(this.getActionErrorMessage(error, 'Image URL preview'));
@@ -8188,7 +8634,7 @@ Return ONLY JSON:
 
       source.mediaTokenId = token.id;
       source.verified = true;
-      this.renderCreateTopic();
+      this.renderCreateTopic({ preserveState: true });
 
       if (btn) {
         btn.innerHTML = 'Added';
@@ -8252,7 +8698,7 @@ Return ONLY JSON:
           mediaTokenId: mediaToken.id
         });
 
-        this.renderCreateTopic();
+        this.renderCreateTopic({ preserveState: true });
 
         if (btn) {
           btn.innerHTML = 'Added';
@@ -8345,7 +8791,7 @@ Return ONLY JSON:
     const rawUrl = String(url || '').trim();
     if (!rawUrl) {
       this.showMediaUrlInput = true;
-      this.renderCreateTopic();
+      this.renderCreateTopic({ preserveState: true });
       this.emitTutorialEvent('topicMediaUrlOpened', { source: 'empty-url' }, 60);
       return;
     }
@@ -8355,6 +8801,41 @@ Return ONLY JSON:
       : this.sanitizeUrl(rawUrl);
     if (!safeUrl) {
       alert('Invalid URL format');
+      return;
+    }
+
+    const youtubeMeta = this.getYoutubeVideoMeta(safeUrl);
+    if (youtubeMeta) {
+      const youtubeDetails = await this.fetchYoutubeMetadata(safeUrl);
+      const mediaToken = this.createMediaToken({
+        url: youtubeDetails?.thumbnailUrl || youtubeMeta.thumbnailUrl,
+        sourceUrl: safeUrl,
+        sourceName: youtubeDetails?.title || this.getHostFromUrl(safeUrl) || 'YouTube',
+        provider: 'youtube',
+        mediaType: 'youtube',
+        embedUrl: youtubeMeta.embedUrl,
+        thumbnailUrl: youtubeDetails?.thumbnailUrl || youtubeMeta.thumbnailUrl,
+        videoId: youtubeMeta.videoId,
+        authorName: youtubeDetails?.authorName || ''
+      });
+      this.addMediaTokenToCurrentPoint(mediaToken);
+      if (!this.topicSources.some(source => String(source.url || '') === safeUrl)) {
+        this.topicSources.push({
+          name: youtubeDetails?.title || 'YouTube evidence',
+          url: safeUrl,
+          category: 'media',
+          reliability: 'unknown',
+          verified: true,
+          linkOnly: true,
+          provider: 'youtube',
+          authorName: youtubeDetails?.authorName || '',
+          mediaTokenId: mediaToken.id
+        });
+      }
+      this.showMediaUrlInput = false;
+      this.mediaUrlDraftUrl = '';
+      this.mediaUrlPreviewToken = null;
+      this.renderCreateTopic({ preserveState: true });
       return;
     }
 
@@ -8620,17 +9101,11 @@ The summary should be factual, informative, focus on the latest/most recent deve
 
     const title = String(this.topicFormState.title || '').trim();
     const summary = String(this.topicFormState.summary || '').trim();
-    const sourceHint = (this.topicSources || [])
-      .filter(source => source.name || source.url)
-      .slice(0, 3)
-      .map(source => [source.name, source.url].filter(Boolean).join(' - '))
-      .join('\n');
     if (!title && !summary) {
-      alert('Add a title, summary, or verified evidence first, then run Web Search.');
+      alert('Add a title or summary first, then check the web.');
       return;
     }
 
-    const returnTab = button?.dataset?.returnTab || this.topicBuilderTab || 'describe';
     const status = this.container.querySelector('[data-draft-www-status]');
     const originalHTML = button?.innerHTML || '';
     if (button) {
@@ -8648,8 +9123,6 @@ The summary should be factual, informative, focus on the latest/most recent deve
 
 Topic: ${title || '[untitled]'}
 Summary: ${summary || '[no summary]'}
-Current evidence:
-${sourceHint || '[none yet]'}
 Layer/category: ${layer?.name || this.topicFormState.category || 'general'}
 Location: ${location || 'not specified'}
 Draft date: ${this.topicFormState.date || 'not specified'}
@@ -8695,14 +9168,14 @@ Rules:
       const parsed = this.parseDraftWebEvidenceResponse(completion.content || '');
       const applied = this.applyDraftWebEvidenceResult(parsed);
       this.showSourceEditor = true;
-      this.topicBuilderTab = this.normalizeTopicBuilderTab(returnTab);
+      this.topicBuilderTab = 'describe';
       this.setTopicDraftStatus({
         ...(this.topicDraftStatus || {}),
         state: this.topicDraftStatus?.state || 'unsaved',
         title: this.topicFormState.title || this.topicDraftStatus?.title || 'Topic draft',
         message: `${applied.sources} source${applied.sources === 1 ? '' : 's'} and ${applied.media} media candidate${applied.media === 1 ? '' : 's'} added from ${apiSummary.textProviderName || apiSummary.textProvider || 'linked AI'}.`
       });
-      this.renderCreateTopic();
+      this.renderCreateTopic({ preserveState: true });
     } catch (error) {
       console.error('[Draft WWW] Web evidence check failed:', error);
       if (status) status.textContent = this.getActionErrorMessage(error, 'Draft web check');
@@ -8834,147 +9307,76 @@ Provide expert analysis focusing on the latest developments, potential implicati
     }
   }
 
-  buildDraftLocationString(form = null) {
-    const country = form?.querySelector('#topic-country')?.value || this.topicFormState.country || '';
-    const region = form?.querySelector('#topic-region')?.value || this.topicFormState.region || '';
-    const title = form?.querySelector('#topic-title')?.value || this.topicFormState.title || '';
-    const location = [region, country].filter(Boolean).join(', ');
-    return location || title;
-  }
-
-  normalizeCoordinateResult(coords = {}) {
-    const lat = Number(coords.lat ?? coords.latitude);
-    const lon = Number(coords.lon ?? coords.lng ?? coords.longitude);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
-    return { lat, lon };
-  }
-
-  async geocodeDraftPlaceWithNominatim(locationString = '') {
-    const query = String(locationString || '').trim();
-    if (!query) return null;
-
-    const url = new URL('https://nominatim.openstreetmap.org/search');
-    url.searchParams.set('format', 'jsonv2');
-    url.searchParams.set('limit', '1');
-    url.searchParams.set('q', query);
-
-    const response = await fetch(url.toString(), {
-      headers: { Accept: 'application/json' }
-    });
-    if (!response.ok) return null;
-
-    const results = await response.json();
-    const first = Array.isArray(results) ? results[0] : null;
-    return this.normalizeCoordinateResult(first || {});
-  }
-
-  getKnownPlaceCoordinates(locationString = '') {
-    const normalizedLocation = String(locationString || '').toLowerCase();
-    if (normalizedLocation.includes('limont') && normalizedLocation.includes('anthisnes')) {
-      return { lat: 50.5077401, lon: 5.4922980 };
+  async generateCoordinates() {
+    const form = this.container.querySelector('#topic-form');
+    const countryInput = form.querySelector('#topic-country');
+    const regionInput = form.querySelector('#topic-region');
+    const titleInput = form.querySelector('#topic-title');
+    const latInput = form.querySelector('#topic-lat');
+    const lonInput = form.querySelector('#topic-lon');
+    const btn = this.container.querySelector('[data-action="generate-coordinates"]');
+    
+    if (!countryInput?.value && !regionInput?.value && !titleInput?.value) {
+      alert('Please enter a country, region, or title first');
+      return;
     }
-    return null;
-  }
-
-  async geocodeDraftPlaceWithAi(locationString = '') {
-    if (!window.ourEarthAI?.createChatCompletion) return null;
-
-    const prompt = `Provide the precise geographic coordinates (latitude and longitude) for: ${locationString}
+    
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<div class="spinner-small"></div> Finding...';
+    btn.disabled = true;
+    
+    try {
+      let locationString = '';
+      if (regionInput?.value) locationString += regionInput.value;
+      if (countryInput?.value) {
+        locationString += (locationString ? ', ' : '') + countryInput.value;
+      }
+      if (!locationString) locationString = titleInput.value;
+      
+      const prompt = `Provide the precise geographic coordinates (latitude and longitude) for: ${locationString}
 
 Return ONLY a JSON object with this exact format, no other text:
 {
   "lat": <latitude as number>,
   "lon": <longitude as number>
 }`;
-
-    const completion = await window.ourEarthAI.createChatCompletion({
-      messages: [
-        {
-          role: "system",
-          content: "You are a geocoding assistant. Return precise coordinates in JSON format only."
-        },
-        {
-          role: "user",
-          content: prompt
+      
+      const completion = await window.ourEarthAI.createChatCompletion({
+        messages: [
+          {
+            role: "system",
+            content: "You are a geocoding assistant. Return precise coordinates in JSON format only."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        json: true
+      });
+      
+      const coords = JSON.parse(completion.content);
+      
+      if (coords.lat && coords.lon && !isNaN(coords.lat) && !isNaN(coords.lon)) {
+        latInput.value = coords.lat.toFixed(4);
+        lonInput.value = coords.lon.toFixed(4);
+        this.topicFormState.lat = coords.lat.toFixed(4);
+        this.topicFormState.lon = coords.lon.toFixed(4);
+        
+        // Update globe view immediately
+        if (this.callbacks.onShow) {
+          this.callbacks.onShow({ lat: coords.lat, lon: coords.lon });
         }
-      ],
-      json: true
-    });
-
-    return this.normalizeCoordinateResult(this.parseAiJsonObject(completion.content || '', 'coordinate JSON'));
-  }
-
-  applyDraftCoordinates(coords = {}, form = null) {
-    const normalized = this.normalizeCoordinateResult(coords);
-    if (!normalized) return false;
-
-    const latValue = normalized.lat.toFixed(4);
-    const lonValue = normalized.lon.toFixed(4);
-    this.topicFormState.lat = latValue;
-    this.topicFormState.lon = lonValue;
-
-    const latInput = form?.querySelector('#topic-lat') || this.container.querySelector('#topic-lat');
-    const lonInput = form?.querySelector('#topic-lon') || this.container.querySelector('#topic-lon');
-    if (latInput) latInput.value = latValue;
-    if (lonInput) lonInput.value = lonValue;
-
-    if (this.callbacks.onShow) {
-      this.callbacks.onShow({ lat: normalized.lat, lon: normalized.lon });
-    }
-
-    return true;
-  }
-
-  async ensureDraftCoordinatesFromPlace(options = {}) {
-    const form = this.container.querySelector('#topic-form');
-    const existingLatText = String(this.topicFormState.lat || form?.querySelector('#topic-lat')?.value || '').trim();
-    const existingLonText = String(this.topicFormState.lon || form?.querySelector('#topic-lon')?.value || '').trim();
-    const existingLat = Number(existingLatText);
-    const existingLon = Number(existingLonText);
-    if (existingLatText && existingLonText && Number.isFinite(existingLat) && Number.isFinite(existingLon)) return true;
-
-    const locationString = this.buildDraftLocationString(form);
-    if (!locationString) return false;
-
-    try {
-      const coords = await this.geocodeDraftPlaceWithNominatim(locationString)
-        || this.getKnownPlaceCoordinates(locationString)
-        || await this.geocodeDraftPlaceWithAi(locationString);
-      if (!coords) throw new Error(`No coordinates found for ${locationString}`);
-      return this.applyDraftCoordinates(coords, form);
-    } catch (error) {
-      if (!options.silent) {
-        throw error;
+        
+        btn.innerHTML = 'Found';
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.disabled = false;
+        }, 2000);
+      } else {
+        throw new Error('Invalid coordinates received');
       }
-      console.warn('[Coordinates] Could not auto-fill draft coordinates:', error);
-      return false;
-    }
-  }
-
-  async generateCoordinates() {
-    const form = this.container.querySelector('#topic-form');
-    const btn = this.container.querySelector('[data-action="generate-coordinates"]');
-    const locationString = this.buildDraftLocationString(form);
-
-    if (!locationString) {
-      alert('Please enter a country, region, or title first');
-      return;
-    }
-
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<div class="spinner-small"></div> Finding...';
-    btn.disabled = true;
-
-    try {
-      const found = await this.ensureDraftCoordinatesFromPlace();
-      if (!found) throw new Error('Invalid coordinates received');
-
-      btn.innerHTML = 'Found';
-      setTimeout(() => {
-        btn.innerHTML = originalHTML;
-        btn.disabled = false;
-      }, 2000);
+      
     } catch (error) {
       console.error('Error generating coordinates:', error);
       alert(this.getActionErrorMessage(error, 'Coordinate suggestion'));
@@ -9084,6 +9486,17 @@ Return ONLY a JSON object with this exact format, no other text:
         outputIntent: this.topicResearchSettings.outputIntent
       },
       researchSources: this.topicSources || [],
+      ...(this.currentPoint?.isAutoMeteoEvent && {
+        isRealtimeMeteo: true,
+        isAutoMeteoEvent: true,
+        eventType: this.currentPoint.eventType || '',
+        severity: this.currentPoint.severity || '',
+        severityScore: this.currentPoint.severityScore || '',
+        confidence: this.currentPoint.confidence || '',
+        meteo: this.currentPoint.meteo && typeof this.currentPoint.meteo === 'object'
+          ? JSON.parse(JSON.stringify(this.currentPoint.meteo))
+          : null
+      }),
       // Preserve fever warning properties
       ...(this.currentPoint?.isFeverWarning && {
         isFeverWarning: true,
@@ -9285,6 +9698,282 @@ Return ONLY a JSON object with this exact format, no other text:
     return createTopicMediaToken(input);
   }
 
+  getYoutubeVideoMeta(url = '') {
+    const safeUrl = this.sanitizeUrl(url);
+    if (!safeUrl) return null;
+
+    try {
+      const parsed = new URL(safeUrl);
+      const host = parsed.hostname.replace(/^www\./, '').toLowerCase();
+      let videoId = '';
+
+      if (host === 'youtu.be') {
+        videoId = parsed.pathname.split('/').filter(Boolean)[0] || '';
+      } else if (host.endsWith('youtube.com')) {
+        if (parsed.pathname.startsWith('/watch')) {
+          videoId = parsed.searchParams.get('v') || '';
+        } else if (parsed.pathname.startsWith('/embed/') || parsed.pathname.startsWith('/shorts/')) {
+          videoId = parsed.pathname.split('/').filter(Boolean)[1] || '';
+        }
+      }
+
+      if (!/^[a-zA-Z0-9_-]{6,}$/.test(videoId)) return null;
+
+      return {
+        videoId,
+        watchUrl: `https://www.youtube.com/watch?v=${videoId}`,
+        embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
+        thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  async fetchYoutubeMetadata(url = '') {
+    const youtubeMeta = this.getYoutubeVideoMeta(url);
+    if (!youtubeMeta) return null;
+
+    try {
+      const endpoint = `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(youtubeMeta.watchUrl)}`;
+      const response = await fetch(endpoint, { cache: 'force-cache' });
+      if (!response.ok) throw new Error(`YouTube metadata returned ${response.status}`);
+      const data = await response.json();
+      return {
+        ...youtubeMeta,
+        title: String(data.title || '').trim(),
+        authorName: String(data.author_name || '').trim(),
+        authorUrl: String(data.author_url || '').trim(),
+        thumbnailUrl: String(data.thumbnail_url || youtubeMeta.thumbnailUrl).trim()
+      };
+    } catch (error) {
+      console.warn('[YouTube Evidence] Metadata fallback only:', error);
+      return youtubeMeta;
+    }
+  }
+
+  renderSourcePreviewControls(source = {}, index = 0) {
+    const youtubeMeta = this.getYoutubeVideoMeta(source.url || '');
+    const notes = String(source.adminNotes || source.transcript || '').trim();
+    const metadataLine = youtubeMeta
+      ? [source.authorName, youtubeMeta.videoId].filter(Boolean).join(' | ')
+      : '';
+
+    return `
+      <textarea
+        class="source-notes-input"
+        rows="${youtubeMeta ? 4 : 2}"
+        placeholder="${youtubeMeta ? 'Paste YouTube transcript or notes here to summarize into the topic' : 'Optional evidence notes'}"
+        data-index="${index}"
+        data-field="adminNotes"
+      >${this.escapeHtml(notes)}</textarea>
+      ${youtubeMeta ? `
+        <div class="youtube-evidence-editor-preview">
+          <button type="button" class="youtube-preview-button" data-action="zoom-topic-media" data-media-url="${this.escapeHtml(youtubeMeta.embedUrl)}" data-media-caption="${this.escapeHtml(source.name || 'YouTube evidence')}">
+            <img src="${this.escapeHtml(youtubeMeta.thumbnailUrl)}" alt="" loading="lazy">
+            <span>Play inline</span>
+          </button>
+          <button type="button" class="source-action-text-btn" data-action="summarize-youtube-evidence" data-index="${index}">
+            Summarize evidence
+          </button>
+        </div>
+        ${metadataLine ? `<div class="youtube-metadata-line">${this.escapeHtml(metadataLine)}</div>` : ''}
+      ` : ''}
+    `;
+  }
+
+  renderYoutubeSourcePreview(source = {}) {
+    const youtubeMeta = this.getYoutubeVideoMeta(source.url || '');
+    if (!youtubeMeta) return '';
+
+    return `
+      <button
+        type="button"
+        class="youtube-source-preview"
+        data-action="zoom-topic-media"
+        data-media-url="${this.escapeHtml(youtubeMeta.embedUrl)}"
+        data-media-caption="${this.escapeHtml(source.name || 'YouTube evidence')}"
+        title="Play video inside the panel"
+      >
+        <img src="${this.escapeHtml(youtubeMeta.thumbnailUrl)}" alt="" loading="lazy">
+        <span>Inline video</span>
+      </button>
+    `;
+  }
+
+  isTopicEarthUrl(url = '') {
+    const safeUrl = this.sanitizeUrl(url);
+    if (!safeUrl) return false;
+
+    try {
+      const host = new URL(safeUrl).hostname.replace(/^www\./, '').toLowerCase();
+      return host === 'topic.earth' || host.endsWith('.topic.earth') || host === window.location.hostname.replace(/^www\./, '').toLowerCase();
+    } catch {
+      return false;
+    }
+  }
+
+  renderExternalSourceBadge(source = {}) {
+    if (!source.url || this.isTopicEarthUrl(source.url)) return '';
+
+    return `
+      <span class="external-source-badge" title="External evidence URL">
+        External: ${this.escapeHtml(this.getHostFromUrl(source.url) || 'web')}
+      </span>
+    `;
+  }
+
+  async summarizeYoutubeEvidence(target = null) {
+    const index = parseInt(target?.dataset.index, 10);
+    const source = Number.isFinite(index) ? this.topicSources[index] : null;
+    if (!source) return;
+
+    this.syncSourceEditorState(target?.closest('.source-editor-item') || this.container);
+    this.saveFormState();
+    this.syncSourceEditorState(target?.closest('.source-editor-item') || this.container);
+    const liveNotes = target
+      ?.closest('.source-editor-item')
+      ?.querySelector('.source-notes-input')
+      ?.value;
+    const transcript = String(liveNotes ?? source.adminNotes ?? source.transcript ?? '').trim();
+    source.adminNotes = transcript;
+    source.transcript = transcript;
+    const metadata = await this.fetchYoutubeMetadata(source.url || '');
+    const metadataText = [
+      metadata?.title ? `Title: ${metadata.title}` : '',
+      metadata?.authorName ? `Channel: ${metadata.authorName}` : '',
+      metadata?.watchUrl ? `URL: ${metadata.watchUrl}` : (source.url ? `URL: ${source.url}` : ''),
+      metadata?.videoId ? `Video ID: ${metadata.videoId}` : ''
+    ].filter(Boolean).join('\n');
+
+    const btn = target;
+    const originalText = btn?.textContent || '';
+    if (btn) {
+      btn.textContent = 'Summarizing...';
+      btn.disabled = true;
+    }
+
+    try {
+      const completion = await window.ourEarthAI.createChatCompletion({
+        messages: [
+          {
+            role: 'system',
+            content: 'You turn YouTube evidence into cautious topic.earth draft metadata. Return strict JSON only. Be factual, concise, and separate transcript-supported claims from metadata-only hints.'
+          },
+          {
+            role: 'user',
+            content: `Use this YouTube evidence to help fill a topic.earth draft. Prefer transcript/notes when present. If transcript is missing, use only public metadata and clearly mark the evidence as metadata-only.
+
+Current draft:
+Title: ${this.topicFormState.title || ''}
+Layer/category: ${this.topicFormState.category || ''}
+Summary: ${this.topicFormState.summary || ''}
+Location: ${[this.topicFormState.region, this.topicFormState.country].filter(Boolean).join(', ') || ''}
+
+YouTube metadata:
+${metadataText || `URL: ${source.url || ''}`}
+
+${transcript ? `Transcript or notes:\n${transcript}` : 'Transcript status: captions or transcript were not provided.'}
+
+Available layer IDs and names:
+${this.layers.map(layer => `- ${layer.id}: ${layer.name}`).join('\n')}
+
+Return ONLY JSON:
+{
+  "title": "concise topic title",
+  "category": "best layer id from the list, or empty",
+  "summary": "1-2 sentence topic summary",
+  "country": "country if clear",
+  "region": "region, city, or subject location if clear",
+  "lat": 0,
+  "lon": 0,
+  "sourceName": "best source/video title",
+  "evidenceNote": "2-3 short bullets or sentences; say metadata-only if no transcript"
+}
+
+Rules:
+- Do not invent location or coordinates.
+- Do not overwrite the user's current topic with unrelated video metadata.
+- If the transcript is absent, the summary must not claim facts beyond title/channel/URL metadata.`
+          }
+        ],
+        json: true,
+        temperature: 0.2
+      });
+
+      const fallbackSuggestion = this.buildYoutubeFallbackSuggestion(source, metadata, transcript);
+      const suggestion = {
+        ...fallbackSuggestion,
+        ...this.parseAiJsonObject(completion.content || '', 'YouTube evidence JSON')
+      };
+      const evidenceNote = this.normalizeResearchResponseText(
+        suggestion.evidenceNote || suggestion.summary || completion.content || ''
+      ).trim();
+      if (evidenceNote || suggestion.summary || suggestion.title) {
+        this.applyEvidenceDraftSuggestion(source, {
+          ...suggestion,
+          sourceName: suggestion.sourceName || metadata?.title || source.name || 'YouTube evidence',
+          title: suggestion.title || metadata?.title || '',
+          summary: suggestion.summary || evidenceNote
+        }, {
+          evidenceDriven: true,
+          forcePopulate: true
+        });
+        source.summary = evidenceNote || suggestion.summary || '';
+        source.category = source.category || 'media';
+        source.provider = 'youtube';
+        source.name = metadata?.title || source.name || 'YouTube evidence';
+        source.authorName = metadata?.authorName || source.authorName || '';
+        source.verified = true;
+        if (evidenceNote && !String(this.topicFormState.insight || '').includes(evidenceNote)) {
+          const currentInsight = String(this.topicFormState.insight || '').trim();
+          this.topicFormState.insight = currentInsight
+            ? `${currentInsight}\n\nYouTube evidence: ${evidenceNote}`
+            : `YouTube evidence: ${evidenceNote}`;
+        }
+        this.topicBuilderTab = 'describe';
+        this.showSourceEditor = true;
+        this.setTopicDraftStatus({
+          ...(this.topicDraftStatus || {}),
+          state: this.topicDraftStatus?.state || 'unsaved',
+          title: this.topicFormState.title || 'Topic draft',
+          message: transcript
+            ? 'YouTube transcript evidence populated the draft fields.'
+            : 'YouTube metadata populated the draft fields where safe; transcript was not available.'
+        });
+        this.renderCreateTopic({ preserveState: true });
+      }
+    } catch (error) {
+      console.error('[YouTube Evidence] Summary failed:', error);
+      const fallbackSuggestion = this.buildYoutubeFallbackSuggestion(source, metadata, transcript);
+      this.applyEvidenceDraftSuggestion(source, fallbackSuggestion, {
+        evidenceDriven: true,
+        forcePopulate: true
+      });
+      source.summary = fallbackSuggestion.summary || '';
+      source.category = source.category || 'media';
+      source.provider = 'youtube';
+      source.name = metadata?.title || source.name || 'YouTube evidence';
+      source.authorName = metadata?.authorName || source.authorName || '';
+      source.verified = true;
+      this.topicBuilderTab = 'describe';
+      this.showSourceEditor = true;
+      this.setTopicDraftStatus({
+        ...(this.topicDraftStatus || {}),
+        state: this.topicDraftStatus?.state || 'unsaved',
+        title: this.topicFormState.title || 'Topic draft',
+        message: transcript
+          ? 'AI summary failed, but pasted YouTube transcript text populated the draft fields.'
+          : 'AI summary failed, but YouTube metadata filled the draft fields that were safe to populate.'
+      });
+      this.renderCreateTopic({ preserveState: true });
+      if (btn) {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    }
+  }
+
   renderTopicManagementSummary(isEditing = false) {
     const requiredFields = [
       this.topicFormState.title,
@@ -9344,35 +10033,12 @@ Return ONLY a JSON object with this exact format, no other text:
     return getTopicMediaTokensForPoint(point);
   }
 
-  isEmbeddableMediaUrl(url = '') {
-    const value = String(url || '').trim();
-    if (!value) return false;
-    return /\.html(?:[?#].*)?$/i.test(value)
-      || /^\/?examples\//i.test(value)
-      || /^\.\/examples\//i.test(value);
-  }
-
   renderMediaTokenImage(token, imageClass = 'generated-image', alt = 'Media image') {
     const normalized = this.normalizeMediaToken(token);
-    if (!normalized?.url && !normalized?.browserAssetKey) return '';
+    if (!normalized?.url && !normalized?.browserAssetKey && !normalized?.thumbnailUrl) return '';
 
     if (!normalized.url && normalized.browserAssetKey) {
       this.scheduleBrowserMediaHydration();
-    }
-
-    if (this.isEmbeddableMediaUrl(normalized.url)) {
-      return `
-        <div class="media-token-frame media-token-frame-embed">
-          <iframe
-            src="${this.escapeHtml(normalized.url)}"
-            title="${this.escapeHtml(alt)}"
-            class="${this.escapeHtml(imageClass)} topic-media-embed-preview"
-            loading="lazy"
-            sandbox="allow-scripts allow-same-origin"
-          ></iframe>
-          <div class="media-token-watermark">${this.escapeHtml(normalized.watermarkText || 'Embedded preview')}</div>
-        </div>
-      `;
     }
 
     const browserAssetAttrs = normalized.browserAssetKey
@@ -9383,15 +10049,16 @@ Return ONLY a JSON object with this exact format, no other text:
     return `
       <div class="media-token-frame">
         <img
-          src="${this.escapeHtml(normalized.url)}"
+          src="${this.escapeHtml(normalized.thumbnailUrl || normalized.url)}"
           alt="${this.escapeHtml(alt)}"
           class="${this.escapeHtml(imageClass + browserAssetClass)}"
-          data-media-url="${this.escapeHtml(normalized.url)}"
+          data-media-url="${this.escapeHtml(normalized.embedUrl || normalized.url)}"
           data-media-source-name="${this.escapeHtml(normalized.sourceName)}"
           data-media-source-url="${this.escapeHtml(normalized.sourceUrl)}"
           data-media-watermark="${this.escapeHtml(normalized.watermarkText)}"
           ${browserAssetAttrs}
         >
+        ${normalized.mediaType === 'youtube' ? '<div class="media-token-play-badge">Play</div>' : ''}
         <div class="media-token-watermark">${this.escapeHtml(normalized.watermarkText)}</div>
       </div>
     `;
@@ -9754,7 +10421,9 @@ Return ONLY a JSON object with this exact format, no other text:
     if (!url) return;
 
     const content = this.container.querySelector('#detail-content');
-    const mediaSection = content?.querySelector('.topic-media-grid')?.closest('.detail-section');
+    const mediaSection = content?.querySelector('.topic-media-grid')?.closest('.detail-section')
+      || content?.querySelector('[data-tutorial-id="topic-evidence"]')
+      || content;
     if (!content || !mediaSection) return;
 
     let zoomPanel = content.querySelector('#topic-media-zoom-panel');
@@ -9765,15 +10434,26 @@ Return ONLY a JSON object with this exact format, no other text:
       mediaSection.appendChild(zoomPanel);
     }
 
-    const isEmbed = this.isEmbeddableMediaUrl(url);
+    const safeUrl = this.sanitizeUrl(url);
+    if (!safeUrl) return;
+    const isVideoEmbed = /youtube(?:-nocookie)?\.com\/embed\//i.test(safeUrl);
+
     zoomPanel.innerHTML = `
       <div class="topic-media-zoom-header">
         <span>${this.escapeHtml(caption || 'Topic media')}</span>
         <button class="topic-media-zoom-close" data-action="close-topic-media-zoom" title="Close media zoom">Close</button>
       </div>
-      ${isEmbed
-        ? `<iframe src="${this.escapeHtml(url)}" title="${this.escapeHtml(caption || 'Topic media')}" class="topic-media-zoom-embed" sandbox="allow-scripts allow-same-origin"></iframe>`
-        : `<img src="${this.escapeHtml(url)}" alt="${this.escapeHtml(caption || 'Topic media')}" class="topic-media-zoom-image">`}
+      ${isVideoEmbed ? `
+        <iframe
+          class="topic-media-zoom-video"
+          src="${this.escapeHtml(safeUrl)}"
+          title="${this.escapeHtml(caption || 'Topic video')}"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+        ></iframe>
+      ` : `
+        <img src="${this.escapeHtml(safeUrl)}" alt="${this.escapeHtml(caption || 'Topic media')}" class="topic-media-zoom-image">
+      `}
     `;
     zoomPanel.classList.remove('hidden');
     zoomPanel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -9789,8 +10469,7 @@ Return ONLY a JSON object with this exact format, no other text:
 
   showSettings(ttsManager) {
     this.mode = 'settings';
-    const compactSettingsPanel = window.matchMedia?.('(max-width: 768px), (max-height: 650px)').matches;
-    this.setPanelSize(compactSettingsPanel ? 'compact' : 'middle');
+    this.setPanelSize('top');
     this.ttsManager = ttsManager;
     this.renderSettings();
     this.container.classList.remove('hidden');
@@ -9983,6 +10662,59 @@ Return ONLY a JSON object with this exact format, no other text:
     window.dispatchEvent(new CustomEvent('settingsChanged', {
       detail: { settings: updatedSettings || Settings.get(), feverResolutionChanged: false }
     }));
+    return updatedSettings;
+  }
+
+  applySettingsFormChange(content, options = {}) {
+    if (!content) return Settings.get();
+
+    const { close = false } = options;
+    const selectedLang = content.querySelector('#ui-language')?.value || null;
+    const currentSettings = Settings.get();
+    const autoDetectLanguage = content.querySelector('#auto-detect-lang')?.checked ?? false;
+    const activeLang = autoDetectLanguage ? LanguageManager.detectBrowserLanguage() : selectedLang;
+    const preferredBrowserVoice = this.getLanguageSafePreferredVoice(
+      activeLang,
+      content.querySelector('#browser-voice')?.value || currentSettings.preferredBrowserVoice || ''
+    ) || null;
+
+    const nextFeverLoopResolution = content.querySelector('#fever-loop-resolution')?.value || 'auto';
+    const oldSettings = Settings.get();
+    const newSettings = {
+      autoDetectLanguage,
+      uiLanguage: autoDetectLanguage ? null : selectedLang,
+      translationLanguage: content.querySelector('[data-action="set-translation-language"].active')?.dataset.language || currentSettings.translationLanguage || selectedLang,
+      tutorialModeEnabled: content.querySelector('#tutorial-mode-enabled')?.checked ?? true,
+      tutorialLevel: content.querySelector('#tutorial-level')?.value || 'guided',
+      ttsEnabled: content.querySelector('#tts-enabled')?.checked ?? true,
+      preferredBrowserVoice,
+      speechRate: parseFloat(content.querySelector('#speech-rate')?.value || currentSettings.speechRate || 1),
+      speechPitch: parseFloat(content.querySelector('#speech-pitch')?.value || currentSettings.speechPitch || 1),
+      autoShowTranscript: content.querySelector('#auto-show-transcript')?.checked ?? currentSettings.autoShowTranscript ?? false,
+      showCountryHover: content.querySelector('#show-country-hover')?.checked ?? false,
+      baseTextureQuality: content.querySelector('#base-texture-quality')?.value || 'auto',
+      feverLoopResolution: nextFeverLoopResolution === '8k' ? '4k' : nextFeverLoopResolution,
+      aiWebSearchEnabled: content.querySelector('#ai-web-search-enabled')?.checked ?? true,
+      aiUpdatesUseLinkedApi: content.querySelector('#ai-updates-use-linked-api')?.checked ?? true,
+      aiVoiceEnabled: content.querySelector('#ai-voice-enabled')?.checked ?? currentSettings.aiVoiceEnabled ?? false,
+      aiVoiceFallbackToBrowser: true,
+      regionalAutoLocate: content.querySelector('#regional-auto-locate')?.checked ?? true,
+      regionalLocationPrecision: content.querySelector('#regional-location-precision')?.value || 'region',
+      detectedBrowserLanguage: LanguageManager.detectBrowserLanguage()
+    };
+
+    const feverResolutionChanged = oldSettings.feverLoopResolution !== newSettings.feverLoopResolution;
+    const updatedSettings = Settings.set(newSettings) || newSettings;
+    this.ttsManager?.updateSettings?.(updatedSettings);
+
+    window.dispatchEvent(new CustomEvent('settingsChanged', {
+      detail: { settings: updatedSettings, feverResolutionChanged }
+    }));
+
+    if (close) {
+      this.hide();
+    }
+
     return updatedSettings;
   }
 
@@ -10460,6 +11192,7 @@ Return ONLY a JSON object with this exact format, no other text:
         });
         content.querySelector('#browser-tts-settings')?.classList.toggle('hidden', useLinkedAiVoice);
         content.querySelector('#linked-tts-settings')?.classList.toggle('hidden', !useLinkedAiVoice);
+        this.applySettingsFormChange(content);
       } else if (action === 'set-settings-access-mode') {
         this.setSettingsAccessMode(target.dataset.mode, content);
       } else if (action === 'save-settings') {
@@ -10482,11 +11215,13 @@ Return ONLY a JSON object with this exact format, no other text:
         if (valueDisplay) {
           valueDisplay.textContent = `${e.target.value}x`;
         }
+        this.applySettingsFormChange(content);
       } else if (e.target.id === 'speech-pitch') {
         const valueDisplay = e.target.parentElement.querySelector('.slider-value');
         if (valueDisplay) {
           valueDisplay.textContent = `${e.target.value}x`;
         }
+        this.applySettingsFormChange(content);
       }
     });
     
@@ -10504,9 +11239,22 @@ Return ONLY a JSON object with this exact format, no other text:
         content.querySelectorAll('#browser-voice, #speech-rate, #speech-pitch, #auto-show-transcript, [data-action="set-tts-voice-mode"]').forEach(control => {
           control.disabled = !e.target.checked;
         });
+        this.applySettingsFormChange(content);
       } else if (e.target.id === 'browser-voice') {
-        const updatedSettings = Settings.set({ preferredBrowserVoice: e.target.value || null });
-        this.ttsManager?.updateSettings?.(updatedSettings || Settings.get());
+        this.applySettingsFormChange(content);
+      } else if ([
+        'tutorial-mode-enabled',
+        'tutorial-level',
+        'auto-show-transcript',
+        'show-country-hover',
+        'base-texture-quality',
+        'fever-loop-resolution',
+        'ai-updates-use-linked-api',
+        'ai-web-search-enabled',
+        'regional-auto-locate',
+        'regional-location-precision'
+      ].includes(e.target.id)) {
+        this.applySettingsFormChange(content);
       }
     });
 
@@ -10514,53 +11262,7 @@ Return ONLY a JSON object with this exact format, no other text:
   
   saveSettings() {
     const content = this.container.querySelector('#detail-content');
-    const selectedLang = content.querySelector('#ui-language')?.value || null;
-    const currentSettings = Settings.get();
-    const autoDetectLanguage = content.querySelector('#auto-detect-lang')?.checked ?? false;
-    const activeLang = autoDetectLanguage ? LanguageManager.detectBrowserLanguage() : selectedLang;
-    const preferredBrowserVoice = this.getLanguageSafePreferredVoice(
-      activeLang,
-      content.querySelector('#browser-voice')?.value || currentSettings.preferredBrowserVoice || ''
-    ) || null;
-    const newSettings = {
-      autoDetectLanguage,
-      uiLanguage: autoDetectLanguage ? null : selectedLang,
-      translationLanguage: content.querySelector('[data-action="set-translation-language"].active')?.dataset.language || currentSettings.translationLanguage || selectedLang,
-      tutorialModeEnabled: content.querySelector('#tutorial-mode-enabled')?.checked ?? true,
-      tutorialLevel: content.querySelector('#tutorial-level')?.value || 'guided',
-      ttsEnabled: content.querySelector('#tts-enabled')?.checked ?? true,
-      preferredBrowserVoice,
-      speechRate: parseFloat(content.querySelector('#speech-rate')?.value || currentSettings.speechRate || 1),
-      speechPitch: parseFloat(content.querySelector('#speech-pitch')?.value || currentSettings.speechPitch || 1),
-      autoShowTranscript: content.querySelector('#auto-show-transcript')?.checked ?? currentSettings.autoShowTranscript ?? false,
-      showCountryHover: content.querySelector('#show-country-hover')?.checked ?? false,
-      baseTextureQuality: content.querySelector('#base-texture-quality')?.value || 'auto',
-      feverLoopResolution: content.querySelector('#fever-loop-resolution')?.value || 'auto',
-      aiWebSearchEnabled: content.querySelector('#ai-web-search-enabled')?.checked ?? true,
-      aiUpdatesUseLinkedApi: content.querySelector('#ai-updates-use-linked-api')?.checked ?? true,
-      aiVoiceEnabled: content.querySelector('#ai-voice-enabled')?.checked ?? currentSettings.aiVoiceEnabled ?? false,
-      aiVoiceFallbackToBrowser: true,
-      regionalAutoLocate: content.querySelector('#regional-auto-locate')?.checked ?? true,
-      regionalLocationPrecision: content.querySelector('#regional-location-precision')?.value || 'region'
-    };
-    if (newSettings.feverLoopResolution === '8k') {
-      console.log('[Settings] Fever loop 8k setting downgraded to 4k before save');
-      newSettings.feverLoopResolution = '4k';
-    }
-
-    newSettings.detectedBrowserLanguage = LanguageManager.detectBrowserLanguage();
-
-    // Check if Fever loop resolution changed
-    const oldSettings = Settings.get();
-    const feverResolutionChanged = oldSettings.feverLoopResolution !== newSettings.feverLoopResolution;
-    
-    const updatedSettings = Settings.set(newSettings) || newSettings;
-    this.ttsManager.updateSettings(updatedSettings);
-    
-    // Notify app of settings change
-    window.dispatchEvent(new CustomEvent('settingsChanged', { detail: { settings: updatedSettings, feverResolutionChanged } }));
-    
-    this.hide();
+    this.applySettingsFormChange(content, { close: true });
   }
   
   resetSettings() {

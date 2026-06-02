@@ -70,7 +70,12 @@ export const AI_ACTIONS = [
 
 export const LAYER_SOURCE_MAPPING = {
   'meteo': ['scientific', 'official'],
+  'meteo-live': ['official', 'media'],
+  'meteo-clouds': ['official'],
   'climate': ['scientific', 'official'],
+  'carbon-history': ['official', 'scientific', 'media'],
+  'good-initiatives-world': ['official', 'scientific', 'media'],
+  'good-initiatives-eu': ['official', 'media'],
   'eu': ['official', 'media'],
   'country-news': ['media', 'official'],
   'regional-news': ['media', 'official'],

@@ -32,15 +32,6 @@ export const LAYERS = [
     feverOnly: true
   },
   {
-    id: 'meteo',
-    name: 'Meteo',
-    modeTabs: ['main', 'regional'],
-    sortByRegionalContext: true,
-    icon: '\uD83C\uDF24\uFE0F',
-    color: '#4fc3f7',
-    enabled: true
-  },
-  {
     id: 'meteo-clouds',
     name: 'Clouds',
     modeTabs: ['main', 'regional'],
@@ -69,7 +60,7 @@ export const LAYERS = [
   {
     id: 'regional-news',
     name: 'Regional News',
-    modeTabs: ['main', 'regional'],
+    modeTabs: ['regional'],
     sortByRegionalContext: true,
     icon: '\uD83D\uDCF0',
     color: '#81c784',
@@ -78,7 +69,7 @@ export const LAYERS = [
   {
     id: 'community-projects',
     name: 'Community Projects',
-    modeTabs: ['main', 'regional'],
+    modeTabs: ['regional'],
     sortByRegionalContext: true,
     icon: '\uD83E\uDD1D',
     color: '#74c69d',
@@ -108,9 +99,25 @@ export const LAYERS = [
     enabled: true
   },
   {
+    id: 'good-initiatives-world',
+    name: 'World Good Initiatives',
+    modeTabs: ['main'],
+    icon: '\uD83C\uDF31',
+    color: '#74c69d',
+    enabled: true
+  },
+  {
+    id: 'good-initiatives-eu',
+    name: 'EU Good Initiatives',
+    modeTabs: ['main', 'regional'],
+    icon: '\uD83C\uDDEA\uD83C\uDDFA',
+    color: '#8bdc7f',
+    enabled: true
+  },
+  {
     id: 'bike-ways',
     name: 'Bike Ways',
-    modeTabs: ['main', 'regional'],
+    modeTabs: ['regional'],
     sortByRegionalContext: true,
     icon: '\uD83D\uDEB2',
     color: '#66bb6a',
@@ -119,7 +126,7 @@ export const LAYERS = [
   {
     id: 'ev-charging',
     name: 'EV Charging',
-    modeTabs: ['main', 'regional'],
+    modeTabs: ['regional'],
     sortByRegionalContext: true,
     icon: '\u26A1',
     color: '#26c6da',
@@ -128,7 +135,7 @@ export const LAYERS = [
   {
     id: 'hydrogen-charging',
     name: 'Hydrogen H2',
-    modeTabs: ['main', 'regional'],
+    modeTabs: ['regional'],
     sortByRegionalContext: true,
     icon: 'H2',
     color: '#ffd54f',
@@ -147,6 +154,15 @@ export const LAYERS = [
     icon: '\uD83C\uDF21\uFE0F',
     color: '#ff8a65',
     enabled: true
+  },
+  {
+    id: 'carbon-history',
+    name: 'Carbon History',
+    modeTabs: ['main'],
+    icon: '\uD83D\uDD70\uFE0F',
+    color: '#f6c85f',
+    enabled: false,
+    chronologySort: 'asc'
   },
   {
     id: 'extreme',

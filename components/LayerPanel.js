@@ -4,7 +4,7 @@
  */
 import { Settings } from '../lib/settings.js';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-shortcuts-20260517';
-import { LanguageManager } from '../lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
+import { LanguageManager } from '../lib/language.js?v=topic-earth-tab-layers-20260507';
 
 const REGIONAL_GROUP_ID = 'regional-live';
 
@@ -15,16 +15,12 @@ export class LayerPanel {
     this.points = points;
     this.callbacks = callbacks;
     this.activeLayers = new Set(layers.filter(layer => layer.enabled && !layer.isGroup).map(layer => layer.id));
-    this.activeLayersByFilter = new Map();
     this.knownLayerIds = new Set(layers.map(layer => layer.id));
     this.isCollapsed = false;
+    this.isClosed = false;
     this.expandedLayers = new Set(layers.filter(layer => layer.defaultExpanded).map(layer => layer.id));
     this.layerFilter = 'main';
     this.regionalContext = null;
-    ['main', 'regional', 'space', 'fever'].forEach(filter => {
-      this.activeLayersByFilter.set(filter, this.getDefaultActiveLayersForFilter(filter));
-    });
-    this.activeLayers = new Set(this.activeLayersByFilter.get(this.layerFilter) || []);
 
     this.handleClick = this.handleClick.bind(this);
     this.handleSettingsChanged = this.handleSettingsChanged.bind(this);
@@ -35,9 +31,7 @@ export class LayerPanel {
 
     window.addEventListener('layerFilterChanged', (e) => {
       const previousFilter = this.layerFilter;
-      this.saveActiveLayerState(previousFilter);
       this.layerFilter = this.normalizeLayerFilter(e.detail.filter);
-      this.activeLayers = this.getStoredActiveLayersForFilter(this.layerFilter);
       this.preparePanelForFilter(this.layerFilter, previousFilter);
       this.updateData(this.layers, this.points);
     });
@@ -53,47 +47,6 @@ export class LayerPanel {
   handleRegionalContextChanged(event) {
     this.regionalContext = event?.detail?.context || null;
     this.updateData(this.layers, this.points);
-  }
-
-  normalizeLayerFilter(filter = 'main') {
-    const normalized = filter === 'world' ? 'main' : String(filter || 'main');
-    return ['main', 'regional', 'space', 'fever'].includes(normalized) ? normalized : 'main';
-  }
-
-  getLayerModeTabs(layer) {
-    if (!layer) return ['main'];
-    if (Array.isArray(layer.modeTabs) && layer.modeTabs.length > 0) {
-      return layer.modeTabs.map(tab => this.normalizeLayerFilter(tab));
-    }
-    if (layer.feverOnly) return ['fever'];
-    if (layer.id === 'space') return ['space'];
-    return ['main'];
-  }
-
-  layerBelongsToFilter(layer, filter = this.layerFilter) {
-    return this.getLayerModeTabs(layer).includes(this.normalizeLayerFilter(filter));
-  }
-
-  getDefaultActiveLayersForFilter(filter = 'main') {
-    const normalized = this.normalizeLayerFilter(filter);
-    return new Set(
-      this.layers
-        .filter(layer => !layer.isGroup && layer.enabled && this.layerBelongsToFilter(layer, normalized))
-        .map(layer => layer.id)
-    );
-  }
-
-  getStoredActiveLayersForFilter(filter = this.layerFilter) {
-    const normalized = this.normalizeLayerFilter(filter);
-    if (!this.activeLayersByFilter.has(normalized)) {
-      this.activeLayersByFilter.set(normalized, this.getDefaultActiveLayersForFilter(normalized));
-    }
-    return new Set(this.activeLayersByFilter.get(normalized));
-  }
-
-  saveActiveLayerState(filter = this.layerFilter) {
-    const normalized = this.normalizeLayerFilter(filter);
-    this.activeLayersByFilter.set(normalized, new Set(this.activeLayers));
   }
 
   preparePanelForFilter(filter = 'main', previousFilter = this.layerFilter) {
@@ -141,6 +94,8 @@ export class LayerPanel {
     const controls = this.createLayerControls();
 
     this.container.appendChild(collapseBtn);
+    this.container.appendChild(this.createCloseButton());
+    this.container.appendChild(this.createReopenButton());
     this.container.appendChild(header);
     this.container.appendChild(feverMessageDiv);
     this.container.appendChild(controls);
@@ -158,6 +113,28 @@ export class LayerPanel {
     btn.className = 'panel-collapse-btn';
     btn.innerHTML = '&#9664;';
     btn.dataset.action = 'collapse';
+    btn.title = 'Collapse layer panel';
+    btn.setAttribute('aria-label', 'Collapse layer panel');
+    return btn;
+  }
+
+  createCloseButton() {
+    const btn = document.createElement('button');
+    btn.className = 'panel-close-btn';
+    btn.innerHTML = '&times;';
+    btn.dataset.action = 'close-panel';
+    btn.title = 'Close layer panel';
+    btn.setAttribute('aria-label', 'Close layer panel');
+    return btn;
+  }
+
+  createReopenButton() {
+    const btn = document.createElement('button');
+    btn.className = 'panel-reopen-btn';
+    btn.innerHTML = '&#9776;';
+    btn.dataset.action = 'reopen-panel';
+    btn.title = 'Show data layers';
+    btn.setAttribute('aria-label', 'Show data layers');
     return btn;
   }
 
@@ -196,18 +173,32 @@ export class LayerPanel {
 
   getFilteredLayers() {
     const topLevelLayers = this.layers.filter(layer => !layer.parentLayerId);
+    return topLevelLayers.filter(layer => this.layerBelongsToFilter(layer, this.layerFilter));
+  }
 
-    switch (this.layerFilter) {
-      case 'space':
-        return topLevelLayers.filter(layer => layer.id === 'space');
-      case 'fever':
-        return topLevelLayers.filter(layer => layer.id === 'earths-fever' || layer.feverOnly);
-      case 'regional':
-        return topLevelLayers.filter(layer => this.layerBelongsToFilter(layer, 'regional'));
-      case 'main':
-      default:
-        return topLevelLayers.filter(layer => this.layerBelongsToFilter(layer, 'main'));
+  getLayerModeTabs(layer) {
+    if (!layer) return ['main'];
+    if (Array.isArray(layer.modeTabs) && layer.modeTabs.length > 0) {
+      return layer.modeTabs;
     }
+    if (layer.feverOnly) return ['fever'];
+    if (layer.id === 'space') return ['space'];
+    if (layer.id === REGIONAL_GROUP_ID || layer.parentLayerId === REGIONAL_GROUP_ID) return ['regional'];
+    return ['main'];
+  }
+
+  normalizeLayerFilter(filter = 'main') {
+    return filter === 'world' ? 'main' : (filter || 'main');
+  }
+
+  layerBelongsToFilter(layer, filter = 'main') {
+    if (!layer) return false;
+    const normalizedFilter = this.normalizeLayerFilter(filter);
+    if (this.isLayerGroup(layer)) {
+      return this.getDescendantLeafLayers(layer)
+        .some(child => this.layerBelongsToFilter(child, normalizedFilter));
+    }
+    return this.getLayerModeTabs(layer).includes(normalizedFilter);
   }
 
   createLayerItem(layer, options = {}) {
@@ -366,6 +357,26 @@ export class LayerPanel {
           if (orderDelta !== 0) return orderDelta;
           return new Date(b.date) - new Date(a.date);
         });
+      } else if (layer.id === 'meteo-live') {
+        const severityRank = { severe: 4, warning: 3, notable: 2, watch: 1 };
+        if (this.layerFilter === 'main') {
+          layerNews = layerNews.filter(point => point.visibleInWorldMeteo !== false);
+        }
+        layerNews = layerNews.sort((a, b) => {
+          const eventDelta = Number(Boolean(b.isAutoMeteoEvent)) - Number(Boolean(a.isAutoMeteoEvent));
+          if (eventDelta !== 0) return eventDelta;
+          const focusDelta = Number(Boolean(b.isRegionalFocus)) - Number(Boolean(a.isRegionalFocus));
+          if (focusDelta !== 0) return focusDelta;
+          const severityDelta = (severityRank[String(b.severity || '').toLowerCase()] || 0) - (severityRank[String(a.severity || '').toLowerCase()] || 0);
+          if (severityDelta !== 0) return severityDelta;
+          return new Date(b.date) - new Date(a.date);
+        });
+      } else if (layerNews.some(point => point.onlineLayerSignal)) {
+        layerNews = layerNews.sort((a, b) => {
+          const priorityDelta = (Number(b.markerPriority) || 0) - (Number(a.markerPriority) || 0);
+          if (priorityDelta !== 0) return priorityDelta;
+          return new Date(b.updatedAt || b.date || 0) - new Date(a.updatedAt || a.date || 0);
+        });
       } else if (this.shouldSortLayerByRegionalContext(layer)) {
         const context = this.regionalContext;
         layerNews = layerNews
@@ -379,11 +390,13 @@ export class LayerPanel {
             return new Date(b.date) - new Date(a.date);
           });
       } else {
-        layerNews = layerNews.sort((a, b) => new Date(b.date) - new Date(a.date));
+        const dateSortDirection = layer.chronologySort === 'asc' ? 1 : -1;
+        layerNews = layerNews.sort((a, b) => dateSortDirection * (new Date(a.date) - new Date(b.date)));
       }
 
       if (layer.id !== 'space') {
-        layerNews = layerNews.slice(0, 5);
+        const previewLimit = Number(layer.previewLimit);
+        layerNews = layerNews.slice(0, Number.isFinite(previewLimit) && previewLimit > 0 ? previewLimit : 5);
       }
     }
 
@@ -392,17 +405,17 @@ export class LayerPanel {
 
   shouldSortLayerByRegionalContext(layer) {
     if (this.layerFilter !== 'regional' || !this.regionalContext) return false;
-    if (layer.sortByRegionalContext) return true;
+    if (this.layerBelongsToFilter(layer, 'regional') && layer.sortByRegionalContext) return true;
 
-    return this.hasAncestorLayer(layer, (ancestor) => ancestor.sortByRegionalContext || ancestor.id === REGIONAL_GROUP_ID);
+    return this.hasAncestorLayer(layer, (ancestor) => (
+      this.layerBelongsToFilter(ancestor, 'regional') && (ancestor.sortByRegionalContext || ancestor.id === REGIONAL_GROUP_ID)
+    ));
   }
 
   isRegionalContextLayer(layer) {
     if (!layer) return false;
-    if (layer.sortByRegionalContext) return true;
-    if (layer.id === REGIONAL_GROUP_ID) return true;
-    if (layer.parentLayerId === REGIONAL_GROUP_ID) return true;
-    return this.hasAncestorLayer(layer, (ancestor) => ancestor.id === REGIONAL_GROUP_ID || ancestor.sortByRegionalContext);
+    if (this.layerBelongsToFilter(layer, 'regional')) return true;
+    return this.hasAncestorLayer(layer, (ancestor) => this.layerBelongsToFilter(ancestor, 'regional'));
   }
 
   hasAncestorLayer(layer, matcher) {
@@ -443,6 +456,32 @@ export class LayerPanel {
 
   getNewsMetaLine(point) {
     const parts = [point.region, point.country].filter(Boolean);
+    if (point.worldMeteoRuntime) {
+      const updatedSource = point.updatedAt || point.meteo?.time || point.date;
+      if (updatedSource) {
+        const date = new Date(updatedSource);
+        if (!Number.isNaN(date.getTime())) {
+          parts.push(`updated ${date.toLocaleString(this.getCurrentLanguage(), { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`);
+        }
+      }
+      if (point.confidence) {
+        parts.push(String(point.confidence).replace(/-/g, ' '));
+      }
+    } else if (point.onlineLayerSignal) {
+      const updatedSource = point.updatedAt || point.date;
+      if (updatedSource) {
+        const date = new Date(updatedSource);
+        if (!Number.isNaN(date.getTime())) {
+          parts.push(`checked ${date.toLocaleString(this.getCurrentLanguage(), { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`);
+        }
+      }
+      if (point.confidence) {
+        parts.push(String(point.confidence).replace(/-/g, ' '));
+      }
+      if (point.reviewState) {
+        parts.push(String(point.reviewState).replace(/-/g, ' '));
+      }
+    }
     const distanceLabel = this.formatDistanceKm(point._regionalDistance);
     if (distanceLabel) {
       parts.push(distanceLabel);
@@ -451,7 +490,28 @@ export class LayerPanel {
   }
 
   getNewsTags(point) {
-    return [point.initiativeType, point.communityStatus, ...((point.engagementTypes || []).slice(0, 2))]
+    const meteoTags = point.isAutoMeteoEvent || point.isRealtimeMeteo || point.category === 'meteo-live'
+      ? [
+          point.severity ? `meteo ${point.severity}` : 'meteo live',
+          point.eventType
+        ]
+      : [];
+    const carbonHistoryTags = point.isCarbonHistory || point.carbonHistory
+      ? [
+          point.carbonHistory?.track,
+          point.carbonHistory?.sensitivity,
+          point.carbonHistory?.confidence
+        ]
+      : [];
+    const onlineTags = point.onlineLayerSignal
+      ? [
+          point.sourceType,
+          point.severity,
+          point.reviewState
+        ]
+      : [];
+
+    return [point.initiativeType, point.communityStatus, ...meteoTags, ...carbonHistoryTags, ...onlineTags, ...((point.engagementTypes || []).slice(0, 2))]
       .filter(Boolean)
       .map(value => this.formatNewsTagLabel(value))
       .slice(0, 4);
@@ -459,6 +519,17 @@ export class LayerPanel {
 
   formatNewsTagLabel(value = '') {
     return String(value).replace(/(^|[\s-])\S/g, match => match.toUpperCase());
+  }
+
+  getNewsTitle(point = {}) {
+    const title = String(point.title || '');
+    if (!point.isCarbonHistory && !point.carbonHistory) return title;
+
+    const yearSource = point.carbonHistory?.periodStart || point.date || '';
+    const match = String(yearSource).match(/^(\d{4})/);
+    const year = match?.[1] || '';
+    if (!year || title.startsWith(`${year}:`) || title.startsWith(`${year} -`)) return title;
+    return `${year}: ${title}`;
   }
 
   escapeHtml(value = '') {
@@ -479,7 +550,14 @@ export class LayerPanel {
 
   createNewsItem(point) {
     const item = document.createElement('div');
-    item.className = 'news-item';
+    const severityClass = point.worldMeteoRuntime && point.severity
+      ? ` news-item-meteo-${String(point.severity).toLowerCase().replace(/[^a-z0-9-]/g, '')}`
+      : '';
+    const onlineClass = point.onlineLayerSignal ? ' news-item-online-signal' : '';
+    item.className = `news-item${point.worldMeteoRuntime ? ' news-item-meteo-runtime' : ''}${onlineClass}${severityClass}`;
+    if ((point.worldMeteoRuntime || point.onlineLayerSignal) && point.markerColor) {
+      item.style.setProperty('--news-meteo-color', point.markerColor);
+    }
     const canDeletePoint = AppAccess.canDeleteTopic(point);
     const deleteButton = canDeletePoint ? `
       <button class="news-delete-btn" data-action="delete-topic" data-point-id="${point.id}" ${AppAccess.can('topic:delete') ? 'data-admin-only="true"' : ''} title="${this.t('layer.removeBrowserTopic')}">
@@ -497,12 +575,12 @@ export class LayerPanel {
     item.innerHTML = `
       <div class="news-date" title="${this.escapeHtml(fullDate)}" data-action="show-detail-collapsed" data-point-id="${point.id}">${shortDate}</div>
       <div class="news-content" data-action="show-detail" data-point-id="${point.id}">
-        <div class="news-title">${this.escapeHtml(point.title || '')}</div>
+        <div class="news-title">${this.escapeHtml(this.getNewsTitle(point))}</div>
         ${metaLine ? `<div class="news-meta-line">${this.escapeHtml(metaLine)}</div>` : ''}
         <div class="news-desc">${this.escapeHtml(point.summary || '')}</div>
         ${tagsHtml ? `<div class="news-tags">${tagsHtml}</div>` : ''}
       </div>
-      <button class="news-research-btn" data-action="open-research" data-point-id="${point.id}" title="${this.escapeHtml(this.t('layer.researchTopic'))}">
+      <button class="news-research-btn" data-action="open-research" data-point-id="${point.id}" title="${this.escapeHtml(this.getCurrentLanguage().startsWith('fr') ? 'Mettre ce sujet a jour' : 'Update this topic')}">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M6 1V11M1 6H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
@@ -518,7 +596,7 @@ export class LayerPanel {
   }
 
   getPreferredRegionalProposalLayerId() {
-    const preferredOrder = ['community-projects', 'regional-news', 'bike-ways', 'ev-charging', 'hydrogen-charging', 'meteo', 'meteo-live', 'meteo-clouds'];
+    const preferredOrder = ['community-projects', 'regional-news', 'bike-ways', 'ev-charging', 'hydrogen-charging'];
     const activeRegionalLayer = preferredOrder.find((layerId) => this.activeLayers.has(layerId) && this.getLayerById(layerId));
     return activeRegionalLayer || 'community-projects';
   }
@@ -572,6 +650,12 @@ export class LayerPanel {
       case 'collapse':
         this.handleCollapse(target);
         break;
+      case 'close-panel':
+        this.setClosed(true);
+        break;
+      case 'reopen-panel':
+        this.setClosed(false);
+        break;
       case 'toggle-layer':
         this.handleLayerToggle(target);
         break;
@@ -610,16 +694,40 @@ export class LayerPanel {
 
   setCollapsed(isCollapsed) {
     this.isCollapsed = Boolean(isCollapsed);
+    if (this.isCollapsed) this.isClosed = false;
+    this.container.classList.remove('closed');
     this.container.classList.toggle('collapsed', this.isCollapsed);
     const btn = this.container.querySelector('.panel-collapse-btn');
     if (!btn) return;
     btn.innerHTML = this.isCollapsed ? '&#9654;' : '&#9664;';
+    btn.title = this.isCollapsed ? 'Expand layer panel' : 'Collapse layer panel';
+    btn.setAttribute('aria-label', btn.title);
 
     if (this.isCollapsed) {
       this.container.style.zIndex = '70';
     } else {
       this.container.style.zIndex = '60';
     }
+  }
+
+  setClosed(isClosed) {
+    this.isClosed = Boolean(isClosed);
+    if (this.isClosed) {
+      this.isCollapsed = false;
+      this.container.classList.remove('collapsed');
+    }
+    this.container.classList.toggle('closed', this.isClosed);
+    const collapseBtn = this.container.querySelector('.panel-collapse-btn');
+    if (collapseBtn) {
+      collapseBtn.innerHTML = '&#9664;';
+      collapseBtn.title = 'Collapse layer panel';
+      collapseBtn.setAttribute('aria-label', 'Collapse layer panel');
+    }
+    this.container.style.zIndex = this.isClosed ? '72' : '60';
+  }
+
+  reopen() {
+    this.setClosed(false);
   }
 
   handleLayerToggle(icon) {
@@ -643,42 +751,14 @@ export class LayerPanel {
   }
 
   setLayerActive(layerId, isActive) {
-    const layer = this.getLayerById(layerId);
-    if (layer && !this.layerBelongsToFilter(layer, this.layerFilter)) {
-      this.setLayerActiveForFilter(layerId, this.getLayerModeTabs(layer)[0] || this.layerFilter, isActive);
-      return;
-    }
-
     if (isActive) {
       this.activeLayers.add(layerId);
     } else {
       this.activeLayers.delete(layerId);
     }
-    this.saveActiveLayerState(this.layerFilter);
 
     if (this.callbacks.onLayerToggle) {
       this.callbacks.onLayerToggle(layerId, isActive);
-    }
-  }
-
-  setLayerActiveForFilter(layerId, filter = this.layerFilter, isActive, options = {}) {
-    const normalized = this.normalizeLayerFilter(filter);
-    const state = this.getStoredActiveLayersForFilter(normalized);
-    if (isActive) {
-      state.add(layerId);
-    } else {
-      state.delete(layerId);
-    }
-    this.activeLayersByFilter.set(normalized, state);
-
-    if (normalized === this.layerFilter) {
-      this.activeLayers = new Set(state);
-      if (options.render !== false) {
-        this.updateData(this.layers, this.points);
-      }
-      if (options.emit !== false && this.callbacks.onLayerToggle) {
-        this.callbacks.onLayerToggle(layerId, isActive);
-      }
     }
   }
 
@@ -797,25 +877,9 @@ export class LayerPanel {
   }
 
   updateData(layers, points) {
-    this.saveActiveLayerState(this.layerFilter);
-    const nextLayerIds = new Set(layers.map(layer => layer.id));
-    this.activeLayersByFilter.forEach((state, filter) => {
-      const cleaned = new Set(Array.from(state).filter(layerId => nextLayerIds.has(layerId)));
-      layers.forEach(layer => {
-        if (!this.knownLayerIds.has(layer.id) && layer.enabled && !layer.isGroup && this.layerBelongsToFilter(layer, filter)) {
-          cleaned.add(layer.id);
-        }
-      });
-      this.activeLayersByFilter.set(filter, cleaned);
-    });
-
     layers.forEach(layer => {
       if (!this.knownLayerIds.has(layer.id) && layer.enabled && !layer.isGroup) {
-        this.getLayerModeTabs(layer).forEach(filter => {
-          const state = this.getStoredActiveLayersForFilter(filter);
-          state.add(layer.id);
-          this.activeLayersByFilter.set(filter, state);
-        });
+        this.activeLayers.add(layer.id);
       }
       if (layer.defaultExpanded) {
         this.expandedLayers.add(layer.id);
@@ -824,7 +888,6 @@ export class LayerPanel {
     });
     this.layers = layers;
     this.points = points;
-    this.activeLayers = this.getStoredActiveLayersForFilter(this.layerFilter);
     this.render();
 
     if (this.isCollapsed) {
@@ -855,10 +918,10 @@ export class LayerPanel {
   }
 
   getActiveLayersForFilter(filter = this.layerFilter) {
-    if (this.normalizeLayerFilter(filter) === this.layerFilter) {
-      this.saveActiveLayerState(this.layerFilter);
-    }
-    return this.getStoredActiveLayersForFilter(filter);
+    return new Set(
+      Array.from(this.activeLayers)
+        .filter(layerId => this.layerBelongsToFilter(this.getLayerById(layerId), filter))
+    );
   }
 
   updateFeverYearOverlay(visible) {
@@ -901,19 +964,11 @@ export class LayerPanel {
   }
 
   activatLayer(layerId) {
-    this.setLayerActive(layerId, true);
+    this.activeLayers.add(layerId);
     const icon = this.container.querySelector(`.layer-icon[data-layer-id="${layerId}"]`);
     if (icon) {
       icon.classList.add('active');
     }
-  }
-
-  removeLayerFromAllStates(layerId) {
-    this.activeLayersByFilter.forEach((state, filter) => {
-      state.delete(layerId);
-      this.activeLayersByFilter.set(filter, state);
-    });
-    this.activeLayers.delete(layerId);
   }
 
   disableNonFilteredLayers(filter) {

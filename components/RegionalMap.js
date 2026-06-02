@@ -1,5 +1,5 @@
 import { Settings } from '../lib/settings.js';
-import { LanguageManager } from '../lib/language.js?v=topic-earth-warning-panel-collapse-20260430';
+import { LanguageManager } from '../lib/language.js?v=topic-earth-meteo-draft-20260531';
 
 const EUROPE_BOUNDS = {
   minLat: 34,
@@ -70,6 +70,9 @@ export class RegionalMap {
     this.activeLayers = null;
     this.meteoOverlayLayer = null;
     this.meteoLegendControl = null;
+    this.meteoDigestDismissed = false;
+    this.meteoCloudSurfaceHidden = false;
+    this.meteoWarningSurfaceHidden = false;
     this.pendingView = null;
     this.markerByTopicId = new Map();
     this.activeTopicId = null;
@@ -165,6 +168,7 @@ export class RegionalMap {
       <div class="regional-map-shell">
         <div class="regional-map-canvas" aria-label="${this.escapeHtml(this.t('auto.componentsRegionalmap.openstreetmapEuropeMapWithTopicPins'))}">
           ${this.renderSearchControl()}
+          ${this.renderMeteoDigest()}
           <div id="regional-leaflet-map" class="regional-leaflet-map"></div>
           <div id="regional-map-status" class="regional-map-status" aria-live="polite"></div>
           <div id="regional-map-fallback" class="regional-map-fallback hidden" role="img" aria-label="Fallback schematic Europe map with topic pins">
@@ -231,6 +235,67 @@ export class RegionalMap {
         <div class="regional-route-hint">${this.escapeHtml(this.t('regional.routeHint'))}</div>
       </div>
     `;
+  }
+
+  renderMeteoDigest() {
+    if (this.meteoDigestDismissed || !this.hasActiveMeteoSurfaceSource()) return '';
+
+    const meteoPoints = this.getMeteoAvailablePoints();
+    if (!meteoPoints.length) return '';
+
+    const warnings = this.getSortedMeteoWarnings(meteoPoints);
+    const primary = this.getPrimaryMeteoSignal(meteoPoints);
+    const meteo = primary.meteo || {};
+    const cloudSurfaceActive = this.isMeteoCloudSurfaceActive();
+    const warningSurfaceActive = this.isMeteoWarningSurfaceActive();
+    const warningLabel = warnings.length
+      ? `${warnings.length} warning signal${warnings.length === 1 ? '' : 's'}`
+      : 'No warning signal';
+    const updated = meteo.time
+      ? new Date(meteo.time).toLocaleTimeString(this.getCurrentLanguage(), { hour: '2-digit', minute: '2-digit' })
+      : '';
+
+    return `
+      <div class="regional-meteo-digest ${warnings.length ? 'has-warning' : 'is-live'}" data-tutorial-id="regional-meteo-digest">
+        <div class="regional-meteo-digest-top">
+          <span>${this.escapeHtml(warningLabel)}</span>
+          <div class="regional-meteo-digest-actions">
+            ${updated ? `<time>${this.escapeHtml(updated)}</time>` : ''}
+            <button type="button" class="${cloudSurfaceActive ? 'active' : ''}" data-action="toggle-regional-meteo-clouds" title="${this.escapeHtml(this.t('regional.meteoCloudsTitle'))}">${this.escapeHtml(this.t('regional.meteoClouds'))}</button>
+            <button type="button" class="${warningSurfaceActive ? 'active' : ''}" data-action="toggle-regional-meteo-warnings" title="${this.escapeHtml(this.t('regional.meteoWarningsTitle'))}">${this.escapeHtml(this.t('regional.meteoWarnings'))}</button>
+            <button type="button" data-action="open-regional-meteo-topic" title="${this.escapeHtml(this.t('regional.meteoTopicTitle'))}">${this.escapeHtml(this.t('regional.meteoTopic'))}</button>
+            <button type="button" data-action="dismiss-regional-meteo-digest" title="${this.escapeHtml(this.t('regional.meteoHideTitle'))}">${this.escapeHtml(this.t('regional.meteoHide'))}</button>
+          </div>
+        </div>
+        <strong>${this.escapeHtml(primary.title || 'Live meteo')}</strong>
+        <div class="regional-meteo-digest-grid">
+          <span>${Number.isFinite(Number(meteo.temperature)) ? `${Number(meteo.temperature).toFixed(1)} deg C` : 'temp n/a'}</span>
+          <span>${Number.isFinite(Number(meteo.precipitationMaxMmH ?? meteo.precipitation)) ? `${Number(meteo.precipitationMaxMmH ?? meteo.precipitation).toFixed(1)} mm/h` : 'rain n/a'}</span>
+          <span>${Number.isFinite(Number(meteo.windGustMaxKmh ?? meteo.windGust)) ? `${Number(meteo.windGustMaxKmh ?? meteo.windGust).toFixed(0)} km/h gust` : 'wind n/a'}</span>
+          <span>${this.escapeHtml(this.getMeteoSurfaceStateLabel(cloudSurfaceActive, warningSurfaceActive))}</span>
+        </div>
+        <small>${this.escapeHtml(primary.isAutoMeteoEvent ? (primary.summary || '') : this.getMeteoTooltipLine(primary))}</small>
+      </div>
+    `;
+  }
+
+  getSortedMeteoWarnings(points = this.getMeteoOverlayPoints()) {
+    return points
+      .filter(point => point.isAutoMeteoEvent)
+      .sort((a, b) => {
+        const focusDelta = Number(Boolean(b.isRegionalFocus)) - Number(Boolean(a.isRegionalFocus));
+        if (focusDelta !== 0) return focusDelta;
+        const severityDelta = this.getMeteoSeverityRank(b.severity) - this.getMeteoSeverityRank(a.severity);
+        if (severityDelta !== 0) return severityDelta;
+        return (Number(b.severityScore) || 0) - (Number(a.severityScore) || 0);
+      });
+  }
+
+  getPrimaryMeteoSignal(points = this.getMeteoOverlayPoints()) {
+    const warnings = this.getSortedMeteoWarnings(points);
+    const focusPoint = points.find(point => point.isRegionalFocus && !point.isAutoMeteoEvent)
+      || points.find(point => point.isRegionalFocus);
+    return warnings[0] || focusPoint || points[0] || null;
   }
 
   async mountLeafletMap() {
@@ -877,23 +942,69 @@ export class RegionalMap {
     };
   }
 
+  getMeteoSeverityRank(severity = '') {
+    const ranks = { severe: 4, warning: 3, notable: 2, watch: 1 };
+    return ranks[String(severity || '').toLowerCase()] || 0;
+  }
+
+  getMeteoSeverityColor(severity = '') {
+    const colors = {
+      severe: '#ff2d55',
+      warning: '#ffb020',
+      notable: '#ffd166',
+      watch: '#4fc3f7'
+    };
+    return colors[String(severity || '').toLowerCase()] || colors.watch;
+  }
+
+  getRegionalMarkerColor(point = {}) {
+    if (point.isAutoMeteoEvent) {
+      return this.getMeteoSeverityColor(point.severity);
+    }
+    return this.getLayerColor(point.category);
+  }
+
+  getMeteoTooltipLine(point = {}) {
+    const meteo = point.meteo || {};
+    const parts = [];
+    if (point.severity) parts.push(String(point.severity).toUpperCase());
+    if (point.eventType) parts.push(point.eventType);
+    if (Number.isFinite(Number(meteo.temperature))) parts.push(`${Number(meteo.temperature).toFixed(1)} deg C`);
+    if (Number.isFinite(Number(meteo.precipitationMaxMmH ?? meteo.precipitation))) {
+      parts.push(`${Number(meteo.precipitationMaxMmH ?? meteo.precipitation).toFixed(1)} mm/h rain`);
+    }
+    if (Number.isFinite(Number(meteo.windGustMaxKmh ?? meteo.windGust))) {
+      parts.push(`${Number(meteo.windGustMaxKmh ?? meteo.windGust).toFixed(0)} km/h gust`);
+    }
+    return parts.join(' | ') || 'Live meteo';
+  }
+
+  getMeteoSurfaceStateLabel(cloudSurfaceActive = false, warningSurfaceActive = false) {
+    if (cloudSurfaceActive && warningSurfaceActive) return this.t('regional.meteoSurfaceBoth');
+    if (cloudSurfaceActive) return this.t('regional.meteoSurfaceCloudsOnly');
+    if (warningSurfaceActive) return this.t('regional.meteoSurfaceWarningsOnly');
+    return this.t('regional.meteoSurfaceHidden');
+  }
+
   addLeafletMarker(L, point) {
-    const color = this.getLayerColor(point.category);
+    const color = this.getRegionalMarkerColor(point);
     const topicId = this.getTopicKey(point);
     const title = point.title || 'Untitled topic';
     const location = [point.region, point.country].filter(Boolean).join(', ') || 'Approximate Europe';
     const isRealtimeMeteo = !!point.isRealtimeMeteo || point.category === 'meteo-live';
+    const isMeteoWarning = !!point.isAutoMeteoEvent;
     const marker = L.circleMarker([point.lat, point.lon], {
-      radius: isRealtimeMeteo ? 10 : 8,
-      color: isRealtimeMeteo ? '#e0f7ff' : '#ffffff',
-      weight: isRealtimeMeteo ? 2.25 : 1.5,
+      radius: isMeteoWarning ? 12 : (isRealtimeMeteo ? 10 : 8),
+      color: isMeteoWarning ? '#ffffff' : (isRealtimeMeteo ? '#e0f7ff' : '#ffffff'),
+      weight: isMeteoWarning ? 3 : (isRealtimeMeteo ? 2.25 : 1.5),
       fillColor: color,
-      fillOpacity: isRealtimeMeteo ? 0.82 : 0.95
+      fillOpacity: isMeteoWarning ? 0.94 : (isRealtimeMeteo ? 0.82 : 0.95)
     });
 
     marker.bindTooltip(`
       <strong>${this.escapeHtml(title)}</strong><br>
       <span>${this.escapeHtml(location)}</span>
+      ${isRealtimeMeteo ? `<br><span>${this.escapeHtml(this.getMeteoTooltipLine(point))}</span>` : ''}
     `, {
       direction: 'top',
       opacity: 0.96,
@@ -908,10 +1019,11 @@ export class RegionalMap {
 
     marker.addTo(this.markerLayer);
     marker.__isRealtimeMeteo = isRealtimeMeteo;
+    marker.__isMeteoWarning = isMeteoWarning;
     marker.__baseFillColor = color;
-    marker.__baseFillOpacity = isRealtimeMeteo ? 0.82 : 0.95;
-    marker.__baseOutlineColor = isRealtimeMeteo ? '#e0f7ff' : '#ffffff';
-    marker.__baseWeight = isRealtimeMeteo ? 2.25 : 1.5;
+    marker.__baseFillOpacity = isMeteoWarning ? 0.94 : (isRealtimeMeteo ? 0.82 : 0.95);
+    marker.__baseOutlineColor = isMeteoWarning ? '#ffffff' : (isRealtimeMeteo ? '#e0f7ff' : '#ffffff');
+    marker.__baseWeight = isMeteoWarning ? 3 : (isRealtimeMeteo ? 2.25 : 1.5);
     this.markerByTopicId.set(topicId, marker);
     this.styleLeafletMarker(marker, topicId === this.activeTopicId);
   }
@@ -919,6 +1031,9 @@ export class RegionalMap {
   addMeteoOverlay(L) {
     const meteoPoints = this.getMeteoOverlayPoints();
     if (!this.map || meteoPoints.length === 0) return;
+    const showCloudSurface = this.isMeteoCloudSurfaceActive();
+    const showWarningSurface = this.isMeteoWarningSurfaceActive();
+    if (!showCloudSurface && !showWarningSurface) return;
 
     if (!this.map.getPane('regionalMeteoPane')) {
       const pane = this.map.createPane('regionalMeteoPane');
@@ -935,51 +1050,113 @@ export class RegionalMap {
       const windSpeed = Math.max(0, Number(meteo.windSpeed) || 0);
       const cloudOpacity = 0.07 + (cloudCover / 100) * 0.16;
       const cloudRadius = 110000 + cloudCover * 3200 + Math.min(windSpeed, 45) * 1400;
-      const cloudColor = precipitation > 0.05 ? '#57a9c7' : '#6bb8c2';
+      const severityRank = this.getMeteoSeverityRank(point.severity);
+      const severityColor = severityRank >= 2 ? this.getMeteoSeverityColor(point.severity) : '';
+      const cloudColor = severityColor || (precipitation > 0.05 ? '#57a9c7' : '#6bb8c2');
+      const rainColor = severityColor || '#167fa7';
+      const cloudWeight = severityRank >= 3 ? 1.8 : 1;
+      const cloudLineOpacity = severityRank >= 2 ? 0.46 : 0.22;
+      const cloudFillBoost = severityRank >= 3 ? 0.08 : (severityRank >= 2 ? 0.04 : 0);
 
-      L.circle([point.lat, point.lon], {
-        pane: 'regionalMeteoPane',
-        radius: cloudRadius,
-        color: cloudColor,
-        weight: 1,
-        opacity: 0.22,
-        fillColor: cloudColor,
-        fillOpacity: cloudOpacity,
-        interactive: false,
-        className: 'regional-meteo-cloud-field'
-      }).addTo(this.meteoOverlayLayer);
-
-      if (precipitation > 0.03) {
+      if (showCloudSurface) {
         L.circle([point.lat, point.lon], {
           pane: 'regionalMeteoPane',
-          radius: 90000 + Math.min(precipitation, 3) * 85000,
-          color: '#167fa7',
-          weight: 1.5,
-          opacity: 0.34,
-          fillColor: '#0f75a4',
-          fillOpacity: 0.14 + Math.min(precipitation, 2) * 0.06,
+          radius: cloudRadius,
+          color: cloudColor,
+          weight: cloudWeight,
+          opacity: cloudLineOpacity,
+          fillColor: cloudColor,
+          fillOpacity: Math.min(0.34, cloudOpacity + cloudFillBoost),
           interactive: false,
-          className: 'regional-meteo-rain-field'
+          className: `regional-meteo-cloud-field severity-${this.escapeHtml(String(point.severity || 'watch'))}`
+        }).addTo(this.meteoOverlayLayer);
+
+        if (precipitation > 0.03) {
+          L.circle([point.lat, point.lon], {
+            pane: 'regionalMeteoPane',
+            radius: 90000 + Math.min(precipitation, 3) * 85000,
+            color: rainColor,
+            weight: severityRank >= 2 ? 2 : 1.5,
+            opacity: severityRank >= 2 ? 0.56 : 0.34,
+            fillColor: rainColor,
+            fillOpacity: Math.min(0.42, 0.14 + Math.min(precipitation, 2) * 0.06 + cloudFillBoost),
+            interactive: false,
+            className: `regional-meteo-rain-field severity-${this.escapeHtml(String(point.severity || 'watch'))}`
+          }).addTo(this.meteoOverlayLayer);
+        }
+      }
+
+      if (showWarningSurface && point.isAutoMeteoEvent) {
+        const warningColor = this.getMeteoSeverityColor(point.severity);
+        L.circle([point.lat, point.lon], {
+          pane: 'regionalMeteoPane',
+          radius: 65000 + Math.min(120000, Math.max(0, Number(point.severityScore) || 0) * 1400),
+          color: warningColor,
+          weight: 2,
+          opacity: 0.66,
+          fillColor: warningColor,
+          fillOpacity: 0.08,
+          interactive: false,
+          className: `regional-meteo-warning-field severity-${this.escapeHtml(String(point.severity || 'watch'))}`
         }).addTo(this.meteoOverlayLayer);
       }
     });
 
-    this.addMeteoLegendControl(L, meteoPoints);
+    this.addMeteoLegendControl(L, meteoPoints, { showCloudSurface, showWarningSurface });
   }
 
-  addMeteoLegendControl(L, meteoPoints) {
+  refreshMeteoSurfaceControls() {
+    if (this.map && this.L) {
+      this.clearMeteoOverlay();
+      this.addMeteoOverlay(this.L);
+    }
+
+    const digest = this.element?.querySelector('.regional-meteo-digest');
+    const nextDigest = this.renderMeteoDigest();
+    if (digest && nextDigest) {
+      digest.outerHTML = nextDigest;
+    } else if (!digest && nextDigest) {
+      this.element?.querySelector('.regional-map-canvas')?.insertAdjacentHTML('afterbegin', nextDigest);
+    } else if (digest && !nextDigest) {
+      digest.remove();
+    }
+  }
+
+  toggleMeteoCloudSurface() {
+    this.meteoCloudSurfaceHidden = !this.meteoCloudSurfaceHidden;
+    this.refreshMeteoSurfaceControls();
+    this.setStatus(
+      this.meteoCloudSurfaceHidden ? this.t('regional.meteoCloudsOff') : this.t('regional.meteoCloudsOn'),
+      'ready'
+    );
+  }
+
+  toggleMeteoWarningSurface() {
+    this.meteoWarningSurfaceHidden = !this.meteoWarningSurfaceHidden;
+    this.refreshMeteoSurfaceControls();
+    this.setStatus(
+      this.meteoWarningSurfaceHidden ? this.t('regional.meteoWarningsOff') : this.t('regional.meteoWarningsOn'),
+      'ready'
+    );
+  }
+
+  addMeteoLegendControl(L, meteoPoints, options = {}) {
     if (!this.map || meteoPoints.length === 0) return;
 
+    const showCloudSurface = options.showCloudSurface ?? this.isMeteoCloudSurfaceActive();
+    const showWarningSurface = options.showWarningSurface ?? this.isMeteoWarningSurfaceActive();
     const avgCloud = meteoPoints.reduce((sum, point) => sum + (Number(point.meteo?.cloudCover) || 0), 0) / meteoPoints.length;
     const wetCount = meteoPoints.filter(point => Number(point.meteo?.precipitation) > 0.03).length;
+    const warningCount = meteoPoints.filter(point => point.isAutoMeteoEvent).length;
     const RegionalMeteoLegend = L.Control.extend({
       options: { position: 'bottomright' },
       onAdd() {
         const wrapper = L.DomUtil.create('div', 'regional-meteo-legend');
         wrapper.innerHTML = `
           <strong>Meteo surface</strong>
-          <span><i class="cloud"></i>${Math.round(avgCloud)}% clouds avg</span>
-          <span><i class="rain"></i>${wetCount} rain sample${wetCount === 1 ? '' : 's'}</span>
+          ${showCloudSurface ? `<span><i class="cloud"></i>${Math.round(avgCloud)}% clouds avg</span>` : ''}
+          ${showCloudSurface ? `<span><i class="rain"></i>${wetCount} rain sample${wetCount === 1 ? '' : 's'}</span>` : ''}
+          ${showWarningSurface && warningCount ? `<span><i class="warning"></i>${warningCount} warning signal${warningCount === 1 ? '' : 's'}</span>` : ''}
         `;
         L.DomEvent.disableClickPropagation(wrapper);
         L.DomEvent.disableScrollPropagation(wrapper);
@@ -1017,6 +1194,13 @@ export class RegionalMap {
     if (this.map && this.markerLayer) {
       this.map.removeLayer(this.markerLayer);
     }
+    this.clearMeteoOverlay();
+
+    this.markerLayer = null;
+    this.markerByTopicId.clear();
+  }
+
+  clearMeteoOverlay() {
     if (this.map && this.meteoOverlayLayer) {
       this.map.removeLayer(this.meteoOverlayLayer);
     }
@@ -1024,10 +1208,8 @@ export class RegionalMap {
       this.map.removeControl(this.meteoLegendControl);
     }
 
-    this.markerLayer = null;
     this.meteoOverlayLayer = null;
     this.meteoLegendControl = null;
-    this.markerByTopicId.clear();
   }
 
   showFallbackMap(message) {
@@ -1236,7 +1418,7 @@ export class RegionalMap {
   styleLeafletMarker(marker, isActive = false) {
     if (!marker?.setStyle) return;
 
-    const baseRadius = marker.__isRealtimeMeteo ? 10 : 8;
+    const baseRadius = marker.__isMeteoWarning ? 12 : (marker.__isRealtimeMeteo ? 10 : 8);
     const baseWeight = marker.__baseWeight || 1.5;
     marker.setStyle({
       radius: isActive ? baseRadius + 4 : baseRadius,
@@ -1715,6 +1897,29 @@ export class RegionalMap {
       }
       return;
     }
+    if (actionButton?.dataset.action === 'dismiss-regional-meteo-digest') {
+      this.meteoDigestDismissed = true;
+      actionButton.closest('.regional-meteo-digest')?.remove();
+      this.setStatus('Meteo surface summary hidden. Toggle Live Meteo or reload Regional mode to show it again.', 'ready');
+      return;
+    }
+    if (actionButton?.dataset.action === 'toggle-regional-meteo-clouds') {
+      this.toggleMeteoCloudSurface();
+      return;
+    }
+    if (actionButton?.dataset.action === 'toggle-regional-meteo-warnings') {
+      this.toggleMeteoWarningSurface();
+      return;
+    }
+    if (actionButton?.dataset.action === 'open-regional-meteo-topic') {
+      const point = this.getPrimaryMeteoSignal();
+      if (point && this.callbacks.onMeteoTopicDraft) {
+        this.callbacks.onMeteoTopicDraft(point);
+      } else if (point && this.callbacks.onTopicSelect) {
+        this.callbacks.onTopicSelect(point);
+      }
+      return;
+    }
 
     const searchToggle = event.target.closest('[data-action="toggle-regional-map-search"]');
     if (searchToggle) {
@@ -1774,15 +1979,33 @@ export class RegionalMap {
 
   getMeteoOverlayPoints() {
     if (!this.shouldShowMeteoOverlay()) return [];
+    return this.getMeteoAvailablePoints();
+  }
 
+  getMeteoAvailablePoints() {
+    if (!this.hasActiveMeteoSurfaceSource()) return [];
     return this.sourcePoints
       .map((point, index) => this.withFallbackCoordinates(point, index))
       .filter(point => point && !this.isExcluded(point) && (point.isRealtimeMeteo || point.category === METEO_REALTIME_LAYER_ID));
   }
 
   shouldShowMeteoOverlay() {
+    return this.isMeteoCloudSurfaceActive() || this.isMeteoWarningSurfaceActive();
+  }
+
+  hasActiveMeteoSurfaceSource() {
     if (!this.activeLayers) return true;
     return this.activeLayers.has(METEO_CLOUD_LAYER_ID) || this.activeLayers.has(METEO_REALTIME_LAYER_ID);
+  }
+
+  isMeteoCloudSurfaceActive() {
+    if (!this.activeLayers) return !this.meteoCloudSurfaceHidden;
+    return this.activeLayers.has(METEO_CLOUD_LAYER_ID) && !this.meteoCloudSurfaceHidden;
+  }
+
+  isMeteoWarningSurfaceActive() {
+    if (!this.activeLayers) return !this.meteoWarningSurfaceHidden;
+    return this.activeLayers.has(METEO_REALTIME_LAYER_ID) && !this.meteoWarningSurfaceHidden;
   }
 
   clamp(value, min, max) {

@@ -1,4 +1,4 @@
-// Domain and CDN guard for production and shared embeds.
+﻿// Domain and CDN guard for production and shared embeds.
 function enforceDomainAndCdnPolicy() {
   const domainConfig = window.SMART_DOMAIN_GUARD_CONFIG || {
     enabled: true,
@@ -7,6 +7,7 @@ function enforceDomainAndCdnPolicy() {
       "smdeltart.com",
       "localhost",
       "127.0.0.1",
+    "topic.earth",
     ],
     allowSubdomains: true,
     allowFileProtocol: true,
@@ -6642,9 +6643,9 @@ window.ApiVault = {
                                 Enter password to decrypt API keys
                             </p>
                             <form id="vaultUnlockForm" action="#" method="post" autocomplete="on">
-                                <input type="text" name="username" value="smdeltart-api-vault"
+                                <input type="text" name="username" value="smdeltart-api-vault" 
                                     style="position:absolute;left:-9999px;" autocomplete="username">
-                                <input type="password" id="vaultPasswordInput" name="password" class="vault-input"
+                                <input type="password" id="vaultPasswordInput" name="password" class="vault-input" 
                                     placeholder="Master Password" autocomplete="current-password">
                                 <div class="vault-dialog-buttons">
                                     <button type="button" class="vault-btn vault-btn-secondary" onclick="document.getElementById('vaultUnlockDialog')?.remove()">
@@ -6656,7 +6657,7 @@ window.ApiVault = {
                                 </div>
                             </form>
                             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #333;">
-                                <button type="button" class="vault-btn" style="width: 100%; font-size: 0.8em; background: #8b3a3a;"
+                                <button type="button" class="vault-btn" style="width: 100%; font-size: 0.8em; background: #8b3a3a;" 
                                     onclick="if(confirm('⚠️ Delete vault? Keys will be LOST.')) window.ApiVault.deleteVaultAndReset()">
                                     🗑️ Delete Vault
                                 </button>
@@ -6845,11 +6846,11 @@ window.ApiVault = {
                         </p>
                         <!-- Form triggers browser's "Save password?" prompt -->
                         <form id="vaultSetupForm" action="#" method="post" autocomplete="on">
-                            <input type="text" name="username" value="smdeltart-api-vault"
+                            <input type="text" name="username" value="smdeltart-api-vault" 
                                 style="position:absolute;left:-9999px;" autocomplete="username">
-                            <input type="password" id="vaultNewPassword" name="password" class="vault-input"
+                            <input type="password" id="vaultNewPassword" name="password" class="vault-input" 
                                 placeholder="Create Master Password" autocomplete="new-password">
-                            <input type="password" id="vaultConfirmPassword" name="confirm" class="vault-input"
+                            <input type="password" id="vaultConfirmPassword" name="confirm" class="vault-input" 
                                 placeholder="Confirm Password" autocomplete="new-password" style="margin-top: 8px;">
                             <div class="vault-dialog-buttons">
                                 <button type="button" class="vault-btn vault-btn-secondary" onclick="window.ApiVault.cancelSetup()">
