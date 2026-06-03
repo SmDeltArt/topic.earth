@@ -202,12 +202,32 @@ def center_visible_body_on_local_position(obj: bpy.types.Object, parent: bpy.typ
     bpy.context.view_layer.update()
 
 
+def parent_visible_center_to_spin(obj: bpy.types.Object, spin: bpy.types.Object) -> None:
+    old_world = obj.matrix_world.copy()
+    obj.parent = spin
+    obj.matrix_parent_inverse.identity()
+    obj.matrix_world = old_world
+    obj.location = Vector((0, 0, 0))
+    bpy.context.view_layer.update()
+
+    current_center_world = bbox_center(obj)
+    current_center_local = spin.matrix_world.inverted() @ current_center_world
+    obj.location -= current_center_local
+    bpy.context.view_layer.update()
+
+
 def make_orbit_pivot(name: str, parent: bpy.types.Object | None = None) -> bpy.types.Object:
     pivot = bpy.data.objects.new(name, None)
     bpy.context.collection.objects.link(pivot)
     if parent:
         pivot.parent = parent
     return pivot
+
+
+def make_spin_pivot(name: str, orbit_pivot: bpy.types.Object | None, local_position: Vector) -> bpy.types.Object:
+    spin = make_orbit_pivot(f"Spin_{name}", parent=orbit_pivot)
+    spin.location = local_position
+    return spin
 
 
 def orbit_radius(au: float) -> float:
@@ -276,11 +296,13 @@ def create_orbits() -> None:
 
     sun.location = Vector((0, 0, 0))
     clear_animation_recursive(sun)
-    animate_self_spin(sun, "Sun")
+    sun_spin = make_spin_pivot("Sun", None, Vector((0, 0, 0)))
+    parent_visible_center_to_spin(sun, sun_spin)
+    animate_self_spin(sun_spin, "Sun")
     earth_period = PLANETS["Earth"]["period_days"]
 
     root = make_orbit_pivot("Orbit_System_Root")
-    root.location = sun.location
+    root.location = Vector((0, 0, 0))
 
     pivots: dict[str, bpy.types.Object] = {}
 
@@ -298,23 +320,25 @@ def create_orbits() -> None:
                 continue
             pivot = make_orbit_pivot("Orbit_Moon", parent=earth_pivot)
             pivot.location = Vector((orbit_radius(PLANETS["Earth"]["au"]), 0, 0))
+            moon_distance = max(diameter(earth) * 2.25, 2.5)
+            spin = make_spin_pivot(planet_name, pivot, Vector((moon_distance, 0, 0)))
         else:
             pivot = make_orbit_pivot(f"Orbit_{planet_name}", parent=root)
-            pivot.location = sun.location.copy()
+            pivot.location = Vector((0, 0, 0))
+            spin = make_spin_pivot(planet_name, pivot, Vector((orbit_radius(data["au"]), 0, 0)))
 
         inclination = math.radians(data["inclination_deg"] * ORBIT_INCLINATION_SCALE)
         pivot.rotation_euler.x = inclination
-        parent_local(obj, pivot)
-        set_planet_orbit_position(obj, planet_name)
+        parent_visible_center_to_spin(obj, spin)
         animate_pivot_rotation(
             pivot,
             data["period_days"],
             earth_period,
             retrograde=False,
         )
-        animate_self_spin(obj, planet_name)
+        animate_self_spin(spin, planet_name)
         pivots[planet_name] = pivot
-        print(f"[Orbit] {planet_name}: radius={obj.location.length:.3f}, period={data['period_days']} days")
+        print(f"[Orbit] {planet_name}: radius={spin.location.length:.3f}, period={data['period_days']} days")
 
 
 def rescale_planets() -> None:

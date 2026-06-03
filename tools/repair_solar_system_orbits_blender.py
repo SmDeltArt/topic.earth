@@ -167,6 +167,7 @@ def delete_old_helpers(planets: dict[str, bpy.types.Object]) -> None:
         if (
             obj.name.startswith("Orbit_")
             or obj.name.startswith("OrbitPath_")
+            or obj.name.startswith("Spin_")
             or obj.name in {"Orbit_System_Root", "Animation"}
             or obj.type == "CURVE"
         ):
@@ -205,18 +206,26 @@ def bbox_center(obj: bpy.types.Object) -> Vector:
     return (min_v + max_v) * 0.5
 
 
-def parent_to_pivot_at_local_radius(obj: bpy.types.Object, pivot: bpy.types.Object, local_position: Vector) -> None:
-    obj.parent = pivot
+def make_spin_pivot(name: str, orbit_pivot: bpy.types.Object | None, local_position: Vector) -> bpy.types.Object:
+    spin = make_empty(f"Spin_{name}", parent=orbit_pivot)
+    spin.location = local_position
+    return spin
+
+
+def parent_visible_center_to_spin(obj: bpy.types.Object, spin: bpy.types.Object) -> None:
+    old_world = obj.matrix_world.copy()
+    obj.parent = spin
     obj.matrix_parent_inverse.identity()
+    obj.matrix_world = old_world
     obj.location = Vector((0, 0, 0))
     bpy.context.view_layer.update()
 
     # Imported GLBs often have planet mesh geometry offset from the object
-    # origin. Center the visible planet body on the orbit radius, not the
-    # object's old origin.
+    # origin. Center the visible planet body on the spin pivot, so self-spin
+    # rotates around the planet body while the orbit pivot stays Sun-centered.
     current_center_world = bbox_center(obj)
-    current_center_local = pivot.matrix_world.inverted() @ current_center_world
-    obj.location += local_position - current_center_local
+    current_center_local = spin.matrix_world.inverted() @ current_center_world
+    obj.location -= current_center_local
     bpy.context.view_layer.update()
 
 
@@ -272,8 +281,9 @@ def rebuild_orbits(planets: dict[str, bpy.types.Object]) -> None:
     if not sun or not earth:
         raise RuntimeError("Need Sun and Earth objects to rebuild orbits.")
 
-    sun.location = Vector((0, 0, 0))
-    animate_spin(sun, "Sun")
+    sun_spin = make_spin_pivot("Sun", None, Vector((0, 0, 0)))
+    parent_visible_center_to_spin(sun, sun_spin)
+    animate_spin(sun_spin, "Sun")
 
     root = make_empty("Orbit_System_Root")
     root.location = Vector((0, 0, 0))
@@ -291,17 +301,18 @@ def rebuild_orbits(planets: dict[str, bpy.types.Object]) -> None:
             pivot = make_empty("Orbit_Moon", parent=earth_pivot)
             pivot.location = Vector((orbit_radius(PLANETS["Earth"]["au"]), 0, 0))
             moon_distance = max(diameter(planets["Earth"]) * 2.25, 2.5)
-            parent_to_pivot_at_local_radius(obj, pivot, Vector((moon_distance, 0, 0)))
+            spin = make_spin_pivot(planet_name, pivot, Vector((moon_distance, 0, 0)))
         else:
             pivot = make_empty(f"Orbit_{planet_name}", parent=root)
             pivot.location = Vector((0, 0, 0))
             pivot.rotation_euler.x = math.radians(data["inclination_deg"] * ORBIT_INCLINATION_SCALE)
-            parent_to_pivot_at_local_radius(obj, pivot, Vector((orbit_radius(data["au"]), 0, 0)))
+            spin = make_spin_pivot(planet_name, pivot, Vector((orbit_radius(data["au"]), 0, 0)))
 
+        parent_visible_center_to_spin(obj, spin)
         animate_orbit(pivot, data["period_days"])
-        animate_spin(obj, planet_name)
+        animate_spin(spin, planet_name)
         pivots[planet_name] = pivot
-        print(f"[Orbit] {planet_name} linked to {pivot.name}; local radius={obj.location.length:.3f}")
+        print(f"[Orbit] {planet_name} linked to {pivot.name}; spin={spin.name}; radius={spin.location.length:.3f}")
 
     make_orbit_curves()
 
