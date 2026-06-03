@@ -105,12 +105,36 @@ def file_mb(path: Path) -> float:
 
 
 def find_object(name: str) -> bpy.types.Object | None:
-    if name in bpy.data.objects:
-        return bpy.data.objects[name]
+    direct = bpy.data.objects.get(name)
+    if direct and direct.type == "MESH" and not is_helper_object(direct):
+        return direct
     for obj in bpy.data.objects:
-        if obj.name.lower() == name.lower():
+        if obj.name.lower() == name.lower() and obj.type == "MESH" and not is_helper_object(obj):
             return obj
+    candidates = [
+        obj for obj in bpy.data.objects
+        if name.lower() in obj.name.lower()
+        and has_mesh_geometry(obj)
+        and not is_helper_object(obj)
+    ]
+    if candidates:
+        candidates.sort(key=lambda obj: (obj.type != "MESH", len(obj.name), obj.name))
+        return candidates[0]
     return None
+
+
+def has_mesh_geometry(obj: bpy.types.Object) -> bool:
+    return obj.type == "MESH" or any(child.type == "MESH" for child in obj.children_recursive)
+
+
+def is_helper_object(obj: bpy.types.Object) -> bool:
+    return (
+        obj.name.startswith("Orbit_")
+        or obj.name.startswith("OrbitPath_")
+        or obj.name.startswith("Spin_")
+        or obj.name in {"Orbit_System_Root", "Animation"}
+        or obj.type == "CURVE"
+    )
 
 
 def world_bbox(obj: bpy.types.Object) -> tuple[Vector, Vector] | None:
@@ -228,11 +252,10 @@ def center_visible_body_on_local_position(obj: bpy.types.Object, parent: bpy.typ
 
 
 def parent_visible_center_to_spin(obj: bpy.types.Object, spin: bpy.types.Object) -> None:
-    old_world = obj.matrix_world.copy()
     obj.parent = spin
     obj.matrix_parent_inverse.identity()
-    obj.matrix_world = old_world
     obj.location = Vector((0, 0, 0))
+    obj.rotation_euler = (0, 0, 0)
     bpy.context.view_layer.update()
 
     current_center_world = bbox_center(obj)

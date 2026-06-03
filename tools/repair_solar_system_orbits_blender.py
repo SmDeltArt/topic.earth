@@ -51,6 +51,10 @@ PLANETS = {
     "Pluto": {"diameter": 0.186, "au": 39.482, "period_days": 90560.0, "inclination_deg": 17.16},
 }
 
+DETAIL_OBJECTS = {
+    "Saturn": ["S_Rings", "Saturn_Rings", "Rings"],
+}
+
 SPIN_PERIOD_DAYS = {
     "Sun": 27.0,
     "Mercury": 58.646,
@@ -86,21 +90,52 @@ def find_object(name: str) -> bpy.types.Object | None:
     return None
 
 
+def has_mesh_geometry(obj: bpy.types.Object) -> bool:
+    return obj.type == "MESH" or any(child.type == "MESH" for child in obj.children_recursive)
+
+
+def is_helper_object(obj: bpy.types.Object) -> bool:
+    return (
+        obj.name.startswith("Orbit_")
+        or obj.name.startswith("OrbitPath_")
+        or obj.name.startswith("Spin_")
+        or obj.name in {"Orbit_System_Root", "Animation"}
+        or obj.type == "CURVE"
+    )
+
+
 def find_planet_object(name: str) -> bpy.types.Object | None:
     direct = find_object(name)
-    if direct and direct.type != "CURVE":
+    if direct and direct.type == "MESH" and not is_helper_object(direct):
         return direct
 
     candidates = [
         obj for obj in bpy.data.objects
         if name.lower() in obj.name.lower()
-        and not obj.name.startswith("Orbit_")
-        and not obj.name.startswith("OrbitPath_")
-        and obj.type != "CURVE"
+        and has_mesh_geometry(obj)
+        and not is_helper_object(obj)
     ]
     if not candidates:
         return None
-    candidates.sort(key=lambda obj: (obj.type != "EMPTY", len(obj.name)))
+    candidates.sort(key=lambda obj: (obj.type != "MESH", len(obj.name), obj.name))
+    return candidates[0]
+
+
+def find_detail_object(aliases: list[str]) -> bpy.types.Object | None:
+    for alias in aliases:
+        direct = find_object(alias)
+        if direct and has_mesh_geometry(direct) and not is_helper_object(direct):
+            return direct
+
+    candidates = [
+        obj for obj in bpy.data.objects
+        if any(alias.lower() in obj.name.lower() for alias in aliases)
+        and has_mesh_geometry(obj)
+        and not is_helper_object(obj)
+    ]
+    if not candidates:
+        return None
+    candidates.sort(key=lambda obj: (obj.type != "MESH", len(obj.name), obj.name))
     return candidates[0]
 
 
@@ -157,20 +192,32 @@ def detach_planets() -> dict[str, bpy.types.Object]:
     return planets
 
 
-def delete_old_helpers(planets: dict[str, bpy.types.Object]) -> None:
+def detach_details() -> dict[str, list[bpy.types.Object]]:
+    details: dict[str, list[bpy.types.Object]] = {}
+    for owner, aliases in DETAIL_OBJECTS.items():
+        obj = find_detail_object(aliases)
+        if not obj:
+            continue
+        matrix = obj.matrix_world.copy()
+        obj.parent = None
+        obj.matrix_world = matrix
+        details.setdefault(owner, []).append(obj)
+        print(f"[Detach] Kept detail for {owner}: {obj.name}")
+    return details
+
+
+def delete_old_helpers(planets: dict[str, bpy.types.Object], details: dict[str, list[bpy.types.Object]]) -> None:
     keep = set(planets.values())
     keep.update(child for obj in planets.values() for child in obj.children_recursive)
+    keep.update(detail for detail_list in details.values() for detail in detail_list)
+    keep.update(child for detail_list in details.values() for detail in detail_list for child in detail.children_recursive)
+    solar_tokens = {name.lower() for name in ["Sun", *PLANETS.keys(), *sum(DETAIL_OBJECTS.values(), [])]}
 
     for obj in list(bpy.data.objects):
         if obj in keep:
             continue
-        if (
-            obj.name.startswith("Orbit_")
-            or obj.name.startswith("OrbitPath_")
-            or obj.name.startswith("Spin_")
-            or obj.name in {"Orbit_System_Root", "Animation"}
-            or obj.type == "CURVE"
-        ):
+        is_duplicate_solar_body = any(token in obj.name.lower() for token in solar_tokens)
+        if is_helper_object(obj) or is_duplicate_solar_body or (obj.type == "EMPTY" and not has_mesh_geometry(obj)):
             bpy.data.objects.remove(obj, do_unlink=True)
 
 
@@ -238,11 +285,10 @@ def make_spin_pivot(name: str, orbit_pivot: bpy.types.Object | None, local_posit
 
 
 def parent_visible_center_to_spin(obj: bpy.types.Object, spin: bpy.types.Object) -> None:
-    old_world = obj.matrix_world.copy()
     obj.parent = spin
     obj.matrix_parent_inverse.identity()
-    obj.matrix_world = old_world
     obj.location = Vector((0, 0, 0))
+    obj.rotation_euler = (0, 0, 0)
     bpy.context.view_layer.update()
 
     # Imported GLBs often have planet mesh geometry offset from the object
@@ -300,7 +346,7 @@ def make_orbit_curves() -> None:
         bpy.context.collection.objects.link(obj)
 
 
-def rebuild_orbits(planets: dict[str, bpy.types.Object]) -> None:
+def rebuild_orbits(planets: dict[str, bpy.types.Object], details: dict[str, list[bpy.types.Object]]) -> None:
     sun = planets.get("Sun")
     earth = planets.get("Earth")
     if not sun or not earth:
@@ -336,6 +382,8 @@ def rebuild_orbits(planets: dict[str, bpy.types.Object]) -> None:
             spin = make_spin_pivot(planet_name, pivot, Vector((orbit_radius(data["au"]), 0, 0)))
 
         parent_visible_center_to_spin(obj, spin)
+        for detail in details.get(planet_name, []):
+            parent_visible_center_to_spin(detail, spin)
         animate_orbit(pivot, data["period_days"])
         animate_spin(spin, planet_name)
         pivots[planet_name] = pivot
@@ -364,8 +412,9 @@ def main() -> None:
     bpy.context.scene.frame_end = FRAME_END
     clear_all_animation()
     planets = detach_planets()
-    delete_old_helpers(planets)
-    rebuild_orbits(planets)
+    details = detach_details()
+    delete_old_helpers(planets, details)
+    rebuild_orbits(planets, details)
     export_model()
     print(f"[Done] Exported linked orbit GLB: {OUTPUT_GLB}")
 
