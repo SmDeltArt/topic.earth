@@ -193,6 +193,31 @@ def bbox_center(obj: bpy.types.Object) -> Vector:
     return (min_v + max_v) * 0.5
 
 
+def force_mesh_origin_to_geometry(obj: bpy.types.Object) -> None:
+    if obj.type != "MESH":
+        return
+
+    selected = [item for item in bpy.context.scene.objects if item.select_get()]
+    active = bpy.context.view_layer.objects.active
+    child_matrices = {child: child.matrix_world.copy() for child in obj.children_recursive}
+
+    bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    try:
+        bpy.ops.object.origin_set(type="ORIGIN_GEOMETRY", center="BOUNDS")
+    except Exception as exc:
+        print(f"[Origin] Skipped {obj.name}: {exc}")
+    finally:
+        for child, matrix in child_matrices.items():
+            child.matrix_world = matrix
+        obj.select_set(False)
+        for item in selected:
+            item.select_set(True)
+        bpy.context.view_layer.objects.active = active
+        bpy.context.view_layer.update()
+
+
 def center_visible_body_on_local_position(obj: bpy.types.Object, parent: bpy.types.Object, local_position: Vector) -> None:
     obj.location = Vector((0, 0, 0))
     bpy.context.view_layer.update()
@@ -297,6 +322,7 @@ def create_orbits() -> None:
     sun.location = Vector((0, 0, 0))
     clear_animation_recursive(sun)
     sun_spin = make_spin_pivot("Sun", None, Vector((0, 0, 0)))
+    force_mesh_origin_to_geometry(sun)
     parent_visible_center_to_spin(sun, sun_spin)
     animate_self_spin(sun_spin, "Sun")
     earth_period = PLANETS["Earth"]["period_days"]
@@ -313,6 +339,7 @@ def create_orbits() -> None:
             continue
 
         clear_animation_recursive(obj)
+        force_mesh_origin_to_geometry(obj)
 
         if planet_name == "Moon":
             earth_pivot = pivots.get("Earth")
