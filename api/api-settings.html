@@ -1102,6 +1102,327 @@
       </div>
 
       <div class="api-settings-container">
+        <!-- ═══════════════════════════════════════════════════════════════
+             🔒 PROVIDER MODE SELECTOR  (added 2026-07)
+             Browser Fallback | Local BYOK | Vercel Secure Proxy
+             ═══════════════════════════════════════════════════════════════ -->
+        <div
+          class="api-category expanded"
+          data-category="provider-mode"
+          id="providerModeCategory"
+          style="border-color: #6d9eeb40; background: #1a2847"
+        >
+          <button
+            class="api-category-btn"
+            data-category="provider-mode"
+            style="background: #1a2847"
+          >
+            <svg
+              class="category-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 12 12"
+            >
+              <polygon
+                points="6,2 11,10 1,10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+            </svg>
+            <span class="category-label">🔒 API Provider Mode</span>
+            <span class="category-status" id="providerModeStatus">🔵</span>
+          </button>
+          <div
+            class="api-category-content"
+            id="providerModeContent"
+            style="background: #131c30; padding: 14px"
+          >
+            <!-- Mode radio buttons -->
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 12px;
+              "
+            >
+              <!-- Mode: Browser Fallback -->
+              <label
+                style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 10px;
+                  padding: 10px;
+                  background: #1e2a47;
+                  border: 1px solid #3a4a6a;
+                  border-radius: 6px;
+                  cursor: pointer;
+                "
+              >
+                <input
+                  type="radio"
+                  name="providerMode"
+                  id="modeBrowser"
+                  value="browser"
+                  style="margin-top: 2px; accent-color: #6d9eeb"
+                />
+                <span>
+                  <span style="font-weight: 600; color: #e0e0e0"
+                    >🌐 Browser Fallback</span
+                  >
+                  <span
+                    style="
+                      display: block;
+                      font-size: 0.78em;
+                      color: #9ca3af;
+                      margin-top: 2px;
+                    "
+                    >No API keys required. Uses built-in browser APIs (Web
+                    Speech, etc.).</span
+                  >
+                </span>
+              </label>
+
+              <!-- Mode: Local BYOK -->
+              <label
+                style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 10px;
+                  padding: 10px;
+                  background: #1e2a47;
+                  border: 1px solid #3a4a6a;
+                  border-radius: 6px;
+                  cursor: pointer;
+                "
+              >
+                <input
+                  type="radio"
+                  name="providerMode"
+                  id="modeByok"
+                  value="byok"
+                  checked
+                  style="margin-top: 2px; accent-color: #6d9eeb"
+                />
+                <span>
+                  <span style="font-weight: 600; color: #e0e0e0"
+                    >🔑 Local BYOK
+                    <span style="font-size: 0.75em; color: #fbbf24"
+                      >(Bring Your Own Keys)</span
+                    ></span
+                  >
+                  <span
+                    style="
+                      display: block;
+                      font-size: 0.78em;
+                      color: #9ca3af;
+                      margin-top: 2px;
+                    "
+                    >Enter your own API keys. Stored only on this device.</span
+                  >
+                </span>
+              </label>
+
+              <!-- Mode: Vercel Secure Proxy -->
+              <label
+                style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 10px;
+                  padding: 10px;
+                  background: #1e2a47;
+                  border: 1px solid #3a4a6a;
+                  border-radius: 6px;
+                  cursor: pointer;
+                "
+              >
+                <input
+                  type="radio"
+                  name="providerMode"
+                  id="modeProxy"
+                  value="proxy"
+                  style="margin-top: 2px; accent-color: #6d9eeb"
+                />
+                <span>
+                  <span style="font-weight: 600; color: #e0e0e0"
+                    >🛡️ Vercel Secure Proxy
+                    <span style="font-size: 0.75em; color: #4ade80"
+                      >(Production)</span
+                    ></span
+                  >
+                  <span
+                    style="
+                      display: block;
+                      font-size: 0.78em;
+                      color: #9ca3af;
+                      margin-top: 2px;
+                    "
+                    >API keys stay on the server. Keys never sent to
+                    browser.</span
+                  >
+                </span>
+              </label>
+            </div>
+
+            <!-- BYOK warning banner (shown only in byok mode) -->
+            <div
+              id="byokWarning"
+              style="
+                display: none;
+                padding: 10px 12px;
+                background: rgba(251, 191, 36, 0.1);
+                border: 1px solid #f59e0b;
+                border-radius: 6px;
+                font-size: 0.78em;
+                color: #fcd34d;
+                margin-bottom: 10px;
+              "
+            >
+              ⚠️ <strong>Local API keys are stored only on this device.</strong
+              ><br />
+              Do not use this mode on shared or public computers.
+            </div>
+
+            <!-- Proxy config section (shown only in proxy mode) -->
+            <div id="proxyConfig" style="display: none">
+              <!-- Health status -->
+              <div
+                id="proxyHealthRow"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  margin-bottom: 10px;
+                "
+              >
+                <span style="font-size: 0.8em; color: #9ca3af"
+                  >Proxy health:</span
+                >
+                <span
+                  id="proxyHealthStatus"
+                  style="font-size: 0.8em; color: #6b7280"
+                  >Not checked</span
+                >
+                <button
+                  id="checkProxyHealthBtn"
+                  style="
+                    padding: 3px 8px;
+                    background: #3b82f6;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 0.75em;
+                    cursor: pointer;
+                  "
+                >
+                  🔍 Check
+                </button>
+              </div>
+
+              <!-- Proxy base URL -->
+              <label
+                style="
+                  font-size: 0.78em;
+                  color: #9ca3af;
+                  display: block;
+                  margin-bottom: 3px;
+                "
+                >Proxy base URL:</label
+              >
+              <input
+                type="text"
+                id="proxyBaseUrl"
+                class="api-key-input"
+                placeholder="Leave empty to use current origin (/api/…)"
+                autocomplete="off"
+                data-lpignore="true"
+                data-form-type="other"
+                style="
+                  margin-bottom: 8px;
+                  font-family: monospace;
+                  font-size: 0.8em;
+                "
+              />
+
+              <!-- Optional proxy token -->
+              <label
+                style="
+                  font-size: 0.78em;
+                  color: #9ca3af;
+                  display: block;
+                  margin-bottom: 3px;
+                "
+                >Proxy token
+                <span style="color: #6b7280">(optional, x-smrt-token)</span
+                >:</label
+              >
+              <input
+                type="password"
+                id="smrtProxyToken"
+                class="api-key-input"
+                placeholder="SMRT_PROXY_TOKEN (leave empty if not set)"
+                autocomplete="off"
+                data-lpignore="true"
+                data-form-type="other"
+                style="margin-bottom: 10px"
+              />
+
+              <!-- Proxy test buttons -->
+              <div
+                style="
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 6px;
+                  margin-bottom: 8px;
+                "
+              >
+                <button
+                  id="testOpenAiProxyBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #22c55e;
+                    color: white;
+                    font-size: 0.78em;
+                    padding: 5px 10px;
+                  "
+                >
+                  🧪 Test OpenAI Proxy
+                </button>
+                <button
+                  id="testElevenLabsProxyBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #3b82f6;
+                    color: white;
+                    font-size: 0.78em;
+                    padding: 5px 10px;
+                  "
+                >
+                  🧪 Test ElevenLabs Proxy
+                </button>
+                <button
+                  id="testAiHealthBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #8b5cf6;
+                    color: white;
+                    font-size: 0.78em;
+                    padding: 5px 10px;
+                  "
+                >
+                  ❤️ AI Health
+                </button>
+              </div>
+              <div
+                id="proxyTestResult"
+                style="font-size: 0.75em; color: #9ca3af; min-height: 18px"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <!-- END PROVIDER MODE -->
+
         <!-- Text API Category -->
         <div class="api-category" data-category="text">
           <button class="api-category-btn" data-category="text">
@@ -1216,18 +1537,21 @@
                     class="api-select"
                     style="font-size: 0.85em"
                   >
-                    <optgroup label="⚡ Recommended (High TPM)">
-                      <option value="gpt-5.4" selected>
-                        gpt-5.4 (500K TPM, $$)
+                    <optgroup label="⚡ Text (Current)">
+                      <option value="gpt-5.5" selected>
+                        gpt-5.5 (Default, $$)
                       </option>
-                      <option value="gpt-5.3-codex">
-                        gpt-5.3-codex (500K TPM, $$)
-                      </option>
+                      <option value="gpt-5.4">gpt-5.4 (500K TPM, $$)</option>
                       <option value="gpt-5-mini">
                         gpt-5-mini (500K TPM, $)
                       </option>
                       <option value="gpt-5">gpt-5 (500K TPM, $$)</option>
                       <option value="gpt-5.1">gpt-5.1 (500K TPM, $$$)</option>
+                    </optgroup>
+                    <optgroup label="💻 Coding">
+                      <option value="gpt-5.3-codex">
+                        gpt-5.3-codex (500K TPM, $$)
+                      </option>
                     </optgroup>
                     <optgroup label="🧠 Premium">
                       <option value="gpt-5.4-pro">
@@ -1819,12 +2143,21 @@
                     class="api-select"
                     style="font-size: 0.85em"
                   >
-                    <optgroup label="🎨 Generation">
-                      <option value="gpt-image-1" selected>
+                    <optgroup label="🎨 Current">
+                      <option value="gpt-image-2" selected>
+                        gpt-image-2 (Default, $$)
+                      </option>
+                    </optgroup>
+                    <optgroup label="📦 Legacy">
+                      <option value="gpt-image-1.5">gpt-image-1.5 ($$)</option>
+                      <option value="gpt-image-1">
                         gpt-image-1 (5 img/min, $$$)
                       </option>
                       <option value="gpt-image-1-mini">
                         gpt-image-1-mini (5 img/min, $$)
+                      </option>
+                      <option value="chatgpt-image-latest">
+                        chatgpt-image-latest ($$)
                       </option>
                       <option value="dall-e-3">dall-e-3 (5 img/min, $$)</option>
                       <option value="dall-e-2">dall-e-2 (50 img/min, $)</option>
@@ -2239,18 +2572,22 @@
                       class="api-select"
                       style="font-size: 0.85em"
                     >
-                      <option value="whisper-1" selected>
-                        whisper-1 (Classic, Fast)
-                      </option>
-                      <option value="gpt-4o-transcribe">
-                        gpt-4o-transcribe (Highest Accuracy)
-                      </option>
-                      <option value="gpt-4o-mini-transcribe">
-                        gpt-4o-mini-transcribe (Cost-effective)
-                      </option>
-                      <option value="gpt-4o-transcribe-diarize">
-                        gpt-4o-transcribe-diarize (Speaker ID)
-                      </option>
+                      <optgroup label="⚡ Current">
+                        <option value="gpt-4o-mini-transcribe" selected>
+                          gpt-4o-mini-transcribe (Default, $)
+                        </option>
+                        <option value="gpt-4o-transcribe">
+                          gpt-4o-transcribe (Highest Accuracy, $$)
+                        </option>
+                        <option value="gpt-4o-transcribe-diarize">
+                          gpt-4o-transcribe-diarize (Speaker ID, $$)
+                        </option>
+                      </optgroup>
+                      <optgroup label="📦 Legacy">
+                        <option value="whisper-1">
+                          whisper-1 (Classic, Fast)
+                        </option>
+                      </optgroup>
                     </select>
                   </div>
                   <a
@@ -2435,10 +2772,17 @@
                       class="api-select"
                       style="font-size: 0.85em"
                     >
-                      <option value="tts-1" selected>tts-1 (Fast, $)</option>
-                      <option value="tts-1-hd">
-                        tts-1-hd (HQ exports, $$)
-                      </option>
+                      <optgroup label="⚡ Current">
+                        <option value="gpt-4o-mini-tts" selected>
+                          gpt-4o-mini-tts (Default, $)
+                        </option>
+                      </optgroup>
+                      <optgroup label="📦 Legacy">
+                        <option value="tts-1">tts-1 (Fast, $)</option>
+                        <option value="tts-1-hd">
+                          tts-1-hd (HQ exports, $$)
+                        </option>
+                      </optgroup>
                     </select>
                     <label
                       style="
@@ -2516,21 +2860,29 @@
                       class="api-select"
                       style="font-size: 0.85em"
                     >
-                      <option value="rachel" selected>
-                        Rachel (Calm Female)
+                      <option value="" disabled selected>
+                        Test API key to load voices…
                       </option>
-                      <option value="drew">Drew (News Male)</option>
-                      <option value="clyde">Clyde (War Veteran)</option>
-                      <option value="paul">Paul (News Male)</option>
-                      <option value="domi">Domi (Assertive Female)</option>
-                      <option value="dave">
-                        Dave (British Conversational)
-                      </option>
-                      <option value="fin">Fin (Irish Male)</option>
-                      <option value="sarah">Sarah (Soft News Female)</option>
-                      <option value="antoni">Antoni (Well Rounded Male)</option>
-                      <option value="thomas">Thomas (Calm Male)</option>
                     </select>
+                    <div style="margin-top: 6px">
+                      <label style="font-size: 0.75em; color: #888"
+                        >Custom Voice ID
+                        <span style="color: #666"
+                          >(paste from ElevenLabs dashboard):</span
+                        ></label
+                      >
+                      <input
+                        type="text"
+                        id="elevenlabsCustomVoiceId"
+                        class="api-input"
+                        placeholder="e.g. pNInz6obpgDQGcFmaJgB"
+                        style="font-size: 0.85em; font-family: monospace"
+                      />
+                      <span
+                        id="elevenlabsCustomVoiceStatus"
+                        style="font-size: 0.75em; color: #888"
+                      ></span>
+                    </div>
                   </div>
                   <a
                     href="#"
@@ -3528,6 +3880,272 @@
         }
         window.close();
       }
+    </script>
+
+    <!-- SmΔrt Model Registry — metadata for all supported models -->
+    <script>
+      window.SMART_MODEL_REGISTRY = [
+        // ── Text ──
+        {
+          id: "gpt-5.5",
+          label: "GPT-5.5",
+          group: "text",
+          status: "current",
+          default: true,
+          fallbackRank: 1,
+          notes: "Latest text model",
+        },
+        {
+          id: "gpt-5.4",
+          label: "GPT-5.4",
+          group: "text",
+          status: "current",
+          default: false,
+          fallbackRank: 2,
+          notes: "500K TPM",
+        },
+        {
+          id: "gpt-5-mini",
+          label: "GPT-5 Mini",
+          group: "text",
+          status: "current",
+          default: false,
+          fallbackRank: 3,
+          notes: "Budget text",
+        },
+        {
+          id: "gpt-5",
+          label: "GPT-5",
+          group: "text",
+          status: "current",
+          default: false,
+          fallbackRank: 4,
+          notes: "500K TPM",
+        },
+        {
+          id: "gpt-5.1",
+          label: "GPT-5.1",
+          group: "text",
+          status: "current",
+          default: false,
+          fallbackRank: 5,
+          notes: "Premium",
+        },
+        {
+          id: "gpt-5.4-pro",
+          label: "GPT-5.4 Pro",
+          group: "text",
+          status: "advanced",
+          default: false,
+          fallbackRank: 6,
+          notes: "30K TPM, high quality",
+        },
+        {
+          id: "gpt-4o",
+          label: "GPT-4o",
+          group: "text",
+          status: "legacy",
+          default: false,
+          fallbackRank: 7,
+          notes: "Previous gen",
+        },
+        {
+          id: "gpt-4o-mini",
+          label: "GPT-4o Mini",
+          group: "text",
+          status: "legacy",
+          default: false,
+          fallbackRank: 8,
+          notes: "Budget legacy",
+        },
+        {
+          id: "gpt-4.1-mini",
+          label: "GPT-4.1 Mini",
+          group: "text",
+          status: "legacy",
+          default: false,
+          fallbackRank: 9,
+          notes: "Fast/light",
+        },
+        // ── Coding ──
+        {
+          id: "gpt-5.3-codex",
+          label: "GPT-5.3 Codex",
+          group: "coding",
+          status: "current",
+          default: true,
+          fallbackRank: 1,
+          notes: "500K TPM, coding optimized",
+        },
+        // ── Image ──
+        {
+          id: "gpt-image-2",
+          label: "GPT Image 2",
+          group: "image",
+          status: "current",
+          default: true,
+          fallbackRank: 1,
+          notes: "Default image model",
+        },
+        {
+          id: "gpt-image-1.5",
+          label: "GPT Image 1.5",
+          group: "image",
+          status: "legacy",
+          default: false,
+          fallbackRank: 2,
+          notes: "Previous gen",
+        },
+        {
+          id: "gpt-image-1",
+          label: "GPT Image 1",
+          group: "image",
+          status: "legacy",
+          default: false,
+          fallbackRank: 3,
+          notes: "5 img/min",
+        },
+        {
+          id: "gpt-image-1-mini",
+          label: "GPT Image 1 Mini",
+          group: "image",
+          status: "legacy",
+          default: false,
+          fallbackRank: 4,
+          notes: "Budget image",
+        },
+        {
+          id: "chatgpt-image-latest",
+          label: "ChatGPT Image Latest",
+          group: "image",
+          status: "legacy",
+          default: false,
+          fallbackRank: 5,
+          notes: "Via ChatGPT",
+        },
+        {
+          id: "dall-e-3",
+          label: "DALL-E 3",
+          group: "image",
+          status: "deprecated",
+          default: false,
+          fallbackRank: 6,
+          notes: "5 img/min",
+        },
+        {
+          id: "dall-e-2",
+          label: "DALL-E 2",
+          group: "image",
+          status: "deprecated",
+          default: false,
+          fallbackRank: 7,
+          notes: "50 img/min",
+        },
+        // ── STT (Speech-to-Text) ──
+        {
+          id: "gpt-4o-mini-transcribe",
+          label: "GPT-4o Mini Transcribe",
+          group: "stt",
+          status: "current",
+          default: true,
+          fallbackRank: 1,
+          notes: "Default STT, cost-effective",
+        },
+        {
+          id: "gpt-4o-transcribe",
+          label: "GPT-4o Transcribe",
+          group: "stt",
+          status: "current",
+          default: false,
+          fallbackRank: 2,
+          notes: "Highest accuracy",
+        },
+        {
+          id: "gpt-4o-transcribe-diarize",
+          label: "GPT-4o Diarize",
+          group: "stt",
+          status: "advanced",
+          default: false,
+          fallbackRank: 3,
+          notes: "Speaker identification",
+        },
+        {
+          id: "whisper-1",
+          label: "Whisper 1",
+          group: "stt",
+          status: "legacy",
+          default: false,
+          fallbackRank: 4,
+          notes: "Classic, fast",
+        },
+        // ── TTS (Text-to-Speech) ──
+        {
+          id: "gpt-4o-mini-tts",
+          label: "GPT-4o Mini TTS",
+          group: "tts",
+          status: "current",
+          default: true,
+          fallbackRank: 1,
+          notes: "Default TTS",
+        },
+        {
+          id: "tts-1",
+          label: "TTS-1",
+          group: "tts",
+          status: "legacy",
+          default: false,
+          fallbackRank: 2,
+          notes: "Fast, budget",
+        },
+        {
+          id: "tts-1-hd",
+          label: "TTS-1 HD",
+          group: "tts",
+          status: "legacy",
+          default: false,
+          fallbackRank: 3,
+          notes: "HQ exports",
+        },
+        // ── Embeddings ──
+        {
+          id: "text-embedding-3-small",
+          label: "Embedding 3 Small",
+          group: "embeddings",
+          status: "current",
+          default: true,
+          fallbackRank: 1,
+          notes: "Default embedding",
+        },
+        {
+          id: "text-embedding-3-large",
+          label: "Embedding 3 Large",
+          group: "embeddings",
+          status: "current",
+          default: false,
+          fallbackRank: 2,
+          notes: "High-quality embedding",
+        },
+        // ── Search ──
+        {
+          id: "gpt-4o-search-preview",
+          label: "GPT-4o Search Preview",
+          group: "search",
+          status: "current",
+          default: true,
+          fallbackRank: 1,
+          notes: "Web search",
+        },
+        // ── Realtime ──
+        {
+          id: "gpt-4o-realtime-preview",
+          label: "GPT-4o Realtime",
+          group: "realtime",
+          status: "current",
+          default: true,
+          fallbackRank: 1,
+          notes: "Realtime API",
+        },
+      ];
     </script>
 
     <script src="src/api-settings.js"></script>

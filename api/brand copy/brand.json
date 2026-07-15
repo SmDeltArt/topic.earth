@@ -1,0 +1,76 @@
+{
+  "$schema": "./source/brand.schema.json",
+  "name": "CAD-ΔI API Settings",
+  "shortName": "CAD-ΔI API",
+  "product": "cad-ai-support",
+  "tagline": "One panel for every AI provider — local, cloud & BYOK.",
+  "description": "Unified AI provider layer for CAD-ΔI tooling. Local models, cloud APIs, and BYOK keys in one settings panel.",
+  "baseUrl": "https://api.smdeltart.com",
+  "colors": {
+    "bg": "#1a1d2e",
+    "bgGradient": "#0f1419",
+    "accent": "#00ffff",
+    "primary": "#6d9eeb",
+    "secondary": "#5a87d6",
+    "ok": "#4ade80",
+    "warn": "#fbbf24",
+    "err": "#f87171"
+  },
+  "logo": {
+    "icon": "brand/logo/cad-ai-logo@480.webp",
+    "text": "brand/logo/cad-ai-logo-text@480.webp",
+    "vector": "brand/source/logo/cad-ai-logo.svg",
+    "animated": "brand/logo/cad-ai-logo-animated.webp"
+  },
+  "favicon": {
+    "ico": "brand/favicon/favicon.ico",
+    "svg": "brand/source/favicon/cad-ai-icons.svg"
+  },
+  "banner": {
+    "web": {
+      "image": "brand/banner/cad-ai-api-banner-1200x400.webp",
+      "w": 1200,
+      "h": 400
+    },
+    "square": {
+      "image": "brand/banner/cad-ai-api-banner-1080x1080.webp",
+      "w": 1080,
+      "h": 1080
+    }
+  },
+  "social": {
+    "og": {
+      "image": "brand/social/cad-ai-api-banner-1200x630.webp",
+      "w": 1200,
+      "h": 630,
+      "mime": "image/webp",
+      "label": "Facebook / LinkedIn / generic share"
+    },
+    "twitter": {
+      "image": "brand/social/cad-ai-api-banner-1500x500.webp",
+      "w": 1500,
+      "h": 500,
+      "mime": "image/webp",
+      "label": "Twitter/X header"
+    },
+    "linkedin": {
+      "image": "brand/social/cad-ai-api-banner-1584x396.webp",
+      "w": 1584,
+      "h": 396,
+      "mime": "image/webp",
+      "label": "LinkedIn cover"
+    },
+    "story": {
+      "image": "brand/social/cad-ai-api-banner-1080x1920.webp",
+      "w": 1080,
+      "h": 1920,
+      "mime": "image/webp",
+      "label": "Instagram / TikTok story"
+    }
+  },
+  "twitter": {
+    "card": "summary_large_image",
+    "site": "@SmDeltArt",
+    "creator": "@SmDeltArt"
+  }
+}

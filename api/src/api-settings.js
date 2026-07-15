@@ -1,4 +1,4 @@
-// Domain and CDN guard for production and shared embeds.
+﻿// Domain and CDN guard for production and shared embeds.
 function enforceDomainAndCdnPolicy() {
   // Detect tier from own URL — works both embedded and standalone.
   // @tweakable tier detection — adjust hostname rules if deployment topology changes
@@ -339,7 +339,7 @@ const API_PROVIDERS = {
     }),
     testMethod: "GET",
     timeout: 10000,
-    keyPattern: /^[a-fA-F0-9_-]{25,35}$/, // More flexible ElevenLabs pattern (upper/lower hex + underscores/hyphens)
+    keyPattern: /^(sk_)?[a-fA-F0-9_-]{20,50}$/, // ElevenLabs: hex strings OR sk_-prefixed keys (2025+)
   },
   "openai-tts": {
     name: "OpenAI TTS",
@@ -2318,6 +2318,22 @@ async function testAllApis() {
 function saveApiSettingsLocally() {
   try {
     const settings = collectAllApiSettings();
+
+    // Proxy mode: never persist server-managed key values to localStorage
+    const _mode = (() => {
+      const checked = document.querySelector(
+        'input[name="providerMode"]:checked',
+      );
+      return checked ? checked.value : "byok";
+    })();
+    if (_mode === "proxy") {
+      ["paidTextApiKey", "externalTtsApiKey", "externalSttApiKey"].forEach(
+        (k) => {
+          if (k in settings) settings[k] = "";
+        },
+      );
+    }
+
     localStorage.setItem("smdeltartApiSettings", JSON.stringify(settings));
     // Keep legacy keys for backward compatibility
     localStorage.setItem("cadAiApiSettings", JSON.stringify(settings));
@@ -2763,8 +2779,13 @@ function setupRealTimeValidation() {
         updateProviderUIElements(config, provider);
       });
 
-      // Test on blur (when user leaves the field)
-      keyInput.addEventListener("blur", async () => {
+      // Test on blur (when user leaves the field) — skip if a test button was clicked
+      keyInput.addEventListener("blur", async (e) => {
+        if (
+          e.relatedTarget?.classList?.contains("test-btn") ||
+          e.relatedTarget?.id?.startsWith("test")
+        )
+          return;
         const provider = selectInput.value;
         const apiKey = keyInput.value.trim();
 
@@ -2996,6 +3017,35 @@ function setupTTSAPIHandlers() {
     }
   });
 
+  // Custom Voice ID field — overrides dropdown when filled
+  const customVoiceInput = document.getElementById("elevenlabsCustomVoiceId");
+  const customVoiceStatus = document.getElementById(
+    "elevenlabsCustomVoiceStatus",
+  );
+  const elVoiceSelect = document.getElementById("elevenlabsVoice");
+  if (customVoiceInput && elVoiceSelect) {
+    customVoiceInput.addEventListener("input", () => {
+      const val = customVoiceInput.value.trim();
+      if (val) {
+        elVoiceSelect.style.opacity = "0.4";
+        elVoiceSelect.style.pointerEvents = "none";
+        if (customVoiceStatus)
+          customVoiceStatus.textContent = "✅ Custom ID will be used";
+      } else {
+        elVoiceSelect.style.opacity = "1";
+        elVoiceSelect.style.pointerEvents = "auto";
+        if (customVoiceStatus) customVoiceStatus.textContent = "";
+      }
+    });
+    // Apply initial state
+    if (customVoiceInput.value.trim()) {
+      elVoiceSelect.style.opacity = "0.4";
+      elVoiceSelect.style.pointerEvents = "none";
+      if (customVoiceStatus)
+        customVoiceStatus.textContent = "✅ Custom ID will be used";
+    }
+  }
+
   // Test TTS API button
   testTtsBtn?.addEventListener("click", () => testExternalTTSAPI());
 }
@@ -3162,17 +3212,89 @@ async function testElevenLabsTTS(text, apiKey) {
     return { success: false, message: "API key required for ElevenLabs" };
   }
 
+  // Decrypt if stored encrypted
+  if (apiKey.startsWith("ENC:")) {
+    apiKey = SmartEncryption.decrypt(apiKey);
+  }
+  apiKey = apiKey.trim();
+  if (!apiKey || apiKey.startsWith("ENC:")) {
+    return { success: false, message: "Could not decrypt ElevenLabs API key" };
+  }
+  // Warn if key looks like OpenAI format (sk-proj-… or sk-…)
+  if (/^sk-proj-/i.test(apiKey) || /^sk-[a-zA-Z]/.test(apiKey)) {
+    return {
+      success: false,
+      message:
+        "This looks like an OpenAI key (sk-…). ElevenLabs keys are hex strings without sk- prefix. Check your key at elevenlabs.io → Profile → API Keys.",
+    };
+  }
+  console.log(
+    `🔑 ElevenLabs key: ${apiKey.slice(0, 5)}…${apiKey.slice(-3)} (${apiKey.length} chars)`,
+  );
+
   try {
-    // Would make actual API call to ElevenLabs
-    // For now, just validate key format
-    if (apiKey.length < 10) {
-      return { success: false, message: "Invalid API key format" };
+    // Real API call — GET /v1/voices validates key and returns voice list
+    const res = await fetch("https://api.elevenlabs.io/v1/voices", {
+      method: "GET",
+      headers: { "xi-api-key": apiKey },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      console.warn(
+        `⚠️ ElevenLabs ${res.status} response:`,
+        errText.slice(0, 300),
+      );
+      if (res.status === 401) {
+        return {
+          success: false,
+          message: `Invalid ElevenLabs API key (401). Verify at elevenlabs.io → Profile → API Keys. ${errText.slice(0, 100)}`,
+        };
+      }
+      return {
+        success: false,
+        message: `ElevenLabs HTTP ${res.status}: ${errText.slice(0, 150)}`,
+      };
+    }
+    const data = await res.json();
+    const voices = data.voices || [];
+
+    // Populate the voice dropdown with the user's actual available voices
+    const sel = document.getElementById("elevenlabsVoice");
+    if (sel && voices.length > 0) {
+      const prev = sel.value; // preserve current selection
+      sel.innerHTML = "";
+      for (const v of voices) {
+        const opt = document.createElement("option");
+        opt.value = v.voice_id;
+        const cat =
+          v.category === "premade"
+            ? ""
+            : v.category === "cloned"
+              ? " (Cloned)"
+              : ` (${v.category || "Custom"})`;
+        opt.textContent = `${v.name}${cat}`;
+        sel.appendChild(opt);
+      }
+      // Restore previous selection if still available, else first voice
+      const customInput = document.getElementById("elevenlabsCustomVoiceId");
+      const customId = customInput?.value?.trim();
+      const selectId = customId || prev;
+      if (selectId && [...sel.options].some((o) => o.value === selectId)) {
+        sel.value = selectId;
+        // Voice found in dropdown — clear custom field and restore dropdown
+        if (customInput && customId) {
+          customInput.value = "";
+          customInput.dispatchEvent(new Event("input"));
+        }
+      } else if ([...sel.options].some((o) => o.value === prev)) {
+        sel.value = prev;
+      }
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
     return {
       success: true,
-      message: "ElevenLabs TTS connection successful",
+      message: `ElevenLabs connected — ${voices.length} voice${voices.length !== 1 ? "s" : ""} available`,
     };
   } catch (error) {
     return {
@@ -3242,7 +3364,8 @@ async function testOpenAITTS(text, apiKey) {
   }
 
   try {
-    const model = document.getElementById("openaiTtsModel")?.value || "tts-1";
+    const model =
+      document.getElementById("openaiTtsModel")?.value || "gpt-4o-mini-tts";
     const voice = document.getElementById("openaiTtsVoice")?.value || "alloy";
 
     updateTTSStatus(`Testing OpenAI TTS (${voice})...`, "info");
@@ -4467,29 +4590,12 @@ async function testOpenAIDalle(prompt, apiKey) {
 }
 
 async function testPollinations(prompt) {
-  try {
-    // Test Pollinations public API
-    const testUrl = "https://image.pollinations.ai/prompt/test";
-    const response = await fetch(testUrl, {
-      method: "HEAD",
-      timeout: 5000,
-    });
-
-    if (response.ok || response.status === 404) {
-      // 404 is normal for image URL
-      return {
-        success: true,
-        message: "Pollinations API accessible (no key required, 4 images)",
-      };
-    } else {
-      return {
-        success: false,
-        message: "Pollinations API not responding",
-      };
-    }
-  } catch (error) {
-    return { success: false, message: "Pollinations API not accessible" };
-  }
+  // Pollinations is always free and needs no key — skip the live HEAD request
+  // (browsers always log 403 for image endpoint HEAD calls, even when handled gracefully).
+  return {
+    success: true,
+    message: "Pollinations AI (free, no API key required)",
+  };
 }
 
 async function testProdia(prompt) {
@@ -4842,8 +4948,8 @@ const SMART_API_PROVIDERS = {
     }),
     testMethod: "GET",
     timeout: 10000,
-    keyPattern: /^[a-fA-F0-9_-]{25,35}$/,
-    keyFormat: "hexadecimal string",
+    keyPattern: /^(sk_)?[a-fA-F0-9_-]{20,50}$/,
+    keyFormat: "hex string or sk_... key",
     docsUrl: "https://elevenlabs.io/docs/api-reference",
     pricing: "freemium",
     capabilities: ["voice-cloning", "multiple-languages", "emotion-control"],
@@ -5615,6 +5721,12 @@ async function testIndividualAPI(type) {
   updateStatus(config.status, "🔍 Testing...");
 
   try {
+    // 🗣️ Use dedicated TTS tester — avoids duplicate call from setupTTSAPIHandlers
+    if (type === "externalTts") {
+      await testExternalTTSAPI();
+      return;
+    }
+
     // 🎥 Use dedicated video API tester for video types
     if (type === "paidVideo" || type === "freeVideo") {
       const statusElementId =
@@ -6257,6 +6369,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize API Vault system
   ApiVault.init();
+
+  // Initialize Provider Mode UI (browser / BYOK / proxy)
+  // Must run AFTER initializeApiSettingsFixed so loadSavedSettings has already
+  // restored radio states via applySettings().
+  initProviderMode();
 });
 
 // ====================================================================
@@ -7515,6 +7632,9 @@ function collectAllSettings() {
     "ollamaModel",
     "ollamaHost",
     "deepseekCloudModel",
+    "elevenlabsVoice",
+    "elevenlabsCustomVoiceId",
+    "edgeTtsVoice",
   ];
 
   inputs.forEach((id) => {
@@ -7695,6 +7815,17 @@ function saveSettingsToLocalStorage(skipWarning = false) {
   try {
     const settings = collectAllSettings();
 
+    // ── Proxy mode: never persist server-managed key values ──────────────────
+    // In Vercel Secure Proxy mode the inputs are hidden and keys must stay
+    // server-side only. Even if the DOM field still holds a previously-typed
+    // value, we MUST NOT write it to localStorage.
+    const _activeMode = (() => {
+      const checked = document.querySelector(
+        'input[name="providerMode"]:checked',
+      );
+      return checked ? checked.value : "byok";
+    })();
+
     // Collect ALL plain (unencrypted) API keys for manager compatibility
     const plainSettings = {
       version: "2.1.0",
@@ -7702,7 +7833,10 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       source: "SmDeltArt-ApiSettings",
       // Text APIs
       paidTextApi: document.getElementById("paidTextApi")?.value || "",
-      paidTextApiKey: document.getElementById("paidTextApiKey")?.value || "",
+      paidTextApiKey:
+        _activeMode === "proxy"
+          ? ""
+          : document.getElementById("paidTextApiKey")?.value || "",
       freeTextApi: document.getElementById("freeTextApi")?.value || "",
       freeTextApiKey: document.getElementById("freeTextApiKey")?.value || "",
       // Image APIs
@@ -7718,7 +7852,9 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       // STT APIs
       externalSttApi: document.getElementById("externalSttApi")?.value || "",
       externalSttApiKey:
-        document.getElementById("externalSttApiKey")?.value || "",
+        _activeMode === "proxy"
+          ? ""
+          : document.getElementById("externalSttApiKey")?.value || "",
       browserSttRadio:
         document.getElementById("browserSttRadio")?.checked || true,
       externalSttApiRadio:
@@ -7728,7 +7864,9 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       // TTS APIs
       externalTtsApi: document.getElementById("externalTtsApi")?.value || "",
       externalTtsApiKey:
-        document.getElementById("externalTtsApiKey")?.value || "",
+        _activeMode === "proxy"
+          ? ""
+          : document.getElementById("externalTtsApiKey")?.value || "",
       browserTtsVoice: document.getElementById("browserTtsVoice")?.value || "",
       // Radio button states
       websimApiRadio:
@@ -7758,19 +7896,30 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       openaiProjectLabel: getOpenAIProjectLabel(),
       openaiKeyLabel: getOpenAIKeyLabel(),
       openaiTextModel:
-        document.getElementById("openaiTextModel")?.value || "gpt-4o",
+        document.getElementById("openaiTextModel")?.value || "gpt-5.5",
       openaiImageModel:
-        document.getElementById("openaiImageModel")?.value || "gpt-image-1",
+        document.getElementById("openaiImageModel")?.value || "gpt-image-2",
       openaiSttModel:
-        document.getElementById("openaiSttModel")?.value || "whisper-1",
+        document.getElementById("openaiSttModel")?.value ||
+        "gpt-4o-mini-transcribe",
       openaiTtsModel:
-        document.getElementById("openaiTtsModel")?.value || "tts-1",
+        document.getElementById("openaiTtsModel")?.value || "gpt-4o-mini-tts",
       openaiTtsVoice:
         document.getElementById("openaiTtsVoice")?.value || "alloy",
       edgeTtsVoice:
         document.getElementById("edgeTtsVoice")?.value || "en-US-AriaNeural",
       elevenlabsVoice:
-        document.getElementById("elevenlabsVoice")?.value || "rachel",
+        document.getElementById("elevenlabsCustomVoiceId")?.value?.trim() ||
+        document.getElementById("elevenlabsVoice")?.value ||
+        "",
+      elevenlabsVoiceName: (() => {
+        const customId = document
+          .getElementById("elevenlabsCustomVoiceId")
+          ?.value?.trim();
+        if (customId) return "Custom";
+        const sel = document.getElementById("elevenlabsVoice");
+        return sel?.selectedOptions?.[0]?.textContent || "";
+      })(),
       openaiVideoModel:
         document.getElementById("openaiVideoModel")?.value || "",
       // Ollama model selector
@@ -7786,6 +7935,17 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       // DeepSeek cloud model
       deepseekCloudModel:
         document.getElementById("deepseekCloudModel")?.value || "deepseek-v3",
+      // Provider mode (safe to persist — never contains actual key values)
+      providerMode: (() => {
+        const checked = document.querySelector(
+          'input[name="providerMode"]:checked',
+        );
+        return checked ? checked.value : "byok";
+      })(),
+      proxyBaseUrl:
+        document.getElementById("proxyBaseUrl")?.value?.trim() || "",
+      smrtProxyToken:
+        document.getElementById("smrtProxyToken")?.value?.trim() || "",
       // Active provider indicators (FIX: audit issue #2)
       activeTextProvider: document.getElementById("paidTextApiRadio")?.checked
         ? "paid"
@@ -7858,6 +8018,10 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       activeImageProvider: plainSettings.activeImageProvider,
       activeSttProvider: plainSettings.activeSttProvider,
       activeTtsProvider: plainSettings.activeTtsProvider,
+      // Provider mode (safe to share cross-widget — no secrets)
+      providerMode: plainSettings.providerMode,
+      proxyBaseUrl: plainSettings.proxyBaseUrl,
+      // Note: smrtProxyToken intentionally excluded from preferencesOnly
       // Fallback
       enableFallback: true,
       fallbackProvider: "pollinations",
@@ -7871,8 +8035,10 @@ function saveSettingsToLocalStorage(skipWarning = false) {
     // These contain keys - apps should migrate to reading from vault
     localStorage.setItem("cadAiApiSettings", JSON.stringify(plainSettings));
     localStorage.setItem("smartApiSettings", JSON.stringify(plainSettings));
-    console.warn(
-      "⚠️ Legacy storage (cadAiApiSettings) still active - migrate apps to use smdeltartPreferences + vault",
+    // Debug-level only: legacy plain storage is still intentionally written so
+    // consuming apps (studio managers) can read keys. Not an error.
+    console.debug(
+      "ℹ️ Legacy storage (cadAiApiSettings) written for app compatibility",
     );
 
     logMessage("💾 Settings saved to localStorage!", "success");
@@ -7989,11 +8155,90 @@ function loadSavedSettings() {
       applySettings(settings);
       logMessage("📂 Loaded saved settings", "info");
 
+      // Auto-populate ElevenLabs voice dropdown if configured
+      if (settings.externalTtsApi === "elevenlabs") {
+        // If a voice was saved, add it as temp option so the dropdown isn't empty
+        const savedVoice = settings.elevenlabsVoice;
+        const sel = document.getElementById("elevenlabsVoice");
+        if (savedVoice && sel) {
+          const opt = document.createElement("option");
+          opt.value = savedVoice;
+          opt.textContent = savedVoice;
+          sel.innerHTML = "";
+          sel.appendChild(opt);
+          sel.value = savedVoice;
+        }
+        // Custom voice ID field
+        const customId = settings.elevenlabsCustomVoiceId;
+        if (customId) {
+          const customEl = document.getElementById("elevenlabsCustomVoiceId");
+          if (customEl) {
+            customEl.value = customId;
+            customEl.dispatchEvent(new Event("input"));
+          }
+        }
+        // Try to fetch full voice list (needs decrypted key from form)
+        setTimeout(() => {
+          const elKey = document.getElementById("externalTtsApiKey")?.value;
+          if (elKey) fetchElevenLabsVoices(elKey, savedVoice);
+        }, 300);
+      }
+
       // Restore test status after settings are applied
       setTimeout(() => restoreTestResults(), 100);
     }
   } catch (e) {
     console.warn("Could not load settings:", e);
+  }
+}
+
+/** Fetch ElevenLabs voices and populate the #elevenlabsVoice dropdown.
+ *  @param {string} apiKey - the xi-api-key
+ *  @param {string} [selectId] - voice_id to pre-select after populating
+ */
+async function fetchElevenLabsVoices(apiKey, selectId) {
+  if (!apiKey) return;
+  // Decrypt if stored encrypted
+  if (apiKey.startsWith("ENC:")) {
+    apiKey = SmartEncryption.decrypt(apiKey);
+  }
+  if (!apiKey || apiKey.startsWith("ENC:")) return;
+  try {
+    const res = await fetch("https://api.elevenlabs.io/v1/voices", {
+      headers: { "xi-api-key": apiKey },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const voices = data.voices || [];
+    const sel = document.getElementById("elevenlabsVoice");
+    if (!sel || voices.length === 0) return;
+    sel.innerHTML = "";
+    for (const v of voices) {
+      const opt = document.createElement("option");
+      opt.value = v.voice_id;
+      const cat =
+        v.category === "premade"
+          ? ""
+          : v.category === "cloned"
+            ? " (Cloned)"
+            : ` (${v.category || "Custom"})`;
+      opt.textContent = `${v.name}${cat}`;
+      sel.appendChild(opt);
+    }
+    if (selectId && [...sel.options].some((o) => o.value === selectId)) {
+      sel.value = selectId;
+      // Clear custom field — the voice is in the dropdown
+      const customEl = document.getElementById("elevenlabsCustomVoiceId");
+      if (customEl) customEl.value = "";
+    } else if (selectId) {
+      // Voice not in dropdown — put it in the custom field
+      const customEl = document.getElementById("elevenlabsCustomVoiceId");
+      if (customEl) customEl.value = selectId;
+    }
+    logMessage(`🔊 Loaded ${voices.length} ElevenLabs voice(s)`, "info");
+  } catch (e) {
+    console.warn("Could not fetch ElevenLabs voices:", e);
   }
 }
 
@@ -8178,20 +8423,10 @@ async function testAllConfiguredAPIs() {
     }
   }
 
-  // Test Pollinations (always free)
+  // Pollinations is always free - skip live test (HEAD returns 403, no key needed).
   tested++;
-  try {
-    const response = await fetch("https://image.pollinations.ai/prompt/test", {
-      method: "HEAD",
-    });
-    if (response.ok || response.status === 404) {
-      passed++;
-      logMessage("✅ Pollinations: Available (Free)", "success");
-    }
-  } catch (e) {
-    logMessage("⚠️ Pollinations: May have CORS issues", "warning");
-    passed++; // Still count as available
-  }
+  passed++;
+  logMessage("✅ Pollinations: Available (Free, no key required)", "success");
 
   // Test Browser TTS
   if ("speechSynthesis" in window) {
@@ -8251,11 +8486,15 @@ function initWidgetSync() {
 // Broadcast sync message to all connected tabs/windows
 function broadcastSync(data) {
   if (widgetSyncChannel) {
-    widgetSyncChannel.postMessage({
-      ...data,
-      timestamp: Date.now(),
-      widgetId: "api-settings",
-    });
+    try {
+      widgetSyncChannel.postMessage({
+        ...data,
+        timestamp: Date.now(),
+        widgetId: "api-settings",
+      });
+    } catch (e) {
+      // Channel may have been closed during navigation — ignore
+    }
   }
 
   // Also try postMessage to opener window
@@ -8667,6 +8906,233 @@ function initAnimatedFavicon() {
   );
 }
 
+// ====================================================================
+// 🔒 PROVIDER MODE — Browser Fallback | Local BYOK | Vercel Secure Proxy
+// ====================================================================
+
+/**
+ * Entry point for the Provider Mode UI.
+ * Must be called AFTER loadSavedSettings() so radio states are already
+ * restored by applySettings() before we derive the active mode.
+ */
+function initProviderMode() {
+  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
+  // Derive active mode from whichever radio applySettings() already checked.
+  // If no radio is checked (first visit), default based on environment.
+  let mode = _getActiveProviderMode();
+  if (!mode) {
+    mode = isLocal ? "byok" : "proxy";
+    const defaultRadio = document.querySelector(
+      `input[name="providerMode"][value="${mode}"]`,
+    );
+    if (defaultRadio) defaultRadio.checked = true;
+  }
+
+  // Apply UI sections for the current mode
+  applyProviderModeUI(mode);
+
+  // Bind radio change events (future user changes)
+  document.querySelectorAll('input[name="providerMode"]').forEach((r) => {
+    r.addEventListener("change", () => {
+      if (!r.checked) return;
+      applyProviderModeUI(r.value);
+    });
+  });
+
+  // Bind proxy test buttons
+  document
+    .getElementById("checkProxyHealthBtn")
+    ?.addEventListener("click", _proxyCheckHealth);
+  document
+    .getElementById("testOpenAiProxyBtn")
+    ?.addEventListener("click", _proxyTestOpenAI);
+  document
+    .getElementById("testElevenLabsProxyBtn")
+    ?.addEventListener("click", _proxyTestElevenLabs);
+  document
+    .getElementById("testAiHealthBtn")
+    ?.addEventListener("click", _proxyTestAiHealth);
+
+  // Auto-check health in proxy mode on non-local environments
+  if (mode === "proxy" && !isLocal) {
+    setTimeout(_proxyCheckHealth, 1500);
+  }
+
+  console.log(`🔒 Provider mode initialised: ${mode} (isLocal=${isLocal})`);
+}
+
+/** Returns the currently checked providerMode radio value, or null. */
+function _getActiveProviderMode() {
+  const checked = document.querySelector('input[name="providerMode"]:checked');
+  return checked ? checked.value : null;
+}
+
+/**
+ * Show/hide UI sections depending on the selected provider mode.
+ * @param {'browser'|'byok'|'proxy'} mode
+ */
+function applyProviderModeUI(mode) {
+  // BYOK warning banner
+  const byokWarning = document.getElementById("byokWarning");
+  if (byokWarning) byokWarning.style.display = mode === "byok" ? "" : "none";
+
+  // Proxy configuration panel (URL, token, test buttons)
+  const proxyConfig = document.getElementById("proxyConfig");
+  if (proxyConfig) proxyConfig.style.display = mode === "proxy" ? "" : "none";
+
+  // In proxy mode hide the key inputs — keys live only on the server.
+  // The selects (provider picker) stay visible so users know which service is used.
+  _setKeyInputVisibility(mode !== "proxy");
+
+  // Update status badge
+  const badges = { browser: "🌐", byok: "🔑", proxy: "🛡️" };
+  const statusEl = document.getElementById("providerModeStatus");
+  if (statusEl) statusEl.textContent = badges[mode] || "🔵";
+}
+
+/**
+ * Hide or show the key <input> fields that must stay server-side in proxy mode.
+ * Only the inputs themselves (and their hint rows) are toggled; selects remain.
+ */
+function _setKeyInputVisibility(visible) {
+  // IDs of API key inputs that are replaced by the server-side proxy.
+  // Cloudinary is intentionally omitted: it has its own section and the user
+  // may still want to configure it for direct-upload use-cases.
+  const proxyManagedIds = [
+    "paidTextApiKey",
+    "externalTtsApiKey",
+    "externalSttApiKey",
+  ];
+
+  proxyManagedIds.forEach((id) => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.style.display = visible ? "" : "none";
+    // Also hide the companion key-format hint
+    const hint = document.getElementById(
+      id.replace("ApiKey", "KeyHint").replace("Key", "Hint"),
+    );
+    if (hint) hint.style.display = visible ? "" : "none";
+  });
+}
+
+// ─── Proxy helpers ────────────────────────────────────────────────────────────
+
+function _proxyBaseUrl() {
+  return (document.getElementById("proxyBaseUrl")?.value || "")
+    .trim()
+    .replace(/\/$/, "");
+}
+
+function _proxyToken() {
+  return (document.getElementById("smrtProxyToken")?.value || "").trim();
+}
+
+function _proxyHeaders() {
+  const h = { "Content-Type": "application/json" };
+  const t = _proxyToken();
+  if (t) h["x-smrt-token"] = t;
+  return h;
+}
+
+function _proxyUrl(path) {
+  const base = _proxyBaseUrl();
+  return base ? `${base}${path}` : path;
+}
+
+async function _proxyCheckHealth() {
+  const statusEl = document.getElementById("proxyHealthStatus");
+  if (statusEl) statusEl.textContent = "⏳ Checking…";
+  try {
+    const res = await fetch(_proxyUrl("/api/ai-health"));
+    if (!res.ok) {
+      if (statusEl) statusEl.textContent = `❌ HTTP ${res.status}`;
+      return;
+    }
+    const d = await res.json();
+    const parts = [
+      d.openai ? "✅ OpenAI" : "⚠️ OpenAI (not set)",
+      d.elevenlabs ? "✅ ElevenLabs" : "⚠️ ElevenLabs (not set)",
+      d.cloudinary ? "✅ Cloudinary" : "⚠️ Cloudinary (not set)",
+    ];
+    if (statusEl) statusEl.textContent = parts.join(" · ");
+  } catch (err) {
+    if (statusEl) statusEl.textContent = `❌ ${err.message}`;
+  }
+}
+
+async function _proxyTestOpenAI() {
+  const resultEl = document.getElementById("proxyTestResult");
+  if (resultEl) resultEl.textContent = "⏳ Testing OpenAI proxy…";
+  try {
+    const res = await fetch(_proxyUrl("/api/openai-chat"), {
+      method: "POST",
+      headers: _proxyHeaders(),
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: "Reply with exactly: OK" }],
+        max_tokens: 5,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      if (resultEl)
+        resultEl.textContent = `❌ OpenAI proxy: ${data.error || res.status}`;
+      return;
+    }
+    const reply = data.choices?.[0]?.message?.content?.trim() || "(empty)";
+    if (resultEl) resultEl.textContent = `✅ OpenAI proxy OK — "${reply}"`;
+  } catch (err) {
+    if (resultEl)
+      resultEl.textContent = `❌ OpenAI proxy error: ${err.message}`;
+  }
+}
+
+async function _proxyTestElevenLabs() {
+  const resultEl = document.getElementById("proxyTestResult");
+  if (resultEl) resultEl.textContent = "⏳ Testing ElevenLabs proxy…";
+  try {
+    const res = await fetch(_proxyUrl("/api/elevenlabs-tts"), {
+      method: "POST",
+      headers: _proxyHeaders(),
+      body: JSON.stringify({ text: "Test", voiceId: "JBFqnCBsd6RMkjVDRZzb" }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.status }));
+      if (resultEl)
+        resultEl.textContent = `❌ ElevenLabs proxy: ${err.error || res.status}`;
+      return;
+    }
+    if (resultEl)
+      resultEl.textContent = "✅ ElevenLabs proxy OK — audio/mpeg received";
+  } catch (err) {
+    if (resultEl)
+      resultEl.textContent = `❌ ElevenLabs proxy error: ${err.message}`;
+  }
+}
+
+async function _proxyTestAiHealth() {
+  const resultEl = document.getElementById("proxyTestResult");
+  if (resultEl) resultEl.textContent = "⏳ Checking AI health…";
+  try {
+    const res = await fetch(_proxyUrl("/api/ai-health"));
+    if (!res.ok) {
+      if (resultEl) resultEl.textContent = `❌ Health HTTP ${res.status}`;
+      return;
+    }
+    const d = await res.json();
+    if (resultEl)
+      resultEl.textContent = [
+        `OpenAI: ${d.openai ? "✅ configured" : "⚠️ not set"}`,
+        `ElevenLabs: ${d.elevenlabs ? "✅ configured" : "⚠️ not set"}`,
+        `Cloudinary: ${d.cloudinary ? "✅ configured" : "⚠️ not set"}`,
+      ].join(" · ");
+  } catch (err) {
+    if (resultEl) resultEl.textContent = `❌ Health error: ${err.message}`;
+  }
+}
+
 // Cleanup on unload
 window.addEventListener("beforeunload", () => {
   if (widgetSyncChannel) {
@@ -8675,5 +9141,6 @@ window.addEventListener("beforeunload", () => {
       isDetached: isDetachedWindow,
     });
     widgetSyncChannel.close();
+    widgetSyncChannel = null;
   }
 });

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SmΔrt API — CAD-AI-Support</title>
+    <!-- TODO: update to custom domain once configured -->
+    <link rel="canonical" href="https://api.caddeltai.com/api-settings" />
+
+    <!-- Brand meta from brand/brand.json, then redirect. -->
+    <script type="module">
+      import { applyBrandMeta } from "./brand/source/brand-meta.js";
+      applyBrandMeta({
+        pageUrl: "https://api.caddeltai.com/",
+        keepTitle: true,
+      }).finally(() => location.replace("api-settings.html"));
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content="0; url=api-settings.html" />
+    </noscript>
+  </head>
+  <body>
+    <p>Redirecting to <a href="api-settings.html">api-settings.html</a>…</p>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "SmÎ”rt API -- CAD-AI-Support",
+  "version": "1.0.0",
+  "product": "cad-ai-support",
+  "baseUrl": "https://api.smdeltart.com",
+  "entries": {
+    "api-settings": {
+      "file": "api-settings.html",
+      "route": "/",
+      "aliases": ["/api-settings", "/settings"],
+      "description": "API keys management with multi-provider support",
+      "storageKeys": ["cadAiApiSettings", "smdeltartApiSettings"],
+      "dependencies": ["src/api-settings.js", "src/api-model-updater.js"]
+    },
+    "llama31-guide": {
+      "file": "llama31-install-guide.html",
+      "route": "/llama31",
+      "linkedTo": ["api-settings"]
+    }
+  },
+  "embed": {
+    "iframe": "/api-settings.html?embed=true"
+  }
+}
