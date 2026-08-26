@@ -5,5 +5,8 @@ space context, tipping points, AMOC, and AI-assisted topic research.
 
 Repository: https://github.com/SmDeltArt/topic.earth
 Website: https://topic.earth/
+General: info@topic.earth
+Support: support@topic.earth
+Contact: contact@topic.earth
 License: EUPL-1.2-or-later
 Stewardship: intended to be stewarded by a Belgian ASBL.

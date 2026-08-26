@@ -3,8 +3,6 @@ Thumbs.db
 *.log
 *.tmp
 
-assets/audio/read-messages/*.mp3
-
 .env
 .env.*
 !.env.example

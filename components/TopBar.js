@@ -6,8 +6,8 @@ import { Settings } from '../lib/settings.js';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-tab-layers-20260507';
 
-const TOPIC_EARTH_HEADER_LOGO_URL = './assets/logo/topic-earth-header-app-space-animated.svg?v=topic-earth-local-space-logo-20260602';
 const TOPIC_EARTH_MARK_FALLBACK_URL = './assets/icons/topic.earth_64x64.svg?v=topic-earth-icons-20260505';
+const TOPIC_EARTH_CLOCK_LOGO_URL = './assets/logo/generated/earth-rotate/topic-earth-logo-earth-rotate-128.webp?v=topic-earth-live-clock-logo-20260605';
 
 export class TopBar {
   constructor(container) {
@@ -20,6 +20,8 @@ export class TopBar {
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleDocumentClick = this.handleDocumentClick.bind(this);
     this.handleSettingsChanged = this.handleSettingsChanged.bind(this);
+    this.updateLogoClock = this.updateLogoClock.bind(this);
+    this.logoClockFrame = null;
     this.container.addEventListener('click', this.handleClick);
     this.container.addEventListener('pointerup', this.handlePointerUp);
     this.container.addEventListener('keydown', this.handleKeyDown);
@@ -85,6 +87,34 @@ export class TopBar {
 
   handleSettingsChanged() {
     this.render();
+  }
+
+  startLogoClock() {
+    if (this.logoClockFrame) {
+      cancelAnimationFrame(this.logoClockFrame);
+      this.logoClockFrame = null;
+    }
+    this.updateLogoClock();
+  }
+
+  updateLogoClock() {
+    const clock = this.container.querySelector('[data-logo-clock]');
+    if (!clock) return;
+
+    const now = new Date();
+    const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
+    const minutes = now.getMinutes() + seconds / 60;
+    const hours = (now.getHours() % 12) + minutes / 60;
+
+    clock.style.setProperty('--clock-hour-angle', `${hours * 30}deg`);
+    clock.style.setProperty('--clock-minute-angle', `${minutes * 6}deg`);
+    clock.style.setProperty('--clock-second-angle', `${seconds * 6}deg`);
+
+    const label = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    clock.setAttribute('aria-label', `topic.earth local time ${label}`);
+    clock.title = label;
+
+    this.logoClockFrame = requestAnimationFrame(this.updateLogoClock);
   }
 
   getCurrentLanguage() {
@@ -208,7 +238,20 @@ export class TopBar {
 
     this.container.innerHTML = `
       <div class="logo logo-image-brand" aria-label="${this.escapeHtml(this.t('app.brand'))}" data-tutorial-id="brand">
-        <img class="logo-header-mark" src="${TOPIC_EARTH_HEADER_LOGO_URL}" data-fallback-src="${TOPIC_EARTH_MARK_FALLBACK_URL}" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc;" alt="" aria-hidden="true">
+        <div class="logo-live-clock" data-logo-clock role="img">
+          <span class="logo-clock-face" aria-hidden="true">
+            <img class="logo-clock-earth" src="${TOPIC_EARTH_CLOCK_LOGO_URL}" data-fallback-src="${TOPIC_EARTH_MARK_FALLBACK_URL}" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc;" alt="">
+            <svg class="logo-clock-hands" viewBox="0 0 100 100" focusable="false" aria-hidden="true">
+              <line class="logo-clock-hand logo-clock-hour" x1="50" y1="52" x2="50" y2="29"></line>
+              <line class="logo-clock-hand logo-clock-minute" x1="50" y1="54" x2="50" y2="20"></line>
+              <line class="logo-clock-hand logo-clock-second" x1="50" y1="57" x2="50" y2="14"></line>
+              <circle class="logo-clock-pin" cx="50" cy="50" r="5"></circle>
+            </svg>
+          </span>
+          <span class="logo-clock-word" aria-hidden="true">
+            <span>topic</span><span>earth</span>
+          </span>
+        </div>
       </div>
       <button class="mode-toggle-btn ${this.interactionMode === 'interaction' ? 'active' : ''}" id="mode-toggle-btn" data-action="toggle-mode" data-tutorial-id="interaction-mode" title="${this.escapeHtml(interactionLabel)}" aria-label="${this.escapeHtml(interactionLabel)}">
         ${this.interactionMode === 'rotate' && !isRegionalMode ? `
@@ -273,6 +316,7 @@ export class TopBar {
     `;
 
     // Dispatch custom event after render so listeners can rebind
+    this.startLogoClock();
     window.dispatchEvent(new CustomEvent('topBarRendered'));
   }
 

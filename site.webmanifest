@@ -2,10 +2,11 @@
   "name": "topic.earth",
   "short_name": "topic.earth",
   "description": "Interactive Earth intelligence for climate signals, regional updates, space context, Fever scenarios, and AI-assisted topic research.",
-  "id": "https://topic.earth/",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["fullscreen", "standalone", "minimal-ui", "browser"],
   "orientation": "any",
   "background_color": "#0a0e1a",
   "theme_color": "#0a0e1a",
@@ -13,7 +14,7 @@
   "lang": "en",
   "icons": [
     {
-      "src": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg",
+      "src": "/assets/icons/topic.earth_24x24.svg",
       "sizes": "24x24",
       "type": "image/svg+xml",
       "purpose": "any"
@@ -25,7 +26,7 @@
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/social/topic-earth-mark-world.png",
+      "src": "/assets/social/topic-earth-vignette-resume.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

@@ -14,10 +14,10 @@
         "function": "Planetary boundary thresholds"
       },
       {
-        "id": "meteo",
+        "id": "meteo-live",
         "emoji": "🌤️",
-        "label": "Meteo",
-        "function": "Weather and meteorological data"
+        "label": "Live Meteo",
+        "function": "Live weather samples, warning signals, and draftable meteo evidence"
       },
       {
         "id": "regional-news",

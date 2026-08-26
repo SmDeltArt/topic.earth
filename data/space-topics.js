@@ -1,6 +1,29 @@
 const degreeC = '\u00B0C';
 const carbonDioxide = 'CO\u2082';
 
+export const SOLAR_SYSTEM_SCALE_REFERENCE = {
+  unit: 'Earth',
+  earthDiameterKm: 12742,
+  astronomicalUnitKm: 149600000,
+  note: 'Scene sizes and distances are compressed for navigation. Earth diameter is the diameter ratio unit; Earth orbit is the distance ratio unit.',
+  bodies: {
+    Sun: { diameterEarth: 109.2, averageDistanceAu: 0 },
+    Mercury: { diameterEarth: 0.383, averageDistanceAu: 0.387 },
+    Venus: { diameterEarth: 0.949, averageDistanceAu: 0.723 },
+    Earth: { diameterEarth: 1.0, averageDistanceAu: 1.0 },
+    Moon: { diameterEarth: 0.273, averageDistanceAu: 0.00257, orbits: 'Earth' },
+    Mars: { diameterEarth: 0.532, averageDistanceAu: 1.524 },
+    Jupiter: { diameterEarth: 11.209, averageDistanceAu: 5.203 },
+    Saturn: { diameterEarth: 9.449, averageDistanceAu: 9.537 },
+    Titan: { diameterEarth: 0.404, parent: 'Saturn', orbitalDistanceKm: 1221870 },
+    Enceladus: { diameterEarth: 0.0395, parent: 'Saturn', orbitalDistanceKm: 238020 },
+    Uranus: { diameterEarth: 4.007, averageDistanceAu: 19.191 },
+    Neptune: { diameterEarth: 3.883, averageDistanceAu: 30.069 },
+    Pluto: { diameterEarth: 0.186, averageDistanceAu: 39.482 },
+    Planet9: { diameterEarth: null, averageDistanceAu: 'hypothetical, often modeled hundreds of AU from the Sun', status: 'unconfirmed' }
+  }
+};
+
 const makeSpaceTopic = ({
   id,
   order,
@@ -14,6 +37,7 @@ const makeSpaceTopic = ({
   atmosphere,
   insight,
   latestNews = '',
+  scaleReference = null,
   researchSources = [],
   mediaTokens = []
 }) => ({
@@ -41,7 +65,8 @@ const makeSpaceTopic = ({
     temperature,
     composition,
     atmosphere,
-    latestNews
+    latestNews,
+    scaleReference
   }
 });
 
@@ -190,8 +215,47 @@ export const SPACE_TOPICS = [
     insight: 'Pluto keeps small icy worlds visible in the Space topic set.'
   }),
   makeSpaceTopic({
-    id: 'space_starship',
+    id: 'space_titan',
     order: 12,
+    object: 'Titan',
+    title: 'Titan',
+    type: 'Saturn Moon',
+    summary: 'Saturn\'s largest moon, with a dense nitrogen atmosphere, methane weather, hydrocarbon lakes, and strong astrobiology interest.',
+    diameter: '5,149 km',
+    temperature: `About -179${degreeC}`,
+    composition: 'Water ice, rock, organic compounds, methane and ethane surface liquids',
+    atmosphere: 'Dense nitrogen atmosphere with methane',
+    insight: 'Titan is useful for comparing climate-like cycles beyond Earth: clouds, rain, lakes, and seasonal atmospheric chemistry.'
+  }),
+  makeSpaceTopic({
+    id: 'space_enceladus',
+    order: 13,
+    object: 'Enceladus',
+    title: 'Enceladus',
+    type: 'Saturn Moon',
+    summary: 'A small icy moon of Saturn with active geysers, a subsurface ocean, and chemistry that makes it one of the strongest ocean-world science targets.',
+    diameter: '504 km',
+    temperature: `About -201${degreeC}`,
+    composition: 'Water ice shell, salty ocean, rocky core, plume material',
+    atmosphere: 'Very thin plume-fed water vapor environment',
+    insight: 'Enceladus connects the solar-system scene to ocean worlds and life-detection science.'
+  }),
+  makeSpaceTopic({
+    id: 'space_planet9',
+    order: 14,
+    object: 'Planet9',
+    title: 'Planet 9',
+    type: 'Hypothetical Planet',
+    summary: 'A hypothetical outer solar-system planet used here as a special-orbit topic. Its existence is not confirmed, so the scene should label it as a model and not a detected planet.',
+    diameter: 'Unknown; often discussed as super-Earth/sub-Neptune scale',
+    temperature: 'Unknown',
+    composition: 'Unknown',
+    atmosphere: 'Unknown',
+    insight: 'Planet 9 is a good place to teach uncertainty: orbital clues can suggest a possible object before direct observation confirms it.'
+  }),
+  makeSpaceTopic({
+    id: 'space_starship',
+    order: 15,
     object: 'Spaceship',
     title: 'Starship',
     type: 'Spacecraft',
@@ -205,8 +269,8 @@ export const SPACE_TOPICS = [
   }),
   makeSpaceTopic({
     id: 'space_asteroid_atlas31',
-    order: 13,
-    object: 'Asteroid',
+    order: 16,
+    object: 'Atlas31',
     title: 'Atlas31 Asteroid',
     type: 'Near-Earth Asteroid',
     summary: 'A model asteroid topic for planetary-defense tracking and orbital-risk storytelling.',
@@ -218,7 +282,7 @@ export const SPACE_TOPICS = [
   }),
   makeSpaceTopic({
     id: 'space_asteroid_atlas32',
-    order: 14,
+    order: 17,
     object: 'Asteroid2',
     title: 'Atlas32 Asteroid',
     type: 'Near-Earth Asteroid',
@@ -231,7 +295,7 @@ export const SPACE_TOPICS = [
   }),
   makeSpaceTopic({
     id: 'space_esa_earth_observation',
-    order: 15,
+    order: 18,
     object: 'Earth',
     title: 'ESA Earth Observation',
     type: 'Civil Space Agency',
@@ -278,6 +342,225 @@ export const SPACE_TOPICS = [
         embedUrl: 'https://player.vimeo.com/video/1197557002?h=220b6f5a22',
         videoId: '1197557002',
         watermarkText: 'ESA Vimeo | topic.earth research'
+      }
+    ]
+  }),
+  makeSpaceTopic({
+    id: 'space_ozone_hole_watch',
+    order: 18.1,
+    object: 'Earth',
+    title: 'Antarctic Ozone Hole Watch',
+    type: 'Atmosphere Watch',
+    summary: 'A Space-mode atmosphere topic for the Antarctic ozone hole, linked to NASA Ozone Watch and ready for live imagery overlays from NASA Worldview/GIBS.',
+    diameter: 'Atmospheric column topic',
+    temperature: 'Controlled by polar stratospheric temperature and sunlight timing',
+    composition: 'Total column ozone measured in Dobson Units; ozone-hole area is where total ozone is below 220 DU',
+    atmosphere: 'Stratospheric ozone over Antarctica',
+    insight: 'This belongs in Space mode because the reality signal is measured from orbit. Keep the topic synced to NASA Ozone Watch for the latest seasonal status and use GIBS/Worldview layers for imagery where available.',
+    latestNews: 'NASA Ozone Watch latest Antarctic ozone status',
+    researchSources: [
+      {
+        name: 'NASA Ozone Watch',
+        url: 'https://ozonewatch.gsfc.nasa.gov/',
+        category: 'official',
+        reliability: 'high',
+        verified: true
+      },
+      {
+        name: 'NASA Knows: The Ozone Hole',
+        url: 'https://science.nasa.gov/earth/explore/nasa-knows-the-ozone-hole/',
+        category: 'official',
+        reliability: 'high',
+        verified: true
+      },
+      {
+        name: 'NASA GIBS available visualizations',
+        url: 'https://nasa-gibs.github.io/gibs-api-docs/available-visualizations/',
+        category: 'imagery',
+        reliability: 'high',
+        verified: true
+      }
+    ],
+    mediaTokens: [
+      {
+        id: 'media_nasa_ozone_watch',
+        url: '',
+        thumbnailUrl: '',
+        sourceUrl: 'https://ozonewatch.gsfc.nasa.gov/',
+        sourceName: 'NASA Ozone Watch',
+        provider: 'iframe',
+        mediaType: 'iframe',
+        embedUrl: 'https://ozonewatch.gsfc.nasa.gov/',
+        watermarkText: 'NASA Ozone Watch | official atmospheric data'
+      }
+    ]
+  }),
+  makeSpaceTopic({
+    id: 'space_satellite_aura_omi',
+    order: 18.2,
+    object: 'Aura',
+    title: 'Aura / OMI Atmosphere Watch',
+    type: 'Earth Observation Satellite',
+    summary: 'Aura monitors atmospheric chemistry. Its Ozone Monitoring Instrument continues the long ozone record and supports ozone, aerosol, air-quality, and climate context.',
+    diameter: 'Satellite topic',
+    temperature: 'Low Earth orbit thermal environment',
+    composition: 'Aura spacecraft with atmospheric chemistry instruments including OMI',
+    atmosphere: 'Ozone, aerosols, and key atmospheric trace gases',
+    insight: 'Aura is the right Space-mode anchor for ozone-hole and atmospheric composition topics.',
+    latestNews: 'Aura and OMI atmosphere monitoring updates',
+    mediaTokens: [
+      {
+        id: 'media_nasa_eyes_aura',
+        url: '',
+        thumbnailUrl: '',
+        sourceUrl: 'https://eyes.nasa.gov/apps/solar-system/#/sc_aura',
+        sourceName: 'NASA Eyes on the Solar System',
+        provider: 'iframe',
+        mediaType: 'iframe',
+        embedUrl: 'https://eyes.nasa.gov/apps/solar-system/#/sc_aura',
+        watermarkText: 'NASA Eyes | Aura spacecraft visualization'
+      }
+    ],
+    researchSources: [
+      {
+        name: 'NASA Aura mission',
+        url: 'https://science.nasa.gov/mission/aura/',
+        category: 'official',
+        reliability: 'high',
+        verified: true
+      },
+      {
+        name: 'Aura Ozone Monitoring Instrument',
+        url: 'https://aura.gsfc.nasa.gov/omi.html',
+        category: 'official',
+        reliability: 'high',
+        verified: true
+      }
+    ]
+  }),
+  makeSpaceTopic({
+    id: 'space_satellite_oco2',
+    order: 18.3,
+    object: 'OCO2',
+    title: 'OCO-2 Carbon Observatory',
+    type: 'Earth Observation Satellite',
+    summary: 'OCO-2 provides daily global measurements used to track carbon movement through Earth systems and monitor vegetation health.',
+    diameter: 'Satellite topic',
+    temperature: 'Low Earth orbit thermal environment',
+    composition: 'Orbiting Carbon Observatory-2 spacecraft and spectrometers',
+    atmosphere: 'Atmospheric carbon dioxide columns and plant fluorescence',
+    insight: 'OCO-2 connects Space mode directly to carbon-cycle and climate intelligence topics.',
+    latestNews: 'OCO-2 carbon monitoring updates',
+    researchSources: [
+      {
+        name: 'NASA OCO-2 mission',
+        url: 'https://science.nasa.gov/mission/oco-2/',
+        category: 'official',
+        reliability: 'high',
+        verified: true
+      }
+    ]
+  }),
+  makeSpaceTopic({
+    id: 'space_satellite_pace',
+    order: 18.4,
+    object: 'PACE',
+    title: 'PACE Ocean-Atmosphere Watch',
+    type: 'Earth Observation Satellite',
+    summary: 'PACE observes ocean color, aerosols, clouds, and particles in the air to reveal ocean-atmosphere climate connections.',
+    diameter: 'Satellite topic',
+    temperature: 'Low Earth orbit thermal environment',
+    composition: 'PACE spacecraft with OCI, SPEXone, and HARP2 instruments',
+    atmosphere: 'Aerosols, clouds, airborne particles, and ocean color',
+    insight: 'PACE is the best Space-mode topic for live ocean-atmosphere imagery and climate-sensitive biological signals.',
+    latestNews: 'PACE ocean, aerosol, and cloud monitoring updates',
+    researchSources: [
+      {
+        name: 'NASA PACE mission',
+        url: 'https://science.nasa.gov/mission/pace/',
+        category: 'official',
+        reliability: 'high',
+        verified: true
+      }
+    ]
+  }),
+  makeSpaceTopic({
+    id: 'space_solar_system_scale_guide',
+    order: 19,
+    object: 'Earth',
+    title: 'Solar System Scale Guide',
+    type: 'Educational Scale Reference',
+    summary: 'A guide topic for reading the solar-system scene: planet diameters and orbital distances are compressed so the model remains navigable, while Earth diameter and Earth orbit provide the real comparison units.',
+    diameter: 'Earth = 1 diameter unit; current Sun = about 109.2 Earth diameters',
+    temperature: 'Not a temperature topic',
+    composition: 'Scale cotation guide, Earth-ratio comparison, astronomical-unit distance comparison',
+    atmosphere: 'The // break marks on guide lines mean distance is visually compressed.',
+    insight: 'Use this topic to explain that the solar-system scene is a readable model, not a literal scale model. Earth is the reference: 1 Earth diameter for size and 1 AU for average Sun-Earth orbital distance.',
+    latestNews: 'Scale values can later be refreshed from official planetary fact sheets or ephemeris services.',
+    scaleReference: SOLAR_SYSTEM_SCALE_REFERENCE,
+    researchSources: [
+      {
+        name: 'NASA Solar System Facts',
+        url: 'https://science.nasa.gov/solar-system/solar-system-facts/',
+        category: 'official',
+        reliability: 'high',
+        verified: true
+      },
+      {
+        name: 'NASA Sun Facts',
+        url: 'https://science.nasa.gov/sun/facts/',
+        category: 'official',
+        reliability: 'high',
+        verified: true
+      },
+      {
+        name: 'NASA Planet Sizes and Locations',
+        url: 'https://science.nasa.gov/solar-system/planet-sizes-and-locations-in-our-solar-system/',
+        category: 'official',
+        reliability: 'high',
+        verified: true
+      }
+    ]
+  }),
+  makeSpaceTopic({
+    id: 'space_nasa_eyes_solar_system',
+    order: 20,
+    object: 'Earth',
+    title: 'NASA Eyes on the Solar System',
+    type: 'Interactive Reference',
+    summary: 'NASA Eyes is an official interactive 3D reference for exploring planets, moons, spacecraft, asteroids, and Earth-observation missions. topic.earth can use it as an embedded evidence/reference panel while keeping its own educational scene lightweight.',
+    diameter: 'External interactive reference',
+    temperature: 'Not a temperature topic',
+    composition: 'NASA interactive 3D scene, spacecraft trajectories, small bodies, Earth science missions',
+    atmosphere: 'Can be embedded as iframe evidence where NASA permits it',
+    insight: 'Use NASA Eyes as the source/reference layer for verified paths and mission context; keep topic.earth as the curated teaching and climate-navigation layer.',
+    researchSources: [
+      {
+        name: 'NASA Eyes',
+        url: 'https://science.nasa.gov/eyes/',
+        category: 'official',
+        reliability: 'high',
+        verified: true
+      },
+      {
+        name: 'NASA Eyes on the Solar System',
+        url: 'https://eyes.nasa.gov/apps/solar-system/#/home',
+        category: 'interactive',
+        reliability: 'high',
+        verified: true
+      }
+    ],
+    mediaTokens: [
+      {
+        id: 'media_nasa_eyes_solar_system',
+        url: '',
+        thumbnailUrl: '',
+        sourceUrl: 'https://eyes.nasa.gov/apps/solar-system/#/home?embed=true',
+        sourceName: 'NASA Eyes on the Solar System',
+        provider: 'iframe',
+        mediaType: 'iframe',
+        embedUrl: 'https://eyes.nasa.gov/apps/solar-system/#/home?embed=true',
+        watermarkText: 'NASA Eyes | official interactive reference'
       }
     ]
   })

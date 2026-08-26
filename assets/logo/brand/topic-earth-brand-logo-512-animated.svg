@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc" data-theme="world">
+  <title id="title">topic.earth animated app-logo square</title>
+  <desc id="desc">A square topic.earth app logo with fixed background and four-mode title color cycling.</desc>
+  <defs>
+    <linearGradient id="railGradient" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="28%" stop-color="var(--line-a)"/>
+      <stop offset="58%" stop-color="var(--line-b)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+    <linearGradient id="titleGradient" x1="112" x2="400" y1="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="var(--topic)"/>
+      <stop offset="42%" stop-color="var(--title-light)"/>
+      <stop offset="70%" stop-color="var(--earth)"/>
+      <stop offset="100%" stop-color="var(--line-b)"/>
+    </linearGradient>
+    <linearGradient id="titleShine" x1="88" x2="424" y1="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="45%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="52%" stop-color="rgba(255,255,255,0.78)"/>
+      <stop offset="60%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+    <clipPath id="earthClip" clipPathUnits="userSpaceOnUse">
+      <circle cx="256" cy="190" r="86"/>
+    </clipPath>
+  </defs>
+  <style>
+    svg {
+      --bg: #071019;
+      --panel: rgba(20, 24, 36, 0.82);
+      --panel-soft: rgba(10, 14, 26, 0.44);
+      --topic: #00d4ff;
+      --earth: #9ff5ff;
+      --title-light: #f4feff;
+      --line-a: #00d4ff;
+      --line-b: #7cffd6;
+      --frame: rgba(0, 212, 255, 0.18);
+      --glow: rgba(0, 212, 255, 0.28);
+      --hour: #39ff88;
+      --minute: #00d4ff;
+      --second: #ff3030;
+      background: var(--bg);
+      font-family: "Space Mono", "Segoe UI", monospace;
+    }
+    svg[data-theme="regional"] { --topic: #39ff88; --earth: #d8ff7a; --title-light: #f6ffe6; --line-a: #39ff88; --line-b: #f9d85d; --frame: rgba(57,255,136,0.18); --glow: rgba(57,255,136,0.28); }
+    svg[data-theme="space"] { --topic: #7aa8ff; --earth: #00d4ff; --title-light: #f2f7ff; --line-a: #7aa8ff; --line-b: #00d4ff; --frame: rgba(122,168,255,0.18); --glow: rgba(122,168,255,0.28); }
+    svg[data-theme="fever"] { --topic: #ff3030; --earth: #f9d85d; --title-light: #fff0dc; --line-a: #ff3030; --line-b: #f9d85d; --frame: rgba(255,48,48,0.2); --glow: rgba(255,48,48,0.32); }
+    .bg { fill: var(--bg); }
+    .frame { fill: var(--panel); stroke: var(--frame); stroke-width: 2; }
+    .frame-fill { fill: var(--panel-soft); opacity: 0.72; }
+    .rail { fill: url(#railGradient); opacity: 0.72; animation: railPulse 6.2s ease-in-out infinite; }
+    .earth { filter: drop-shadow(0 0 18px var(--glow)); }
+    .earth-ring { fill: none; stroke: url(#railGradient); stroke-width: 5; }
+    .hand { stroke-linecap: round; vector-effect: non-scaling-stroke; }
+    .hour-hand { stroke: var(--hour); stroke-width: 9; }
+    .minute-hand { stroke: var(--minute); stroke-width: 5; }
+    .second-hand { stroke: var(--second); stroke-width: 3; }
+    .pin { fill: #05070a; stroke: rgba(255,255,255,0.72); stroke-width: 2; }
+    .word {
+      font-size: 54px;
+      font-weight: 900;
+      letter-spacing: 0;
+      dominant-baseline: middle;
+      text-anchor: middle;
+      filter: drop-shadow(0 0 10px var(--glow));
+    }
+    .word-topic,
+    .word-earth { fill: url(#titleGradient); }
+    .word-shine {
+      fill: url(#titleShine);
+      opacity: 0.42;
+      mix-blend-mode: screen;
+      animation: titleShimmer 5.8s ease-in-out infinite;
+    }
+    .mode {
+      fill: var(--topic);
+      font-size: 15px;
+      font-weight: 800;
+      text-anchor: middle;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+    @keyframes railPulse { 0%, 100% { opacity: 0.42; } 50% { opacity: 0.92; } }
+    @keyframes titleShimmer {
+      0%, 32% { opacity: 0; transform: translateX(-36px); }
+      52% { opacity: 0.46; }
+      72%, 100% { opacity: 0; transform: translateX(36px); }
+    }
+  </style>
+  <rect class="bg" width="512" height="512"/>
+  <rect class="frame" x="78" y="82" width="356" height="348" rx="10"/>
+  <rect class="frame-fill" x="92" y="96" width="328" height="320" rx="8"/>
+  <rect class="rail" x="122" y="106" width="268" height="4" rx="2"/>
+  <rect class="rail" x="122" y="394" width="268" height="4" rx="2"/>
+  <circle cx="256" cy="190" r="95" fill="#071019"/>
+  <image class="earth" href="../generated/earth-rotate/topic-earth-logo-earth-rotate-512.webp" x="170" y="104" width="172" height="172" preserveAspectRatio="xMidYMid slice" clip-path="url(#earthClip)"/>
+  <circle class="earth-ring" cx="256" cy="190" r="88"/>
+  <g clip-path="url(#earthClip)">
+    <line class="hand hour-hand" x1="256" y1="193" x2="256" y2="142"/>
+    <line class="hand minute-hand" x1="256" y1="196" x2="256" y2="118"/>
+    <line class="hand second-hand" x1="256" y1="200" x2="256" y2="102"/>
+  </g>
+  <circle class="pin" cx="256" cy="190" r="8"/>
+  <text class="word" x="256" y="326">
+    <tspan class="word-topic">topic.</tspan><tspan class="word-earth">earth</tspan>
+  </text>
+  <text class="word word-shine" x="256" y="326">topic.earth</text>
+  <text id="modeLabel" class="mode" x="256" y="364">world</text>
+  <script><![CDATA[
+    (function () {
+      const modes = ["world", "regional", "space", "fever"];
+      const root = document.documentElement;
+      const label = document.getElementById("modeLabel");
+      let index = Math.floor(Math.random() * modes.length);
+      function setMode() {
+        const mode = modes[index];
+        root.setAttribute("data-theme", mode);
+        if (label) label.textContent = mode === "fever" ? "fever scenario" : mode;
+      }
+      function setHands() {
+        const now = new Date();
+        const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
+        const minutes = now.getMinutes() + seconds / 60;
+        const hours = (now.getHours() % 12) + minutes / 60;
+        [
+          [".hour-hand", hours * 30],
+          [".minute-hand", minutes * 6],
+          [".second-hand", seconds * 6]
+        ].forEach(([selector, angle]) => {
+          document.querySelectorAll(selector).forEach((node) => {
+            node.setAttribute("transform", "rotate(" + angle + " 256 190)");
+          });
+        });
+        requestAnimationFrame(setHands);
+      }
+      setMode();
+      setInterval(() => {
+        index = (index + 1) % modes.length;
+        setMode();
+      }, 6200);
+      setHands();
+    }());
+  ]]></script>
+</svg>

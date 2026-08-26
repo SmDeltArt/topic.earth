@@ -81,7 +81,13 @@ GitHub: `Open-source interactive Earth intelligence dashboard with climate layer
 
 Discord: `Explore topic.earth: Earth layers, Fever scenarios, regional updates, and AI-assisted topic research in one browser dashboard.`
 
-Preview and logo assets live in [assets/social](assets/social), including an animated SVG vignette, a captured English first-frame PNG, a light GIF fallback, a Twitter/Discord-safe PNG resume card, transparent PNG/SVG marks, header variants, and animated GIF marks. GitHub-friendly files under 1 MB are [topic-earth-github-preview-600.gif](assets/social/topic-earth-github-preview-600.gif), [topic-earth-github-vignette-600-short.gif](assets/social/topic-earth-github-vignette-600-short.gif), and the five-frame fallback [topic-earth-github-storyboard-600.jpg](assets/social/topic-earth-github-storyboard-600.jpg). Cloudinary export metadata is archived in [assets/logo/export-2026-05-21T05_12_25.270Z.csv](assets/logo/export-2026-05-21T05_12_25.270Z.csv), and the cleaned social-preview upload set is archived in [assets/social/export-2026-05-21T07_12_07.418Z.csv](assets/social/export-2026-05-21T07_12_07.418Z.csv).
+Preview and logo assets live in [assets/social](assets/social), including an animated SVG vignette, a captured English first-frame PNG, a light GIF fallback, a Twitter/Discord-safe PNG resume card, transparent PNG/SVG marks, header variants, and animated GIF marks. GitHub-friendly files under 1 MB are [topic-earth-github-preview-600.gif](assets/social/topic-earth-github-preview-600.gif), [topic-earth-github-vignette-600-short.gif](assets/social/topic-earth-github-vignette-600-short.gif), and the five-frame fallback [topic-earth-github-storyboard-600.jpg](assets/social/topic-earth-github-storyboard-600.jpg). Cloudinary export metadata is archived in [assets/logo/export-2026-05-21T05_12_25.270Z.csv](assets/logo/export-2026-05-21T05_12_25.270Z.csv), the first cleaned social-preview upload set is archived in [assets/social/export-2026-05-21T07_12_07.418Z.csv](assets/social/export-2026-05-21T07_12_07.418Z.csv), and the latest GitHub/Vercel-ready social GIF export is archived in [assets/social/export-2026-05-21T10_54_53.709Z.csv](assets/social/export-2026-05-21T10_54_53.709Z.csv).
+
+Project contact addresses:
+
+- General: `info@topic.earth`
+- Support: `support@topic.earth`
+- Publishing and partnerships: `contact@topic.earth`
 
 ## Product Flow
 
@@ -97,7 +103,7 @@ For admin and AI features, the preferred internal model is:
 Topic Draft -> Sources -> Media -> AI Assist -> Review -> Save / Export / Submit / Publish
 ```
 
-Internal planning docs stay in the `_actual_vs_y1` development folder rather than the public app bundle.
+Internal planning docs stay in the `__actual_vs\topic.earth` development folder rather than the public app bundle.
 
 ## License
 

@@ -287,13 +287,6 @@ Garde-fous:
 - Exercices courts et faciles a relire.
 - Limites fixes de tokens/cout, avec estimation avant generation.
 
-Premier passage implemente:
-
-- Topic Story stocke maintenant un profil `audience` et un drapeau `under16Only` avec le HTML genere.
-- L'onglet Story expose des presets d'age (`6-8`, `9-12`, `Teen`, `Adult`) qui reutilisent les champs deja remplis et appellent le generateur IA securise.
-- Les profils moins de 16 ans forcent le template educatif, la metadata de review adulte, un vocabulaire doux et pas de cadrage anxiogene ou manipulateur.
-- Les cartes generees affichent le profil d'age, le niveau de vocabulaire et l'objectif pedagogique dans la preview HTML sandboxee.
-
 Ce n'est pas trop ambitieux si cela commence comme un seul style de carte narrative. Cela devient trop lourd si topic.earth essaie d'integrer tout l'editeur d'animation dans le dashboard principal.
 
 ## Placement UI

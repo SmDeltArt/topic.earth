@@ -1,4 +1,4 @@
-import { GlobeRenderer } from './lib/globe.js?v=topic-earth-meteo-cloud-severity-20260601';
+import { GlobeRenderer } from './lib/globe.js?v=topic-earth-space-focus-admin-20260606';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
 import { LAYERS } from './data/layers.js?v=topic-earth-good-initiatives-watch-20260601';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
@@ -6,14 +6,14 @@ import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-i
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
 import { FEVER_TOPICS } from './data/fever-topics.js?v=topic-earth-embedded-story-20260521';
 import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
-import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-topics-20260505';
+import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-aura-eyes-20260605';
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=topic-earth-api-settings-bridge-20260602';
+import { TopBar } from './components/TopBar.js?v=topic-earth-live-clock-logo-20260605';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-climate-indicators-20260601';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-smart-source-shortcuts-20260601';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-space-admin-actions-20260605';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-meteo-draft-20260531';
 import { Settings } from './lib/settings.js?v=topic-earth-greek-language-20260521';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -3575,17 +3575,29 @@ class TopicEarthApp {
   }
   
   showPlanetDetail(planetInfo) {
+    const matchingSpaceTopic = SPACE_TOPICS.find(topic => (
+      topic.object === planetInfo.name ||
+      topic.title === planetInfo.name ||
+      topic.id === `planet_${planetInfo.name}`
+    ));
+    const topicTitle = matchingSpaceTopic?.title || planetInfo.name;
+
     // Show planet information in detail panel with full scientific data
     const planetData = {
-      id: `planet_${planetInfo.name}`,
-      title: `${planetInfo.emoji} ${planetInfo.name}`,
-      category: 'space',
-      date: new Date().toISOString().split('T')[0],
-      country: 'Solar System',
-      region: planetInfo.type,
-      source: 'Solar System Explorer',
-      summary: planetInfo.description,
-      insight: `You are currently viewing ${planetInfo.name} in the solar system. ${planetInfo.name === 'Earth' ? 'Click Earth to return to the globe view.' : 'Explore the solar system by clicking on other planets. The view rotates around the selected object.'}`,
+      ...(matchingSpaceTopic || {}),
+      id: matchingSpaceTopic?.id || `planet_${planetInfo.name}`,
+      title: `${planetInfo.emoji} ${topicTitle}`,
+      category: matchingSpaceTopic?.category || 'space',
+      date: matchingSpaceTopic?.date || new Date().toISOString().split('T')[0],
+      country: matchingSpaceTopic?.country || 'Solar System',
+      region: matchingSpaceTopic?.type || planetInfo.type,
+      source: matchingSpaceTopic?.source || 'Solar System Explorer',
+      sourceUrl: matchingSpaceTopic?.sourceUrl || '',
+      summary: matchingSpaceTopic?.summary || planetInfo.description,
+      insight: matchingSpaceTopic?.insight || `You are currently viewing ${planetInfo.name} in the solar system. Explore by clicking other planets or Earth-observation satellites; the view stays in Space mode and tracks the selected object.`,
+      media: matchingSpaceTopic?.media || [],
+      mediaTokens: matchingSpaceTopic?.mediaTokens || [],
+      researchSources: matchingSpaceTopic?.researchSources || [],
       isPlanet: true,
       planetData: planetInfo // Pass all the detailed data
     };

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>topic.earth animated social SVG set</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #070a12;
+        --panel: #101722;
+        --text: #eafcff;
+        --muted: #9bb0c3;
+        --line: rgba(255, 255, 255, 0.12);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font: 14px/1.5 "Space Mono", "Segoe UI", monospace;
+        padding: 24px;
+      }
+      main {
+        width: min(1180px, 100%);
+        margin: 0 auto;
+        display: grid;
+        gap: 18px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 22px;
+        letter-spacing: 0;
+      }
+      p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 360px);
+        gap: 18px;
+        align-items: start;
+      }
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 12px;
+      }
+      object {
+        display: block;
+        width: 100%;
+        border-radius: 6px;
+        background: #05070a;
+      }
+      .banner { aspect-ratio: 1200 / 630; }
+      .square { aspect-ratio: 1; }
+      .favicon {
+        width: 128px;
+        aspect-ratio: 1;
+      }
+      code { color: #00d4ff; }
+      @media (max-width: 800px) {
+        .grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>topic.earth animated social SVG set</h1>
+        <p>Open the SVG files directly or through <code>&lt;object&gt;</code> so the random mode switch and live clock script can run.</p>
+      </header>
+      <section class="panel">
+        <object class="banner" type="image/svg+xml" data="./topic-earth-social-banner-1200x630-animated.svg"></object>
+      </section>
+      <section class="grid">
+        <div class="panel">
+          <object class="square" type="image/svg+xml" data="./topic-earth-social-logo-512-animated.svg"></object>
+        </div>
+        <div class="panel">
+          <object class="favicon" type="image/svg+xml" data="./topic-earth-favicon-animated.svg"></object>
+          <p>Favicon master. Export still/animated raster variants for platform upload when scripts are stripped.</p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

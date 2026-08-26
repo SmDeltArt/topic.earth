@@ -43,6 +43,11 @@ EARTH_ORBITS_PER_LOOP = 1.0
 EARTH_ORBIT_RADIUS = 22.0
 ORBIT_DISTANCE_EXPONENT = 0.5
 ORBIT_INCLINATION_SCALE = 0.35
+GLTF_ANIMATION_TRACK = "Solar_System_Real_Orbits"
+SUN_VISUAL_SCALE_MULTIPLIER = 0.25
+SCALE_GUIDE_Z = 0.35
+MOON_ORBIT_RADIUS_MULTIPLIER = 1.25
+MOON_MIN_ORBIT_RADIUS = 1.25
 
 # Imported GLB actions can keep planets locked to their old motion. Clear them
 # and build fresh orbit + self-spin animation from this script.
@@ -336,6 +341,18 @@ def animate_self_spin(obj: bpy.types.Object, planet_name: str) -> None:
     set_linear_keyframes(obj)
 
 
+def move_actions_to_shared_nla_track() -> None:
+    for obj in bpy.data.objects:
+        if not obj.animation_data or not obj.animation_data.action:
+            continue
+        action = obj.animation_data.action
+        track = obj.animation_data.nla_tracks.new()
+        track.name = GLTF_ANIMATION_TRACK
+        strip = track.strips.new(action.name, FRAME_START, action)
+        strip.name = action.name
+        obj.animation_data.action = None
+
+
 def create_orbits() -> None:
     sun = find_object("Sun")
     earth = find_object("Earth")
@@ -370,7 +387,7 @@ def create_orbits() -> None:
                 continue
             pivot = make_orbit_pivot("Orbit_Moon", parent=earth_pivot)
             pivot.location = Vector((orbit_radius(PLANETS["Earth"]["au"]), 0, 0))
-            moon_distance = max(diameter(earth) * 2.25, 2.5)
+            moon_distance = max(diameter(earth) * MOON_ORBIT_RADIUS_MULTIPLIER, MOON_MIN_ORBIT_RADIUS)
             spin = make_spin_pivot(planet_name, pivot, Vector((moon_distance, 0, 0)))
         else:
             pivot = make_orbit_pivot(f"Orbit_{planet_name}", parent=root)
@@ -404,7 +421,7 @@ def rescale_planets() -> None:
 
     sun = find_object("Sun")
     if sun:
-        scale_object_to_diameter(sun, earth_diameter * target_ratio(SUN_DIAMETER_RATIO))
+        scale_object_to_diameter(sun, earth_diameter * target_ratio(SUN_DIAMETER_RATIO) * SUN_VISUAL_SCALE_MULTIPLIER)
 
     for planet_name, data in PLANETS.items():
         obj = find_object(planet_name)
@@ -436,17 +453,86 @@ def add_orbit_curves() -> None:
             angle = math.tau * index / points
             poly.points[index].co = (math.cos(angle) * radius, math.sin(angle) * radius, 0, 1)
         obj = bpy.data.objects.new(f"OrbitPath_{planet_name}", curve)
+        obj.rotation_euler.x = math.radians(data["inclination_deg"] * ORBIT_INCLINATION_SCALE)
         bpy.context.collection.objects.link(obj)
+
+
+def add_poly_curve(name: str, points: list[Vector], material: bpy.types.Material, bevel_depth: float = 0.018) -> bpy.types.Object:
+    curve = bpy.data.curves.new(name, type="CURVE")
+    curve.dimensions = "3D"
+    curve.resolution_u = 1
+    curve.bevel_depth = bevel_depth
+    curve.materials.append(material)
+    poly = curve.splines.new("POLY")
+    poly.points.add(len(points) - 1)
+    for index, point in enumerate(points):
+        poly.points[index].co = (point.x, point.y, point.z, 1)
+    obj = bpy.data.objects.new(name, curve)
+    bpy.context.collection.objects.link(obj)
+    return obj
+
+
+def add_scale_cotation_guides() -> None:
+    material = bpy.data.materials.new("Scale_Guide_Yellow_Compressed")
+    material.diffuse_color = (1.0, 0.72, 0.16, 0.62)
+    earth_radius = orbit_radius(PLANETS["Earth"]["au"])
+    y_step = 0.46
+    break_size = 0.38
+
+    for index, (planet_name, data) in enumerate(PLANETS.items()):
+        if planet_name in {"Earth", "Moon"}:
+            continue
+        radius = orbit_radius(data["au"])
+        start_x = min(earth_radius, radius)
+        end_x = max(earth_radius, radius)
+        if abs(end_x - start_x) < 0.01:
+            continue
+
+        y = -(index + 1) * y_step
+        z = SCALE_GUIDE_Z
+        gap = min(1.0, max(0.35, (end_x - start_x) * 0.08))
+        break_x = start_x + (end_x - start_x) * 0.48
+        before = Vector((break_x - gap * 0.5, y, z))
+        after = Vector((break_x + gap * 0.5, y, z))
+
+        add_poly_curve(
+            f"ScaleGuide_Earth_to_{planet_name}",
+            [Vector((start_x, y, z)), before, after, Vector((end_x, y, z))],
+            material,
+            bevel_depth=0.014,
+        )
+        add_poly_curve(
+            f"ScaleBreak_Earth_to_{planet_name}_A",
+            [
+                Vector((break_x - break_size * 0.5, y - break_size * 0.28, z)),
+                Vector((break_x - break_size * 0.1, y + break_size * 0.28, z)),
+            ],
+            material,
+            bevel_depth=0.018,
+        )
+        add_poly_curve(
+            f"ScaleBreak_Earth_to_{planet_name}_B",
+            [
+                Vector((break_x + break_size * 0.1, y - break_size * 0.28, z)),
+                Vector((break_x + break_size * 0.5, y + break_size * 0.28, z)),
+            ],
+            material,
+            bevel_depth=0.018,
+        )
 
 
 def export_model() -> None:
     OUTPUT_GLB.parent.mkdir(parents=True, exist_ok=True)
+    move_actions_to_shared_nla_track()
     bpy.ops.export_scene.gltf(
         filepath=str(OUTPUT_GLB),
         export_format="GLB",
         export_yup=True,
         export_apply=True,
         export_animations=True,
+        export_animation_mode="NLA_TRACKS",
+        export_merge_animation="NLA_TRACK",
+        export_nla_strips_merged_animation_name=GLTF_ANIMATION_TRACK,
         export_skins=True,
         export_morph=True,
     )
@@ -463,6 +549,7 @@ def main() -> None:
     rescale_planets()
     create_orbits()
     add_orbit_curves()
+    add_scale_cotation_guides()
     export_model()
 
     print(f"[GLB] Output size: {file_mb(OUTPUT_GLB):.2f} MB")

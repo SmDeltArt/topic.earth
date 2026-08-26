@@ -187,6 +187,97 @@ body:not(.admin-mode) [data-admin-only="true"] {
     filter: drop-shadow(0 0 8px var(--glow));
 }
 
+.logo-live-clock {
+    --clock-hour-angle: 0deg;
+    --clock-minute-angle: 0deg;
+    --clock-second-angle: 0deg;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.logo-clock-face {
+    width: 36px;
+    height: 36px;
+    position: relative;
+    flex: 0 0 36px;
+    display: block;
+    border-radius: 50%;
+    overflow: hidden;
+    filter: drop-shadow(0 0 8px var(--glow));
+}
+
+.logo-clock-earth,
+.logo-clock-hands {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.logo-clock-earth {
+    object-fit: cover;
+    transform: scale(1.14);
+}
+
+.logo-clock-hands {
+    overflow: visible;
+}
+
+.logo-clock-hand {
+    stroke: #05070a;
+    stroke-linecap: round;
+    transform-box: view-box;
+    transform-origin: 50px 50px;
+    vector-effect: non-scaling-stroke;
+}
+
+.logo-clock-hour {
+    stroke: #39ff88;
+    stroke-width: 4;
+    transform: rotate(var(--clock-hour-angle));
+}
+
+.logo-clock-minute {
+    stroke: #00d4ff;
+    stroke-width: 2.8;
+    transform: rotate(var(--clock-minute-angle));
+}
+
+.logo-clock-second {
+    stroke: #ff3030;
+    stroke-width: 2.25;
+    transform: rotate(var(--clock-second-angle));
+}
+
+.logo-clock-pin {
+    fill: #05070a;
+    stroke: rgba(255, 255, 255, 0.68);
+    stroke-width: 1.2;
+}
+
+.logo-clock-word {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 1;
+    text-transform: lowercase;
+    color: var(--logo-topic);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--logo-topic) 34%, transparent);
+}
+
+.logo-clock-word span:last-child {
+    color: var(--logo-earth);
+}
+
 body.topic-logo-stopped #top-bar .logo::before,
 body.topic-logo-stopped #top-bar .logo::after,
 body.topic-logo-stopped #top-bar .logo-mark,
@@ -3801,6 +3892,19 @@ body.regional-map-search-open #layer-panel {
     overflow: hidden;
     border-radius: inherit;
     background: rgba(0, 0, 0, 0.24);
+}
+
+.media-token-iframe-frame {
+    aspect-ratio: 16 / 9;
+    min-height: 220px;
+}
+
+.media-token-iframe {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: 0;
+    border-radius: inherit;
 }
 
 .media-token-play-badge {
@@ -8080,6 +8184,22 @@ canvas:hover {
         height: 31px;
     }
 
+    #top-bar .logo-live-clock {
+        height: 31px;
+        gap: 5px;
+    }
+
+    #top-bar .logo-clock-face {
+        width: 29px;
+        height: 29px;
+        flex-basis: 29px;
+    }
+
+    #top-bar .logo-clock-word {
+        font-size: 11px;
+        gap: 3px;
+    }
+
     #top-bar .logo-word::after {
         bottom: -4px;
     }
@@ -8321,6 +8441,13 @@ canvas:hover {
 
     #detail-panel {
         background: rgba(26, 31, 46, 0.7);
+    }
+
+    body.topic-mode-space.detail-panel-open #detail-panel {
+        height: min(36vh, calc(100vh - 112px));
+        height: min(36dvh, calc(90dvh - 112px));
+        max-height: min(36vh, calc(100vh - 112px));
+        max-height: min(36dvh, calc(90dvh - 112px));
     }
 
     #layer-panel.collapsed {

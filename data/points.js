@@ -1,4 +1,4 @@
-// Shared tipping boundary data model - single source of truth for all boundaries
+﻿// Shared tipping boundary data model - single source of truth for all boundaries
 export const TIPPING_BOUNDARIES = {
   'climate_change': {
     id: 'climate_change',
@@ -605,11 +605,11 @@ export const MOCK_POINTS = [
     category: 'eu',
     title: 'EU Parliament Approves New Climate Legislation',
     country: 'France',
-    region: 'ÃŽle-de-France',
+    region: 'ÃƒÅ½le-de-France',
     date: '2024-01-15',
     source: 'Official EU Statement',
     summary: 'The European Parliament has approved comprehensive climate legislation aimed at reducing carbon emissions by 55% by 2030. This landmark decision marks a significant step in the EU\'s commitment to becoming climate neutral by 2050.',
-    insight: 'This legislation aligns with the Paris Agreement goals and sets a precedent for other global regions. Expected economic impact includes â‚¬1.8T in green investments over the next decade.'
+    insight: 'This legislation aligns with the Paris Agreement goals and sets a precedent for other global regions. Expected economic impact includes Ã¢â€šÂ¬1.8T in green investments over the next decade.'
   },
   {
     id: 2,
@@ -621,7 +621,7 @@ export const MOCK_POINTS = [
     region: 'Berlin',
     date: '2024-01-14',
     source: 'Federal Press Office',
-    summary: 'The German government unveiled a â‚¬500 billion infrastructure modernization plan focusing on renewable energy grid expansion, high-speed rail networks, and digital infrastructure across the country.',
+    summary: 'The German government unveiled a Ã¢â€šÂ¬500 billion infrastructure modernization plan focusing on renewable energy grid expansion, high-speed rail networks, and digital infrastructure across the country.',
     insight: 'This investment is projected to create 1.2 million jobs and accelerate Germany\'s transition to a carbon-neutral economy by 2045, five years ahead of the EU target.'
   },
   {
@@ -634,7 +634,7 @@ export const MOCK_POINTS = [
     region: 'Lazio',
     date: '2024-01-13',
     source: 'Climate Monitoring Network',
-    summary: 'An unprecedented winter heatwave has affected the Mediterranean region, with temperatures reaching 8Â°C above seasonal averages. Climate scientists link this anomaly to broader climate change patterns.',
+    summary: 'An unprecedented winter heatwave has affected the Mediterranean region, with temperatures reaching 8Ã‚Â°C above seasonal averages. Climate scientists link this anomaly to broader climate change patterns.',
     insight: 'This event follows a trend of increasing winter temperature extremes in Southern Europe. Agricultural impacts include earlier flowering cycles and potential frost damage risks.'
   },
   {
@@ -648,7 +648,7 @@ export const MOCK_POINTS = [
     date: '2024-01-12',
     source: 'Regional Energy Authority',
     summary: 'Spain and Portugal jointly announce achieving 85% renewable energy generation capacity, surpassing 2030 targets six years early. Solar and wind installations exceeded expectations.',
-    insight: 'The Iberian Peninsula now serves as a model for renewable transition. Energy export to France via new interconnectors generates â‚¬2.4B annually in cross-border energy trade.'
+    insight: 'The Iberian Peninsula now serves as a model for renewable transition. Energy export to France via new interconnectors generates Ã¢â€šÂ¬2.4B annually in cross-border energy trade.'
   },
   {
     id: 5,
@@ -674,7 +674,7 @@ export const MOCK_POINTS = [
     date: '2024-01-10',
     source: 'HM Treasury',
     summary: 'The United Kingdom introduces a carbon border adjustment mechanism to prevent carbon leakage and encourage global climate action. The policy affects imports from high-emission economies.',
-    insight: 'This policy aligns with EU\'s CBAM and is expected to reduce UK\'s embodied carbon imports by 30% while generating Â£4B in annual revenue for green transition funding.'
+    insight: 'This policy aligns with EU\'s CBAM and is expected to reduce UK\'s embodied carbon imports by 30% while generating Ã‚Â£4B in annual revenue for green transition funding.'
   },
   {
     id: 7,
@@ -700,20 +700,7 @@ export const MOCK_POINTS = [
     date: '2024-01-08',
     source: 'European Commission',
     summary: 'The Digital Services Act now fully applies to all online platforms operating in the EU, introducing strict content moderation requirements and user protection measures.',
-    insight: 'This represents the most comprehensive digital regulation globally, affecting platforms with over 500M users. Compliance costs estimated at â‚¬12B but expected to create safer online environment.'
-  },
-  {
-    id: 9,
-    lat: 47.3769,
-    lon: 8.5417,
-    category: 'meteo',
-    title: 'Alpine Snowpack 40% Below Historical Average',
-    country: 'Switzerland',
-    region: 'ZÃ¼rich',
-    date: '2024-01-09',
-    source: 'Swiss Meteorological Institute',
-    summary: 'Monitoring stations across the Swiss Alps report significantly reduced snowpack levels, raising concerns about summer water availability and winter tourism impact.',
-    insight: 'Reduced snowpack affects hydroelectric power generation (60% of Swiss electricity) and threatens summer water supply for agriculture across Central Europe.'
+    insight: 'This represents the most comprehensive digital regulation globally, affecting platforms with over 500M users. Compliance costs estimated at Ã¢â€šÂ¬12B but expected to create safer online environment.'
   },
   {
     id: 10,
@@ -841,7 +828,6 @@ export const MOCK_POINTS = [
     category: 'hydrogen-charging',
     title: 'Zurich Region Tracks Hydrogen Refueling for Heavy Transport',
     country: 'Switzerland',
-    region: 'Zurich',
     date: '2024-01-23',
     source: 'Swiss Clean Transport Network',
     summary: 'Regional planners are monitoring hydrogen refueling growth along freight and logistics corridors serving northern Switzerland.',
@@ -952,72 +938,5 @@ export const MOCK_POINTS = [
     initiativeType: 'Resilience',
     engagementTypes: ['join', 'learn'],
     communityStatus: 'active'
-  },
-  {
-    id: 24,
-    lat: 50.5077401,
-    lon: 5.492298,
-    category: 'regional-news',
-    title: 'Fête à Limont 2026',
-    country: 'Belgium',
-    region: 'Limont (Anthisnes)',
-    date: '2026-05-23',
-    source: 'Commune d Anthisnes',
-    summary: 'La Fête à Limont revient du 23 au 25 mai 2026 avec animations gratuites, attractions foraines tout le week-end, balade familiale à vélo, concerts, blind test, messe en wallon, frisée aux lardons et tombola.',
-    insight: 'Exemple vivant de topic régional en français: une source communale vérifiable, une affiche-programme lisible par IA, une page story HTML et un micro-jeu enfant qui transforment le sujet local en contenu éducatif partageable.',
-    regionalScope: 'village',
-    initiativeType: 'Culture locale',
-    engagementTypes: ['visit', 'learn', 'share'],
-    communityStatus: 'scheduled',
-    media: [
-      'https://www.app360.be/sites/default/files/styles/api_sheet/public/home_background_image/fete_a_limont_mai_2026.jpg?itok=WOZvKmJU&focalpoint=50,50'
-    ],
-    mediaTokens: [
-      {
-        kind: 'image',
-        url: 'https://www.app360.be/sites/default/files/styles/api_sheet/public/home_background_image/fete_a_limont_mai_2026.jpg?itok=WOZvKmJU&focalpoint=50,50',
-        title: 'Affiche Fête à Limont mai 2026',
-        source: 'Commune d Anthisnes / app360',
-        alt: 'Affiche du programme de la Fête à Limont 2026'
-      },
-      {
-        kind: 'html',
-        url: '/examples/fete-a-limont-2026-story.html',
-        title: 'Story HTML Fete a Limont 2026',
-        sourceName: 'topic.earth story',
-        sourceUrl: 'https://anthisnes.be/fete-a-limont/',
-        watermarkText: 'Story HTML | topic.earth'
-      },
-      {
-        kind: 'game',
-        url: '/examples/vertical-bowling-microgame.html',
-        title: 'Micro-game bowling vertical',
-        sourceName: 'topic.earth micro-game',
-        sourceUrl: 'https://anthisnes.be/fete-a-limont/',
-        watermarkText: 'Micro-game | topic.earth'
-      }
-    ],
-    researchSources: [
-      {
-        name: 'Commune d Anthisnes - Fête à Limont',
-        url: 'https://anthisnes.be/fete-a-limont/',
-        type: 'official'
-      },
-      {
-        name: 'Affiche programme 2026',
-        url: 'https://www.app360.be/sites/default/files/styles/api_sheet/public/home_background_image/fete_a_limont_mai_2026.jpg?itok=WOZvKmJU&focalpoint=50,50',
-        type: 'media'
-      },
-      {
-        name: 'Story HTML topic.earth',
-        url: '/examples/fete-a-limont-2026-story.html',
-        type: 'example'
-      },
-      {
-        name: 'Micro-jeu bowling vertical topic.earth',
-        url: '/examples/vertical-bowling-microgame.html',
-        type: 'example'
-      }
-    ]
   }
 ];

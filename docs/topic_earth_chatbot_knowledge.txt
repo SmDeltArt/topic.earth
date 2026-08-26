@@ -1,0 +1,423 @@
+topic.earth chatbot knowledge base
+Last updated: 2026-05-18
+
+Purpose
+This file gives a chatbot practical knowledge for explaining topic.earth and answering user questions about the app. It is written as a plain text reference for retrieval, chatbot grounding, onboarding, support, and product guidance.
+
+High level description
+topic.earth is an interactive Earth intelligence and topic management app. It combines:
+
+- a public exploration experience for global and regional topics;
+- a 3D globe with topic markers;
+- a Regional 2D OpenStreetMap view;
+- Space and Earth's Fever modes;
+- topic cards with sources, media, notes, and research context;
+- a local browser draft workflow for proposals;
+- admin review and export tools;
+- contextual tutorial bubbles.
+
+The product principle is:
+
+Explore -> describe -> evidence -> review -> save
+
+The app should feel like one contribution workflow, not many disconnected AI/admin panels.
+
+Core modes
+
+World mode
+World mode is the main 3D globe. It displays topic markers and layer-based information. Users can click or hover markers to see a topic vignette. A selected topic opens the detail panel.
+
+Regional mode
+Regional mode is a 2D OpenStreetMap-based map for local and regional topics. It can focus places, search topics, show topic pins, draw paths, calculate routes, and restore saved route/path state for topics.
+
+Space mode
+Space mode switches away from the Earth topic view into a solar-system or space object view. It should be explained as an exploration mode, not as the normal topic editing workspace.
+
+Earth's Fever mode
+Fever mode visualizes climate scenario milestones, warnings, AMOC and tipping point context, and Fever-specific overlays. It is for understanding scenario progression and risk, not for editing normal topics.
+
+Topic cards
+A topic card is the user's main reading and editing surface. A good topic has:
+
+- title;
+- layer/category;
+- location/date when relevant;
+- summary;
+- insight or analysis;
+- sources/evidence;
+- media tokens or image URLs;
+- optional regional route/path state.
+
+For chatbot answers, describe topic cards as "the topic's home base" where summary, evidence, media, and review state live.
+
+User mode and Admin mode
+
+User mode
+User mode is protected by default. It lets people explore and create local proposals or browser drafts without mutating published data. User mode should be framed as safe and non-destructive.
+
+Admin mode
+Admin mode unlocks local editing, layer/topic management, draft review, media/source checks, and admin export packages. In current local development, Admin mode is deliberately toggled from the visible User/Admin control when the profile allows it.
+
+Important answer rule
+Do not tell users that user mode publishes or changes official data. User mode keeps drafts local unless later submitted or exported for admin review.
+
+Local drafts and saving
+Saving a draft stores it on this device/browser. It is not the same as publishing. If storage is full or blocked, the user may need to export an admin package or reduce embedded media.
+
+Recommended language:
+"Save on this device keeps the draft locally. Admin review or export is a separate step."
+
+Avoid language:
+"This is now published."
+"Everyone can see it."
+
+Regional map search and position
+Regional search accepts:
+
+- topic names;
+- places;
+- addresses;
+- cities;
+- coordinates such as "50.85, 4.35";
+- current area from auto-location when enabled.
+
+Regional auto-location is only a map focus helper. It does not create an account location, does not track the user continuously, and does not automatically save a route or path.
+
+Auto-location tries:
+
+1. IP-based location.
+2. Browser geolocation when IP location is too broad or unavailable.
+3. Regional precision settings clamp how close the focus should be.
+
+Regional precision settings
+Regional precision controls the preferred scale:
+
+- continent;
+- country;
+- region;
+- city;
+- address.
+
+The actual focus may be less precise if only IP-level or broad search data is available. Explain it like:
+"Regional precision is a target scale. The app uses the best available accuracy from IP, browser geolocation, search, or map click."
+
+GPS-like behavior
+The app has pieces of GPS behavior, but it is not full live navigation by default.
+
+Current behavior:
+
+- can focus current area;
+- can use map clicks or topic coordinates as route points;
+- can calculate OpenStreetMap routes;
+- can show and edit route/path geometry.
+
+Not currently guaranteed:
+
+- continuous live tracking;
+- turn-by-turn navigation;
+- traffic-aware routing;
+- automatic route start from current position unless the user selects it.
+
+Recommended answer:
+"It can work like a lightweight map planner. It uses location to focus the map, but route and path saving still require explicit user action."
+
+Regional paths
+A path is a manually authored line on the map. It is best for proposed corridors, conceptual paths, protected bike corridors, missing links, or manually corrected geometry.
+
+Path behavior:
+
+- Trace path mode lets users click points on the map.
+- Points show numbered draggable handles.
+- Users can move points by dragging.
+- Users can remove a point from its popup or with right click.
+- At least two points are needed for a meaningful path.
+- A path is a draft until attached to a selected topic.
+
+Saving path state
+A path only registers into a topic when:
+
+- a topic is active or selected;
+- the user clicks Attach path / Finish path;
+- permissions allow modifying that topic or local proposal.
+
+If no topic is active, the line may remain visible on the map but is not stored in a topic record.
+
+Recommended answer:
+"Open or select a topic first, then attach the path. Without a selected topic, the path is only a map draft."
+
+Regional routes
+A route is calculated from start to destination using OpenStreetMap routing.
+
+Route input options:
+
+- click start point, then click destination;
+- type topic name;
+- type address;
+- type city;
+- type coordinates.
+
+Route options:
+
+- bike;
+- walk;
+- road/driving;
+- shorter;
+- faster.
+
+Route service
+The app uses OpenStreetMap-related services:
+
+- Nominatim for resolving typed destinations to coordinates;
+- routing.openstreetmap.de for bike/walk/road route geometry.
+
+If routing is unavailable, the app can fall back to a direct guide line.
+
+Edit as path
+If the OpenStreetMap route is only approximate or the user wants to correct it manually, use "Edit as path". This converts route geometry into editable path points.
+
+Saving route state
+Attach route to topic stores the route state on the selected topic. Without a selected topic, the route remains a map draft.
+
+Regional topic media and vignettes
+Regional topic pins and Leaflet hover vignettes can display a small media preview.
+
+Media sources may come from:
+
+- mediaTokens;
+- legacy media URLs;
+- AI-generated media;
+- direct image URLs added by the user;
+- source media found from research or news update flows.
+
+If no usable image is available, Regional shows a compact generated category tile instead of leaving the vignette blank.
+
+Topic media model
+Use mediaTokens as the preferred normalized media shape. A media token can include:
+
+- url;
+- sourceUrl;
+- sourceName;
+- sourceHost;
+- watermarkText;
+- query;
+- generated flag;
+- provider;
+- createdAt;
+- browser asset metadata when browser-only.
+
+Legacy media arrays are still read as fallback, but new flows should keep mediaTokens.
+
+Media URL behavior
+Direct image URLs are accepted as media. Non-image URLs are treated as source/evidence links unless an image can be extracted or generated.
+
+Recommended answer:
+"Paste a direct image URL to add media immediately. A normal webpage URL is better kept as evidence unless the app can extract or generate an image from it."
+
+AI media and research media
+AI can help suggest or generate media for a topic when a linked provider is configured. The human should review generated media before saving or applying it. AI output should not silently mutate published data.
+
+Recommended answer:
+"AI can suggest or generate media, but it should land in the draft for review. The user or admin decides whether to save it."
+
+Sources and evidence
+Evidence can include:
+
+- source name;
+- source URL;
+- research source records;
+- media source references;
+- AI research output after review;
+- manual notes.
+
+The app should keep sources and media attached to the topic so drafts remain reviewable.
+
+Central Topic Composer
+The contribution direction is a central composer:
+
+- user types or pastes a note, URL, media link, or local idea;
+- app fills a draft preview;
+- URLs are routed into evidence or media records;
+- user reviews the draft;
+- user saves locally or admin exports/reviews.
+
+Recommended chatbot explanation:
+"Use the composer as the single input place. Paste the idea, source, or image link there, then review the generated topic preview before saving."
+
+Tutorial system
+The app uses contextual tutorial bubbles rather than permanent wall text.
+
+Tutorial levels:
+
+- Essential: first-visit help and core concepts.
+- Guided: task help for flows such as Regional paths, routes, settings, media, and composer.
+- Expert/Admin: admin cues and deeper controls.
+
+Tutorial bubbles can include Read, which speaks the current bubble through browser TTS or a linked TTS bridge if enabled.
+
+The optional Ask tutorial helper is not the default path and should only answer the current UI step when a linked AI text provider is ready.
+
+Settings tutorial behavior
+In Settings, important controls can show contextual explanations when hovered, focused by keyboard, or clicked. These include:
+
+- Access mode;
+- Language;
+- Tutorial tips and tutorial level;
+- Text to speech;
+- Country labels;
+- texture quality;
+- Fever loop quality;
+- build info;
+- AI API settings;
+- Regional focus and precision.
+
+AI settings
+AI features depend on linked provider settings. Public users can leave AI off. When linked, provider/model choices power AI research, text help, media generation, and updates.
+
+Important answer rule
+Do not imply that topic.earth owns or bundles a universal AI provider. Say "linked provider" or "configured provider" unless the user has specified one.
+
+Build transparency
+Settings may show "Development assistant: Codex". This identifies the development assistant used for this build context. It is separate from runtime AI provider/model settings.
+
+Fever mode
+Fever mode is for climate scenario and risk visualization. It can show scenario values, warnings, AMOC values, tipping risk, and milestone textures. It is not the normal topic creation area.
+
+Carbon History layer
+Carbon History and hydrocarbon chronology layers are sensitive research topics. Use careful language, separate evidence from interpretation, and avoid partisan certainty. Encourage source review.
+
+Admin export
+Admin export packages gather local/browser drafts and media for review. Packaging media may fail for cross-origin or browser-only assets; keep original URLs as references when needed.
+
+Privacy and tracking
+Answer cautiously:
+
+- Regional auto-location focuses the map.
+- It does not create a permanent account location by itself.
+- It does not continuously track movement by default.
+- Browser geolocation requires permission.
+- HTTPS or localhost may be required for browser geolocation.
+
+Recommended answer:
+"Location is used to focus Regional. It is not saved as your account location unless a topic or proposal is explicitly saved with location data."
+
+Common user questions and recommended answers
+
+Question: Can topic.earth be used like GPS?
+Answer: It can act like a lightweight map planner. It can focus your area, calculate routes, and let you edit paths, but live turn-by-turn GPS tracking is not the default behavior.
+
+Question: Why did my path not save?
+Answer: A path only saves when it is attached to a selected topic and permissions allow updating that topic. Without a selected topic, it remains a temporary map draft.
+
+Question: What can I type in Regional search?
+Answer: You can search topic names, places, addresses, cities, or coordinates. Auto-location can also focus your current area if enabled.
+
+Question: What does precision mean?
+Answer: Precision sets the preferred map scale for Regional focus. The app uses the best available accuracy from IP, browser geolocation, search, or map clicks.
+
+Question: How do I fix an approximate route?
+Answer: Use Edit as path. It converts the route into draggable path points so you can move, add, or delete points manually.
+
+Question: How do I add an image to a topic?
+Answer: Use media actions in the topic draft. A direct image URL becomes media. A normal webpage URL is stored as evidence unless the app can extract or generate an image.
+
+Question: Why does a Regional pin show a placeholder instead of an image?
+Answer: The topic has no usable media URL yet. Add a direct image, upload media, or use source/AI media tools to create a media token.
+
+Question: What is User mode?
+Answer: User mode protects published content. It lets people explore and save local drafts without changing official data.
+
+Question: What is Admin mode?
+Answer: Admin mode unlocks local editing, review, source/media checks, and export tools when deliberately enabled in an admin-capable profile.
+
+Question: Is AI required?
+Answer: No. The app should work without AI. Linked AI providers add research, generation, and assistant features when configured.
+
+Question: Does Read use AI?
+Answer: Read mainly uses text-to-speech. It can use browser voices or a linked TTS bridge if enabled.
+
+Answer style for chatbot
+Use short, direct answers. Prefer practical steps. Mention constraints only when they affect the user's next action.
+
+Good answer structure:
+
+1. Direct answer in one sentence.
+2. What to do next.
+3. Important caveat, if needed.
+
+Example:
+"Yes. In Regional, search can find a topic, address, city, or coordinates. If you want the result saved, open a topic first and attach the route or path to it."
+
+Do not over-answer. Avoid exposing internal implementation details unless the user asks.
+
+When user is confused
+Use clarifying language:
+
+- "This is only a draft until saved."
+- "This focuses the map, it does not track you."
+- "Attach it to a topic if you want it restored later."
+- "Admin mode is for editing/review, not normal browsing."
+
+When user asks to manage a response
+The chatbot should help shape the answer into:
+
+- a simple explanation for normal users;
+- a more technical explanation for admins;
+- step-by-step instructions when the user wants to do something;
+- a warning only when privacy, permissions, publishing, or storage are involved.
+
+Do not claim
+The chatbot should not claim:
+
+- topics are published automatically;
+- location is continuously tracked by default;
+- AI is always available;
+- routes include live traffic or turn-by-turn navigation;
+- Regional paths save without a selected topic;
+- user mode can edit published official records;
+- generated media is verified evidence.
+
+Glossary
+
+Topic
+A data card about a place, event, initiative, layer item, or research object.
+
+Layer
+A category or dataset grouping topics.
+
+Media token
+Normalized record for an image/media item and its source metadata.
+
+Evidence
+Source URLs, source names, notes, and research references supporting a topic.
+
+Regional state
+Saved map state on a topic, including focus, path, route, profile, preference, layer, and zoom.
+
+Path
+Manual editable line made of points.
+
+Route
+Calculated line from start to destination, usually from OpenStreetMap routing.
+
+Proposal
+A local browser draft, often created by a user from Regional or the composer.
+
+Admin package
+Exported bundle of drafts and media references for review.
+
+Tutorial bubble
+Contextual in-app guidance tied to an interface element.
+
+Linked AI provider
+Configured AI backend used for optional research, text, image, or voice features.
+
+Current implementation notes
+
+- Regional map uses OpenStreetMap/Leaflet.
+- Route lookup uses Nominatim plus routing.openstreetmap.de.
+- Regional topic vignettes can display small media previews from mediaTokens or legacy media URLs.
+- The shared media helper normalizes URL/media token selection for DetailPanel, Globe, and Regional.
+- Tutorial text is stored through translation keys and shared CSV.
+- The app favors explicit user/admin actions over silent mutation.
+
+End of file.

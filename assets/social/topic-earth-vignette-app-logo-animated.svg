@@ -1,0 +1,203 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc" data-theme="world">
+  <title id="title">topic.earth animated social banner</title>
+  <desc id="desc">Animated topic.earth banner with Earth clock logo, mode information, and stylized signal background.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#02060d"/>
+      <stop offset="48%" stop-color="#071019"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="railGradient" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="30%" stop-color="var(--line-a)"/>
+      <stop offset="58%" stop-color="var(--line-b)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+    <linearGradient id="titleGradient" x1="430" x2="902" y1="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="var(--topic)"/>
+      <stop offset="42%" stop-color="var(--title-light)"/>
+      <stop offset="72%" stop-color="var(--earth)"/>
+      <stop offset="100%" stop-color="var(--line-c)"/>
+    </linearGradient>
+    <linearGradient id="titleShine" x1="350" x2="960" y1="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="44%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="52%" stop-color="rgba(255,255,255,0.72)"/>
+      <stop offset="61%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="var(--glow)" stop-opacity="0.68"/>
+      <stop offset="55%" stop-color="var(--glow)" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="var(--glow)" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="earthClip" clipPathUnits="userSpaceOnUse">
+      <circle cx="276" cy="176" r="68"/>
+    </clipPath>
+    <filter id="softBlur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+  <style>
+    svg {
+      --topic: #00d4ff;
+      --earth: #9ff5ff;
+      --title-light: #f4feff;
+      --line-a: #00d4ff;
+      --line-b: #7cffd6;
+      --line-c: #81d4ff;
+      --frame: rgba(0, 212, 255, 0.2);
+      --glow: rgba(0, 212, 255, 0.36);
+      --hour: #39ff88;
+      --minute: #00d4ff;
+      --second: #ff3030;
+      font-family: "Space Mono", "Segoe UI", monospace;
+      background: #071019;
+    }
+    svg[data-theme="regional"] { --topic: #39ff88; --earth: #d8ff7a; --title-light: #f6ffe6; --line-a: #39ff88; --line-b: #f9d85d; --line-c: #00d4ff; --frame: rgba(57,255,136,0.22); --glow: rgba(57,255,136,0.34); }
+    svg[data-theme="space"] { --topic: #7aa8ff; --earth: #00d4ff; --title-light: #f2f7ff; --line-a: #7aa8ff; --line-b: #00d4ff; --line-c: #f9d85d; --frame: rgba(122,168,255,0.24); --glow: rgba(122,168,255,0.34); }
+    svg[data-theme="fever"] { --topic: #ff3030; --earth: #f9d85d; --title-light: #fff0dc; --line-a: #ff3030; --line-b: #f9d85d; --line-c: #00d4ff; --frame: rgba(255,48,48,0.24); --glow: rgba(255,48,48,0.34); }
+    .bg { fill: url(#bg); }
+    .grid { stroke: rgba(255,255,255,0.12); stroke-width: 1; stroke-dasharray: 7 18; animation: gridDrift 20s linear infinite; }
+    .halo { fill: url(#halo); filter: url(#softBlur); animation: haloMove 18s ease-in-out infinite; }
+    .wave { fill: none; stroke: url(#railGradient); stroke-width: 2.2; opacity: 0.3; animation: waveShift 16s linear infinite; }
+    .logo-frame { fill: rgba(20,24,36,0.82); stroke: var(--frame); stroke-width: 2; }
+    .logo-fill { fill: rgba(10,14,26,0.48); }
+    .rail { fill: url(#railGradient); opacity: 0.72; animation: railPulse 6.2s ease-in-out infinite; }
+    .earth-img { filter: drop-shadow(0 0 16px var(--glow)); }
+    .earth-ring { fill: none; stroke: url(#railGradient); stroke-width: 4; }
+    .hand { stroke-linecap: round; vector-effect: non-scaling-stroke; }
+    .hour-hand { stroke: var(--hour); stroke-width: 7; }
+    .minute-hand { stroke: var(--minute); stroke-width: 4; }
+    .second-hand { stroke: var(--second); stroke-width: 2.6; }
+    .pin { fill: #05070a; stroke: rgba(255,255,255,0.75); stroke-width: 1.8; }
+    .brand { font-size: 88px; font-weight: 900; dominant-baseline: middle; letter-spacing: 0; filter: drop-shadow(0 0 12px var(--glow)); }
+    .brand tspan { fill: url(#titleGradient); }
+    .brand-shine { fill: url(#titleShine); opacity: 0.4; mix-blend-mode: screen; animation: titleShimmer 5.8s ease-in-out infinite; }
+    .mode-label { fill: var(--topic); font-size: 18px; font-weight: 800; text-transform: uppercase; opacity: 0.92; }
+    .info-panel { fill: rgba(10,14,26,0.54); stroke: var(--frame); stroke-width: 1.4; }
+    .headline { fill: var(--topic); font-size: 42px; font-weight: 900; letter-spacing: 0; filter: drop-shadow(0 0 10px var(--glow)); }
+    .info { fill: #e8eaed; font-size: 21px; font-weight: 700; letter-spacing: 0; }
+    .info-muted { fill: #9aa0a6; font-size: 18px; font-weight: 700; }
+    .bar { fill: var(--topic); filter: drop-shadow(0 0 10px var(--glow)); }
+    .chip { fill: rgba(255,255,255,0.055); stroke: var(--frame); stroke-width: 1; }
+    .chip-text { fill: var(--earth); font-size: 18px; font-weight: 800; text-transform: uppercase; }
+    @keyframes gridDrift { to { stroke-dashoffset: -260; } }
+    @keyframes haloMove { 0%,100% { transform: translate(-40px, 8px); opacity: 0.72; } 50% { transform: translate(36px, -18px); opacity: 1; } }
+    @keyframes waveShift { to { stroke-dashoffset: -360; } }
+    @keyframes railPulse { 0%,100% { opacity: 0.38; } 50% { opacity: 0.92; } }
+    @keyframes titleShimmer { 0%,32% { opacity: 0; transform: translateX(-90px); } 52% { opacity: 0.46; } 72%,100% { opacity: 0; transform: translateX(90px); } }
+  </style>
+  <rect class="bg" width="1200" height="630"/>
+  <circle class="halo" cx="870" cy="146" r="290"/>
+  <circle class="halo" cx="190" cy="520" r="250" opacity="0.5"/>
+  <path class="grid" d="M-80 102H1280 M-80 202H1280 M-80 302H1280 M-80 402H1280 M-80 502H1280 M122 0V630 M302 0V630 M482 0V630 M662 0V630 M842 0V630 M1022 0V630"/>
+  <path class="wave" stroke-dasharray="26 22" d="M-40 444C130 390 222 504 388 448C572 386 708 390 876 350C1040 312 1122 330 1240 292"/>
+  <path class="wave" stroke-dasharray="18 30" d="M-50 520C124 470 264 548 430 504C610 456 704 496 880 428C1038 366 1128 402 1240 372"/>
+
+  <g id="logoBlock">
+    <rect class="logo-frame" x="176" y="98" width="848" height="160" rx="10"/>
+    <rect class="logo-fill" x="188" y="110" width="824" height="136" rx="8"/>
+    <rect class="rail" x="218" y="238" width="760" height="4" rx="2"/>
+    <rect class="rail" x="218" y="114" width="760" height="3" rx="1.5"/>
+    <circle cx="276" cy="176" r="78" fill="#071019"/>
+    <image class="earth-img" href="../logo/generated/earth-rotate/topic-earth-logo-earth-rotate-512.webp" x="208" y="108" width="136" height="136" preserveAspectRatio="xMidYMid slice" clip-path="url(#earthClip)"/>
+    <circle class="earth-ring" cx="276" cy="176" r="70"/>
+    <g clip-path="url(#earthClip)">
+      <line class="hand hour-hand" x1="276" y1="179" x2="276" y2="138"/>
+      <line class="hand minute-hand" x1="276" y1="181" x2="276" y2="118"/>
+      <line class="hand second-hand" x1="276" y1="184" x2="276" y2="106"/>
+    </g>
+    <circle class="pin" cx="276" cy="176" r="7"/>
+    <text class="brand" x="382" y="176"><tspan>topic.</tspan><tspan>earth</tspan></text>
+    <text class="brand brand-shine" x="382" y="176">topic.earth</text>
+    <text id="modeLabel" class="mode-label" x="388" y="226">world update</text>
+  </g>
+
+  <g id="infoBlock">
+    <rect class="info-panel" x="220" y="322" width="760" height="190" rx="10"/>
+    <rect class="bar" x="254" y="354" width="7" height="120" rx="3.5"/>
+    <text id="headline" class="headline" x="290" y="374">World Update</text>
+    <text id="infoLineA" class="info" x="290" y="424">Live Earth signals, climate layers, topic intelligence.</text>
+    <text id="infoLineB" class="info-muted" x="290" y="464">https://topic.earth - info@topic.earth</text>
+    <g id="chipRow">
+      <rect class="chip" x="290" y="484" width="126" height="34" rx="7"/>
+      <rect class="chip" x="430" y="484" width="126" height="34" rx="7"/>
+      <rect class="chip" x="570" y="484" width="126" height="34" rx="7"/>
+      <rect class="chip" x="710" y="484" width="156" height="34" rx="7"/>
+      <text class="chip-text" x="313" y="507">Regional</text>
+      <text class="chip-text" x="464" y="507">World</text>
+      <text class="chip-text" x="609" y="507">Space</text>
+      <text class="chip-text" x="740" y="507">Fever Sim</text>
+    </g>
+  </g>
+  <script><![CDATA[
+    (function () {
+      const modes = [
+        {
+          key: "world",
+          mode: "world update",
+          headline: "World Update",
+          a: "Live Earth signals, climate layers, topic intelligence.",
+          b: "Worldwide context for weather, climate, and public data."
+        },
+        {
+          key: "regional",
+          mode: "regional dashboard",
+          headline: "Regional Dashboard",
+          a: "Local initiatives, evidence, and climate signals.",
+          b: "Track places, compare updates, turn observations into topics."
+        },
+        {
+          key: "space",
+          mode: "space watch",
+          headline: "Space Watch",
+          a: "Atmosphere missions, orbital context, Earth observation.",
+          b: "Aura, OCO-2, PACE, ozone, and climate imagery."
+        },
+        {
+          key: "fever",
+          mode: "fever simulation",
+          headline: "Fever Simulation",
+          a: "Tipping points, scenarios, planetary risk signals.",
+          b: "Explore heat, feedback loops, and transition paths."
+        }
+      ];
+      const root = document.documentElement;
+      let index = Math.floor(Math.random() * modes.length);
+      const setText = (id, value) => {
+        const node = document.getElementById(id);
+        if (node) node.textContent = value;
+      };
+      function setMode() {
+        const mode = modes[index];
+        root.setAttribute("data-theme", mode.key);
+        setText("modeLabel", mode.mode);
+        setText("headline", mode.headline);
+        setText("infoLineA", mode.a);
+        setText("infoLineB", mode.b);
+      }
+      function setHands() {
+        const now = new Date();
+        const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
+        const minutes = now.getMinutes() + seconds / 60;
+        const hours = (now.getHours() % 12) + minutes / 60;
+        [
+          [".hour-hand", hours * 30],
+          [".minute-hand", minutes * 6],
+          [".second-hand", seconds * 6]
+        ].forEach(([selector, angle]) => {
+          document.querySelector(selector).setAttribute("transform", "rotate(" + angle + " 276 176)");
+        });
+        requestAnimationFrame(setHands);
+      }
+      setMode();
+      setInterval(() => {
+        index = (index + 1) % modes.length;
+        setMode();
+      }, 6200);
+      setHands();
+    }());
+  ]]></script>
+</svg>
+

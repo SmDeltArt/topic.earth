@@ -3345,6 +3345,62 @@ Keep response concise (3-4 sentences).`;
   
   renderPlanetDetail(planet) {
     const content = this.container.querySelector('#detail-content');
+    const isAdmin = AppAccess.isAdminMode();
+    const canManageTopicSources = AppAccess.canManageTopicSources(planet);
+    const canModifyTopic = AppAccess.canModifyTopic(planet);
+    const canDeleteTopic = AppAccess.canDeleteTopic(planet);
+    const mediaTokens = this.getMediaTokensForPoint(planet);
+    const mediaHtml = mediaTokens.length > 0 ? `
+      <div class="detail-section">
+        <div class="section-label">Mission Media</div>
+        <div class="topic-media-grid">
+          ${mediaTokens.map((token, index) => `
+            <div class="topic-media-item">
+              ${this.renderMediaTokenImage(token, 'topic-media-image', `${planet.title || 'Space topic'} media ${index + 1}`)}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+    const topicActions = `
+      <div class="topic-detail-actions">
+        <button class="btn-secondary topic-action-btn" data-action="check-topic-update" title="Check latest news against this Space topic">
+          Check Topic Update
+        </button>
+        ${canManageTopicSources ? `
+          <button class="btn-secondary topic-action-btn" data-action="manage-sources" title="Manage evidence and add media">
+            Evidence & Media
+          </button>
+        ` : ''}
+        ${canModifyTopic ? `
+          <button class="btn-primary topic-action-btn" data-action="edit-topic">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="display: inline-block; margin-right: 6px;">
+              <path d="M1 10L1 13L4 13L11.5 5.5L8.5 2.5L1 10Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              <path d="M8.5 2.5L11.5 5.5" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            ${planet.isCustom || planet.isFeverWarning || planet.isTippingPoint ? 'Edit Topic' : 'Edit as Draft Copy'}
+          </button>
+        ` : ''}
+        ${isAdmin ? `
+          <button class="btn-primary-alt topic-action-btn" data-action="submit-topic-package" data-admin-only="true" title="Download this Space topic as a ZIP package for admin review">
+            Submit ZIP
+          </button>
+          <div id="topic-submit-status" class="admin-submit-note" data-admin-only="true">
+            Submit downloads this topic as a ZIP for admin review.
+          </div>
+        ` : ''}
+        ${canDeleteTopic ? `
+          <button class="btn-danger topic-action-btn" data-action="delete-topic" title="Remove this browser topic">
+            Remove Topic
+          </button>
+        ` : ''}
+        ${!isAdmin && !canModifyTopic ? `
+          <div class="readonly-user-note">
+            User mode is read-only for published Space topics. Switch to admin mode to edit, or save a draft copy.
+          </div>
+        ` : ''}
+      </div>
+    `;
     
     content.innerHTML = `
       <div class="detail-header">
@@ -3376,6 +3432,8 @@ Keep response concise (3-4 sentences).`;
         </div>
       ` : ''}
 
+      ${mediaHtml}
+
       <div class="detail-section">
         <div class="section-label">Navigation</div>
         <div class="insight-card">
@@ -3399,9 +3457,11 @@ Keep response concise (3-4 sentences).`;
       <div class="detail-section">
         <div class="section-label">Solar System View</div>
         <div class="section-content compact" style="color: var(--text-secondary); font-style: italic;">
-          Click on any planet or celestial body to focus on it. The rotation will center on the selected object. Click Earth to return to the detailed globe view.
+          Click on any planet, moon, or Earth-observation satellite to focus on it. The rotation stays in Space mode and tracks the selected object.
         </div>
       </div>
+
+      ${topicActions}
     `;
     
     // Add search handler
@@ -10182,10 +10242,26 @@ Rules:
 
   renderMediaTokenImage(token, imageClass = 'generated-image', alt = 'Media image') {
     const normalized = this.normalizeMediaToken(token);
-    if (!normalized?.url && !normalized?.browserAssetKey && !normalized?.thumbnailUrl) return '';
+    const isIframe = normalized?.mediaType === 'iframe' && normalized.embedUrl;
+    if (!normalized?.url && !normalized?.browserAssetKey && !normalized?.thumbnailUrl && !isIframe) return '';
 
     if (!normalized.url && normalized.browserAssetKey) {
       this.scheduleBrowserMediaHydration();
+    }
+
+    if (isIframe) {
+      return `
+        <div class="media-token-frame media-token-iframe-frame">
+          <iframe
+            class="media-token-iframe ${this.escapeHtml(imageClass)}"
+            src="${this.escapeHtml(normalized.embedUrl)}"
+            title="${this.escapeHtml(normalized.sourceName || alt)}"
+            loading="lazy"
+            allowfullscreen
+          ></iframe>
+          <div class="media-token-watermark">${this.escapeHtml(normalized.watermarkText)}</div>
+        </div>
+      `;
     }
 
     const browserAssetAttrs = normalized.browserAssetKey

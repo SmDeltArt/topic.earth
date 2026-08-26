@@ -294,13 +294,6 @@ Recommended first implementation:
 - Render with one safe template.
 - Add an "Open in SVG Editor" or "Export for SVG Editor" bridge using the JSON contract above.
 
-Implemented first pass:
-
-- Topic Story now stores an `audience` profile and an `under16Only` flag beside the generated HTML.
-- The Story tab exposes age presets (`6-8`, `9-12`, `Teen`, `Adult`) that use the current draft fields and call the safe AI story generator.
-- Under-16 profiles force the educational template, adult-review metadata, gentle vocabulary, and no frightening or manipulative framing.
-- Generated cards show the age profile, vocabulary level, and learning objective inside the sandboxed HTML preview.
-
 This is not too much if it starts as one constrained story-card style. It becomes too much only if topic.earth tries to own the full animation editor inside the main dashboard.
 
 ## UI Placement

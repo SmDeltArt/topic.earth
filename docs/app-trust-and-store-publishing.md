@@ -177,7 +177,9 @@ Sections:
 - Children and educational content.
 - Security practices.
 - User controls and deletion.
-- Contact: `info@topic.earth` or `contact@topic.earth`.
+- General contact: `info@topic.earth`.
+- Support contact: `support@topic.earth`.
+- Publishing and partnership contact: `contact@topic.earth`.
 
 ## Store Description Direction
 

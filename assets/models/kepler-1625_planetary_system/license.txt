@@ -1,0 +1,11 @@
+Model Information:
+* title:	Kepler-1625 planetary system
+* source:	https://sketchfab.com/3d-models/kepler-1625-planetary-system-0423e47bae9943b9ac983354446b4dea
+* author:	pergamond (https://sketchfab.com/pergamond)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Kepler-1625 planetary system" (https://sketchfab.com/3d-models/kepler-1625-planetary-system-0423e47bae9943b9ac983354446b4dea) by pergamond (https://sketchfab.com/pergamond) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

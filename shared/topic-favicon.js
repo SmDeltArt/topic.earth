@@ -4,6 +4,7 @@
   const FRAME_MS = 500;
   const isLocal = LOCAL_HOSTS.has(location.hostname);
   const FRAME_GROUP_IDS = ["g1", "g10", "g13", "g17", "g21", "g25"];
+  const BORDER_FAVICON_COLORS = ["#00d4ff", "#39ff88", "#7aa8ff", "#ff3030"];
 
   const state = window.__topicLogoClockState || {
     startTime: performance.now(),
@@ -86,9 +87,21 @@
     return frameSvg;
   }
 
+  function isBorderFavicon(svgText) {
+    return /data-topic-border-favicon=["']true["']/i.test(svgText);
+  }
+
+  function makeBorderFrameSvg(svgText, activeIndex) {
+    return stripInlineSvgAnimation(svgText)
+      .replace(/--border-a:\s*#[0-9a-f]{3,8};/i, `--border-a: ${BORDER_FAVICON_COLORS[activeIndex]};`)
+      .replace(/animation:\s*borderMode\s+[^;]+;/gi, "");
+  }
+
   function renderSvgFrame(svgText, activeIndex, size = 64) {
     return new Promise((resolve) => {
-      const frameSvg = makeGroupFrameSvg(svgText, activeIndex);
+      const frameSvg = isBorderFavicon(svgText)
+        ? makeBorderFrameSvg(svgText, activeIndex)
+        : makeGroupFrameSvg(svgText, activeIndex);
       const blobUrl = URL.createObjectURL(
         new Blob([frameSvg], { type: "image/svg+xml" }),
       );
@@ -130,8 +143,9 @@
     const svgText = await fetchSvgText(sourceHrefs);
     if (!svgText) return [];
 
+    const frameSource = isBorderFavicon(svgText) ? BORDER_FAVICON_COLORS : FRAME_GROUP_IDS;
     const frames = await Promise.all(
-      FRAME_GROUP_IDS.map((_, index) => renderSvgFrame(svgText, index)),
+      frameSource.map((_, index) => renderSvgFrame(svgText, index)),
     );
     state.frameUrls = frames.filter(Boolean);
     return state.frameUrls;
@@ -222,6 +236,15 @@
 
   function init() {
     const icon = getIcon();
+    if (icon?.dataset.topicFaviconDirect === "true") {
+      icon.dataset.topicClockManaged = "true";
+      state.stopped = true;
+      state.managing = true;
+      if (icon.dataset.localHref) {
+        icon.href = icon.dataset.localHref;
+      }
+      return;
+    }
     const href = setPrimaryHref(icon);
     startSyncedAnimation(getAnimationSources(href));
   }

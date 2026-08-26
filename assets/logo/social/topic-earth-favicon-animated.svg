@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title" data-topic-border-favicon="true">
+  <title id="title">topic.earth Earth favicon</title>
+  <style>
+    svg {
+      --bg: #071019;
+      --sea: #00a8d8;
+      --land: #79d12f;
+      --border-a: #00d4ff;
+      --border-b: #39ff88;
+      --border-c: #7aa8ff;
+      --border-d: #ff3030;
+      background: var(--bg);
+    }
+    .bg { fill: var(--bg); }
+    .globe {
+      fill: var(--sea);
+      stroke: var(--border-a);
+      stroke-width: 3.2;
+      animation: borderMode 8s steps(4, end) infinite;
+      filter: drop-shadow(0 0 4px currentColor);
+    }
+    .land { fill: var(--land); opacity: 0.95; }
+    .shade { fill: rgba(255,255,255,0.14); }
+    @keyframes borderMode {
+      0%, 24.99% { stroke: var(--border-a); }
+      25%, 49.99% { stroke: var(--border-b); }
+      50%, 74.99% { stroke: var(--border-c); }
+      75%, 100% { stroke: var(--border-d); }
+    }
+  </style>
+  <rect class="bg" width="64" height="64" rx="12"/>
+  <circle class="globe" cx="32" cy="32" r="25"/>
+  <g clip-path="circle(23.5px at 32px 32px)">
+    <path class="shade" d="M19 12c9-7 25-5 33 7-7-3-17-3-24 1-5 3-9 2-9-8Z"/>
+    <path class="land" d="M13.5 21.2c7.5-5.3 13.7-4.4 16.8 1.2 2.2 4-3.4 6.6-8.4 5.4-4.2-1-9.5 2.2-8.4-6.6Z"/>
+    <path class="land" d="M36 13c9.2 2 15.4 8.4 13.4 14.5-1.6 5.2-8.2 3.2-10.4-1.4-2.4-5.1-8.6-5.2-3-13.1Z"/>
+    <path class="land" d="M26.5 41.2c8.8-3.5 20.4-1.1 23.4 6.4 1.6 4-2.6 8.8-8.8 8.7-8.4-.1-13.3-6.4-14.6-15.1Z"/>
+    <path class="land" d="M-3.4 35.2c8.2-4.2 18.4-2 19.8 4.4 1.1 5-6.8 8.2-14.6 7-6.4-1-9.2-6.6-5.2-11.4Z"/>
+  </g>
+</svg>
