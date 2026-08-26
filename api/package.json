@@ -1,6 +1,14 @@
 {
     "private":  true,
     "name":  "cad-deltai-api-settings",
-    "version":  "1.0.0",
-    "type":  "module"
+    "version":  "1.1.0",
+    "type":  "module",
+    "scripts": {
+        "check": "node --check scripts/sync-build.js && node --check src/api-bridge-handler.js && node --check src/api-model-updater.js && node --check src/api-settings.js",
+        "sync": "node scripts/sync-build.js",
+        "sync:portal-api": "node scripts/sync-build.js --target portal-api",
+        "sync:portal-api:write": "node scripts/sync-build.js --target portal-api --write",
+        "sync:portal-clipboard": "node scripts/sync-build.js --target portal-clipboard",
+        "sync:portal-clipboard:write": "node scripts/sync-build.js --target portal-clipboard --write"
+    }
 }

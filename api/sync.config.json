@@ -1,0 +1,94 @@
+{
+  "repoRoot": "..",
+  "targets": [
+    {
+      "name": "api-settings-to-widgets",
+      "source": "api",
+      "destination": "widgets",
+      "include": [
+        "api-settings.html",
+        "domain-config.js",
+        "src/api-settings.js",
+        "src/api-model-updater.js"
+      ],
+      "exclude": [],
+      "stripBlocks": [],
+      "replacements": [],
+      "enabled": true
+    },
+    {
+      "name": "api-settings-to-studio",
+      "source": "api",
+      "destination": "studio/public/api",
+      "include": [
+        "api-settings.html",
+        "domain-config.js",
+        "src/api-settings.js",
+        "src/api-model-updater.js"
+      ],
+      "exclude": [
+        "src/api-bridge-handler.js",
+        "src/smart-ai-models.js"
+      ],
+      "stripBlocks": [],
+      "replacements": [],
+      "enabled": true
+    },
+    {
+      "name": "proxy-handlers-to-widgets",
+      "source": "api/api",
+      "destination": "widgets/api",
+      "include": [
+        "elevenlabs-sound.js",
+        "elevenlabs-sound-effects.js",
+        "elevenlabs-tts.js"
+      ],
+      "exclude": [],
+      "stripBlocks": [],
+      "replacements": [],
+      "enabled": true
+    },
+    {
+      "name": "public-api-settings-build",
+      "source": "api",
+      "destination": "release/portal/api/api-settings",
+      "include": [
+        "api-settings.html",
+        "cad-deltai-logo-128.svg",
+        "domain-config.js",
+        "src/api-settings.js",
+        "src/api-model-updater.js",
+        "shared/smart-spa-base.css",
+        "brand/brand.json",
+        "brand/source/brand-meta.js"
+      ],
+      "exclude": [
+        "src/api-bridge-handler.js",
+        "src/smart-ai-models.js"
+      ],
+      "stripBlocks": [
+        "developer-admin",
+        "private-dev-activation",
+        "private-proxy-admin",
+        "private-vault-admin",
+        "private-diagnostics",
+        "private-internal-links",
+        "private-badges"
+      ],
+      "replacements": [],
+      "enabled": false
+    },
+    {
+      "name": "api-settings-to-release-portal",
+      "source": "release/portal/api/api-settings",
+      "destination": "portal/api/api-settings",
+      "include": [
+        "**/*"
+      ],
+      "exclude": [],
+      "stripBlocks": [],
+      "replacements": [],
+      "enabled": false
+    }
+  ]
+}

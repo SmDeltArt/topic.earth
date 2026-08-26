@@ -7,9 +7,10 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "frame-ancestors 'self' https://*.caddeltai.com https://*.smdeltart.com https://*.vercel.app http://localhost:* http://127.0.0.1:*"
+          "value": "frame-ancestors 'self' https://caddeltai.com https://*.caddeltai.com https://smdeltart.com https://*.smdeltart.com http://localhost:* http://127.0.0.1:*"
         },
-        { "key": "X-Frame-Options", "value": "ALLOWALL" }
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
       ]
     }
   ],

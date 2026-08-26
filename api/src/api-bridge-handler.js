@@ -1,5 +1,5 @@
 /**
- * SmΔrt API Bridge Handler
+ * CAD-DELTAI API Bridge Handler
  * Manages cross-origin communication between clipboard-manager.html and
  * the embedded api-settings.html widget via WidgetBridge (postMessage)
  *
@@ -16,6 +16,7 @@ class ApiBridgeHandler {
     this.iframe = document.getElementById("apiSettingsFrame");
     this.overlay = document.getElementById("apiSettingsOverlay");
     this.apiSettingsBtn = document.getElementById("apiSettingsBtn");
+    this.iframeOrigin = "";
     this.messageListeners = {};
     this.isInitialized = false;
 
@@ -32,8 +33,12 @@ class ApiBridgeHandler {
 
     // Listen for messages from api-settings iframe
     window.addEventListener("message", (event) => {
-      // Security: Only accept messages from widgets.smdeltart.com and local testing
-      if (!this.isAllowedOrigin(event.origin)) return;
+      // Accept messages only from this iframe and its resolved origin.
+      if (
+        event.source !== this.iframe.contentWindow ||
+        !this.isAllowedOrigin(event.origin)
+      )
+        return;
 
       const { type, action, data } = event.data || {};
       if (type !== "smart-widget") return;
@@ -87,26 +92,30 @@ class ApiBridgeHandler {
     const host = window.location.hostname || "";
     const isLocal = host === "localhost" || host === "127.0.0.1" || host === "";
     const isFileProtocol = window.location.protocol === "file:";
-    const isSmdDomain = host.endsWith("smdeltart.com");
+    const isVercelHost = host.endsWith(".vercel.app");
 
-    // Local dev: use local file. Deployed apps: use protected widgets subdomain.
+    // Local development stays local. Vercel-hosted consumers use the stable
+    // Vercel API origin; custom-domain consumers use the canonical API domain.
     const targetSrc =
       isLocal || isFileProtocol
         ? "api-settings.html?embed=true"
-        : isSmdDomain
-          ? "https://api.smdeltart.com/api-settings.html?embed=true"
-          : this.iframe.src;
+        : isVercelHost
+          ? "https://api-caddeltai.vercel.app/api-settings?embed=true"
+          : "https://api.caddeltai.com/api-settings?embed=true";
 
     if (targetSrc && this.iframe.getAttribute("src") !== targetSrc) {
       this.iframe.setAttribute("src", targetSrc);
     }
+
+    try {
+      this.iframeOrigin = new URL(targetSrc, window.location.href).origin;
+    } catch {
+      this.iframeOrigin = "";
+    }
   }
 
   isAllowedOrigin(origin) {
-    // Production
-    if (origin === "https://widgets.smdeltart.com") return true;
-    // Staging
-    if (origin.endsWith(".vercel.app")) return true;
+    if (this.iframeOrigin && origin === this.iframeOrigin) return true;
     // Local development
     if (
       origin === "http://localhost:5500" ||
@@ -123,8 +132,8 @@ class ApiBridgeHandler {
       origin === "http://127.0.0.1:8080"
     )
       return true;
-    // File protocol for local testing
-    if (origin === "null") return true;
+    // File protocol for local testing only.
+    if (origin === "null" && window.location.protocol === "file:") return true;
     return false;
   }
 

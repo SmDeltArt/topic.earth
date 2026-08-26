@@ -21,7 +21,14 @@
   const CACHE_KEY = "smdeltart-model-cache";
   const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
   const SETTINGS_KEY = "smdeltartApiSettings";
+  const MANIFEST_KEY = "smdeltartModelManifest";
   const LEGACY_API_SECRET_KEY = "Sm\u0394rt2025!ApiKey#Secure";
+
+  // UI labels that are NOT real OpenAI model ids — mapped to valid ids.
+  const OPENAI_MODEL_ALIASES = {
+    "gpt-5.6 luna": "gpt-5.5",
+    "gpt-5.6 sol": "gpt-5.5",
+  };
 
   // ---------- utilities ----------
 
@@ -148,7 +155,9 @@
   function isOpenAiTextModelId(id = "") {
     const value = String(id).toLowerCase();
     if (!value.startsWith("gpt-")) return false;
-    return !/(image|audio|realtime|transcribe|tts|whisper|embed|moderation|search-preview)/.test(value);
+    return !/(image|audio|realtime|transcribe|tts|whisper|embed|moderation|search-preview)/.test(
+      value,
+    );
   }
 
   function getOpenAiTextModelRank(id = "") {
@@ -170,10 +179,12 @@
   }
 
   function getOpenAiTextModels(models = []) {
-    return Array.from(new Set(models.filter(isOpenAiTextModelId))).sort((a, b) => {
-      const rank = getOpenAiTextModelRank(b) - getOpenAiTextModelRank(a);
-      return rank || a.localeCompare(b);
-    });
+    return Array.from(new Set(models.filter(isOpenAiTextModelId))).sort(
+      (a, b) => {
+        const rank = getOpenAiTextModelRank(b) - getOpenAiTextModelRank(a);
+        return rank || a.localeCompare(b);
+      },
+    );
   }
 
   function pickHighestOpenAiTextModel(models = []) {
@@ -202,7 +213,8 @@
 
     const status = document.getElementById("openaiTextModelStatus");
     if (status) {
-      const current = document.getElementById("openaiTextModel")?.value || "not selected";
+      const current =
+        document.getElementById("openaiTextModel")?.value || "not selected";
       status.innerHTML = `<strong>Current:</strong> ${escapeHtml(current)} · <strong>Max:</strong> ${escapeHtml(maxModel || "not checked")}${textModels.length ? ` · ${textModels.length} models` : ""}`;
     }
   }
@@ -225,13 +237,13 @@
       select.appendChild(opt);
     }
     select.value = textModels.includes(previous) ? previous : textModels[0];
+    appendAliasOptions(select);
     select.dispatchEvent(new Event("input", { bubbles: true }));
     select.dispatchEvent(new Event("change", { bubbles: true }));
     updateOpenAITextModelStatus(textModels);
   }
 
   function broadcastModelsUpdated(detail) {
-    // Local DOM event (same-page listeners)
     try {
       window.dispatchEvent(new CustomEvent("models-updated", { detail }));
     } catch {
@@ -256,6 +268,132 @@
       }
     } catch (err) {
       console.warn("[model-updater] bridge dispatch failed:", err);
+    }
+  }
+
+  // Re-add alias options (gpt-5.6 luna / sol) so a live refresh that rebuilds
+  // the <select> from real provider ids never drops the mapped labels.
+  function appendAliasOptions(select) {
+    if (!select) return;
+    if (select.querySelector('option[data-alias="1"]')) return;
+    const group = document.createElement("optgroup");
+    group.label = "🌙 Aliases (mapped → valid IDs)";
+    Object.entries(OPENAI_MODEL_ALIASES).forEach(([alias, target]) => {
+      const opt = document.createElement("option");
+      opt.value = alias;
+      opt.textContent = `${alias} (→ ${target})`;
+      opt.dataset.alias = "1";
+      group.appendChild(opt);
+    });
+    select.appendChild(group);
+  }
+
+  // ---------- Local model manifest (separate from the 24h cache) ----------
+
+  function tokenParamForModel(id) {
+    return /^gpt-5(\b|[\s.-])/i.test(String(id || "").trim())
+      ? "max_completion_tokens"
+      : "max_tokens";
+  }
+
+  function loadManifest() {
+    try {
+      const raw = localStorage.getItem(MANIFEST_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function saveManifest(manifest) {
+    try {
+      localStorage.setItem(MANIFEST_KEY, JSON.stringify(manifest));
+    } catch (err) {
+      console.warn("[model-updater] manifest write failed:", err);
+    }
+  }
+
+  function buildModelManifest() {
+    const registry = Array.isArray(window.SMART_MODEL_REGISTRY)
+      ? window.SMART_MODEL_REGISTRY
+      : [];
+    const textLikeGroups = new Set(["text", "coding"]);
+
+    const models = registry.map((m) => ({
+      provider: "openai",
+      id: m.id,
+      label: m.label || m.id,
+      tokenParam: textLikeGroups.has(m.group) ? tokenParamForModel(m.id) : null,
+      notes: m.notes || "",
+    }));
+
+    // Alias entries resolve to a valid id, never sent literally.
+    Object.entries(OPENAI_MODEL_ALIASES).forEach(([alias, target]) => {
+      models.push({
+        provider: "openai",
+        id: target,
+        label: alias,
+        alias: true,
+        aliasOf: target,
+        tokenParam: tokenParamForModel(target),
+        notes: `Alias → ${target}`,
+      });
+    });
+
+    return {
+      version: new Date().toISOString().slice(0, 10),
+      generatedAt: new Date().toISOString(),
+      models,
+    };
+  }
+
+  // Rebuild the manifest but preserve any user-edited notes; NEVER touches the
+  // model cache (CACHE_KEY) — the two stores are intentionally independent.
+  function rebuildModelManifest() {
+    const built = buildModelManifest();
+    const prev = loadManifest();
+    if (prev && Array.isArray(prev.models)) {
+      const prevByKey = new Map(
+        prev.models.map((x) => [`${x.provider}:${x.label}`, x]),
+      );
+      built.models = built.models.map((entry) => {
+        const old = prevByKey.get(`${entry.provider}:${entry.label}`);
+        return old && old.notes ? { ...entry, notes: old.notes } : entry;
+      });
+    }
+    saveManifest(built);
+    return built;
+  }
+
+  function setManifestStatus(message, kind) {
+    const el = document.getElementById("modelManifestStatus");
+    if (!el) return;
+    const color =
+      kind === "error" ? "#f87171" : kind === "success" ? "#4ade80" : "#b8c1ec";
+    el.style.color = color;
+    el.innerHTML = message;
+  }
+
+  function exportModelManifest() {
+    const manifest = loadManifest() || rebuildModelManifest();
+    try {
+      const blob = new Blob([JSON.stringify(manifest, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `smdeltart-model-manifest-${manifest.version}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setManifestStatus(
+        `⬇️ Exported ${manifest.models.length} models (v${manifest.version}).`,
+        "success",
+      );
+    } catch (err) {
+      setManifestStatus(`❌ Export failed: ${err.message}`, "error");
     }
   }
 
@@ -372,6 +510,15 @@
       parse: (j) => (j.data || []).map((m) => m.id),
     },
     {
+      id: "kimi",
+      label: "Moonshot Kimi",
+      keyField: "paidTextApiKey",
+      providerHint: "kimi",
+      url: "https://api.moonshot.ai/v1/models",
+      headers: (k) => ({ Authorization: `Bearer ${k}` }),
+      parse: (j) => (j.data || []).map((m) => m.id),
+    },
+    {
       id: "google",
       label: "Google AI",
       keyField: "paidTextApiKey",
@@ -402,14 +549,23 @@
 
   async function refreshOneProvider(p, settings) {
     const key = resolveKeyForProvider(p, settings);
-    if (!key) {
+    const useKimiProxy =
+      p.id === "kimi" &&
+      document.getElementById("modeProxy")?.checked &&
+      typeof window._proxyUrl === "function" &&
+      typeof window._proxyHeaders === "function";
+    if (!key && !useKimiProxy) {
       return { id: p.id, label: p.label, skipped: true, reason: "no key" };
     }
-    const url = typeof p.url === "function" ? p.url(key) : p.url;
+    const url = useKimiProxy
+      ? window._proxyUrl("/api/moonshot-chat")
+      : typeof p.url === "function"
+        ? p.url(key)
+        : p.url;
     try {
       const res = await fetch(url, {
         method: "GET",
-        headers: p.headers(key),
+        headers: useKimiProxy ? window._proxyHeaders() : p.headers(key),
         signal: AbortSignal.timeout(10000),
       });
       if (!res.ok) {
@@ -424,6 +580,20 @@
       const models = (p.parse(json) || []).filter(Boolean);
       setProviderCache(p.id, models);
       if (p.id === "openai") populateOpenAITextModelSelect(models);
+      if (p.id === "kimi") {
+        const select = document.getElementById("kimiTextModel");
+        if (select && models.length) {
+          const selected = select.value;
+          select.innerHTML = "";
+          models.forEach((id) => {
+            const option = document.createElement("option");
+            option.value = id;
+            option.textContent = id;
+            select.appendChild(option);
+          });
+          if (models.includes(selected)) select.value = selected;
+        }
+      }
       return {
         id: p.id,
         label: p.label,
@@ -519,6 +689,28 @@
       });
     }
 
+    const rebuildManifestBtn = document.getElementById(
+      "rebuildModelManifestBtn",
+    );
+    if (rebuildManifestBtn) {
+      rebuildManifestBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const manifest = rebuildModelManifest();
+        setManifestStatus(
+          `🧬 Manifest rebuilt — ${manifest.models.length} models (v${manifest.version}). Browser cache untouched.`,
+          "success",
+        );
+      });
+    }
+
+    const exportManifestBtn = document.getElementById("exportModelManifestBtn");
+    if (exportManifestBtn) {
+      exportManifestBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        exportModelManifest();
+      });
+    }
+
     // Hydrate Ollama dropdown from cache on load (no network probe).
     const cached = readCache().ollama;
     if (
@@ -541,6 +733,7 @@
     ) {
       populateOpenAITextModelSelect(openAiCached.models);
     } else {
+      appendAliasOptions(document.getElementById("openaiTextModel"));
       updateOpenAITextModelStatus([]);
     }
   }
@@ -549,8 +742,20 @@
   window.SmartModelUpdater = {
     refreshAll: refreshAllProviders,
     refreshOllama: refreshOllamaUI,
-    refreshOpenAI: () => refreshOneProvider(PROVIDERS.find((p) => p.id === "openai"), readSavedSettings()),
+    refreshOpenAI: () =>
+      refreshOneProvider(
+        PROVIDERS.find((p) => p.id === "openai"),
+        readSavedSettings(),
+      ),
     getCache: readCache,
+  };
+
+  // Model manifest API — intentionally separate from the model cache above.
+  window.SmartModelManifest = {
+    rebuild: rebuildModelManifest,
+    build: buildModelManifest,
+    load: loadManifest,
+    export: exportModelManifest,
   };
 
   if (document.readyState === "loading") {

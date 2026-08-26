@@ -1,4 +1,79 @@
 ﻿// Domain and CDN guard for production and shared embeds.
+const API_PRIVACY_RESET_VERSION = 1;
+const API_PRIVACY_STORAGE_KEYS = [
+  "smart_api_settings", "smartApiSettings", "smdeltartApiSettings",
+  "smdeltartPreferences", "cadAiApiSettings", "ai-api-settings",
+  "smdeltartSmartSettings", "streamingStudioConfig",
+];
+const _elevenLabsVoiceIdsByRef = new Map();
+
+function _looksLikePrivateVoiceId(value) {
+  return typeof value === "string" && value.length >= 12 && value.length <= 80 &&
+    /^[A-Za-z0-9_-]+$/.test(value) && value !== "server-default";
+}
+
+function _sanitizePrivateVoiceData(value, path = []) {
+  if (Array.isArray(value)) return value.map((entry, index) => _sanitizePrivateVoiceData(entry, [...path, index]));
+  if (!value || typeof value !== "object") return value;
+  const clean = {};
+  const provider = String(value.provider || value.ttsProvider || "").toLowerCase();
+  const privateFields = /^(elevenlabsvoice|elevenlabsvoiceid|elevenlabscustomvoiceid|elevenlabsvoicelist|elevenlabsvoices|defaultvoiceid|voiceid)$/;
+  for (const [key, entry] of Object.entries(value)) {
+    const normalized = key.replace(/[^a-z0-9]/gi, "").toLowerCase();
+    if (privateFields.test(normalized)) continue;
+    if (key === "voiceAlias" && entry !== "" && entry !== "server-default") continue;
+    if (key === "voice" && _looksLikePrivateVoiceId(entry) &&
+      (provider.includes("elevenlabs") || /(tts|text|effect|vignette|active|package|streamingstudioconfig)/i.test(path.join(".")))) continue;
+    clean[key] = _sanitizePrivateVoiceData(entry, [...path, key]);
+  }
+  if (clean.tts?.provider === "elevenlabs" && clean.tts.voice !== "server-default") delete clean.tts.voice;
+  return clean;
+}
+
+function _migratePrivateVoiceStorage() {
+  let clearedStores = 0;
+  for (const storage of [localStorage, sessionStorage]) {
+    API_PRIVACY_STORAGE_KEYS.forEach((key) => {
+      try {
+        const raw = storage.getItem(key);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        const clean = _sanitizePrivateVoiceData(parsed);
+        const next = JSON.stringify(clean);
+        if (next !== JSON.stringify(parsed)) {
+          storage.setItem(key, next);
+          clearedStores += 1;
+        }
+      } catch (_) {}
+    });
+  }
+  return clearedStores;
+}
+
+function _setLocalElevenLabsVoiceOptions(select, voices, preferredName = "") {
+  _elevenLabsVoiceIdsByRef.clear();
+  select.innerHTML = "";
+  voices.forEach((voice, index) => {
+    const reference = `local-voice-${index + 1}`;
+    _elevenLabsVoiceIdsByRef.set(reference, voice.voice_id);
+    const option = document.createElement("option");
+    option.value = reference;
+    option.dataset.voiceName = voice.name || "Voice";
+    const category = voice.category && voice.category !== "premade" ? ` (${voice.category})` : "";
+    option.textContent = `${voice.name || "Voice"}${category}`;
+    select.appendChild(option);
+  });
+  const wanted = String(preferredName || "").replace(/\s*\([^)]*\)\s*$/, "").trim().toLowerCase();
+  const match = [...select.options].find((option) => option.dataset.voiceName?.toLowerCase() === wanted);
+  if (match) select.value = match.value;
+}
+
+function _selectedLocalElevenLabsVoiceId() {
+  return _elevenLabsVoiceIdsByRef.get(document.getElementById("elevenlabsVoice")?.value || "") || "";
+}
+
+_migratePrivateVoiceStorage();
+
 function enforceDomainAndCdnPolicy() {
   // Detect tier from own URL — works both embedded and standalone.
   // @tweakable tier detection — adjust hostname rules if deployment topology changes
@@ -11,10 +86,9 @@ function enforceDomainAndCdnPolicy() {
         ? "staging"
         : "production";
 
-  // When embedded as an iframe, skip host check — the server-side CSP
-  // frame-ancestors header already controls which origins can embed this page.
+  // Embedded pages validate their parent through the browser-controlled referrer.
+  // CSP provides the primary frame restriction; this is a second defensive layer.
   const isEmbedded = window.self !== window.top;
-  if (isEmbedded) return true;
 
   const domainConfig = window.SMART_DOMAIN_GUARD_CONFIG || {
     enabled: true,
@@ -33,8 +107,6 @@ function enforceDomainAndCdnPolicy() {
       "smdeltart.com",
       "api.smdeltart.com",
       "widgets.smdeltart.com",
-      // Vercel hosting (any *.vercel.app via allowSubdomains)
-      "vercel.app",
       // topic.earth
       "topic.earth",
       // Local development
@@ -53,13 +125,25 @@ function enforceDomainAndCdnPolicy() {
 
   const protocol = window.location.protocol;
   const hostname = (window.location.hostname || "").toLowerCase();
+  let hostnameToCheck = hostname;
+
+  if (isEmbedded) {
+    try {
+      hostnameToCheck = new URL(document.referrer).hostname.toLowerCase();
+    } catch {
+      hostnameToCheck = "";
+    }
+  }
 
   const hostAllowed = domainConfig.allowedHosts.some((allowedHost) => {
     const normalized = String(allowedHost).toLowerCase();
-    if (hostname === normalized) {
+    if (hostnameToCheck === normalized) {
       return true;
     }
-    if (domainConfig.allowSubdomains && hostname.endsWith(`.${normalized}`)) {
+    if (
+      domainConfig.allowSubdomains &&
+      hostnameToCheck.endsWith(`.${normalized}`)
+    ) {
       return true;
     }
     return false;
@@ -135,6 +219,18 @@ const API_PROVIDERS = {
     testMethod: "GET",
     timeout: 10000,
     keyPattern: /^sk-(proj-)?[a-zA-Z0-9_-]{20,}$/, // Support both sk- and sk-proj- OpenAI keys
+  },
+  kimi: {
+    name: "Moonshot Kimi",
+    testEndpoint: "https://api.moonshot.ai/v1/models",
+    headers: (apiKey) => ({
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    }),
+    testMethod: "GET",
+    timeout: 12000,
+    // Moonshot does not promise a stable public key prefix.
+    keyPattern: /^[^\s]{20,200}$/,
   },
   groq: {
     name: "Groq",
@@ -339,7 +435,7 @@ const API_PROVIDERS = {
     }),
     testMethod: "GET",
     timeout: 10000,
-    keyPattern: /^(sk_)?[a-fA-F0-9_-]{20,50}$/, // ElevenLabs: hex strings OR sk_-prefixed keys (2025+)
+    keyPattern: /^[^\s]{16,200}$/, // Accept modern ElevenLabs key variants; validate with live API call
   },
   "openai-tts": {
     name: "OpenAI TTS",
@@ -666,12 +762,8 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
     return false;
   }
 
-  // Special handling for OpenAI - sync across text, image, and TTS APIs
-  if (
-    provider === "openai" ||
-    provider === "openai-dalle" ||
-    provider === "openai-tts"
-  ) {
+  // Special handling for OpenAI - sync across text/image/STT APIs.
+  if (provider === "openai" || provider === "openai-dalle") {
     // Get all OpenAI API elements
     const openaiTextKey = document
       .getElementById("paidTextApiKey")
@@ -686,9 +778,6 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
 
     const sttKey = document.getElementById("externalSttApiKey")?.value?.trim();
     const sttApi = document.getElementById("externalSttApi")?.value;
-
-    const ttsKey = document.getElementById("externalTtsApiKey")?.value?.trim();
-    const ttsApi = document.getElementById("externalTtsApi")?.value;
 
     // Check if any of the other OpenAI APIs already passed with the same key
     let syncedSuccess = false;
@@ -718,14 +807,6 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
     ) {
       syncedSuccess = true;
       syncedMessage = "OpenAI API key valid (synchronized with STT API)";
-    } else if (
-      provider !== "openai-tts" &&
-      ttsApi === "openai-tts" &&
-      ttsKey === apiKey &&
-      document.getElementById("externalTtsStatus")?.textContent === "✅"
-    ) {
-      syncedSuccess = true;
-      syncedMessage = "OpenAI API key valid (synchronized with TTS API)";
     }
 
     if (syncedSuccess) {
@@ -761,14 +842,6 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
     ) {
       updateApiStatus("externalSttStatus", success, result.message);
     }
-    if (
-      ttsApi === "openai-tts" &&
-      ttsKey === apiKey &&
-      provider !== "openai-tts"
-    ) {
-      updateApiStatus("externalTtsStatus", success, result.message);
-    }
-
     updateCategoryStatus();
     return success;
   }
@@ -829,6 +902,17 @@ async function testAndUpdateApiStatus(provider, apiKey, statusElementId) {
 // Real API testing function to replace the mock one
 async function testAllApisReal() {
   addLogEntry("🧪 Starting comprehensive API tests...", "info");
+
+  // In Secure Proxy mode, local key inputs are hidden/disabled — never read
+  // or validate them. Test the managed services through their Vercel routes.
+  const providerMode =
+    (typeof _getActiveProviderMode === "function" &&
+      _getActiveProviderMode()) ||
+    "byok";
+  if (providerMode === "proxy") {
+    await _testAllApisProxyMode();
+    return;
+  }
 
   let successCount = 0;
   let totalTests = 0;
@@ -1266,82 +1350,144 @@ async function testVideoApiConnection(apiName, apiKey, statusElementId) {
   }
 }
 
-// Comparison Dashboard JavaScript - Same as main application
+// Comparison Dashboard JavaScript
+// Static, source-linked snapshot. "Update All" refreshes the rendered snapshot;
+// it does not call provider pricing endpoints.
+const PRICE_DATA_AS_OF = "2026-07-29";
+const PRICE_COMPARISON_BUDGET_USD = 5;
+const TEXT_USAGE_MIX = { input: 0.8, output: 0.2 };
+
 const apiList = [
   {
     key: "openai",
     name: "OpenAI",
-    model: "GPT-4o",
-    pricePer1K: 0.0025,
+    model: "GPT-5.6 Sol",
+    billing: "tokens",
+    inputPerMillion: 5,
+    outputPerMillion: 30,
+    quality: 5,
+    notes: "Flagship reasoning and coding",
+    sourceUrl: "https://developers.openai.com/api/docs/models/gpt-5.6-sol",
+  },
+  {
+    key: "kimi",
+    name: "Moonshot",
+    model: "Kimi K3",
+    billing: "tokens",
+    cachedInputPerMillion: 0.3,
+    inputPerMillion: 3,
+    outputPerMillion: 15,
     quality: 4.9,
-    notes: "Best overall",
+    notes: "1M context · coding · image/video input",
+    sourceUrl: "https://platform.kimi.ai/docs/pricing/chat-k3",
   },
   {
     key: "groq",
     name: "Groq",
-    model: "Llama-3.3-70B",
-    pricePer1K: 0.0,
-    quality: 4.3,
-    notes: "Fastest",
+    model: "GPT-OSS 120B",
+    billing: "tokens",
+    inputPerMillion: 0.15,
+    outputPerMillion: 0.6,
+    quality: 4.5,
+    notes: "Fast inference; Llama 3.3 70B retiring",
+    sourceUrl: "https://console.groq.com/docs/models",
   },
   {
     key: "google",
     name: "Google",
-    model: "Gemini 2.0 Flash",
-    pricePer1K: 0.0001,
+    model: "Gemini 3.6 Flash",
+    billing: "tokens",
+    inputPerMillion: 1.5,
+    outputPerMillion: 7.5,
     quality: 4.5,
     notes: "Fast & capable",
+    sourceUrl: "https://ai.google.dev/gemini-api/docs/pricing",
   },
   {
     key: "deepseek",
     name: "DeepSeek",
-    model: "DeepSeek-V3",
-    pricePer1K: 0.00014,
-    quality: 4.6,
+    model: "DeepSeek V4 Pro",
+    billing: "tokens",
+    inputPerMillion: 0.435,
+    outputPerMillion: 0.87,
+    quality: 4.7,
     notes: "Best value coding",
+    sourceUrl: "https://api-docs.deepseek.com/quick_start/pricing/",
   },
   {
     key: "anthropic",
     name: "Anthropic",
-    model: "Claude 3.5 Sonnet",
-    pricePer1K: 0.003,
-    quality: 4.8,
-    notes: "Best for analysis",
+    model: "Claude Opus 4.8",
+    billing: "tokens",
+    inputPerMillion: 5,
+    outputPerMillion: 25,
+    quality: 5,
+    notes: "Flagship analysis and agents",
+    sourceUrl: "https://platform.claude.com/docs/en/about-claude/pricing",
   },
   {
     key: "sambanova",
     name: "SambaNova",
-    model: "Llama-3.3-70B",
-    pricePer1K: 0.0,
+    model: "GPT-OSS 120B",
+    billing: "tiered",
     quality: 4.2,
-    notes: "Free, fast",
+    notes: "Limited free tier; paid price varies",
+    sourceUrl: "https://docs.sambanova.ai/docs/en/models/rate-limits",
   },
-  // 🎥 Video APIs (integrated)
+  // Video pricing cannot be compared as token pricing.
   {
     key: "runway",
     name: "🎥 Runway",
-    model: "Gen-3 Alpha",
-    pricePer1K: 50,
-    quality: 5.0,
-    notes: "$0.05/sec video",
+    model: "Gen-4 Turbo",
+    billing: "seconds",
+    pricePerSecond: 0.05,
+    quality: 4.8,
+    notes: "5 credits/sec; credits cost $0.01",
+    sourceUrl: "https://docs.dev.runwayml.com/usage/billing/",
   },
   {
     key: "luma",
     name: "🎥 Luma",
-    model: "Dream Machine",
-    pricePer1K: 32,
-    quality: 4.5,
-    notes: "$0.032/sec video",
+    model: "Ray 3.2",
+    billing: "variable",
+    quality: 4.9,
+    notes: "Varies by action, duration & resolution",
+    sourceUrl: "https://lumalabs.ai/api",
   },
   {
     key: "replicate",
     name: "🎥 Replicate",
-    model: "Multi-Model",
-    pricePer1K: 10,
+    model: "Multi-model",
+    billing: "variable",
     quality: 4.0,
-    notes: "Free tier video",
+    notes: "Model/output or hardware-time pricing",
+    sourceUrl: "https://replicate.com/pricing",
   },
 ];
+
+function formatUsd(value) {
+  return Number(value).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: value < 1 ? 3 : 2,
+  });
+}
+
+function formatApiPrice(api) {
+  if (api.billing === "tokens") {
+    const cached =
+      api.cachedInputPerMillion !== undefined
+        ? ` / ${formatUsd(api.cachedInputPerMillion)} cached`
+        : "";
+    return `${formatUsd(api.inputPerMillion)} in${cached} / ${formatUsd(api.outputPerMillion)} out per 1M`;
+  }
+  if (api.billing === "seconds") {
+    return `${formatUsd(api.pricePerSecond)}/video sec`;
+  }
+  if (api.billing === "tiered") return "Free tier / paid varies";
+  return "Model-specific";
+}
 
 function logExplain(msg) {
   console.log("📊 Dashboard log:", msg);
@@ -1419,7 +1565,7 @@ function fillPriceTable() {
     row.innerHTML = `
                     <td style="padding: 4px 6px; font-size: 0.75em;">${api.name}</td>
                     <td style="padding: 4px 6px; font-size: 0.7em;">${api.model}</td>
-                    <td style="padding: 4px 6px; font-size: 0.7em;">${api.pricePer1K === 0 ? "Free" : "$" + api.pricePer1K + "/1K"}</td>
+                    <td style="padding: 4px 6px; font-size: 0.7em;"><a href="${api.sourceUrl}" target="_blank" rel="noopener noreferrer" title="Official pricing source; checked ${PRICE_DATA_AS_OF}" style="color: inherit; text-decoration: underline dotted;">${formatApiPrice(api)}</a></td>
                     <td style="padding: 4px 6px; text-align: center;">
                         <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
                             <span style="color: ${qualityColor}; font-weight: bold; font-size: 0.7em;">${qualityPercent}%</span>
@@ -1562,27 +1708,24 @@ function updateVideoApiStatus() {
 }
 
 function showPriceComparatif() {
-  const userLocale = navigator.language || "en-US";
-  let vat = 0.2;
-  let fee = 0.3;
-
-  if (userLocale.startsWith("fr")) vat = 0.2;
-  else if (userLocale.startsWith("de")) vat = 0.19;
-  else if (userLocale.startsWith("us")) vat = 0.0;
-  else if (userLocale.startsWith("uk")) vat = 0.2;
-  else if (userLocale.startsWith("es")) vat = 0.21;
-
-  const base = 5.0;
-  const total = base + fee + (base + fee) * vat;
-  let html = `<b>Price Comparison for $${total.toFixed(2)} (incl. VAT/fees, est. for ${userLocale}):</b><br>`;
+  const budget = PRICE_COMPARISON_BUDGET_USD;
+  let html = `<b>What a ${formatUsd(budget)} API budget buys (tax/fees excluded):</b><br>`;
+  html += `<span style="font-size:0.9em;color:#9ca3af;">Text estimate assumes ${TEXT_USAGE_MIX.input * 100}% input / ${TEXT_USAGE_MIX.output * 100}% output tokens. Prices checked ${PRICE_DATA_AS_OF}.</span>`;
   html += '<ul style="margin:6px 0 0 18px;">';
   apiList.forEach((api) => {
-    if (api.pricePer1K === 0) {
-      html += `<li><b>${api.name}</b>: Free/Low (unlimited or public)</li>`;
+    if (api.billing === "tokens") {
+      const blendedPerMillion =
+        api.inputPerMillion * TEXT_USAGE_MIX.input +
+        api.outputPerMillion * TEXT_USAGE_MIX.output;
+      const tokens = Math.floor((budget / blendedPerMillion) * 1_000_000);
+      html += `<li><b>${api.name}</b>: ~${tokens.toLocaleString()} blended text tokens</li>`;
+    } else if (api.billing === "seconds") {
+      const seconds = Math.floor(budget / api.pricePerSecond);
+      html += `<li><b>${api.name}</b>: ~${seconds.toLocaleString()} generated video seconds</li>`;
+    } else if (api.billing === "tiered") {
+      html += `<li><b>${api.name}</b>: limited free tier; paid allowance depends on account pricing</li>`;
     } else {
-      const tokens = Math.floor((total / api.pricePer1K) * 1000);
-      const mb = (tokens * 0.00075).toFixed(2);
-      html += `<li><b>${api.name}</b>: ~${tokens.toLocaleString()} tokens (~${mb} MB) for $${total.toFixed(2)}</li>`;
+      html += `<li><b>${api.name}</b>: model and output settings determine allowance</li>`;
     }
   });
   html += "</ul>";
@@ -1604,16 +1747,16 @@ function showSmartRecommendation() {
 
   if (purpose === "text")
     rec =
-      "🏆 Groq: Fastest. OpenAI GPT-4o: Best quality. DeepSeek-V3: Ultra-cheap coding.";
+      "🏆 OpenAI GPT-5.6 Sol and Claude Opus 4.8: flagship quality. Groq GPT-OSS 120B: fast value. DeepSeek V4 Pro: low-cost coding.";
   else if (purpose === "image")
     rec =
-      "🏆 Google Gemini 2.0: Best value. OpenAI DALL-E 3: Best quality. FLUX 1.1: Fast.";
+      "🏆 Compare the selected image model's per-image price: output size and quality materially change cost.";
   else if (purpose === "video")
     rec =
-      "🏆 Runway Gen-3: Best quality ($0.05/s). Luma Dream: Best value ($0.032/s). Replicate: Free tier.";
+      "🏆 Runway Gen-4 Turbo has a clear $0.05/s rate. Luma Ray 3.2 and Replicate vary by output settings/model.";
   else if (purpose === "doc")
     rec =
-      "🏆 Claude 3.5 Sonnet: Best for analysis. DeepSeek: Long context. Gemini 2.0: Fast.";
+      "🏆 Claude Opus 4.8 and GPT-5.6 Sol: flagship analysis. DeepSeek V4 Pro: cost-efficient processing.";
   else if (purpose === "tts")
     rec =
       "🏆 ElevenLabs: Best quality. OpenAI TTS: Good value. Browser TTS: Free.";
@@ -1622,17 +1765,17 @@ function showSmartRecommendation() {
       "🏆 OpenAI Whisper: Best accuracy. Groq Whisper: Fastest. AssemblyAI: Real-time.";
 
   if (qty === "high" && purpose === "video")
-    rec += " ⚡ High volume: Haiper ($0.02/s) or FAL.ai for budget.";
+    rec += " ⚡ High volume: compare the exact duration, resolution, and audio settings before choosing.";
   else if (qty === "high" && purpose !== "tts")
     rec += " ⚡ High volume: DeepSeek or Gemini for cost efficiency.";
   else if (qty === "high" && purpose === "tts")
     rec += " ⚡ High volume: Google TTS or Azure for enterprise scale.";
   if (qty === "low" && purpose === "video")
-    rec += " ✨ Low volume: Runway or Sora for best cinematic quality.";
+    rec += " ✨ Low volume: prioritize output quality, then verify the selected model's exact per-generation price.";
   else if (qty === "low" && purpose === "text")
-    rec += " ✨ Low volume: GPT-4o or Claude for best quality.";
+    rec += " ✨ Low volume: GPT-5.6 Sol or Claude Opus 4.8 for quality-first work.";
   if (purpose === "doc" && qty === "high")
-    rec += " 📚 Long docs: Claude 3.5 or DeepSeek for 200K+ context.";
+    rec += " 📚 Long docs: verify context-window and long-context pricing for the exact selected model.";
 
   recDiv.innerHTML = rec;
 }
@@ -1673,18 +1816,18 @@ async function testApiSpeed() {
 }
 
 async function testApiQuality() {
-  logExplain("🔄 Running API quality assessment tests...");
+  logExplain("🔄 Displaying editorial model-quality estimates...");
   const qualityResults = document.getElementById("qualityResults");
   if (!qualityResults) return;
 
-  qualityResults.innerHTML = "🧠 Testing response quality...";
+  qualityResults.innerHTML = "🧠 Loading model-quality estimates...";
   const qualityScores = [
-    { name: "OpenAI GPT-4", score: 95, color: "#4CAF50" },
-    { name: "Groq", score: 88, color: "#FF9800" },
-    { name: "Google Gemini", score: 85, color: "#2196F3" },
-    { name: "DeepSeek", score: 84, color: "#FF6B6B" },
-    { name: "Kimi (Qwen)", score: 82, color: "#9C27B0" },
-    { name: "SambaNova", score: 75, color: "#795548" },
+    { name: "OpenAI GPT-5.6 Sol", score: 100, color: "#4CAF50" },
+    { name: "Anthropic Claude Opus 4.8", score: 100, color: "#14B8A6" },
+    { name: "DeepSeek V4 Pro", score: 94, color: "#FF6B6B" },
+    { name: "Google Gemini 3.6 Flash", score: 90, color: "#2196F3" },
+    { name: "Groq GPT-OSS 120B", score: 90, color: "#FF9800" },
+    { name: "SambaNova GPT-OSS 120B", score: 84, color: "#795548" },
   ];
 
   let resultsHtml = "";
@@ -1701,7 +1844,7 @@ async function testApiQuality() {
     qualityResults.innerHTML = resultsHtml;
   }
   logExplain(
-    "✅ Quality test completed. Scores reflect current AI model capabilities (95% max = non-AGI).",
+    "✅ Editorial quality estimates displayed; these are orientation scores, not live benchmark results.",
   );
 }
 
@@ -1715,7 +1858,7 @@ const SMDELTART_API_REVISION = {
     // Image Generation APIs (2025)
     "openai-dalle": {
       url: "https://api.openai.com/v1/images/generations",
-      model: "gpt-image-1",
+      model: "gpt-image-2",
       status: "active",
     },
     "openai-gpt4o-image": {
@@ -1914,10 +2057,14 @@ function scrollToLogs() {
 }
 
 function updateAllTablesAndChart() {
-  logExplain("🔄 Updating all tables and charts...");
+  logExplain(
+    `🔄 Refreshing the verified pricing snapshot (${PRICE_DATA_AS_OF})...`,
+  );
   fillPriceTable();
   showPriceComparatif();
-  logExplain("✅ All tables and charts updated successfully!");
+  logExplain(
+    "✅ Price table and normalized budget comparison refreshed. Open a linked price to verify live provider changes.",
+  );
 }
 
 function openLlamaQuickSetup() {
@@ -2050,6 +2197,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Action Button Handlers
 function setupActionButtonHandlers() {
+  // Legacy bootstrap kept for older standalone builds. The current visible
+  // controls are owned by setupSaveLoadButtons(), which preserves Vault/session
+  // separation and avoids duplicate click handlers.
+  return;
+
   const exportBtn = document.getElementById("exportApiSettingsBtn");
   const importBtn = document.getElementById("importApiSettingsBtn");
   const importFile = document.getElementById("importApiSettingsFile");
@@ -2315,25 +2467,125 @@ async function testAllApis() {
   }
 }
 
+function _normaliseSpeechProvider(provider, fallback = "browser") {
+  const value = String(provider || "")
+    .trim()
+    .toLowerCase();
+  if (
+    value === "openai" ||
+    value === "openai-tts" ||
+    value === "openai-stt" ||
+    value === "openai-whisper"
+  ) {
+    return "openai";
+  }
+  if (value === "elevenlabs" || value === "elevenlabs-tts") {
+    return "elevenlabs";
+  }
+  if (value === "groq" || value === "groq-whisper") return "groq";
+  if (value === "browser" || value === "browser-tts" || value === "browser-stt")
+    return "browser";
+  return fallback;
+}
+
+function _buildNormalizedSettingsContract(settings, proxyTokenPresent = false) {
+  const providerMode =
+    settings.providerMode ||
+    (settings.modeProxy === true || settings.modeProxy === "true"
+      ? "proxy"
+      : settings.modeBrowser === true || settings.modeBrowser === "true"
+        ? "browser"
+        : "byok");
+  const browserMode = providerMode === "browser";
+  const proxyMode = providerMode === "proxy";
+  // Resolve the context default before posting the contract. Widgets hosts
+  // the settings UI locally but uses the configured canonical API project;
+  // Studio's API iframe and Portal's bundled page keep their own origin.
+  const proxyBaseUrl = String(
+    settings.proxyBaseUrl ||
+      (proxyMode && /^https?:$/.test(window.location.protocol)
+        ? _defaultProxyBaseUrl()
+        : ""),
+  )
+    .trim()
+    .replace(/\/$/, "");
+  const ttsProvider = browserMode
+    ? "browser"
+    : _normaliseSpeechProvider(
+        settings.proxyTtsProvider ||
+          (proxyMode || settings.externalTtsApiRadio
+            ? settings.externalTtsApi
+            : "browser"),
+        proxyMode ? "openai" : "browser",
+      );
+  const sttProvider = browserMode
+    ? "browser"
+    : _normaliseSpeechProvider(
+        settings.proxySttProvider ||
+          (proxyMode || settings.externalSttApiRadio
+            ? settings.externalSttApi
+            : "browser"),
+        proxyMode ? "openai" : "browser",
+      );
+
+  return {
+    schemaVersion: 1,
+    providerMode,
+    proxyBaseUrl,
+    proxyTokenPresent: Boolean(proxyTokenPresent),
+    tts: {
+      provider: ttsProvider,
+      model:
+        ttsProvider === "elevenlabs"
+          ? settings.elevenlabsTtsModelId ||
+            settings.normalized?.tts?.model ||
+            settings.elevenlabsModel ||
+            "eleven_v3"
+          : settings.normalized?.tts?.model ||
+            settings.openaiTtsModel ||
+            "gpt-4o-mini-tts",
+      voice:
+        ttsProvider === "elevenlabs"
+          ? proxyMode
+            ? "server-default"
+            : ""
+          : settings.openaiTtsVoice || "nova",
+    },
+    stt: {
+      provider: sttProvider,
+      model:
+        sttProvider === "groq"
+          ? settings.groqSttModel || "whisper-large-v3"
+          : settings.openaiSttModel || "gpt-4o-mini-transcribe",
+    },
+  };
+}
+
+function _attachNormalizedSettingsContract(settings, proxyTokenPresent = false) {
+  const normalized = _buildNormalizedSettingsContract(
+    settings,
+    proxyTokenPresent,
+  );
+  settings.normalized = normalized;
+  settings.proxyTokenPresent = normalized.proxyTokenPresent;
+  settings.proxyTtsProvider = normalized.tts.provider;
+  settings.proxySttProvider = normalized.stt.provider;
+  settings.modeBrowser = normalized.providerMode === "browser";
+  return settings;
+}
+
 function saveApiSettingsLocally() {
+  if (typeof saveSettingsToLocalStorage === "function") {
+    saveSettingsToLocalStorage(true);
+    return;
+  }
+
   try {
-    const settings = collectAllApiSettings();
-
-    // Proxy mode: never persist server-managed key values to localStorage
-    const _mode = (() => {
-      const checked = document.querySelector(
-        'input[name="providerMode"]:checked',
-      );
-      return checked ? checked.value : "byok";
-    })();
-    if (_mode === "proxy") {
-      ["paidTextApiKey", "externalTtsApiKey", "externalSttApiKey"].forEach(
-        (k) => {
-          if (k in settings) settings[k] = "";
-        },
-      );
-    }
-
+    const settings = _attachNormalizedSettingsContract(
+      collectAllApiSettings(),
+      false,
+    );
+    delete settings.smrtProxyToken;
     localStorage.setItem("smdeltartApiSettings", JSON.stringify(settings));
     // Keep legacy keys for backward compatibility
     localStorage.setItem("cadAiApiSettings", JSON.stringify(settings));
@@ -2345,14 +2597,19 @@ function saveApiSettingsLocally() {
     // Send full settings so cross-origin parents (media.caddeltai.com etc.) can
     // cache keys in their own localStorage via the postMessage receiver.
     if (window.parent !== window) {
-      window.parent.postMessage(
-        {
-          type: "smart-widget",
-          action: "settings-saved",
-          data: settings,
-        },
-        "*",
-      );
+      const targetOrigin = _trustedProxySessionParentOrigin();
+      if (targetOrigin) {
+        window.parent.postMessage(
+          {
+            type: "smart-widget",
+            action: "settings-saved",
+            data: settings,
+          },
+          targetOrigin,
+        );
+        // The token travels only in the separate, session-scoped message.
+        _notifyParentProxySession();
+      }
     }
   } catch (error) {
     logExplain("❌ Local save failed: " + error.message);
@@ -2401,6 +2658,7 @@ function collectAllApiSettings() {
   // Collect all form data
   const inputs = document.querySelectorAll("input, select");
   inputs.forEach((input) => {
+    if (input.id === "smrtProxyToken") return;
     if (input.id) {
       // Handle radio buttons differently - save their checked state
       if (input.type === "radio") {
@@ -2410,6 +2668,16 @@ function collectAllApiSettings() {
       }
     }
   });
+
+  // Persist the active provider mode as a first-class field so it survives
+  // reload regardless of which save path wrote last (byok | proxy).
+  settings.providerMode =
+    (typeof _getActiveProviderMode === "function" &&
+      _getActiveProviderMode()) ||
+    "byok";
+
+  // Preserve the ElevenLabs voice list for the bridge (Clipboard STTTS Lab).
+  _attachElevenLabsVoiceList(settings);
 
   return settings;
 }
@@ -2464,11 +2732,7 @@ function syncOpenAIKeys(sourceInputId, apiKey) {
       provider: "openai-whisper",
       radioId: "externalSttApiRadio",
     },
-    externalTtsApiKey: {
-      selectId: "externalTtsApi",
-      provider: "openai-tts",
-      radioId: "externalTtsApiRadio",
-    },
+    // OpenAI is intentionally not auto-synced to TTS.
   };
 
   // Don't sync if the key is empty or invalid format
@@ -2558,6 +2822,9 @@ function updateApiSectionVisibility() {
   const openaiTextModelSelector = document.getElementById(
     "openaiTextModelSelector",
   );
+  const kimiTextModelSelector = document.getElementById(
+    "kimiTextModelSelector",
+  );
   const openaiImageModelSelector = document.getElementById(
     "openaiImageModelSelector",
   );
@@ -2583,6 +2850,10 @@ function updateApiSectionVisibility() {
   if (openaiTextModelSelector && paidTextApi) {
     openaiTextModelSelector.style.display =
       paidTextApi.value === "openai" ? "block" : "none";
+  }
+  if (kimiTextModelSelector && paidTextApi) {
+    kimiTextModelSelector.style.display =
+      paidTextApi.value === "kimi" ? "block" : "none";
   }
   if (openaiImageModelSelector && paidImageApi) {
     openaiImageModelSelector.style.display =
@@ -2620,12 +2891,24 @@ function updateApiSectionVisibility() {
   const paidImageApiKey = document.getElementById("paidImageApiKey");
 
   if (testPaidTextBtn && paidTextApi && paidTextApiKey) {
-    testPaidTextBtn.style.display =
-      paidTextApi.value && paidTextApiKey.value ? "block" : "none";
+    // In Secure Proxy mode the key is server-side/hidden — show the test button
+    // as soon as a provider is picked so the model check can be verified on URL.
+    const proxyMode =
+      typeof _getActiveProviderMode === "function" &&
+      _getActiveProviderMode() === "proxy";
+    const showText = proxyMode
+      ? !!paidTextApi.value
+      : !!(paidTextApi.value && paidTextApiKey.value);
+    testPaidTextBtn.style.display = showText ? "block" : "none";
   }
   if (testPaidImageBtn && paidImageApi && paidImageApiKey) {
-    testPaidImageBtn.style.display =
-      paidImageApi.value && paidImageApiKey.value ? "block" : "none";
+    const proxyMode =
+      typeof _getActiveProviderMode === "function" &&
+      _getActiveProviderMode() === "proxy";
+    const showImage = proxyMode
+      ? !!paidImageApi.value
+      : !!(paidImageApi.value && paidImageApiKey.value);
+    testPaidImageBtn.style.display = showImage ? "block" : "none";
   }
 
   // Show Ollama model selector when Ollama is selected
@@ -2645,6 +2928,9 @@ function updateApiSectionVisibility() {
     ollamaVisionModelSelector.style.display =
       freeImageApi.value === "ollama-vision" ? "block" : "none";
   }
+
+  // Ensure "Get API Key" links remain disabled while proxy mode is active.
+  _setApiInfoLinkVisibility(_getActiveProviderMode() !== "proxy");
 }
 
 function setupRealTimeValidation() {
@@ -2703,11 +2989,7 @@ function setupRealTimeValidation() {
         console.log(
           `🔍 Checking for OpenAI sync: provider=${provider}, inputId=${config.inputId}, apiKey length=${apiKey.length}`,
         );
-        if (
-          provider === "openai" ||
-          provider === "openai-dalle" ||
-          provider === "openai-tts"
-        ) {
+        if (provider === "openai" || provider === "openai-dalle") {
           console.log(`🔄 Triggering OpenAI sync from ${config.inputId}`);
           syncOpenAIKeys(config.inputId, apiKey);
         }
@@ -2831,7 +3113,7 @@ function updateProviderUIElements(config, provider) {
       openai: "https://platform.openai.com/api-keys",
       xai: "https://x.ai/api",
       deepseek: "https://platform.deepseek.com/api-keys",
-      kimi: "https://platform.moonshot.cn/console/api-keys",
+      kimi: "https://platform.kimi.ai/console/api-keys",
       google: "https://aistudio.google.com/app/apikey",
       anthropic: "https://console.anthropic.com/settings/keys",
       cohere: "https://dashboard.cohere.com/api-keys",
@@ -2935,8 +3217,8 @@ function setupTTSAPIHandlers() {
 
   // Handle external TTS API selection
   externalTtsSelect?.addEventListener("change", (e) => {
-    const selectedOption = e.target.selectedOptions[0];
-    const apiValue = e.target.value;
+    let selectedOption = e.target.selectedOptions[0];
+    let apiValue = e.target.value;
     const openaiTtsModelSelector = document.getElementById(
       "openaiTtsModelSelector",
     );
@@ -2948,22 +3230,37 @@ function setupTTSAPIHandlers() {
     );
 
     if (apiValue) {
+      if (apiValue === "openai-tts") {
+        e.target.value = "elevenlabs";
+        apiValue = "elevenlabs";
+        selectedOption = e.target.selectedOptions[0];
+        addLogEntry(
+          "ℹ️ OpenAI TTS is deprecated in this widget. Switched to ElevenLabs for voice synthesis.",
+          "info",
+        );
+      }
+
       const isFree = selectedOption.getAttribute("data-free") === "true";
       const keyFormat = selectedOption.getAttribute("data-key-format") || "";
+      const isProxyMode = _getActiveProviderMode() === "proxy";
 
       // Show/hide API key input based on whether it's free
       if (isFree) {
         externalTtsKey.style.display = "none";
+        externalTtsKey.disabled = true;
         externalTtsLink.style.display = "none";
         externalTtsHint.style.display = "none";
         externalTtsHint.textContent = "";
       } else {
-        externalTtsKey.style.display = "block";
+        externalTtsKey.style.display = isProxyMode ? "none" : "block";
+        externalTtsKey.disabled = isProxyMode;
         externalTtsLink.style.display = "block";
-        externalTtsHint.style.display = "block";
-        externalTtsHint.textContent = keyFormat
-          ? `Key format: ${keyFormat}...`
-          : "API key required";
+        externalTtsHint.style.display = isProxyMode ? "none" : "block";
+        externalTtsHint.textContent = isProxyMode
+          ? ""
+          : keyFormat
+            ? `Key format: ${keyFormat}...`
+            : "API key required";
 
         // Set API info links
         const apiLinks = {
@@ -2996,11 +3293,24 @@ function setupTTSAPIHandlers() {
           apiValue === "elevenlabs" ? "block" : "none";
       }
 
+      if (apiValue === "elevenlabs") {
+        if (_getActiveProviderMode() === "proxy") {
+          _proxyFetchElevenLabsVoices().catch((err) => {
+            console.warn("Could not load ElevenLabs voices via proxy:", err);
+          });
+        } else if (externalTtsKey.value?.trim()) {
+          fetchElevenLabsVoices(externalTtsKey.value.trim()).catch((err) => {
+            console.warn("Could not load ElevenLabs voices:", err);
+          });
+        }
+      }
+
       testTtsBtn.style.display = "block";
       ttsStatusDiv.style.display = "block";
       updateTTSStatus("Ready to test...", "info");
     } else {
       externalTtsKey.style.display = "none";
+      externalTtsKey.disabled = true;
       externalTtsLink.style.display = "none";
       externalTtsHint.style.display = "none";
       testTtsBtn.style.display = "none";
@@ -3017,34 +3327,29 @@ function setupTTSAPIHandlers() {
     }
   });
 
-  // Custom Voice ID field — overrides dropdown when filled
-  const customVoiceInput = document.getElementById("elevenlabsCustomVoiceId");
-  const customVoiceStatus = document.getElementById(
-    "elevenlabsCustomVoiceStatus",
+  const elevenLabsModelSelect = document.getElementById(
+    "elevenlabsTtsModelId",
   );
-  const elVoiceSelect = document.getElementById("elevenlabsVoice");
-  if (customVoiceInput && elVoiceSelect) {
-    customVoiceInput.addEventListener("input", () => {
-      const val = customVoiceInput.value.trim();
-      if (val) {
-        elVoiceSelect.style.opacity = "0.4";
-        elVoiceSelect.style.pointerEvents = "none";
-        if (customVoiceStatus)
-          customVoiceStatus.textContent = "✅ Custom ID will be used";
-      } else {
-        elVoiceSelect.style.opacity = "1";
-        elVoiceSelect.style.pointerEvents = "auto";
-        if (customVoiceStatus) customVoiceStatus.textContent = "";
-      }
-    });
-    // Apply initial state
-    if (customVoiceInput.value.trim()) {
-      elVoiceSelect.style.opacity = "0.4";
-      elVoiceSelect.style.pointerEvents = "none";
-      if (customVoiceStatus)
-        customVoiceStatus.textContent = "✅ Custom ID will be used";
+  elevenLabsModelSelect?.addEventListener("change", () => {
+    const modelId =
+      elevenLabsModelSelect.value === "eleven_multilingual_v2"
+        ? "eleven_multilingual_v2"
+        : "eleven_v3";
+    try {
+      localStorage.setItem("elevenlabsTtsModelId", modelId);
+      const raw = localStorage.getItem("smdeltartPreferences");
+      const preferences = raw ? JSON.parse(raw) : {};
+      preferences.elevenlabsTtsModelId = modelId;
+      localStorage.setItem(
+        "smdeltartPreferences",
+        JSON.stringify(preferences),
+      );
+    } catch (error) {
+      console.warn("Could not save ElevenLabs model preference:", error);
     }
-  }
+    clearTimeout(window.autoSaveTimeout);
+    window.autoSaveTimeout = setTimeout(() => saveApiSettingsLocally(), 250);
+  });
 
   // Test TTS API button
   testTtsBtn?.addEventListener("click", () => testExternalTTSAPI());
@@ -3131,7 +3436,11 @@ async function testTTSProvider(provider, apiKey) {
       return await testGoogleTTS(testText, apiKey);
 
     case "openai-tts":
-      return await testOpenAITTS(testText, apiKey);
+      return {
+        success: false,
+        message:
+          "OpenAI TTS is deprecated in this widget. Use ElevenLabs for voice synthesis.",
+      };
 
     default:
       return { success: false, message: "Unknown TTS provider" };
@@ -3208,6 +3517,42 @@ async function testESpeakTTS(text) {
 
 // Paid TTS API Tests (would require actual API implementation)
 async function testElevenLabsTTS(text, apiKey) {
+  if (_getActiveProviderMode() === "proxy") {
+    try {
+      await _proxyFetchElevenLabsVoices();
+      const res = await fetch(_proxyUrl("/api/elevenlabs-tts"), {
+        method: "POST",
+        headers: _proxyHeaders(),
+        body: JSON.stringify({
+          text,
+          voiceAlias: "server-default",
+          model_id:
+            document.getElementById("elevenlabsTtsModelId")?.value ||
+            "eleven_v3",
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        return {
+          success: false,
+          message:
+            err?.error || err?.detail || `ElevenLabs proxy HTTP ${res.status}`,
+        };
+      }
+
+      return {
+        success: true,
+        message: "ElevenLabs proxy OK (server default)",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `ElevenLabs proxy error: ${error.message}`,
+      };
+    }
+  }
+
   if (!apiKey) {
     return { success: false, message: "API key required for ElevenLabs" };
   }
@@ -3225,7 +3570,7 @@ async function testElevenLabsTTS(text, apiKey) {
     return {
       success: false,
       message:
-        "This looks like an OpenAI key (sk-…). ElevenLabs keys are hex strings without sk- prefix. Check your key at elevenlabs.io → Profile → API Keys.",
+        "This looks like an OpenAI key (sk-…). ElevenLabs keys are different (often sk_…). Check your key at elevenlabs.io → Profile → API Keys.",
     };
   }
   console.log(
@@ -3262,34 +3607,7 @@ async function testElevenLabsTTS(text, apiKey) {
     // Populate the voice dropdown with the user's actual available voices
     const sel = document.getElementById("elevenlabsVoice");
     if (sel && voices.length > 0) {
-      const prev = sel.value; // preserve current selection
-      sel.innerHTML = "";
-      for (const v of voices) {
-        const opt = document.createElement("option");
-        opt.value = v.voice_id;
-        const cat =
-          v.category === "premade"
-            ? ""
-            : v.category === "cloned"
-              ? " (Cloned)"
-              : ` (${v.category || "Custom"})`;
-        opt.textContent = `${v.name}${cat}`;
-        sel.appendChild(opt);
-      }
-      // Restore previous selection if still available, else first voice
-      const customInput = document.getElementById("elevenlabsCustomVoiceId");
-      const customId = customInput?.value?.trim();
-      const selectId = customId || prev;
-      if (selectId && [...sel.options].some((o) => o.value === selectId)) {
-        sel.value = selectId;
-        // Voice found in dropdown — clear custom field and restore dropdown
-        if (customInput && customId) {
-          customInput.value = "";
-          customInput.dispatchEvent(new Event("input"));
-        }
-      } else if ([...sel.options].some((o) => o.value === prev)) {
-        sel.value = prev;
-      }
+      _setLocalElevenLabsVoiceOptions(sel, voices);
     }
 
     return {
@@ -3351,6 +3669,59 @@ async function testGoogleTTS(text, apiKey) {
 }
 
 async function testOpenAITTS(text, apiKey) {
+  const model =
+    document.getElementById("openaiTtsModel")?.value || "gpt-4o-mini-tts";
+  const voice = document.getElementById("openaiTtsVoice")?.value || "alloy";
+
+  if (_getActiveProviderMode() === "proxy") {
+    try {
+      updateTTSStatus(`Testing OpenAI TTS proxy (${voice})...`, "info");
+      const response = await fetch(_proxyUrl("/api/openai-tts"), {
+        method: "POST",
+        headers: _proxyHeaders(),
+        body: JSON.stringify({
+          model,
+          voice,
+          input: text,
+          format: "mp3",
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage =
+          errorData?.error ||
+          errorData?.detail ||
+          `HTTP ${response.status} from /api/openai-tts`;
+        throw new Error(errorMessage);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+
+      await new Promise((resolve, reject) => {
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          resolve();
+        };
+        audio.onerror = () => reject(new Error("Audio playback failed"));
+        audio.play();
+      });
+
+      return {
+        success: true,
+        message: `OpenAI proxy TTS working! Voice: ${voice}`,
+      };
+    } catch (error) {
+      console.error("OpenAI Proxy TTS Test Error:", error);
+      return {
+        success: false,
+        message: `OpenAI proxy TTS error: ${error.message}`,
+      };
+    }
+  }
+
   if (!apiKey) {
     return { success: false, message: "API key required for OpenAI TTS" };
   }
@@ -3364,10 +3735,6 @@ async function testOpenAITTS(text, apiKey) {
   }
 
   try {
-    const model =
-      document.getElementById("openaiTtsModel")?.value || "gpt-4o-mini-tts";
-    const voice = document.getElementById("openaiTtsVoice")?.value || "alloy";
-
     updateTTSStatus(`Testing OpenAI TTS (${voice})...`, "info");
 
     const response = await fetch("https://api.openai.com/v1/audio/speech", {
@@ -3549,6 +3916,9 @@ function setupPaidTextAPIHandlers() {
     const openaiTextModelSelector = document.getElementById(
       "openaiTextModelSelector",
     );
+    const kimiTextModelSelector = document.getElementById(
+      "kimiTextModelSelector",
+    );
     const testPaidTextBtn = document.getElementById("testPaidTextBtn");
 
     if (apiValue) {
@@ -3570,13 +3940,17 @@ function setupPaidTextAPIHandlers() {
         openaiTextModelSelector.style.display =
           apiValue === "openai" ? "block" : "none";
       }
+      if (kimiTextModelSelector) {
+        kimiTextModelSelector.style.display =
+          apiValue === "kimi" ? "block" : "none";
+      }
 
       // Set API info links
       const apiLinks = {
         openai: "https://platform.openai.com/api-keys",
         xai: "https://console.x.ai/team/api-keys",
         deepseek: "https://platform.deepseek.com/api_keys",
-        kimi: "https://platform.moonshot.cn/console/api-keys",
+        kimi: "https://platform.kimi.ai/console/api-keys",
         google: "https://aistudio.google.com/app/apikey",
         anthropic: "https://console.anthropic.com/settings/keys",
         cohere: "https://dashboard.cohere.com/api-keys",
@@ -3597,15 +3971,29 @@ function setupPaidTextAPIHandlers() {
       if (openaiTextModelSelector) {
         openaiTextModelSelector.style.display = "none";
       }
+      if (kimiTextModelSelector) {
+        kimiTextModelSelector.style.display = "none";
+      }
     }
   });
 
   // 🔧 Add change handler for OpenAI Text Model selector
   const openaiTextModel = document.getElementById("openaiTextModel");
+  ensureOpenAITextModelOptions();
   openaiTextModel?.addEventListener("change", () => {
     console.log("📝 Text model changed to:", openaiTextModel.value);
     updateOpenAIModelStatus();
-    // Model change is saved when Save Locally is clicked
+    // Persist the model choice immediately.
+    clearTimeout(window.autoSaveTimeout);
+    window.autoSaveTimeout = setTimeout(() => saveApiSettingsLocally(), 400);
+    // Test the chosen model directly so the section check turns green/red now
+    // (no need to open the proxy section). Debounced to avoid rapid calls.
+    clearTimeout(window._textModelTestTimeout);
+    window._textModelTestTimeout = setTimeout(() => {
+      _testModelChoiceDirect("text").catch((e) =>
+        console.warn("Text model test failed:", e),
+      );
+    }, 350);
   });
 
   const _openaiProjectLabelEl = document.getElementById("openaiProjectLabel");
@@ -3624,6 +4012,43 @@ function setupPaidTextAPIHandlers() {
   });
 
   updateOpenAIModelStatus();
+}
+
+function ensureOpenAITextModelOptions() {
+  const select = document.getElementById("openaiTextModel");
+  if (!select) return;
+
+  const requiredModels = [
+    {
+      value: "gpt-5.6 luna",
+      label: "gpt-5.6 luna (Advanced reasoning, $$)",
+    },
+    {
+      value: "gpt-5.6 sol",
+      label: "gpt-5.6 sol (Balanced speed/quality, $$)",
+    },
+  ];
+
+  let targetGroup = Array.from(select.querySelectorAll("optgroup")).find((g) =>
+    (g.label || "").includes("Text"),
+  );
+
+  if (!targetGroup) {
+    targetGroup = document.createElement("optgroup");
+    targetGroup.label = "⚡ Text (Current)";
+    select.insertBefore(targetGroup, select.firstChild || null);
+  }
+
+  requiredModels.forEach((model) => {
+    const exists = Array.from(select.options).some(
+      (o) => o.value === model.value,
+    );
+    if (exists) return;
+    const option = document.createElement("option");
+    option.value = model.value;
+    option.textContent = model.label;
+    targetGroup.appendChild(option);
+  });
 }
 
 function updateTextStatus(message, type = "info") {
@@ -4469,7 +4894,16 @@ function setupPaidImageAPIHandlers() {
   const openaiImageModel = document.getElementById("openaiImageModel");
   openaiImageModel?.addEventListener("change", () => {
     console.log("🖼️ Image model changed to:", openaiImageModel.value);
-    // Model change is saved when Save Locally is clicked
+    // Persist the model choice immediately.
+    clearTimeout(window.autoSaveTimeout);
+    window.autoSaveTimeout = setTimeout(() => saveApiSettingsLocally(), 400);
+    // Test the chosen image model directly so the section check updates now.
+    clearTimeout(window._imageModelTestTimeout);
+    window._imageModelTestTimeout = setTimeout(() => {
+      _testModelChoiceDirect("image").catch((e) =>
+        console.warn("Image model test failed:", e),
+      );
+    }, 350);
   });
 }
 
@@ -4805,7 +5239,7 @@ window.debugApiSettings = () => {
 };
 
 // Log initialization
-console.log("🎯 SmΔrt Collection API Settings - Standalone SPA");
+console.log("🎯 CAD-DELTAI API Settings - Standalone SPA");
 console.log("📍 Version: 2.1 (GitHub Pages Ready)");
 console.log("✅ All API testing built-in - no external dependencies");
 console.log("🔧 Use debugApiSettings() for debug mode");
@@ -4820,6 +5254,30 @@ console.log("🔧 Use debugApiSettings() for debug mode");
 
 const SMART_API_PROVIDERS = {
   // 📝 TEXT APIs
+  kimi: {
+    name: "Moonshot Kimi",
+    category: "text",
+    type: "paid",
+    testEndpoint: "https://api.moonshot.ai/v1/models",
+    headers: (apiKey) => ({
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    }),
+    testMethod: "GET",
+    timeout: 12000,
+    keyPattern: /^[^\s]{20,200}$/,
+    keyFormat: "Moonshot global API key",
+    docsUrl: "https://platform.kimi.ai/console/api-keys",
+    pricing: "$3 input / $15 output per 1M (K3)",
+    capabilities: [
+      "chat",
+      "coding",
+      "long-context",
+      "image-input",
+      "video-input",
+    ],
+    lastUpdated: "2026-07-29",
+  },
   openai: {
     name: "OpenAI GPT",
     category: "text",
@@ -4948,8 +5406,8 @@ const SMART_API_PROVIDERS = {
     }),
     testMethod: "GET",
     timeout: 10000,
-    keyPattern: /^(sk_)?[a-fA-F0-9_-]{20,50}$/,
-    keyFormat: "hex string or sk_... key",
+    keyPattern: /^[^\s]{16,200}$/,
+    keyFormat: "live key (often sk_...)",
     docsUrl: "https://elevenlabs.io/docs/api-reference",
     pricing: "freemium",
     capabilities: ["voice-cloning", "multiple-languages", "emotion-control"],
@@ -5711,6 +6169,17 @@ async function testIndividualAPI(type) {
   if (!config) return;
 
   const provider = config.select.value;
+
+  // Secure Proxy mode — never read local keys; test via Vercel endpoints so the
+  // status/model check can turn green even when local BYOK keys are cleared.
+  if (
+    typeof _getActiveProviderMode === "function" &&
+    _getActiveProviderMode() === "proxy"
+  ) {
+    await _testIndividualApiProxyMode(type, provider, config);
+    return;
+  }
+
   const apiKey = config.input.value.trim();
 
   if (!provider || !apiKey) {
@@ -5771,10 +6240,104 @@ async function testIndividualAPI(type) {
   }
 }
 
-// 🖼️ Test OpenAI Image API with selected model
+// �️ Secure Proxy variant of the per-provider test button — routes to the
+// Vercel proxy endpoints and never reads local key inputs.
+async function _testIndividualApiProxyMode(type, provider, config) {
+  if (!provider) {
+    updateStatus(config.status, "⚠️ Select a provider first");
+    return;
+  }
+  updateStatus(config.status, "🔍 Testing via proxy…");
+
+  // Text APIs → the selected provider's secure proxy.
+  if (type === "paidText" || type === "freeText") {
+    const res = await _runProxyTextTest();
+    updateStatus(config.status, res.success ? "✅" : "❌");
+    if (res.provider === "openai") {
+      _setOpenAITextModelVerified(res.success, res.model, res.message);
+    }
+    logMessage(
+      res.success ? `✅ ${res.message}` : `❌ ${res.message}`,
+      res.success ? "success" : "error",
+    );
+    updateCategoryStatus();
+    return;
+  }
+
+  // Image APIs — free/no-key providers stay testable; OpenAI images now run
+  // through the secure server proxy (no browser origin limits, no local key).
+  if (type === "paidImage" || type === "freeImage") {
+    if (_selectedOptionNeedsNoKey(config.select.id)) {
+      const ok = await testAndUpdateApiStatus(provider, "", config.status.id);
+      logMessage(
+        ok ? `✅ ${provider} image OK (no key)` : `❌ ${provider} image failed`,
+        ok ? "success" : "error",
+      );
+      return;
+    }
+    if (
+      provider === "openai-dalle" ||
+      provider === "openai-image" ||
+      provider === "openai"
+    ) {
+      const res = await _runProxyOpenAIImageTest();
+      updateStatus(config.status, res.success ? "✅" : "❌");
+      logMessage(
+        res.success ? `✅ ${res.message}` : `❌ ${res.message}`,
+        res.success ? "success" : "error",
+      );
+      updateCategoryStatus();
+      return;
+    }
+    updateStatus(config.status, "ℹ️");
+    logMessage(
+      `ℹ️ ${provider || "This image API"} has no Secure Proxy route yet.`,
+      "info",
+    );
+    return;
+  }
+
+  // TTS APIs → ElevenLabs / OpenAI TTS proxies; free/no-key stay local.
+  if (type === "externalTts") {
+    const ttsApi = config.select.value;
+    let res;
+    if (ttsApi === "elevenlabs") {
+      res = await _runProxyElevenLabsTest();
+    } else if (ttsApi === "openai-tts") {
+      res = await _runProxyOpenAITtsTest();
+    } else if (ttsApi && _selectedOptionNeedsNoKey(config.select.id)) {
+      const ok = await testAndUpdateApiStatus(ttsApi, "", config.status.id);
+      logMessage(
+        ok ? `✅ ${ttsApi} TTS OK (no key)` : `❌ ${ttsApi} TTS failed`,
+        ok ? "success" : "error",
+      );
+      return;
+    } else {
+      updateStatus(config.status, "ℹ️");
+      logMessage(
+        `ℹ️ ${ttsApi || "TTS"} requires a local key — skipped in Secure Proxy mode.`,
+        "info",
+      );
+      return;
+    }
+    updateStatus(config.status, res.success ? "✅" : "❌");
+    logMessage(
+      res.success ? `✅ ${res.message}` : `❌ ${res.message}`,
+      res.success ? "success" : "error",
+    );
+    updateCategoryStatus();
+    return;
+  }
+
+  // Video / other — no proxy route yet.
+  updateStatus(config.status, "ℹ️");
+  logMessage("ℹ️ This API has no Secure Proxy route yet.", "info");
+}
+
+// �🖼️ Test OpenAI Image API with selected model
 async function testOpenAIImageAPI(apiKey, statusEl) {
   const imageModelSelect = document.getElementById("openaiImageModel");
-  const imageModel = imageModelSelect?.value || "gpt-image-1";
+  const imageModel = imageModelSelect?.value || "gpt-image-2";
 
   console.log(
     `%c🖼️ Testing OpenAI Image API with model: ${imageModel}`,
@@ -5789,8 +6352,7 @@ async function testOpenAIImageAPI(apiKey, statusEl) {
       testSize = "256x256"; // DALL-E 2 supports smaller sizes
     }
 
-    // Build request body - gpt-image-1 doesn't support 'quality' parameter
-    const isGptImage1 = imageModel.startsWith("gpt-image");
+    const isGptImage = imageModel.startsWith("gpt-image");
     const requestBody = {
       model: imageModel,
       prompt: "A simple blue circle on white background, minimalist",
@@ -5798,8 +6360,11 @@ async function testOpenAIImageAPI(apiKey, statusEl) {
       size: testSize,
     };
 
-    // Only add quality for DALL-E models
-    if (!isGptImage1) {
+    if (isGptImage) {
+      requestBody.quality = "low";
+      requestBody.background = "opaque";
+      requestBody.output_format = "png";
+    } else if (imageModel === "dall-e-3") {
       requestBody.quality = "standard";
     }
 
@@ -5844,7 +6409,11 @@ async function testOpenAIImageAPI(apiKey, statusEl) {
           n: 1,
           size: "1024x1024",
         };
-        if (!isGptImage1) {
+        if (isGptImage) {
+          retryBody.quality = "low";
+          retryBody.background = "opaque";
+          retryBody.output_format = "png";
+        } else if (imageModel === "dall-e-3") {
           retryBody.quality = "standard";
         }
 
@@ -5891,7 +6460,8 @@ async function testOpenAIImageAPI(apiKey, statusEl) {
 // 📝 Test OpenAI Text API with selected model
 async function testOpenAITextAPI(apiKey, statusEl) {
   const textModelSelect = document.getElementById("openaiTextModel");
-  const textModel = textModelSelect?.value || "gpt-4o-mini";
+  const textModel =
+    textModelSelect?.value || textModelSelect?.options?.[0]?.value || "gpt-5.5";
 
   console.log(
     `%c📝 Testing OpenAI Text API with model: ${textModel}`,
@@ -5900,37 +6470,78 @@ async function testOpenAITextAPI(apiKey, statusEl) {
   logMessage(`📝 Testing OpenAI Text (${textModel})...`, "info");
 
   try {
+    const messages = [
+      {
+        role: "user",
+        content: 'Say "API test OK" in exactly 3 words',
+      },
+    ];
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: textModel,
-        messages: [
-          {
-            role: "user",
-            content: 'Say "API test OK" in exactly 3 words',
-          },
-        ],
-        max_tokens: 20,
-      }),
+      body: JSON.stringify(_buildOpenAIChatPayload(textModel, messages, 20)),
     });
 
+    let data = await response.json().catch(() => ({}));
+    if (!response.ok && _shouldRetryWithMaxCompletionTokens(response, data)) {
+      const retryResponse = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(
+            _buildOpenAIChatPayload(textModel, messages, 20, {
+              forceMaxCompletionTokens: true,
+            }),
+          ),
+        },
+      );
+      data = await retryResponse.json().catch(() => ({}));
+      if (retryResponse.ok) {
+        const reply = data.choices?.[0]?.message?.content || "OK";
+        updateStatus(statusEl, "✅");
+        _setOpenAITextModelVerified(true, textModel);
+        console.log(
+          `%c✅ OpenAI Text (${textModel}): ${reply}`,
+          "color: #22c55e; font-weight: bold;",
+        );
+        logMessage(`✅ OpenAI Text (${textModel}): API working!`, "success");
+        return;
+      }
+      const errMsg = _extractApiErrorMessage(
+        data,
+        `HTTP ${retryResponse.status}`,
+      );
+      updateStatus(statusEl, "❌");
+      _setOpenAITextModelVerified(false, textModel, errMsg);
+      console.log(
+        `%c❌ OpenAI Text (${textModel}): ${errMsg}`,
+        "color: #ef4444;",
+      );
+      logMessage(`❌ OpenAI Text (${textModel}): ${errMsg}`, "error");
+      return;
+    }
+
     if (response.ok) {
-      const data = await response.json();
       const reply = data.choices?.[0]?.message?.content || "OK";
       updateStatus(statusEl, "✅");
+      _setOpenAITextModelVerified(true, textModel);
       console.log(
         `%c✅ OpenAI Text (${textModel}): ${reply}`,
         "color: #22c55e; font-weight: bold;",
       );
       logMessage(`✅ OpenAI Text (${textModel}): API working!`, "success");
     } else {
-      const error = await response.json();
-      const errMsg = error.error?.message || `HTTP ${response.status}`;
+      const errMsg = _extractApiErrorMessage(data, `HTTP ${response.status}`);
       updateStatus(statusEl, "❌");
+      _setOpenAITextModelVerified(false, textModel, errMsg);
       console.log(
         `%c❌ OpenAI Text (${textModel}): ${errMsg}`,
         "color: #ef4444;",
@@ -5939,6 +6550,7 @@ async function testOpenAITextAPI(apiKey, statusEl) {
     }
   } catch (err) {
     updateStatus(statusEl, "❌");
+    _setOpenAITextModelVerified(false, textModel, err.message);
     console.log(`%c❌ OpenAI Text Error: ${err.message}`, "color: #ef4444;");
     logMessage(`❌ OpenAI Text: ${err.message}`, "error");
   }
@@ -6026,11 +6638,21 @@ async function testOpenAIModels() {
   const textApiKey = document.getElementById("paidTextApiKey")?.value?.trim();
 
   if (textApiSelect?.value === "openai" && textApiKey) {
-    const textModel = textModelSelect?.value || "gpt-4o-mini";
+    const textModel =
+      textModelSelect?.value ||
+      textModelSelect?.options?.[0]?.value ||
+      "gpt-5.5";
     console.log("%c🔤 Text Model: " + textModel, "color: #22c55e;");
     logMessage(`🔤 Testing OpenAI Text Model: ${textModel}`, "info");
 
     try {
+      const messages = [
+        {
+          role: "user",
+          content: 'Say "API test OK" in 3 words max.',
+        },
+      ];
+
       const response = await fetch(
         "https://api.openai.com/v1/chat/completions",
         {
@@ -6039,21 +6661,54 @@ async function testOpenAIModels() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${textApiKey}`,
           },
-          body: JSON.stringify({
-            model: textModel,
-            messages: [
-              {
-                role: "user",
-                content: 'Say "API test OK" in 3 words max.',
-              },
-            ],
-            max_tokens: 10,
-          }),
+          body: JSON.stringify(
+            _buildOpenAIChatPayload(textModel, messages, 10),
+          ),
         },
       );
 
+      let data = await response.json().catch(() => ({}));
+      if (!response.ok && _shouldRetryWithMaxCompletionTokens(response, data)) {
+        const retryResponse = await fetch(
+          "https://api.openai.com/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${textApiKey}`,
+            },
+            body: JSON.stringify(
+              _buildOpenAIChatPayload(textModel, messages, 10, {
+                forceMaxCompletionTokens: true,
+              }),
+            ),
+          },
+        );
+
+        data = await retryResponse.json().catch(() => ({}));
+        if (retryResponse.ok) {
+          const reply = data.choices?.[0]?.message?.content || "OK";
+          console.log(
+            "%c✅ OpenAI Text (" + textModel + "): " + reply,
+            "color: #22c55e; font-weight: bold;",
+          );
+          logMessage(`✅ OpenAI Text (${textModel}): Working!`, "success");
+          return;
+        }
+
+        const errMsg = _extractApiErrorMessage(
+          data,
+          String(retryResponse.status),
+        );
+        console.log(
+          "%c❌ OpenAI Text (" + textModel + "): " + errMsg,
+          "color: #ef4444;",
+        );
+        logMessage(`❌ OpenAI Text (${textModel}): ${errMsg}`, "error");
+        return;
+      }
+
       if (response.ok) {
-        const data = await response.json();
         const reply = data.choices?.[0]?.message?.content || "OK";
         console.log(
           "%c✅ OpenAI Text (" + textModel + "): " + reply,
@@ -6061,18 +6716,12 @@ async function testOpenAIModels() {
         );
         logMessage(`✅ OpenAI Text (${textModel}): Working!`, "success");
       } else {
-        const error = await response.json();
+        const errMsg = _extractApiErrorMessage(data, String(response.status));
         console.log(
-          "%c❌ OpenAI Text (" +
-            textModel +
-            "): " +
-            (error.error?.message || response.status),
+          "%c❌ OpenAI Text (" + textModel + "): " + errMsg,
           "color: #ef4444;",
         );
-        logMessage(
-          `❌ OpenAI Text (${textModel}): ${error.error?.message || response.status}`,
-          "error",
-        );
+        logMessage(`❌ OpenAI Text (${textModel}): ${errMsg}`, "error");
       }
     } catch (err) {
       console.log("%c❌ OpenAI Text Error: " + err.message, "color: #ef4444;");
@@ -6088,7 +6737,7 @@ async function testOpenAIModels() {
   const imageApiKey = document.getElementById("paidImageApiKey")?.value?.trim();
 
   if (imageApiSelect?.value === "openai-dalle" && imageApiKey) {
-    const imageModel = imageModelSelect?.value || "gpt-image-1";
+    const imageModel = imageModelSelect?.value || "gpt-image-2";
     console.log("%c🖼️ Image Model: " + imageModel, "color: #22c55e;");
     logMessage(`🖼️ Testing OpenAI Image Model: ${imageModel}`, "info");
 
@@ -6115,8 +6764,16 @@ async function testOpenAIModels() {
             model: imageModel,
             prompt: "A simple blue circle on white background",
             n: 1,
-            size: "256x256", // Use smallest size for faster/cheaper test (DALL-E 2 only)
-            quality: "standard",
+            size: imageModel === "dall-e-2" ? "256x256" : "1024x1024",
+            ...(imageModel.startsWith("gpt-image")
+              ? {
+                  quality: "low",
+                  background: "opaque",
+                  output_format: "png",
+                }
+              : imageModel === "dall-e-3"
+                ? { quality: "standard" }
+                : {}),
           }),
         },
       );
@@ -6370,9 +7027,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize API Vault system
   ApiVault.init();
 
-  // Initialize Provider Mode UI (browser / BYOK / proxy)
-  // Must run AFTER initializeApiSettingsFixed so loadSavedSettings has already
-  // restored radio states via applySettings().
+  // Initialize Provider Mode UI (browser / BYOK / Vercel Proxy)
   initProviderMode();
 });
 
@@ -6382,7 +7037,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // This system encrypts ALL API keys with a master password
 // The master password is stored in the browser's password manager
 // Keys: AES-256-GCM encryption | Browser: Chrome, Firefox, Edge, Safari
-// Admin Password: smdeltart.com (base64: c21kZWx0YXJ0LmNvbQ==) - bypasses all vault locks
+// Vault unlock requires the user-derived key; there is no universal bypass.
 // ====================================================================
 
 // Expose on window for onclick handlers
@@ -6392,16 +7047,6 @@ window.ApiVault = {
   PBKDF2_ITERATIONS: 100000,
   isUnlocked: false,
   masterKey: null, // In-memory only, never stored
-
-  // Admin password (obfuscated) - bypasses vault encryption
-  getAdminPassword() {
-    return atob("c21kZWx0YXJ0LmNvbQ=="); // smdeltart.com
-  },
-
-  // Check if password is the admin bypass
-  isAdminPassword(password) {
-    return password === this.getAdminPassword();
-  },
 
   // Check if vault exists
   hasVault() {
@@ -6532,22 +7177,6 @@ window.ApiVault = {
         throw new Error("No vault found");
       }
 
-      // Check for admin bypass FIRST
-      if (this.isAdminPassword(masterPassword)) {
-        console.log("🔓 API Vault: Admin bypass activated");
-        this.isUnlocked = true;
-        this.masterKey = null; // Admin mode - no encryption key
-        // Return keys directly from unencrypted legacy storage if available
-        const legacy = localStorage.getItem("cadAiApiSettings");
-        if (legacy) {
-          try {
-            const parsed = JSON.parse(legacy);
-            return parsed;
-          } catch (e) {}
-        }
-        return {}; // Empty keys in admin mode
-      }
-
       const vault = JSON.parse(stored);
       const salt = this.base64ToArray(vault.salt);
       const key = await this.deriveKey(masterPassword, salt);
@@ -6614,6 +7243,7 @@ window.ApiVault = {
   lock() {
     this.masterKey = null;
     this.isUnlocked = false;
+    clearApiSecretsFromForms({ includeProxyToken: false });
     console.log("🔐 API Vault: Locked");
   },
 
@@ -6702,6 +7332,7 @@ window.ApiVault = {
       try {
         const keys = await this.unlockVault(password);
         this.applyDecryptedKeys(keys);
+        _restoreProxyTokenToSession(keys?.smrtProxyToken);
         updateVaultButtonState();
         logMessage("🔐 Vault auto-unlocked via browser", "success");
       } catch (e) {
@@ -6864,6 +7495,7 @@ window.ApiVault = {
     try {
       const keys = await this.unlockVault(password);
       this.applyDecryptedKeys(keys);
+      _restoreProxyTokenToSession(keys?.smrtProxyToken);
 
       // Save to password manager for next time
       await this.saveToPasswordManager(password);
@@ -6892,9 +7524,10 @@ window.ApiVault = {
     if (!keys) return;
 
     Object.entries(keys).forEach(([id, value]) => {
+      if (id === "proxyBaseUrl") return;
       const el = document.getElementById(id);
       if (el) {
-        const isSecretField = /ApiKey$/i.test(id);
+        const isSecretField = /(ApiKey$|^smrtProxyToken$)/i.test(id);
         const hasExistingValue =
           el.type === "radio" || el.type === "checkbox"
             ? el.checked
@@ -6934,6 +7567,8 @@ window.ApiVault = {
       "paidVideoApiKey",
       "freeVideoApiKey",
       "externalTtsApiKey",
+      "externalSttApiKey",
+      "smrtProxyToken",
     ].forEach((id) => {
       const el = document.getElementById(id);
       if (el?.value) keys[id] = el.value;
@@ -6952,6 +7587,8 @@ window.ApiVault = {
       "openaiProjectLabel",
       "openaiKeyLabel",
       "openaiTextModel",
+      "kimiTextModel",
+      "kimiReasoningEffort",
       "openaiImageModel",
       "openaiTtsModel",
       "openaiTtsVoice",
@@ -6976,12 +7613,16 @@ window.ApiVault = {
       "vercelTtsRadio",
       "browserTtsRadio",
       "externalTtsApiRadio",
+      "modeByok",
+      "modeProxy",
     ].forEach((id) => {
       const el = document.getElementById(id);
       if (el) keys[id] = el.checked;
     });
 
-    return await this.saveKeys(keys);
+    const saved = await this.saveKeys(keys);
+    _restoreProxyTokenToSession(keys.smrtProxyToken);
+    return saved;
   },
 
   // Show setup dialog for first-time vault creation
@@ -7067,6 +7708,8 @@ window.ApiVault = {
       "paidVideoApiKey",
       "freeVideoApiKey",
       "externalTtsApiKey",
+      "externalSttApiKey",
+      "smrtProxyToken",
       "paidTextApi",
       "freeTextApi",
       "paidImageApi",
@@ -7078,6 +7721,8 @@ window.ApiVault = {
       "openaiProjectLabel",
       "openaiKeyLabel",
       "openaiTextModel",
+      "kimiTextModel",
+      "kimiReasoningEffort",
       "openaiImageModel",
       "openaiTtsModel",
       "openaiTtsVoice",
@@ -7101,12 +7746,15 @@ window.ApiVault = {
       "vercelTtsRadio",
       "browserTtsRadio",
       "externalTtsApiRadio",
+      "modeByok",
+      "modeProxy",
     ].forEach((id) => {
       const el = document.getElementById(id);
       if (el) keys[id] = el.checked;
     });
 
     await this.createVault(pass1, keys);
+    _restoreProxyTokenToSession(keys.smrtProxyToken);
 
     document.getElementById("vaultSetupDialog")?.remove();
     logMessage("🔐 API Vault created! Keys are now encrypted.", "success");
@@ -7120,6 +7768,7 @@ window.ApiVault = {
   deleteVaultAndReset() {
     clearApiCredentialStorage({ includePreferences: true });
     clearApiSecretsFromForms();
+    _notifyParentProxySession({ clear: true });
     this.isUnlocked = false;
     this.masterKey = null;
 
@@ -7419,7 +8068,7 @@ function setupSaveLoadButtons() {
     exportBtn.addEventListener("click", () => {
       showContextualHelp(
         "File Export",
-        "Creating .json backup with encrypted API keys...",
+        "Creating portable backup. Vault material remains encrypted; proxy token is not exported as plain settings.",
       );
       exportSettingsToFile();
     });
@@ -7432,7 +8081,7 @@ function setupSaveLoadButtons() {
     importBtn.addEventListener("click", () => {
       showContextualHelp(
         "File Import",
-        "Select a .json, .ghfav, or .scs file to load settings",
+        "Select a .json, .ghfav, or .scs backup. Proxy-token recovery restores only the current session.",
       );
       importFile.click();
     });
@@ -7445,7 +8094,7 @@ function setupSaveLoadButtons() {
     testBtn.addEventListener("click", () => {
       showContextualHelp(
         "Test APIs",
-        "Testing each configured API endpoint for valid response...",
+        "Testing the active BYOK or Secure Proxy configuration without saving changes.",
       );
       testAllConfiguredAPIs();
     });
@@ -7470,20 +8119,20 @@ function setupSaveLoadButtons() {
           "📖 HELP MODE ACTIVE - Hover or click buttons to see tips here",
         );
         showHelpInLog(
-          "💾 File Export → Download settings as .json backup file",
+          "💾 File Export → Download portable backup; Vault material stays encrypted; no plain proxy token",
           "tip",
         );
         showHelpInLog(
-          "📁 File Import → Load from .json, .ghfav, .scs files",
+          "📁 File Import → Restore .json/.ghfav/.scs; proxy token recovery goes to session only",
           "tip",
         );
-        showHelpInLog("🧪 Test APIs → Verify all API keys are working", "tip");
+        showHelpInLog("🧪 Test APIs → Test BYOK keys or managed proxy endpoints without saving", "tip");
         showHelpInLog(
-          "💾 Locally → ⚠️ Save UNENCRYPTED to localStorage",
+          "💾 Locally → Save provider/model/voice/proxyBaseUrl preferences for this browser",
           "warning",
         );
-        showHelpInLog("💾 Vault → ✅ Save ENCRYPTED (recommended)", "tip");
-        showHelpInLog("🔐 Vault Mgr → Create/Unlock/Lock/Delete vault", "tip");
+        showHelpInLog("💾 Vault → Save credentials to encrypted Smart API Vault", "tip");
+        showHelpInLog("🔐 Vault Mgr → 🔐 create, 🔒 unlock, 🔓 manage/lock/delete", "tip");
       } else {
         logMessage("ℹ️ Help mode disabled", "info");
       }
@@ -7528,7 +8177,7 @@ function showSectionInfo(section) {
       title: "🤖 AI Text API Info",
       items: [
         "• WebSim API - Free built-in, works in WebSim environment",
-        "• Paid APIs - OpenAI GPT-4o, Claude, Gemini (best quality)",
+        "• Paid APIs - OpenAI GPT-5.6, Claude, Gemini (model availability depends on account)",
         "• Free APIs - Groq, HuggingFace, Together AI (free tier limits)",
         "⚡ Pipeline: WebSim → Paid → Free → Fallback chain",
       ],
@@ -7537,7 +8186,7 @@ function showSectionInfo(section) {
       title: "🎨 AI Image Generation Info",
       items: [
         "• WebSim API - Free built-in image generation",
-        "• OpenAI DALL-E 3 - Best quality, $0.04-0.12 per image",
+        "• OpenAI Image - price varies by model, quality, size, and output format",
         "• Stable Diffusion - Free via HuggingFace/Replicate",
         "• FLUX - Fast high-quality via Together/FAL",
         "📐 Supports aspect ratios: 1:1, 16:9, 9:16, 4:3",
@@ -7557,7 +8206,7 @@ function showSectionInfo(section) {
       items: [
         "• HuggingFace Spaces - Free! No API key needed 🆓",
         "• Replicate - Pay-per-use, many models available",
-        "• Runway Gen-3 - Cinema quality, best for pro use",
+        "• Runway Gen-4 Turbo - $0.05 per generated video second",
         "⚠️ CORS Note: Most video APIs block browser requests",
         "🎥 Text-to-video or Image-to-video animation",
       ],
@@ -7566,9 +8215,9 @@ function showSectionInfo(section) {
       title: "📊 Comparison Dashboard Info",
       items: [
         "• Check Updates - Detect new API versions and model updates",
-        "• Price Comparison - Compare costs across providers (per 1M tokens)",
-        "• Model Benchmark - Quality ratings from community benchmarks",
-        '💡 Click "Update All" to fetch latest prices from official APIs',
+        "• Price Comparison - Separate token, video-second, tiered, and model-specific billing",
+        "• Est. quality - Editorial orientation scores, not live benchmarks",
+        `💡 "Update All" refreshes the source-linked pricing snapshot checked ${PRICE_DATA_AS_OF}; it does not send API keys or purchase requests`,
       ],
     },
   };
@@ -7600,7 +8249,6 @@ function collectAllSettings() {
     lastSaved: new Date().toISOString(),
     source: "SmDeltArt-ApiSettings",
   };
-
   // Collect all input values
   const inputs = [
     "paidTextApiKey",
@@ -7624,6 +8272,8 @@ function collectAllSettings() {
     "openaiProjectLabel",
     "openaiKeyLabel",
     "openaiTextModel",
+    "kimiTextModel",
+    "kimiReasoningEffort",
     "openaiImageModel",
     "openaiTtsModel",
     "openaiTtsVoice",
@@ -7632,9 +8282,9 @@ function collectAllSettings() {
     "ollamaModel",
     "ollamaHost",
     "deepseekCloudModel",
-    "elevenlabsVoice",
-    "elevenlabsCustomVoiceId",
+    "elevenlabsTtsModelId",
     "edgeTtsVoice",
+    "proxyBaseUrl",
   ];
 
   inputs.forEach((id) => {
@@ -7665,6 +8315,10 @@ function collectAllSettings() {
     "externalTtsApiRadio",
     "browserSttRadio",
     "externalSttApiRadio",
+    // Provider mode radios (Secure Proxy vs Local BYOK) — REQUIRED so the
+    // chosen mode is not lost on reload (previously reverted to BYOK).
+    "modeByok",
+    "modeProxy",
   ];
 
   radios.forEach((id) => {
@@ -7674,7 +8328,27 @@ function collectAllSettings() {
     }
   });
 
+  // Persist the active provider mode as a first-class field too.
+  settings.providerMode =
+    (typeof _getActiveProviderMode === "function" &&
+      _getActiveProviderMode()) ||
+    "byok";
+
+  // Preserve the ElevenLabs voice list so consuming apps (Clipboard STTTS Lab)
+  // can render the real account voices instead of a static fallback.
+  _attachElevenLabsVoiceList(settings);
+
   return settings;
+}
+
+// Build the ElevenLabs voice list from the current dropdown; if the dropdown
+// is empty (not yet fetched) preserve any previously stored list so saves never
+// wipe the cached voices that the bridge relies on.
+function _attachElevenLabsVoiceList(target) {
+  delete target.elevenlabsVoiceList;
+  delete target.elevenlabsVoice;
+  delete target.elevenLabsVoiceId;
+  delete target.elevenlabsCustomVoiceId;
 }
 
 function applySettings(settings) {
@@ -7773,7 +8447,7 @@ function getApiStorageKeys() {
   ];
 }
 
-function clearApiSecretsFromForms() {
+function clearApiSecretsFromForms({ includeProxyToken = true } = {}) {
   [
     "paidTextApiKey",
     "freeTextApiKey",
@@ -7787,6 +8461,10 @@ function clearApiSecretsFromForms() {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
+  if (includeProxyToken) {
+    const tokenEl = document.getElementById("smrtProxyToken");
+    if (tokenEl) tokenEl.value = "";
+  }
 }
 
 function clearApiCredentialStorage({ includePreferences = false } = {}) {
@@ -7795,17 +8473,68 @@ function clearApiCredentialStorage({ includePreferences = false } = {}) {
     .forEach((key) => localStorage.removeItem(key));
 }
 
+function _secretSettingFieldNames() {
+  return [
+    "paidTextApiKey",
+    "freeTextApiKey",
+    "paidImageApiKey",
+    "freeImageApiKey",
+    "paidVideoApiKey",
+    "freeVideoApiKey",
+    "externalTtsApiKey",
+    "externalSttApiKey",
+    "smrtProxyToken",
+  ];
+}
+
+function _withoutPlainSessionToken(settings) {
+  const clean = { ...(settings || {}) };
+  delete clean.smrtProxyToken;
+  clean.proxyTokenPresent = false;
+  if (clean.normalized && typeof clean.normalized === "object") {
+    clean.normalized = { ...clean.normalized, proxyTokenPresent: false };
+  }
+  return clean;
+}
+
+function _legacyEncryptedSettings(settings, plainSettings) {
+  const legacy = _withoutPlainSessionToken(plainSettings);
+  _secretSettingFieldNames().forEach((key) => {
+    if (key !== "smrtProxyToken") legacy[key] = settings?.[key] || "";
+  });
+  return legacy;
+}
+
+function _restoreProxyTokenToSession(token) {
+  const value = String(token || "").trim();
+  if (!value) return false;
+  const input = document.getElementById("smrtProxyToken");
+  if (input) input.value = value;
+  try {
+    const current = JSON.parse(
+      sessionStorage.getItem("cadAiApiSettings") || "{}",
+    );
+    const sessionSettings = _collectProxySessionSettings();
+    sessionStorage.setItem(
+      "cadAiApiSettings",
+      JSON.stringify({ ...current, ...sessionSettings }),
+    );
+  } catch (_) {}
+  _notifyParentProxySession();
+  return true;
+}
+
 function saveSettingsToLocalStorage(skipWarning = false) {
   showContextualHelp(
     "Save Locally",
-    "⚠️ This saves UNENCRYPTED to localStorage - anyone can read it!",
+    "Saves non-secret preferences in this browser. API keys stay encrypted/blank in compatibility copies; proxy token stays session-only.",
   );
 
-  // Show safety warning for unencrypted storage
+  // Show safety note for local browser storage.
   if (
     !skipWarning &&
     !confirm(
-      "⚠️ SECURITY WARNING\n\nThis will save API keys in PLAIN TEXT to localStorage.\n\nAnyone with access to your browser can view these keys.\n\nFor better security, use the 🔐 Vault button to encrypt your keys.\n\nContinue with unencrypted save?",
+      "Save API Settings locally?\n\nThis stores provider choices, models, voices, proxyBaseUrl, and encrypted compatibility key fields in this browser.\n\nIt will not store SMRT_PROXY_TOKEN in plain localStorage. Use Vault for encrypted credential recovery.",
     )
   ) {
     logMessage("💡 Tip: Use 🔐 Vault for encrypted storage", "info");
@@ -7814,29 +8543,15 @@ function saveSettingsToLocalStorage(skipWarning = false) {
 
   try {
     const settings = collectAllSettings();
-
-    // ── Proxy mode: never persist server-managed key values ──────────────────
-    // In Vercel Secure Proxy mode the inputs are hidden and keys must stay
-    // server-side only. Even if the DOM field still holds a previously-typed
-    // value, we MUST NOT write it to localStorage.
-    const _activeMode = (() => {
-      const checked = document.querySelector(
-        'input[name="providerMode"]:checked',
-      );
-      return checked ? checked.value : "byok";
-    })();
+    if (!settings.proxyBaseUrl) settings.proxyBaseUrl = _defaultProxyBaseUrl();
 
     // Collect ALL plain (unencrypted) API keys for manager compatibility
     const plainSettings = {
       version: "2.1.0",
       lastSaved: new Date().toISOString(),
-      source: "SmDeltArt-ApiSettings",
-      // Text APIs
+      source: "SmDeltArt-ApiSettings", // Text APIs
       paidTextApi: document.getElementById("paidTextApi")?.value || "",
-      paidTextApiKey:
-        _activeMode === "proxy"
-          ? ""
-          : document.getElementById("paidTextApiKey")?.value || "",
+      paidTextApiKey: document.getElementById("paidTextApiKey")?.value || "",
       freeTextApi: document.getElementById("freeTextApi")?.value || "",
       freeTextApiKey: document.getElementById("freeTextApiKey")?.value || "",
       // Image APIs
@@ -7852,11 +8567,9 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       // STT APIs
       externalSttApi: document.getElementById("externalSttApi")?.value || "",
       externalSttApiKey:
-        _activeMode === "proxy"
-          ? ""
-          : document.getElementById("externalSttApiKey")?.value || "",
+        document.getElementById("externalSttApiKey")?.value || "",
       browserSttRadio:
-        document.getElementById("browserSttRadio")?.checked || true,
+        document.getElementById("browserSttRadio")?.checked ?? true,
       externalSttApiRadio:
         document.getElementById("externalSttApiRadio")?.checked || false,
       openaiSttModel:
@@ -7864,9 +8577,7 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       // TTS APIs
       externalTtsApi: document.getElementById("externalTtsApi")?.value || "",
       externalTtsApiKey:
-        _activeMode === "proxy"
-          ? ""
-          : document.getElementById("externalTtsApiKey")?.value || "",
+        document.getElementById("externalTtsApiKey")?.value || "",
       browserTtsVoice: document.getElementById("browserTtsVoice")?.value || "",
       // Radio button states
       websimApiRadio:
@@ -7897,6 +8608,10 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       openaiKeyLabel: getOpenAIKeyLabel(),
       openaiTextModel:
         document.getElementById("openaiTextModel")?.value || "gpt-5.5",
+      kimiTextModel:
+        document.getElementById("kimiTextModel")?.value || "kimi-k3",
+      kimiReasoningEffort:
+        document.getElementById("kimiReasoningEffort")?.value || "low",
       openaiImageModel:
         document.getElementById("openaiImageModel")?.value || "gpt-image-2",
       openaiSttModel:
@@ -7908,17 +8623,16 @@ function saveSettingsToLocalStorage(skipWarning = false) {
         document.getElementById("openaiTtsVoice")?.value || "alloy",
       edgeTtsVoice:
         document.getElementById("edgeTtsVoice")?.value || "en-US-AriaNeural",
-      elevenlabsVoice:
-        document.getElementById("elevenlabsCustomVoiceId")?.value?.trim() ||
-        document.getElementById("elevenlabsVoice")?.value ||
-        "",
+      elevenlabsTtsModelId:
+        document.getElementById("elevenlabsTtsModelId")?.value ||
+        "eleven_v3",
       elevenlabsVoiceName: (() => {
-        const customId = document
-          .getElementById("elevenlabsCustomVoiceId")
-          ?.value?.trim();
-        if (customId) return "Custom";
         const sel = document.getElementById("elevenlabsVoice");
-        return sel?.selectedOptions?.[0]?.textContent || "";
+        return (
+          sel?.selectedOptions?.[0]?.dataset?.voiceName ||
+          sel?.selectedOptions?.[0]?.textContent ||
+          ""
+        );
       })(),
       openaiVideoModel:
         document.getElementById("openaiVideoModel")?.value || "",
@@ -7935,17 +8649,6 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       // DeepSeek cloud model
       deepseekCloudModel:
         document.getElementById("deepseekCloudModel")?.value || "deepseek-v3",
-      // Provider mode (safe to persist — never contains actual key values)
-      providerMode: (() => {
-        const checked = document.querySelector(
-          'input[name="providerMode"]:checked',
-        );
-        return checked ? checked.value : "byok";
-      })(),
-      proxyBaseUrl:
-        document.getElementById("proxyBaseUrl")?.value?.trim() || "",
-      smrtProxyToken:
-        document.getElementById("smrtProxyToken")?.value?.trim() || "",
       // Active provider indicators (FIX: audit issue #2)
       activeTextProvider: document.getElementById("paidTextApiRadio")?.checked
         ? "paid"
@@ -7967,15 +8670,32 @@ function saveSettingsToLocalStorage(skipWarning = false) {
           : "websim",
     };
 
-    // Save encrypted to smdeltart key (primary) - contains API keys
-    localStorage.setItem("smdeltartApiSettings", JSON.stringify(settings));
+    // Carry provider mode + ElevenLabs voice list onto the legacy plain object
+    // so cadAiApiSettings / smartApiSettings fallbacks stay consistent and the
+    // bridge never loses the voice list.
+    plainSettings.providerMode = settings.providerMode;
+    delete plainSettings.elevenlabsVoiceList;
+    delete plainSettings.elevenlabsVoice;
+    delete plainSettings.elevenLabsVoiceId;
 
+    const persistentSettings = _withoutPlainSessionToken(settings);
+    const legacySettings = _legacyEncryptedSettings(settings, plainSettings);
+
+    // Primary local settings: normal preferences plus legacy-obfuscated key
+    // fields, never the session proxy token.
+    localStorage.setItem(
+      "smdeltartApiSettings",
+      JSON.stringify(persistentSettings),
+    );
     // Save PREFERENCES ONLY (no API keys!) for cross-widget sync
     // Apps read preferences here, but must get keys from encrypted vault
     const preferencesOnly = {
       version: settings.version,
       lastSaved: settings.lastSaved,
       source: settings.source,
+      providerMode: settings.providerMode,
+      proxyBaseUrl: persistentSettings.proxyBaseUrl || _defaultProxyBaseUrl(),
+      normalized: persistentSettings.normalized,
       // Provider selections (not keys)
       paidTextApi: plainSettings.paidTextApi,
       freeTextApi: plainSettings.freeTextApi,
@@ -8002,12 +8722,14 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       openaiProjectLabel: plainSettings.openaiProjectLabel,
       openaiKeyLabel: plainSettings.openaiKeyLabel,
       openaiTextModel: plainSettings.openaiTextModel,
+      kimiTextModel: plainSettings.kimiTextModel,
+      kimiReasoningEffort: plainSettings.kimiReasoningEffort,
       openaiImageModel: plainSettings.openaiImageModel,
       openaiSttModel: plainSettings.openaiSttModel,
       openaiTtsModel: plainSettings.openaiTtsModel,
       openaiTtsVoice: plainSettings.openaiTtsVoice,
       edgeTtsVoice: plainSettings.edgeTtsVoice,
-      elevenlabsVoice: plainSettings.elevenlabsVoice,
+      elevenlabsTtsModelId: plainSettings.elevenlabsTtsModelId,
       openaiVideoModel: plainSettings.openaiVideoModel,
       ollamaModel: plainSettings.ollamaModel,
       ollamaHost: plainSettings.ollamaHost,
@@ -8018,10 +8740,6 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       activeImageProvider: plainSettings.activeImageProvider,
       activeSttProvider: plainSettings.activeSttProvider,
       activeTtsProvider: plainSettings.activeTtsProvider,
-      // Provider mode (safe to share cross-widget — no secrets)
-      providerMode: plainSettings.providerMode,
-      proxyBaseUrl: plainSettings.proxyBaseUrl,
-      // Note: smrtProxyToken intentionally excluded from preferencesOnly
       // Fallback
       enableFallback: true,
       fallbackProvider: "pollinations",
@@ -8031,33 +8749,33 @@ function saveSettingsToLocalStorage(skipWarning = false) {
       JSON.stringify(preferencesOnly),
     );
 
-    // ⚠️ LEGACY: Keep for backward compatibility (will be removed in v3.0)
-    // These contain keys - apps should migrate to reading from vault
-    localStorage.setItem("cadAiApiSettings", JSON.stringify(plainSettings));
-    localStorage.setItem("smartApiSettings", JSON.stringify(plainSettings));
-    // Debug-level only: legacy plain storage is still intentionally written so
-    // consuming apps (studio managers) can read keys. Not an error.
+    // Legacy compatibility keys keep the old object shape, but secret fields
+    // are encrypted/blank and smrtProxyToken is never persisted here.
+    localStorage.setItem("cadAiApiSettings", JSON.stringify(legacySettings));
+    localStorage.setItem("smartApiSettings", JSON.stringify(legacySettings));
     console.debug(
-      "ℹ️ Legacy storage (cadAiApiSettings) written for app compatibility",
+      "ℹ️ Legacy storage written without plaintext proxy/session secrets",
     );
 
     logMessage("💾 Settings saved to localStorage!", "success");
     console.log(
       "💾 Saved settings (plain for managers):",
-      Object.keys(plainSettings),
+      Object.keys(legacySettings),
     );
 
     // Notify parent window (if in iframe) via widget-bridge protocol
     if (window.parent !== window) {
-      window.parent.postMessage(
-        {
-          type: "smart-widget",
-          action: "settings-saved",
-          // Include full plain settings so parent can cache cross-origin
-          data: plainSettings,
-        },
-        "*",
-      );
+      const targetOrigin = _trustedProxySessionParentOrigin();
+      if (targetOrigin) {
+        window.parent.postMessage(
+          {
+            type: "smart-widget",
+            action: "settings-saved",
+            data: legacySettings,
+          },
+          targetOrigin,
+        );
+      }
     }
 
     // Also save to vault if unlocked (AES-256-GCM encrypted)
@@ -8081,64 +8799,13 @@ function saveSettingsToLocalStorage(skipWarning = false) {
 
 // Save current test status to localStorage
 function saveTestResults() {
-  const testStatus = {
-    paidTextStatus:
-      document.getElementById("paidTextStatus")?.textContent === "✅",
-    freeTextStatus:
-      document.getElementById("freeTextStatus")?.textContent === "✅",
-    paidImageStatus:
-      document.getElementById("paidImageStatus")?.textContent === "✅",
-    freeImageStatus:
-      document.getElementById("freeImageStatus")?.textContent === "✅",
-    paidVideoStatus:
-      document.getElementById("paidVideoStatus")?.textContent === "✅",
-    freeVideoStatus:
-      document.getElementById("freeVideoStatus")?.textContent === "✅",
-    externalTtsStatus:
-      document.getElementById("externalTtsStatus")?.textContent === "✅",
-    lastTested: new Date().toISOString(),
-  };
-  localStorage.setItem("smdeltartApiTestStatus", JSON.stringify(testStatus));
-  console.log("✅ Test status saved:", testStatus);
+  localStorage.removeItem("smdeltartApiTestStatus");
 }
 
 // Restore test status from localStorage
 function restoreTestResults() {
   try {
-    const saved = localStorage.getItem("smdeltartApiTestStatus");
-    if (saved) {
-      const testStatus = JSON.parse(saved);
-      console.log("📋 Restoring test status:", testStatus);
-
-      // Restore individual status indicators
-      if (testStatus.paidTextStatus)
-        updateApiStatus("paidTextStatus", true, "Previously validated");
-      if (testStatus.freeTextStatus)
-        updateApiStatus("freeTextStatus", true, "Previously validated");
-      if (testStatus.paidImageStatus)
-        updateApiStatus("paidImageStatus", true, "Previously validated");
-      if (testStatus.freeImageStatus)
-        updateApiStatus("freeImageStatus", true, "Previously validated");
-      if (testStatus.paidVideoStatus)
-        updateApiStatus("paidVideoStatus", true, "Previously validated");
-      if (testStatus.freeVideoStatus)
-        updateApiStatus("freeVideoStatus", true, "Previously validated");
-      if (testStatus.externalTtsStatus)
-        updateApiStatus("externalTtsStatus", true, "Previously validated");
-
-      // Update category status
-      updateCategoryStatus();
-
-      // Log when last tested
-      if (testStatus.lastTested) {
-        const lastDate = new Date(testStatus.lastTested);
-        const ago = Math.round((Date.now() - lastDate) / 60000);
-        logMessage(
-          `✅ API keys loaded - click "Test All APIs" to validate`,
-          "info",
-        );
-      }
-    }
+    localStorage.removeItem("smdeltartApiTestStatus");
   } catch (e) {
     console.warn("Could not restore test status:", e);
   }
@@ -8158,34 +8825,36 @@ function loadSavedSettings() {
       // Auto-populate ElevenLabs voice dropdown if configured
       if (settings.externalTtsApi === "elevenlabs") {
         // If a voice was saved, add it as temp option so the dropdown isn't empty
-        const savedVoice = settings.elevenlabsVoice;
-        const sel = document.getElementById("elevenlabsVoice");
-        if (savedVoice && sel) {
-          const opt = document.createElement("option");
-          opt.value = savedVoice;
-          opt.textContent = savedVoice;
-          sel.innerHTML = "";
-          sel.appendChild(opt);
-          sel.value = savedVoice;
-        }
-        // Custom voice ID field
-        const customId = settings.elevenlabsCustomVoiceId;
-        if (customId) {
-          const customEl = document.getElementById("elevenlabsCustomVoiceId");
-          if (customEl) {
-            customEl.value = customId;
-            customEl.dispatchEvent(new Event("input"));
-          }
-        }
+        const savedVoiceName = settings.elevenlabsVoiceName || "";
         // Try to fetch full voice list (needs decrypted key from form)
         setTimeout(() => {
+          if (_getActiveProviderMode() === "proxy") {
+            _proxyFetchElevenLabsVoices(savedVoiceName).catch((e) => {
+              console.warn("Could not fetch ElevenLabs voices via proxy:", e);
+            });
+            return;
+          }
           const elKey = document.getElementById("externalTtsApiKey")?.value;
-          if (elKey) fetchElevenLabsVoices(elKey, savedVoice);
+          if (elKey) {
+            fetchElevenLabsVoices(elKey, savedVoiceName).catch((e) => {
+              console.warn("Could not fetch ElevenLabs voices:", e);
+            });
+          }
         }, 300);
       }
 
       // Restore test status after settings are applied
       setTimeout(() => restoreTestResults(), 100);
+    }
+    const modelSelect = document.getElementById("elevenlabsTtsModelId");
+    const directModel = localStorage.getItem("elevenlabsTtsModelId");
+    if (
+      modelSelect &&
+      (directModel === "eleven_v3" ||
+        directModel === "eleven_multilingual_v2") &&
+      !(saved && JSON.parse(saved)?.elevenlabsTtsModelId)
+    ) {
+      modelSelect.value = directModel;
     }
   } catch (e) {
     console.warn("Could not load settings:", e);
@@ -8194,9 +8863,39 @@ function loadSavedSettings() {
 
 /** Fetch ElevenLabs voices and populate the #elevenlabsVoice dropdown.
  *  @param {string} apiKey - the xi-api-key
- *  @param {string} [selectId] - voice_id to pre-select after populating
+ *  @param {string} [selectId] - friendly voice name to pre-select
  */
+function _persistElevenLabsVoiceCache(
+  voices,
+  selectedVoiceId,
+  selectedVoiceName,
+) {
+  try {
+    const keys = [
+      "smdeltartApiSettings",
+      "cadAiApiSettings",
+      "smartApiSettings",
+    ];
+    keys.forEach((key) => {
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : {};
+      delete parsed.elevenlabsVoiceList;
+      delete parsed.elevenlabsVoice;
+      delete parsed.elevenLabsVoiceId;
+      delete parsed.elevenlabsCustomVoiceId;
+      if (selectedVoiceName) parsed.elevenlabsVoiceName = selectedVoiceName;
+      localStorage.setItem(key, JSON.stringify(parsed));
+    });
+  } catch (err) {
+    console.warn("Could not persist ElevenLabs voice cache:", err);
+  }
+}
+
 async function fetchElevenLabsVoices(apiKey, selectId) {
+  if (_getActiveProviderMode() === "proxy") {
+    await _proxyFetchElevenLabsVoices(selectId);
+    return;
+  }
   if (!apiKey) return;
   // Decrypt if stored encrypted
   if (apiKey.startsWith("ENC:")) {
@@ -8213,29 +8912,13 @@ async function fetchElevenLabsVoices(apiKey, selectId) {
     const voices = data.voices || [];
     const sel = document.getElementById("elevenlabsVoice");
     if (!sel || voices.length === 0) return;
-    sel.innerHTML = "";
-    for (const v of voices) {
-      const opt = document.createElement("option");
-      opt.value = v.voice_id;
-      const cat =
-        v.category === "premade"
-          ? ""
-          : v.category === "cloned"
-            ? " (Cloned)"
-            : ` (${v.category || "Custom"})`;
-      opt.textContent = `${v.name}${cat}`;
-      sel.appendChild(opt);
-    }
-    if (selectId && [...sel.options].some((o) => o.value === selectId)) {
-      sel.value = selectId;
-      // Clear custom field — the voice is in the dropdown
-      const customEl = document.getElementById("elevenlabsCustomVoiceId");
-      if (customEl) customEl.value = "";
-    } else if (selectId) {
-      // Voice not in dropdown — put it in the custom field
-      const customEl = document.getElementById("elevenlabsCustomVoiceId");
-      if (customEl) customEl.value = selectId;
-    }
+    _setLocalElevenLabsVoiceOptions(sel, voices, selectId);
+    const selectedOption = sel.selectedOptions?.[0];
+    _persistElevenLabsVoiceCache(
+      voices,
+      "",
+      selectedOption?.dataset?.voiceName || selectedOption?.textContent || "",
+    );
     logMessage(`🔊 Loaded ${voices.length} ElevenLabs voice(s)`, "info");
   } catch (e) {
     console.warn("Could not fetch ElevenLabs voices:", e);
@@ -8244,12 +8927,22 @@ async function fetchElevenLabsVoices(apiKey, selectId) {
 
 function exportSettingsToFile() {
   try {
-    const settings = collectAllSettings();
+    const settings = _withoutPlainSessionToken(
+      _sanitizePrivateVoiceData(collectAllSettings()),
+    );
+    const vault = localStorage.getItem(ApiVault.STORAGE_KEY);
+    if (vault) {
+      try {
+        settings._vault = JSON.parse(vault);
+      } catch (_) {}
+    }
     // Add SmDeltArt collection signature for .ghfav format
     settings._ghfav = {
       collection: "SmDeltArt",
       version: "2.1",
       created: new Date().toISOString(),
+      secrets:
+        "API keys may be present as ENC: compatibility values; Vault data is encrypted. SMRT_PROXY_TOKEN is never exported in plain settings.",
     };
     const blob = new Blob([JSON.stringify(settings, null, 2)], {
       type: "application/x-ghfav",
@@ -8260,7 +8953,10 @@ function exportSettingsToFile() {
     a.download = `smdeltart-api-settings.ghfav`;
     a.click();
     URL.revokeObjectURL(url);
-    logMessage("📤 Settings exported to .ghfav file", "success");
+    logMessage(
+      "📤 Settings exported. Vault material, if present, remains encrypted; proxy token is not exported in plain settings.",
+      "success",
+    );
   } catch (e) {
     logMessage("❌ Export failed: " + e.message, "error");
   }
@@ -8288,6 +8984,11 @@ function importSettingsFromFile(event) {
   reader.onload = (e) => {
     try {
       const settings = JSON.parse(e.target.result);
+      const recoveredProxyToken =
+        typeof settings.smrtProxyToken === "string"
+          ? settings.smrtProxyToken.trim()
+          : "";
+      delete settings.smrtProxyToken;
 
       // Validate .ghfav signature - must be from SmDeltArt collection
       if (settings._ghfav) {
@@ -8302,8 +9003,20 @@ function importSettingsFromFile(event) {
         delete settings._ghfav;
       }
 
+      if (settings._vault && typeof settings._vault === "object") {
+        localStorage.setItem(
+          ApiVault.STORAGE_KEY,
+          JSON.stringify(settings._vault),
+        );
+        delete settings._vault;
+        ApiVault.isUnlocked = false;
+        ApiVault.masterKey = null;
+        updateVaultButtonState();
+      }
+
       applySettings(settings);
-      saveSettingsToLocalStorage();
+      saveSettingsToLocalStorage(true);
+      if (recoveredProxyToken) _restoreProxyTokenToSession(recoveredProxyToken);
       logMessage("📥 Settings imported successfully", "success");
     } catch (err) {
       logMessage("❌ Invalid settings file: " + err.message, "error");
@@ -8500,13 +9213,16 @@ function broadcastSync(data) {
   // Also try postMessage to opener window
   if (window.opener && !window.opener.closed) {
     try {
-      window.opener.postMessage(
-        {
-          type: "smdeltart-widget-sync",
-          ...data,
-        },
-        "*",
-      );
+      const targetOrigin = _trustedParentOrigin();
+      if (targetOrigin) {
+        window.opener.postMessage(
+          {
+            type: "smdeltart-widget-sync",
+            ...data,
+          },
+          targetOrigin,
+        );
+      }
     } catch (e) {
       console.log("Could not message opener:", e);
     }
@@ -8515,13 +9231,16 @@ function broadcastSync(data) {
   // And to parent frame if in iframe
   if (window.parent !== window) {
     try {
-      window.parent.postMessage(
-        {
-          type: "smdeltart-widget-sync",
-          ...data,
-        },
-        "*",
-      );
+      const targetOrigin = _trustedParentOrigin();
+      if (targetOrigin) {
+        window.parent.postMessage(
+          {
+            type: "smdeltart-widget-sync",
+            ...data,
+          },
+          targetOrigin,
+        );
+      }
     } catch (e) {
       console.log("Could not message parent:", e);
     }
@@ -8666,12 +9385,85 @@ function openDetachedWindow() {
   }
 }
 
-// ΔI is no longer clickable - just a styled element that matches favicon color
-// The color sync happens in initAnimatedFavicon() when favicon stops
-function setupHeaderLogoClick() {
-  // Nothing to do - ΔI is just styled text now, not a link
-  console.log("ΔI branding: color synced with favicon on stop");
+/* sync:begin developer-admin */
+function _apiSettingsDevUrl() {
+  const url = new URL(window.location.href);
+  url.searchParams.set("dev", "1");
+  url.hash = "advancedDeveloperSettings";
+  return url.href;
 }
+
+function _trustedParentOrigin() {
+  try {
+    const origin = new URL(document.referrer).origin;
+    const host = new URL(origin).hostname;
+    const trusted =
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "caddeltai.com" ||
+      host.endsWith(".caddeltai.com") ||
+      host === "smdeltart.com" ||
+      host.endsWith(".smdeltart.com") ||
+      host.endsWith(".vercel.app");
+    return trusted ? origin : "";
+  } catch {
+    return "";
+  }
+}
+
+// Only the small version badge activates developer UI; it never authorizes
+// proxy requests.
+function setupHeaderLogoClick() {
+  const versionBadge = document.getElementById("apiSettingsVersionBadge");
+  if (!versionBadge) return;
+
+  const targetUrl = _apiSettingsDevUrl();
+  versionBadge.setAttribute("href", targetUrl);
+  versionBadge.setAttribute("title", "Enable developer proxy settings");
+
+  versionBadge.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    if (window.parent === window) {
+      window.location.replace(targetUrl);
+      return;
+    }
+
+    const parentOrigin = _trustedParentOrigin();
+    if (!parentOrigin) {
+      window.location.replace(targetUrl);
+      return;
+    }
+
+    let acknowledged = false;
+    const onMessage = (messageEvent) => {
+      if (
+        messageEvent.origin === parentOrigin &&
+        messageEvent.data?.type === "smart-widget" &&
+        messageEvent.data?.action === "api-settings-dev-enabled"
+      ) {
+        acknowledged = true;
+        window.removeEventListener("message", onMessage);
+      }
+    };
+    window.addEventListener("message", onMessage);
+
+    window.parent.postMessage(
+      {
+        type: "smart-widget",
+        action: "api-settings-enable-dev",
+        data: { source: "api-settings", dev: true },
+      },
+      parentOrigin,
+    );
+
+    setTimeout(() => {
+      window.removeEventListener("message", onMessage);
+      if (!acknowledged) window.location.replace(targetUrl);
+    }, 500);
+  });
+}
+/* sync:end developer-admin */
 
 // Sync settings when saved
 const originalSaveSettings = window.saveSettings;
@@ -8735,7 +9527,9 @@ function applyContentScale() {
 // Initialize on load
 document.addEventListener("DOMContentLoaded", () => {
   initWidgetSync();
+  /* sync:begin developer-admin */
   setupHeaderLogoClick();
+  /* sync:end developer-admin */
   initAnimatedFavicon();
   disablePasswordManagers();
   applyContentScale();
@@ -8866,8 +9660,8 @@ function initAnimatedFavicon() {
         titleI.style.textShadow = `0 0 15px ${finalPosition.color}80`;
       }
 
-      // Tab title: favicon shows ΔI → tab completes to "CAD-ΔI API Settings"
-      document.title = "CAD-ΔI API Settings";
+      // Use the canonical product name in the browser tab.
+      document.title = "CAD-DELTAI API Settings";
 
       console.log(
         `🔺 Delta favicon stopped at ${finalPosition.name} (${finalPosition.rotation}°)`,
@@ -8910,37 +9704,63 @@ function initAnimatedFavicon() {
 // 🔒 PROVIDER MODE — Browser Fallback | Local BYOK | Vercel Secure Proxy
 // ====================================================================
 
-/**
- * Entry point for the Provider Mode UI.
- * Must be called AFTER loadSavedSettings() so radio states are already
- * restored by applySettings() before we derive the active mode.
- */
-function initProviderMode() {
-  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+let _proxyHealthOk = false;
 
-  // Derive active mode from whichever radio applySettings() already checked.
-  // If no radio is checked (first visit), default based on environment.
-  let mode = _getActiveProviderMode();
-  if (!mode) {
-    mode = isLocal ? "byok" : "proxy";
-    const defaultRadio = document.querySelector(
-      `input[name="providerMode"][value="${mode}"]`,
-    );
-    if (defaultRadio) defaultRadio.checked = true;
+function _applyProxySensitiveUi(mode) {
+  const hideKeys = mode === "proxy";
+  _setKeyInputVisibility(!hideKeys);
+  _setApiInfoLinkVisibility(!hideKeys);
+}
+
+function initProviderMode() {
+  const developerUIEnabled = Boolean(window.DOMAIN_CONFIG?.showDeveloperUI?.());
+
+  const apiAccessSection = document.getElementById("advancedDeveloperSettings");
+  const managedBadge = document.getElementById("managedProxyStatus");
+
+  if (apiAccessSection) {
+    apiAccessSection.style.display = developerUIEnabled ? "" : "none";
   }
 
-  // Apply UI sections for the current mode
-  applyProviderModeUI(mode);
+  if (managedBadge) {
+    managedBadge.style.display = developerUIEnabled ? "none" : "block";
+  }
 
-  // Bind radio change events (future user changes)
+  let mode = _getActiveProviderMode();
+  // Restore the persisted mode (survives reload / "call back API") before we
+  // apply UI — otherwise the HTML default (BYOK) would win and silently
+  // override a saved Secure Proxy choice.
+  const storedMode = _readStoredProviderMode();
+  if (storedMode) {
+    mode = storedMode;
+    const r = document.querySelector(
+      `input[name="providerMode"][value="${mode}"]`,
+    );
+    if (r) r.checked = true;
+  }
+  if (!mode) {
+    mode = "proxy";
+    const r = document.querySelector(
+      `input[name="providerMode"][value="${mode}"]`,
+    );
+    if (r) r.checked = true;
+  }
+  applyProviderModeUI(mode);
   document.querySelectorAll('input[name="providerMode"]').forEach((r) => {
     r.addEventListener("change", () => {
-      if (!r.checked) return;
-      applyProviderModeUI(r.value);
+      if (r.checked) {
+        applyProviderModeUI(r.value);
+        // Persist immediately so switching mode is never lost.
+        _persistProviderMode(r.value);
+      }
     });
   });
-
-  // Bind proxy test buttons
+  document.addEventListener("change", () => {
+    const active = _getActiveProviderMode();
+    if (active === "proxy") {
+      _applyProxySensitiveUi(active);
+    }
+  });
   document
     .getElementById("checkProxyHealthBtn")
     ?.addEventListener("click", _proxyCheckHealth);
@@ -8948,68 +9768,138 @@ function initProviderMode() {
     .getElementById("testOpenAiProxyBtn")
     ?.addEventListener("click", _proxyTestOpenAI);
   document
+    .getElementById("testMoonshotProxyBtn")
+    ?.addEventListener("click", _proxyTestMoonshot);
+  document
     .getElementById("testElevenLabsProxyBtn")
     ?.addEventListener("click", _proxyTestElevenLabs);
   document
     .getElementById("testAiHealthBtn")
     ?.addEventListener("click", _proxyTestAiHealth);
-
-  // Auto-check health in proxy mode on non-local environments
-  if (mode === "proxy" && !isLocal) {
+  if (mode === "proxy" && developerUIEnabled)
     setTimeout(_proxyCheckHealth, 1500);
+  console.log(`🔒 Provider mode: ${mode} (developerUI=${developerUIEnabled})`);
+}
+
+function _getActiveProviderMode() {
+  const c = document.querySelector('input[name="providerMode"]:checked');
+  return c ? c.value : null;
+}
+
+// Read the persisted provider mode from any storage key (byok | proxy).
+function _readStoredProviderMode() {
+  const keys = ["smdeltartApiSettings", "cadAiApiSettings", "smartApiSettings"];
+  for (const key of keys) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const s = JSON.parse(raw);
+      if (s?.providerMode === "proxy" || s?.providerMode === "byok") {
+        return s.providerMode;
+      }
+      if (s?.modeProxy === true) return "proxy";
+      if (s?.modeByok === true) return "byok";
+    } catch (_) {}
+  }
+  return null;
+}
+
+// Write the active provider mode into every settings key immediately, so a
+// mode switch is never lost even before the user clicks "Save Locally".
+function _persistProviderMode(mode) {
+  const value = mode === "proxy" ? "proxy" : "byok";
+  const keys = ["smdeltartApiSettings", "cadAiApiSettings", "smartApiSettings"];
+  keys.forEach((key) => {
+    try {
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed.providerMode = value;
+      parsed.modeProxy = value === "proxy";
+      parsed.modeByok = value === "byok";
+      localStorage.setItem(key, JSON.stringify(parsed));
+    } catch (_) {}
+  });
+}
+
+// Test the currently chosen OpenAI model directly from its section when the
+// model dropdown changes, so the section "check" turns green/red immediately
+// — without needing to open the proxy section. Works in both Secure Proxy and
+// Local BYOK modes. Debounced by the caller.
+async function _testModelChoiceDirect(kind) {
+  if (isLoadingSettings) return;
+  const proxyMode = _getActiveProviderMode() === "proxy";
+
+  if (kind === "text") {
+    const statusId = "paidTextStatus";
+    if (proxyMode) {
+      updateStatus(document.getElementById(statusId), "🔍");
+      const res = await _runProxyTextTest();
+      updateApiStatus(statusId, res.success, res.message);
+      if (res.provider === "openai") {
+        _setOpenAITextModelVerified(res.success, res.model, res.message);
+      }
+      updateCategoryStatus();
+      return;
+    }
+    const apiKey = document.getElementById("paidTextApiKey")?.value?.trim();
+    if (!apiKey) return; // No key to test with in BYOK mode.
+    await testOpenAITextAPI(apiKey, document.getElementById(statusId));
+    updateCategoryStatus();
+    return;
   }
 
-  console.log(`🔒 Provider mode initialised: ${mode} (isLocal=${isLocal})`);
+  if (kind === "image") {
+    const statusId = "paidImageStatus";
+    if (proxyMode) {
+      updateStatus(document.getElementById(statusId), "🔍");
+      const res = await _runProxyOpenAIImageTest();
+      updateApiStatus(statusId, res.success, res.message);
+      updateCategoryStatus();
+      return;
+    }
+    const apiKey = document.getElementById("paidImageApiKey")?.value?.trim();
+    if (!apiKey) return;
+    await testOpenAIImageAPI(apiKey, document.getElementById(statusId));
+    updateCategoryStatus();
+  }
 }
 
-/** Returns the currently checked providerMode radio value, or null. */
-function _getActiveProviderMode() {
-  const checked = document.querySelector('input[name="providerMode"]:checked');
-  return checked ? checked.value : null;
-}
-
-/**
- * Show/hide UI sections depending on the selected provider mode.
- * @param {'browser'|'byok'|'proxy'} mode
- */
 function applyProviderModeUI(mode) {
-  // BYOK warning banner
   const byokWarning = document.getElementById("byokWarning");
   if (byokWarning) byokWarning.style.display = mode === "byok" ? "" : "none";
-
-  // Proxy configuration panel (URL, token, test buttons)
   const proxyConfig = document.getElementById("proxyConfig");
   if (proxyConfig) proxyConfig.style.display = mode === "proxy" ? "" : "none";
-
-  // In proxy mode hide the key inputs — keys live only on the server.
-  // The selects (provider picker) stay visible so users know which service is used.
-  _setKeyInputVisibility(mode !== "proxy");
-
-  // Update status badge
+  _applyProxySensitiveUi(mode);
   const badges = { browser: "🌐", byok: "🔑", proxy: "🛡️" };
   const statusEl = document.getElementById("providerModeStatus");
   if (statusEl) statusEl.textContent = badges[mode] || "🔵";
+
+  // In proxy mode, preload ElevenLabs voices from server so browser key is never required.
+  if (
+    mode === "proxy" &&
+    document.getElementById("externalTtsApi")?.value === "elevenlabs"
+  ) {
+    _proxyFetchElevenLabsVoices().catch((e) => {
+      console.warn("Proxy voice preload failed:", e);
+    });
+  }
 }
 
-/**
- * Hide or show the key <input> fields that must stay server-side in proxy mode.
- * Only the inputs themselves (and their hint rows) are toggled; selects remain.
- */
 function _setKeyInputVisibility(visible) {
-  // IDs of API key inputs that are replaced by the server-side proxy.
-  // Cloudinary is intentionally omitted: it has its own section and the user
-  // may still want to configure it for direct-upload use-cases.
-  const proxyManagedIds = [
+  [
     "paidTextApiKey",
+    "freeTextApiKey",
+    "paidImageApiKey",
+    "freeImageApiKey",
+    "paidVideoApiKey",
+    "freeVideoApiKey",
     "externalTtsApiKey",
     "externalSttApiKey",
-  ];
-
-  proxyManagedIds.forEach((id) => {
+  ].forEach((id) => {
     const input = document.getElementById(id);
     if (!input) return;
     input.style.display = visible ? "" : "none";
-    // Also hide the companion key-format hint
+    input.disabled = !visible;
     const hint = document.getElementById(
       id.replace("ApiKey", "KeyHint").replace("Key", "Hint"),
     );
@@ -9017,121 +9907,865 @@ function _setKeyInputVisibility(visible) {
   });
 }
 
-// ─── Proxy helpers ────────────────────────────────────────────────────────────
+function _setApiInfoLinkVisibility(visible) {
+  document.querySelectorAll(".api-info-link").forEach((el) => {
+    el.style.display = visible ? "inline-block" : "none";
+    el.style.pointerEvents = visible ? "" : "none";
+    el.style.opacity = visible ? "1" : "0.45";
+  });
+}
+
+// After a successful proxy test, never keep the raw key visible in the local
+// (BYOK) section — replace it with a masked status chip. The stored value is
+// untouched; only the on-screen rendering changes.
+function _showLocalKeyConnected(statusText = "Connected · stored locally") {
+  const input = document.getElementById("paidTextApiKey");
+  if (!input) return;
+  input.dataset.maskedConnected = "1";
+  input.style.display = "none";
+
+  let chip = document.getElementById("localKeyConnectedStatus");
+  if (!chip) {
+    chip = document.createElement("div");
+    chip.id = "localKeyConnectedStatus";
+    chip.style.cssText =
+      "margin:6px 0;padding:6px 10px;border-radius:6px;" +
+      "background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.35);" +
+      "color:#86efac;font-size:0.8em;font-weight:600;";
+    input.parentNode.insertBefore(chip, input.nextSibling);
+  }
+  chip.textContent = `🔒 ${statusText}`;
+  chip.style.display = "";
+}
+
+function _defaultProxyBaseUrl() {
+  const hostname = String(window.location.hostname || "").toLowerCase();
+  if (
+    hostname === "api-caddeltai.vercel.app" ||
+    hostname.startsWith("api-caddeltai-git-")
+  ) {
+    return "https://api-caddeltai.vercel.app";
+  }
+  return "https://api.caddeltai.com";
+}
 
 function _proxyBaseUrl() {
-  return (document.getElementById("proxyBaseUrl")?.value || "")
+  return (
+    document.getElementById("proxyBaseUrl")?.value ||
+    _defaultProxyBaseUrl()
+  )
     .trim()
     .replace(/\/$/, "");
 }
-
 function _proxyToken() {
   return (document.getElementById("smrtProxyToken")?.value || "").trim();
 }
 
-function _proxyHeaders() {
-  const h = { "Content-Type": "application/json" };
-  const t = _proxyToken();
-  if (t) h["x-smrt-token"] = t;
-  return h;
+const PROXY_SESSION_PARENT_ORIGINS = new Set([
+  "https://studio.caddeltai.com",
+  "https://studio.smdeltart.com",
+  "https://studio-caddeltai.vercel.app",
+]);
+
+function _trustedProxySessionParentOrigin() {
+  try {
+    const referrer = new URL(document.referrer);
+    const isLocal =
+      (referrer.hostname === "localhost" ||
+        referrer.hostname === "127.0.0.1") &&
+      (referrer.protocol === "http:" || referrer.protocol === "https:");
+    if (
+      referrer.origin === window.location.origin ||
+      PROXY_SESSION_PARENT_ORIGINS.has(referrer.origin) ||
+      isLocal
+    ) {
+      return referrer.origin;
+    }
+  } catch (_) {}
+  return "";
 }
 
+function _collectProxySessionSettings() {
+  const settings = {
+    smrtProxyToken: _proxyToken(),
+    // Resolve the Widgets canonical API default before sharing the session.
+    proxyBaseUrl: _proxyBaseUrl() || _defaultProxyBaseUrl(),
+    providerMode: _getActiveProviderMode() || "proxy",
+  };
+  settings.modeProxy = settings.providerMode === "proxy";
+  settings.modeByok = settings.providerMode === "byok";
+  [
+    "paidTextApi",
+    "externalTtsApi",
+    "externalSttApi",
+    "elevenlabsTtsModelId",
+    "elevenlabsVoiceName",
+    "openaiTextModel",
+    "kimiTextModel",
+    "kimiReasoningEffort",
+    "openaiImageModel",
+    "openaiTtsModel",
+    "openaiTtsVoice",
+    "openaiSttModel",
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el?.value) settings[id] = el.value;
+  });
+  ["kimiTextModel", "kimiReasoningEffort", "elevenlabsTtsModelId"].forEach(
+    (id) => {
+      document.getElementById(id)?.addEventListener("change", () => {
+        clearTimeout(window.autoSaveTimeout);
+        window.autoSaveTimeout = setTimeout(() => saveApiSettingsLocally(), 400);
+      });
+    },
+  );
+  const selectedElevenLabsVoice =
+    document.getElementById("elevenlabsVoice")?.selectedOptions?.[0];
+  if (selectedElevenLabsVoice?.textContent) {
+    settings.elevenlabsVoiceName =
+      selectedElevenLabsVoice.textContent.trim();
+  }
+  settings.externalTtsApiRadio =
+    document.getElementById("externalTtsApiRadio")?.checked || false;
+  settings.externalSttApiRadio =
+    document.getElementById("externalSttApiRadio")?.checked || false;
+  return _attachNormalizedSettingsContract(
+    settings,
+    Boolean(settings.smrtProxyToken),
+  );
+}
+
+function _notifyParentProxySession({ clear = false } = {}) {
+  const targetOrigin = _trustedProxySessionParentOrigin();
+  const targetWindow =
+    window.parent !== window
+      ? window.parent
+      : window.opener && !window.opener.closed
+        ? window.opener
+        : null;
+  if (!targetOrigin || !targetWindow) return false;
+  const data = clear ? {} : _collectProxySessionSettings();
+  if (!clear && !data.smrtProxyToken) return false;
+  targetWindow.postMessage(
+    {
+      type: "smart-widget",
+      action: clear ? "proxy-session-clear" : "proxy-session",
+      data,
+    },
+    targetOrigin,
+  );
+  return true;
+}
+
+function _purgePlaintextProxyToken() {
+  ["smdeltartApiSettings", "cadAiApiSettings", "smartApiSettings"].forEach(
+    (key) => {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        const settings = JSON.parse(raw);
+        if (!settings || typeof settings !== "object") return;
+        if (!Object.prototype.hasOwnProperty.call(settings, "smrtProxyToken"))
+          return;
+        delete settings.smrtProxyToken;
+        localStorage.setItem(key, JSON.stringify(settings));
+      } catch (_) {}
+    },
+  );
+}
+_purgePlaintextProxyToken();
+
+function _proxyHeaders() {
+  const t = _proxyToken();
+  if (!t) {
+    throw new Error(
+      "Proxy token required — unlock the vault or enter SMRT_PROXY_TOKEN",
+    );
+  }
+  return {
+    "Content-Type": "application/json",
+    "x-smrt-token": t,
+  };
+}
 function _proxyUrl(path) {
-  const base = _proxyBaseUrl();
-  return base ? `${base}${path}` : path;
+  const b = _proxyBaseUrl();
+  return b ? `${b}${path}` : path;
+}
+// The model-list helper is loaded as a separate classic script.
+window._proxyUrl = _proxyUrl;
+window._proxyHeaders = _proxyHeaders;
+
+function _isGpt5StyleModel(model) {
+  return /^gpt-5(\b|[\s.-])/i.test(String(model || "").trim());
+}
+
+// Aliases are UI labels that must NOT be sent to OpenAI literally — they are
+// mapped to a real, valid internal model id before any request is built.
+const OPENAI_MODEL_ALIASES = {
+  "gpt-5.6 luna": "gpt-5.5",
+  "gpt-5.6-luna": "gpt-5.5",
+  "gpt-5.6 sol": "gpt-5.5",
+  "gpt-5.6-sol": "gpt-5.5",
+};
+
+function resolveOpenAiModelId(model) {
+  const raw = String(model || "").trim();
+  const key = raw.toLowerCase();
+  return OPENAI_MODEL_ALIASES[key] || raw;
+}
+window.resolveOpenAiModelId = resolveOpenAiModelId;
+
+function _buildOpenAIChatPayload(model, messages, tokenBudget, opts = {}) {
+  const resolvedModel = resolveOpenAiModelId(model);
+  const forceMaxCompletionTokens = opts.forceMaxCompletionTokens === true;
+  const payload = {
+    model: resolvedModel,
+    messages,
+  };
+
+  if (forceMaxCompletionTokens || _isGpt5StyleModel(resolvedModel)) {
+    payload.max_completion_tokens = tokenBudget;
+  } else {
+    payload.max_tokens = tokenBudget;
+  }
+
+  return payload;
+}
+
+function _extractApiErrorMessage(data, fallback = "Unknown error") {
+  const raw =
+    data?.error?.message ??
+    data?.error ??
+    data?.detail ??
+    data?.message ??
+    data;
+
+  if (typeof raw === "string" && raw.trim()) return raw;
+  try {
+    const asJson = JSON.stringify(raw);
+    return asJson && asJson !== "{}" ? asJson : fallback;
+  } catch {
+    return raw ? String(raw) : fallback;
+  }
+}
+
+function _shouldRetryWithMaxCompletionTokens(response, data) {
+  if (response?.ok) return false;
+  const msg = _extractApiErrorMessage(data, "").toLowerCase();
+  return msg.includes("max_tokens") && msg.includes("max_completion_tokens");
 }
 
 async function _proxyCheckHealth() {
-  const statusEl = document.getElementById("proxyHealthStatus");
-  if (statusEl) statusEl.textContent = "⏳ Checking…";
+  const el = document.getElementById("proxyHealthStatus");
+  if (el) el.textContent = "⏳ Checking…";
   try {
-    const res = await fetch(_proxyUrl("/api/ai-health"));
-    if (!res.ok) {
-      if (statusEl) statusEl.textContent = `❌ HTTP ${res.status}`;
+    const r = await fetch(_proxyUrl("/api/ai-health"), {
+      headers: _proxyHeaders(),
+    });
+    if (!r.ok) {
+      _proxyHealthOk = false;
+      _applyProxySensitiveUi(_getActiveProviderMode());
+      if (el) el.textContent = `❌ HTTP ${r.status}`;
       return;
     }
-    const d = await res.json();
+    const d = await r.json();
+    const services = d?.services || d || {};
+    _proxyHealthOk = Boolean(
+      services.openai || services.moonshot || services.elevenlabs,
+    );
+    _applyProxySensitiveUi(_getActiveProviderMode());
     const parts = [
-      d.openai ? "✅ OpenAI" : "⚠️ OpenAI (not set)",
-      d.elevenlabs ? "✅ ElevenLabs" : "⚠️ ElevenLabs (not set)",
-      d.cloudinary ? "✅ Cloudinary" : "⚠️ Cloudinary (not set)",
+      services.openai ? "✅ OpenAI" : "⚠️ OpenAI (not set)",
+      services.moonshot ? "✅ Moonshot Kimi" : "⚠️ Moonshot Kimi (not set)",
+      services.elevenlabs ? "✅ ElevenLabs" : "⚠️ ElevenLabs (not set)",
     ];
-    if (statusEl) statusEl.textContent = parts.join(" · ");
+    if (el) el.textContent = parts.join(" · ");
   } catch (err) {
-    if (statusEl) statusEl.textContent = `❌ ${err.message}`;
+    _proxyHealthOk = false;
+    _applyProxySensitiveUi(_getActiveProviderMode());
+    if (el) el.textContent = `❌ ${err.message}`;
+  }
+}
+
+// Mark the chosen OpenAI text model as verified (green) or failed (red) on the
+// model status line — works for both Secure Proxy and Local BYOK tests.
+function _setOpenAITextModelVerified(ok, model, note = "") {
+  const el = document.getElementById("openaiTextModelStatus");
+  if (!el) return;
+  const m =
+    model || document.getElementById("openaiTextModel")?.value || "model";
+  const when = new Date().toLocaleTimeString();
+  if (ok) {
+    el.innerHTML =
+      `<span style="color:#4ade80"><strong>✅ ${escapeHtml(m)} verified</strong></span>` +
+      (note ? ` · ${escapeHtml(note)}` : "") +
+      `<br><span style="color:#9ca3af">Checked: ${escapeHtml(when)}</span>`;
+  } else {
+    el.innerHTML =
+      `<span style="color:#f87171"><strong>❌ ${escapeHtml(m)} not verified</strong></span>` +
+      (note ? ` · ${escapeHtml(note)}` : "");
+  }
+}
+window._setOpenAITextModelVerified = _setOpenAITextModelVerified;
+
+// ── Reusable proxy test cores (return structured results) ─────────────────
+async function _runProxyOpenAITest() {
+  const endpoint = _proxyUrl("/api/openai-chat");
+  const model =
+    document.getElementById("openaiTextModel")?.value ||
+    document.getElementById("openaiTextModel")?.options?.[0]?.value ||
+    "gpt-5.5";
+  try {
+    let r = await fetch(endpoint, {
+      method: "POST",
+      headers: _proxyHeaders(),
+      body: JSON.stringify(
+        _buildOpenAIChatPayload(
+          model,
+          [{ role: "user", content: "Reply with exactly: OK" }],
+          5,
+        ),
+      ),
+    });
+    let d = await r.json().catch(() => ({}));
+
+    if (!r.ok && _shouldRetryWithMaxCompletionTokens(r, d)) {
+      r = await fetch(endpoint, {
+        method: "POST",
+        headers: _proxyHeaders(),
+        body: JSON.stringify(
+          _buildOpenAIChatPayload(
+            model,
+            [{ role: "user", content: "Reply with exactly: OK" }],
+            5,
+            { forceMaxCompletionTokens: true },
+          ),
+        ),
+      });
+      d = await r.json().catch(() => ({}));
+    }
+
+    if (r.ok) {
+      const content = d.choices?.[0]?.message?.content?.trim() || "OK";
+      return {
+        success: true,
+        provider: "openai",
+        message: `OpenAI proxy OK — "${content}"`,
+        status: r.status,
+        model,
+      };
+    }
+    const msg = _extractApiErrorMessage(d, "Unknown error");
+    return {
+      success: false,
+      provider: "openai",
+      message: `OpenAI proxy failed | HTTP ${r.status} | endpoint: ${endpoint} | model: ${model} | error: ${msg}`,
+      status: r.status,
+      model,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      provider: "openai",
+      message: `OpenAI proxy error: ${err.message}`,
+      status: 0,
+      model,
+    };
+  }
+}
+async function _runProxyMoonshotTest() {
+  const endpoint = _proxyUrl("/api/moonshot-chat");
+  const model = document.getElementById("kimiTextModel")?.value || "kimi-k3";
+  const reasoningEffort =
+    document.getElementById("kimiReasoningEffort")?.value || "low";
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: _proxyHeaders(),
+      body: JSON.stringify({
+        model,
+        messages: [{ role: "user", content: "Reply with exactly: OK" }],
+        max_completion_tokens: 32,
+        reasoning_effort: reasoningEffort,
+      }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (response.ok) {
+      const content = data.choices?.[0]?.message?.content?.trim() || "OK";
+      return {
+        success: true,
+        provider: "kimi",
+        message: `Moonshot Kimi proxy OK — "${content}"`,
+        status: response.status,
+        model,
+      };
+    }
+    return {
+      success: false,
+      provider: "kimi",
+      message: `Moonshot Kimi proxy failed | HTTP ${response.status} | model: ${model} | error: ${_extractApiErrorMessage(data, "Unknown error")}`,
+      status: response.status,
+      model,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      provider: "kimi",
+      message: `Moonshot Kimi proxy error: ${error.message}`,
+      status: 0,
+      model,
+    };
+  }
+}
+
+async function _runProxyTextTest() {
+  return document.getElementById("paidTextApi")?.value === "kimi"
+    ? _runProxyMoonshotTest()
+    : _runProxyOpenAITest();
+}
+
+async function _runProxyElevenLabsTest() {
+  const endpoint = _proxyUrl("/api/elevenlabs-tts");
+  try {
+    const r = await fetch(endpoint, {
+      method: "POST",
+      headers: _proxyHeaders(),
+      body: JSON.stringify({
+        text: "Test",
+        voiceAlias: "server-default",
+        model_id:
+          document.getElementById("elevenlabsTtsModelId")?.value ||
+          "eleven_v3",
+      }),
+    });
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({ error: r.status }));
+      return {
+        success: false,
+        provider: "elevenlabs",
+        message: `ElevenLabs proxy: ${_extractApiErrorMessage(e, r.status)}`,
+        status: r.status,
+      };
+    }
+    return {
+      success: true,
+      provider: "elevenlabs",
+      message: "ElevenLabs proxy OK — audio/mpeg received",
+      status: r.status,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      provider: "elevenlabs",
+      message: `ElevenLabs proxy error: ${err.message}`,
+      status: 0,
+    };
+  }
+}
+
+async function _runProxyOpenAITtsTest() {
+  const endpoint = _proxyUrl("/api/openai-tts");
+  const model =
+    document.getElementById("openaiTtsModel")?.value || "gpt-4o-mini-tts";
+  const voice = document.getElementById("openaiTtsVoice")?.value || "alloy";
+  try {
+    const r = await fetch(endpoint, {
+      method: "POST",
+      headers: _proxyHeaders(),
+      body: JSON.stringify({ text: "Test", model, voice }),
+    });
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({ error: r.status }));
+      return {
+        success: false,
+        provider: "openai-tts",
+        message: `OpenAI TTS proxy: ${_extractApiErrorMessage(e, r.status)}`,
+        status: r.status,
+      };
+    }
+    return {
+      success: true,
+      provider: "openai-tts",
+      message: "OpenAI TTS proxy OK — audio received",
+      status: r.status,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      provider: "openai-tts",
+      message: `OpenAI TTS proxy error: ${err.message}`,
+      status: 0,
+    };
+  }
+}
+
+// Image generation via the secure server proxy (no browser origin limits, no
+// local key). Returns a structured result like the other proxy cores.
+async function _runProxyOpenAIImageTest() {
+  const endpoint = _proxyUrl("/api/openai-image");
+  const model =
+    document.getElementById("openaiImageModel")?.value || "gpt-image-2";
+  try {
+    const r = await fetch(endpoint, {
+      method: "POST",
+      headers: _proxyHeaders(),
+      body: JSON.stringify({
+        prompt: "A simple blue circle on a white background, minimalist",
+        model,
+        n: 1,
+        size: model === "dall-e-2" ? "256x256" : "1024x1024",
+        ...(model.startsWith("gpt-image")
+          ? {
+              quality: "low",
+              background: "opaque",
+              output_format: "png",
+            }
+          : {}),
+      }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok && Array.isArray(d.data) && d.data.length) {
+      return {
+        success: true,
+        provider: "openai-image",
+        message: `OpenAI Image proxy OK — ${model} generated 1 image`,
+        status: r.status,
+        model,
+      };
+    }
+    const msg = _extractApiErrorMessage(d, `HTTP ${r.status}`);
+    return {
+      success: false,
+      provider: "openai-image",
+      message: `OpenAI Image proxy failed | HTTP ${r.status} | model: ${model} | error: ${msg}`,
+      status: r.status,
+      model,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      provider: "openai-image",
+      message: `OpenAI Image proxy error: ${err.message}`,
+      status: 0,
+      model,
+    };
+  }
+}
+
+// True when the currently selected <option> needs no API key (free / no-key).
+function _selectedOptionNeedsNoKey(selectId) {
+  const sel = document.getElementById(selectId);
+  const opt = sel?.selectedOptions?.[0];
+  if (!opt) return false;
+  const fmt = opt.getAttribute("data-key-format");
+  const isFree = opt.getAttribute("data-free") === "true";
+  return isFree || fmt === "" || fmt === null;
+}
+
+// Secure Proxy "Test APIs" flow — never reads or validates local key inputs.
+async function _testAllApisProxyMode() {
+  addLogEntry(
+    "🛡️ Secure Proxy mode — testing via Vercel endpoints (local keys skipped)...",
+    "info",
+  );
+  let successCount = 0;
+  let totalTests = 0;
+  const setIcon = (id, ok) => {
+    const e = document.getElementById(id);
+    if (e) e.textContent = ok ? "✅" : "❌";
+  };
+
+  // [1/4] Text → selected OpenAI or Moonshot Kimi proxy.
+  addLogEntry("[1/4] 📝 Text API via selected secure proxy...", "info");
+  {
+    totalTests++;
+    const res = await _runProxyTextTest();
+    if (res.provider === "openai") {
+      _setOpenAITextModelVerified(res.success, res.model, res.message);
+    }
+    if (res.success) {
+      successCount++;
+      addLogEntry(`✅ ${res.message}`, "success");
+      setIcon("paidTextStatus", true);
+      setIcon("textApiStatus", true);
+    } else {
+      addLogEntry(`❌ ${res.message}`, "error");
+      setIcon("paidTextStatus", false);
+    }
+  }
+
+  // [2/4] Image — no proxy image route; free/no-key providers still testable.
+  const imageProvider = document.querySelector(
+    'input[name="imageApiProvider"]:checked',
+  )?.value;
+  addLogEntry(
+    `[2/4] 🎨 Image API via proxy (Provider: ${imageProvider})...`,
+    "info",
+  );
+  if (imageProvider === "free" && _selectedOptionNeedsNoKey("freeImageApi")) {
+    const freeImageApi = document.getElementById("freeImageApi")?.value;
+    if (freeImageApi) {
+      totalTests++;
+      try {
+        const ok = await testAndUpdateApiStatus(
+          freeImageApi,
+          "",
+          "freeImageStatus",
+        );
+        if (ok) {
+          successCount++;
+          addLogEntry(`✅ ${freeImageApi} image OK (local, no key)`, "success");
+        } else {
+          addLogEntry(`❌ ${freeImageApi} image failed`, "error");
+        }
+      } catch (e) {
+        addLogEntry(`❌ Image error: ${e.message}`, "error");
+      }
+    } else {
+      addLogEntry("⚠️ No free image API selected", "warning");
+    }
+  } else if (imageProvider === "paid") {
+    const paidImageApi = document.getElementById("paidImageApi")?.value;
+    if (
+      paidImageApi === "openai-dalle" ||
+      paidImageApi === "openai-image" ||
+      paidImageApi === "openai"
+    ) {
+      totalTests++;
+      const res = await _runProxyOpenAIImageTest();
+      if (res.success) {
+        successCount++;
+        addLogEntry(`✅ ${res.message}`, "success");
+        setIcon("paidImageStatus", true);
+        setIcon("imageApiStatus", true);
+      } else {
+        addLogEntry(`❌ ${res.message}`, "error");
+        setIcon("paidImageStatus", false);
+      }
+    } else if (paidImageApi) {
+      addLogEntry(
+        `ℹ️ ${paidImageApi} image has no Secure Proxy route — skipped.`,
+        "info",
+      );
+    } else {
+      addLogEntry("⚠️ No paid image API selected", "warning");
+    }
+  } else {
+    addLogEntry(
+      "ℹ️ No proxy-testable image provider selected (key not evaluated).",
+      "info",
+    );
+  }
+
+  // [3/4] TTS → ElevenLabs / OpenAI TTS proxies; free/no-key stay local.
+  const ttsProvider = document.querySelector(
+    'input[name="ttsApiProvider"]:checked',
+  )?.value;
+  addLogEntry(
+    `[3/4] 🗣️ TTS API via proxy (Provider: ${ttsProvider})...`,
+    "info",
+  );
+  if (ttsProvider === "external") {
+    const ttsApi = document.getElementById("externalTtsApi")?.value;
+    if (ttsApi === "elevenlabs") {
+      totalTests++;
+      const res = await _runProxyElevenLabsTest();
+      if (res.success) {
+        successCount++;
+        addLogEntry(`✅ ${res.message}`, "success");
+        setIcon("externalTtsStatus", true);
+      } else {
+        addLogEntry(`❌ ${res.message}`, "error");
+        setIcon("externalTtsStatus", false);
+      }
+    } else if (ttsApi === "openai-tts") {
+      totalTests++;
+      const res = await _runProxyOpenAITtsTest();
+      if (res.success) {
+        successCount++;
+        addLogEntry(`✅ ${res.message}`, "success");
+        setIcon("externalTtsStatus", true);
+      } else {
+        addLogEntry(`❌ ${res.message}`, "error");
+        setIcon("externalTtsStatus", false);
+      }
+    } else if (ttsApi && _selectedOptionNeedsNoKey("externalTtsApi")) {
+      totalTests++;
+      try {
+        const ok = await testAndUpdateApiStatus(
+          ttsApi,
+          "",
+          "externalTtsStatus",
+        );
+        if (ok) {
+          successCount++;
+          addLogEntry(`✅ ${ttsApi} TTS OK (local, no key)`, "success");
+        } else {
+          addLogEntry(`❌ ${ttsApi} TTS failed`, "error");
+        }
+      } catch (e) {
+        addLogEntry(`❌ TTS error: ${e.message}`, "error");
+      }
+    } else if (ttsApi) {
+      addLogEntry(
+        `ℹ️ ${ttsApi} requires a local key — skipped in Secure Proxy mode.`,
+        "info",
+      );
+    } else {
+      addLogEntry("⚠️ No external TTS API selected", "warning");
+    }
+  } else if (ttsProvider === "browser") {
+    addLogEntry("ℹ️ Using Browser TTS (always available)", "info");
+  } else {
+    addLogEntry("⚠️ No TTS provider selected", "warning");
+  }
+
+  // [4/4] Summary — count only proxy-backed results.
+  addLogEntry("[4/4] 📊 Generating proxy test summary...", "info");
+  addLogEntry("─".repeat(50), "info");
+  if (totalTests === 0) {
+    addLogEntry("ℹ️ No proxy-backed APIs configured to test", "info");
+  } else {
+    addLogEntry(
+      `🎯 Proxy APIs tested: ${successCount}/${totalTests} working`,
+      successCount === totalTests ? "success" : "warning",
+    );
+    if (successCount === totalTests) {
+      addLogEntry("🎉 Secure proxy services responded correctly!", "success");
+    } else if (successCount > 0) {
+      addLogEntry(
+        "⚠️ Some proxy services failed — check the proxy configuration.",
+        "warning",
+      );
+    } else {
+      addLogEntry(
+        "❌ All proxy tests failed — check the Vercel proxy.",
+        "error",
+      );
+    }
   }
 }
 
 async function _proxyTestOpenAI() {
-  const resultEl = document.getElementById("proxyTestResult");
-  if (resultEl) resultEl.textContent = "⏳ Testing OpenAI proxy…";
-  try {
-    const res = await fetch(_proxyUrl("/api/openai-chat"), {
-      method: "POST",
-      headers: _proxyHeaders(),
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: "Reply with exactly: OK" }],
-        max_tokens: 5,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      if (resultEl)
-        resultEl.textContent = `❌ OpenAI proxy: ${data.error || res.status}`;
-      return;
-    }
-    const reply = data.choices?.[0]?.message?.content?.trim() || "(empty)";
-    if (resultEl) resultEl.textContent = `✅ OpenAI proxy OK — "${reply}"`;
-  } catch (err) {
-    if (resultEl)
-      resultEl.textContent = `❌ OpenAI proxy error: ${err.message}`;
-  }
+  const el = document.getElementById("proxyTestResult");
+  if (el) el.textContent = "⏳ Testing OpenAI proxy…";
+  console.log("POST", _proxyUrl("/api/openai-chat"));
+  const res = await _runProxyOpenAITest();
+  if (el)
+    el.textContent = res.success ? `✅ ${res.message}` : `❌ ${res.message}`;
+  _setOpenAITextModelVerified(res.success, res.model, res.message);
+  if (res.success) _showLocalKeyConnected();
+  return res;
+}
+
+async function _proxyTestMoonshot() {
+  const el = document.getElementById("proxyTestResult");
+  if (el) el.textContent = "⏳ Testing Moonshot Kimi proxy…";
+  const res = await _runProxyMoonshotTest();
+  if (el)
+    el.textContent = res.success ? `✅ ${res.message}` : `❌ ${res.message}`;
+  return res;
 }
 
 async function _proxyTestElevenLabs() {
-  const resultEl = document.getElementById("proxyTestResult");
-  if (resultEl) resultEl.textContent = "⏳ Testing ElevenLabs proxy…";
-  try {
-    const res = await fetch(_proxyUrl("/api/elevenlabs-tts"), {
-      method: "POST",
-      headers: _proxyHeaders(),
-      body: JSON.stringify({ text: "Test", voiceId: "JBFqnCBsd6RMkjVDRZzb" }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: res.status }));
-      if (resultEl)
-        resultEl.textContent = `❌ ElevenLabs proxy: ${err.error || res.status}`;
-      return;
-    }
-    if (resultEl)
-      resultEl.textContent = "✅ ElevenLabs proxy OK — audio/mpeg received";
-  } catch (err) {
-    if (resultEl)
-      resultEl.textContent = `❌ ElevenLabs proxy error: ${err.message}`;
+  const el = document.getElementById("proxyTestResult");
+  if (el) el.textContent = "⏳ Testing ElevenLabs proxy…";
+  const res = await _runProxyElevenLabsTest();
+  if (el)
+    el.textContent = res.success ? `✅ ${res.message}` : `❌ ${res.message}`;
+  return res;
+}
+
+async function _proxyFetchElevenLabsVoices(selectId) {
+  const sel = document.getElementById("elevenlabsVoice");
+  if (!sel) return;
+
+  const response = await fetch(_proxyUrl("/api/elevenlabs-tts"), {
+    method: "GET",
+    headers: _proxyHeaders(),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(
+      data?.error ||
+        data?.detail ||
+        `ElevenLabs voice list HTTP ${response.status}`,
+    );
   }
+
+  const voices = Array.isArray(data?.voices) ? data.voices : [];
+  if (!voices.length) return;
+
+  sel.innerHTML = "";
+  voices.forEach((v) => {
+    const opt = document.createElement("option");
+    opt.value = v.alias || "server-default";
+    opt.dataset.voiceName = v.label || "Server default";
+    opt.textContent = v.label || "Server default";
+    sel.appendChild(opt);
+  });
+  sel.value = data.defaultVoiceAlias || voices[0]?.alias || "server-default";
+  const selectedOption = sel.selectedOptions?.[0];
+  _persistElevenLabsVoiceCache(
+    [],
+    "",
+    selectedOption?.dataset?.voiceName || selectedOption?.textContent || "",
+  );
 }
 
 async function _proxyTestAiHealth() {
-  const resultEl = document.getElementById("proxyTestResult");
-  if (resultEl) resultEl.textContent = "⏳ Checking AI health…";
+  const el = document.getElementById("proxyTestResult");
+  if (el) el.textContent = "⏳ Checking AI health…";
   try {
-    const res = await fetch(_proxyUrl("/api/ai-health"));
-    if (!res.ok) {
-      if (resultEl) resultEl.textContent = `❌ Health HTTP ${res.status}`;
+    const r = await fetch(_proxyUrl("/api/ai-health"), {
+      headers: _proxyHeaders(),
+    });
+    if (!r.ok) {
+      if (el) el.textContent = `❌ Health HTTP ${r.status}`;
       return;
     }
-    const d = await res.json();
-    if (resultEl)
-      resultEl.textContent = [
-        `OpenAI: ${d.openai ? "✅ configured" : "⚠️ not set"}`,
-        `ElevenLabs: ${d.elevenlabs ? "✅ configured" : "⚠️ not set"}`,
-        `Cloudinary: ${d.cloudinary ? "✅ configured" : "⚠️ not set"}`,
+    const d = await r.json();
+    const services = d?.services || d || {};
+    if (el)
+      el.textContent = [
+        `OpenAI: ${services.openai ? "✅ configured" : "⚠️ not set"}`,
+        `ElevenLabs: ${services.elevenlabs ? "✅ configured" : "⚠️ not set"}`,
+        `Cloudinary: ${services.cloudinary ? "✅ configured" : "⚠️ not set"}`,
       ].join(" · ");
   } catch (err) {
-    if (resultEl) resultEl.textContent = `❌ Health error: ${err.message}`;
+    if (el) el.textContent = `❌ Health error: ${err.message}`;
   }
 }
+
+window.addEventListener("message", (event) => {
+  const message = event.data || {};
+  if (
+    message.type !== "smart-widget" ||
+    message.action !== "api-settings-privacy-reset-request" ||
+    Number(message.data?.version || 0) !== API_PRIVACY_RESET_VERSION
+  ) return;
+  let trusted = event.origin === location.origin || PROXY_SESSION_PARENT_ORIGINS.has(event.origin);
+  try {
+    const url = new URL(event.origin);
+    trusted ||= ["localhost", "127.0.0.1"].includes(url.hostname) && /^https?:$/.test(url.protocol);
+  } catch (_) {}
+  if (!trusted) return;
+  const clearedStores = _migratePrivateVoiceStorage();
+  _elevenLabsVoiceIdsByRef.clear();
+  const select = document.getElementById("elevenlabsVoice");
+  if (select) select.innerHTML = '<option value="server-default">Server default</option>';
+  event.source?.postMessage({
+    type: "smart-widget",
+    action: "api-settings-privacy-reset-complete",
+    data: {
+      version: API_PRIVACY_RESET_VERSION,
+      requestId: message.data?.requestId || "",
+      origin: location.origin,
+      clearedStores,
+    },
+  }, event.origin);
+});
 
 // Cleanup on unload
 window.addEventListener("beforeunload", () => {

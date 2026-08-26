@@ -1,8 +1,8 @@
 {
-  "name": "SmÎ”rt API -- CAD-AI-Support",
+  "name": "CAD-DELTAI API Settings",
   "version": "1.0.0",
   "product": "cad-ai-support",
-  "baseUrl": "https://api.smdeltart.com",
+  "baseUrl": "https://api.caddeltai.com",
   "entries": {
     "api-settings": {
       "file": "api-settings.html",
@@ -16,6 +16,12 @@
       "file": "llama31-install-guide.html",
       "route": "/llama31",
       "linkedTo": ["api-settings"]
+    },
+    "source-metadata": {
+      "file": "api/source-metadata.js",
+      "route": "/api/source-metadata",
+      "description": "Authenticated public URL, GitHub and YouTube metadata extraction with SSRF protection",
+      "auth": "proxy-token"
     }
   },
   "embed": {

@@ -5,7 +5,7 @@
  *
  *   <script type="module">
  *     import { applyBrandMeta } from "./brand/source/brand-meta.js";
- *     applyBrandMeta({ pageUrl: "https://api.smdeltart.com/api-settings.html" });
+ *     applyBrandMeta({ pageUrl: "https://api.caddeltai.com/api-settings" });
  *   </script>
  *
  * Reads brand/brand.json, injects/updates these <head> tags:

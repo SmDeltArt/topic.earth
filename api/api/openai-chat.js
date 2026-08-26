@@ -1,52 +1,74 @@
-/**
- * /api/openai-chat — Secure OpenAI Chat Completions proxy
- *
- * Ported from private/streaming-studio/app/api/openai-chat/route.ts
- * Adapted to Vercel Serverless Function (req/res) format used by widgets.
- *
- * SECURITY:
- * - API key read ONLY from process.env.OPENAI_API_KEY (server side)
- * - Key is NEVER returned to the browser
- * - Optional bearer token gate via SMRT_PROXY_TOKEN
- *
- * Usage: POST /api/openai-chat
- * Headers (optional): x-smrt-token: <SMRT_PROXY_TOKEN>
- * Body: OpenAI chat completions request JSON
- */
+import {
+  allowedValue,
+  contentLengthWithin,
+  envList,
+  preparePaidRequest,
+  sendJson,
+} from "./_security.js";
 
-function send(res, status, body) {
-  res.setHeader("Content-Type", "application/json");
-  res.setHeader("Cache-Control", "no-store");
-  res.status(status).end(JSON.stringify(body));
+const DEFAULT_MODELS = [
+  "gpt-5.5",
+  "gpt-5.4",
+  "gpt-5-mini",
+  "gpt-5",
+  "gpt-5.1",
+  "gpt-5.4-pro",
+  "gpt-4o",
+  "gpt-4o-mini",
+  "gpt-4.1-mini",
+];
+
+function isGpt5FamilyModel(model) {
+  return /^gpt-5(\b|[\s.-])/i.test(model);
 }
 
 export default async function handler(req, res) {
-  if (req.method === "OPTIONS") return send(res, 204, {});
-  if (req.method !== "POST")
-    return send(res, 405, { error: "Method not allowed" });
-
-  // ── Optional token gate ──────────────────────────────────────────────────
-  const proxyToken = process.env.SMRT_PROXY_TOKEN;
-  if (proxyToken) {
-    const clientToken = req.headers["x-smrt-token"];
-    if (clientToken !== proxyToken) {
-      return send(res, 401, { error: "Unauthorized" });
-    }
+  if (!preparePaidRequest(req, res, ["POST"])) return;
+  if (!contentLengthWithin(req, 1_000_000)) {
+    return sendJson(res, 413, { error: "Request body too large" });
   }
 
-  // ── Check server key is configured ─────────────────────────────────────
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    return send(res, 503, { error: "OpenAI is not configured on this server" });
+    return sendJson(res, 503, { error: "OpenAI is not configured" });
   }
 
-  // ── Body is pre-parsed by Vercel ────────────────────────────────────────
   const body = req.body;
-  if (!body || typeof body !== "object") {
-    return send(res, 400, { error: "Invalid JSON body" });
+  if (!body || typeof body !== "object" || !Array.isArray(body.messages)) {
+    return sendJson(res, 400, { error: "A messages array is required" });
+  }
+  if (
+    body.messages.length < 1 ||
+    body.messages.length > 100 ||
+    JSON.stringify(body.messages).length > 100_000
+  ) {
+    return sendJson(res, 400, { error: "Messages exceed the allowed limits" });
   }
 
-  // ── Forward to OpenAI ───────────────────────────────────────────────────
+  const model = allowedValue(
+    body.model,
+    "gpt-4o-mini",
+    envList("OPENAI_CHAT_MODELS", DEFAULT_MODELS),
+  );
+  if (!model) return sendJson(res, 400, { error: "Model not allowed" });
+
+  const requestedTokens = Number(
+    body.max_completion_tokens ?? body.max_tokens ?? 1024,
+  );
+  const tokenLimit = Math.min(
+    Number.isFinite(requestedTokens) ? Math.max(1, requestedTokens) : 1024,
+    4096,
+  );
+
+  const payload = { ...body, model };
+  if (isGpt5FamilyModel(model)) {
+    payload.max_completion_tokens = tokenLimit;
+    delete payload.max_tokens;
+  } else {
+    payload.max_tokens = tokenLimit;
+    delete payload.max_completion_tokens;
+  }
+
   let upstream;
   try {
     upstream = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -55,18 +77,17 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     });
-  } catch (err) {
-    return send(res, 502, {
-      error: "Failed to reach OpenAI",
-      detail: String(err),
-    });
+  } catch {
+    return sendJson(res, 502, { error: "OpenAI is temporarily unavailable" });
   }
 
-  // ── Relay response ──────────────────────────────────────────────────────
-  const data = await upstream
-    .json()
-    .catch(() => ({ error: "Non-JSON response from OpenAI" }));
-  return send(res, upstream.status, data);
+  const data = await upstream.json().catch(() => null);
+  if (!upstream.ok) {
+    return sendJson(res, upstream.status, {
+      error: data?.error?.message || `OpenAI HTTP ${upstream.status}`,
+    });
+  }
+  return sendJson(res, 200, data);
 }

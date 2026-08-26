@@ -1,52 +1,113 @@
-# api/ — CAD-ΔI-Support (SmΔrt API Product)
+# CAD-DELTAI API Settings
 
-Flagship product folder. Hosts the API keys manager (`api-settings.html`)
-and the Llama 3.1 install guide.
+Private API-settings product for CAD-DELTAI. It provides browser/BYOK settings,
+an encrypted vault workflow, and authenticated Vercel proxy routes for paid AI
+providers.
+
+Production: `https://api.caddeltai.com`
 
 ## Structure
 
+```text
+api-settings.html              Main API settings interface
+index.html                     Redirect to API Settings
+domain-config.js               Browser host and developer-UI policy
+manifest.json                  Product routes and compatibility metadata
+vercel.json                    Vercel routes and response headers
+package.json                   Validation and sync commands
+LICENSE.md                     Private proprietary license
+CHANGELOG.md                   Package changes
+
+api/                           Secured Vercel serverless proxy functions
+  _security.js                 Origin, token, method and body guards
+  ai-health.js
+  elevenlabs-tts.js
+  openai-chat.js
+  openai-image.js
+  openai-stt.js
+  openai-tts.js
+
+src/                           Browser application modules
+shared/                        Shared styles
+brand/                         Included CAD-DELTAI metadata and assets
+docs/                          Detailed security documentation
+scripts/sync-build.js          Selective sync/build utility
+sync.config.json               Portal API and Clipboard sync rules
 ```
-api/
-├── index.html                  Redirect → api-settings.html (+ brand meta)
-├── api-settings.html           Master API keys widget (multi-provider)
-├── llama31-install-guide.html  Local LLM setup guide
-├── manifest.json               Product manifest
-├── vercel.json                 Routes for api.caddeltai.com
-├── src/
-│   ├── api-settings.js
-│   ├── api-bridge-handler.js
-│   ├── api-model-updater.js
-│   └── smart-ai-models.js
-├── docs/                       Product documentation
-├── brand/                      Brand assets (logo / banner / social / favicon)
-│   ├── brand.json              ⭐ Master brand metadata (single source of truth)
-│   ├── source/                 Generators & vector sources
-│   │   ├── brand-meta.js       ES6 helper: injects title/og/twitter/favicons
-│   │   ├── banner/             Banner generator (HTML) + ffmpeg scripts
-│   │   ├── logo/               cad-ai-logo.svg
-│   │   └── favicon/            cad-ai-icons.svg
-│   ├── banner/                 Web/hero deliverables (WebP)
-│   ├── social/                 OG / Twitter / LinkedIn / Story cards (WebP)
-│   ├── logo/                   Raster logo exports
-│   └── favicon/                Raster favicons + .ico
-└── _trash/
+
+The legacy value `cad-ai-support` and existing localStorage keys remain internal
+compatibility identifiers. The visible product name is **CAD-DELTAI**.
+
+## Secure proxy
+
+Provider keys remain server-side. Paid routes require `SMRT_PROXY_TOKEN`; an
+unset token disables paid proxy requests. Configure the following in the API
+Vercel project as needed:
+
+- `SMRT_PROXY_TOKEN`
+- `OPENAI_API_KEY`
+- `ELEVENLABS_API_KEY`
+- `ELEVENLABS_ALLOWED_VOICES_JSON` — preferred ElevenLabs TTS alias map; browser receives aliases and labels only
+- `ELEVENLABS_PUBLIC_VOICE_ID` — compatibility fallback mapped to `server-default`
+- `ELEVENLABS_VOICE_ID` — legacy fallback only when no alias JSON or public voice fallback is configured
+- `SMRT_ALLOWED_ORIGINS`
+
+Add every consuming Vercel application origin explicitly to
+`SMRT_ALLOWED_ORIGINS`. Do not use a broad `*.vercel.app` authorization rule.
+See `SECURITY_SETUP.md` and `docs/API_SETTINGS_SECURITY.md` for the complete
+deployment procedure.
+
+## Iframe routing
+
+- Local applications use the local `api-settings.html?embed=true` file.
+- Applications hosted on `*.vercel.app` use
+  `https://api-caddeltai.vercel.app/api-settings?embed=true`.
+- Custom-domain applications use
+  `https://api.caddeltai.com/api-settings?embed=true`.
+
+These remain different browser origins. Communication therefore uses
+`postMessage`, restricted to the actual API iframe window and resolved origin.
+
+## Selective sync
+
+The sync command is a dry-run unless `--write` is supplied:
+
+```bash
+npm run sync:portal-api
+npm run sync:portal-api:write
+
+npm run sync:portal-clipboard
+npm run sync:portal-clipboard:write
 ```
 
-## Brand metadata pipeline
+The `portal-api` target copies approved API files into `portal/widgets/api` and
+removes blocks marked with paired comments such as:
 
-`brand/brand.json` is the single source of truth for title, description,
-colors, logo, favicons, and social cards. Every page in this product
-imports `brand/source/brand-meta.js` and calls `applyBrandMeta()` to inject
-the matching `<title>`, `<meta>`, OG, Twitter, and favicon tags at load.
+```js
+/* sync:begin developer-admin */
+// Private developer UI logic
+/* sync:end developer-admin */
+```
 
-Edit `brand.json` once → all pages update.
+The prepared API package marks the `dev=1` configuration, header activation
+logic, and API Access control panel. Removing frontend UI is not authorization:
+the server token, origin, method, model and request-size guards remain required.
 
-## Canonical URLs
+The `portal-clipboard` target selects the Clipboard Manager,
+`smart-svg-editor.html`, API settings files, and their approved shared assets.
 
-- Production: `https://api.caddeltai.com/`
-- Embed: `/api/api-settings.html?embed=true`
+## Validation
 
-## Owners
+```bash
+npm run check
+node scripts/sync-build.js --help
+```
 
-- Product: BenDes (CAD-ΔI-Support)
-- Pipeline: `__actual_vs/private/api/` → `__actual_github/private/api/` → Vercel
+Review every dry-run file list before using `--write`. Add `--clean` only when
+you intentionally want to remove stale files from the generated destination.
+
+## Ownership
+
+- Product: BenDes / CAD-DELTAI
+- Professional ecosystem: CAD-AI-Support
+- Pipeline: `private/api/` → GitHub → Vercel

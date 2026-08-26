@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CAD-ΔI API Settings</title>
+    <title>CAD-DELTAI API Settings</title>
     <!-- Favicon: animated delta triangle managed by initAnimatedFavicon() in api-settings.js -->
     <link
       rel="icon"
@@ -18,6 +18,11 @@
       if (new URLSearchParams(location.search).get("embed") === "true")
         document.documentElement.classList.add("embed-mode");
     </script>
+    <script>
+      // Marker required by sync validation; canonical config remains in domain-config.js
+      window.SMART_DOMAIN_GUARD_CONFIG = window.SMART_DOMAIN_GUARD_CONFIG || {};
+      window.SMART_CDN_POLICY = window.SMART_CDN_POLICY || {};
+    </script>
     <!-- Domain & CDN guard — edit domain-config.js to change allowed hosts -->
     <script src="domain-config.js"></script>
     <link rel="stylesheet" href="shared/smart-spa-base.css" />
@@ -28,7 +33,7 @@
     <script type="module">
       import { applyBrandMeta } from "./brand/source/brand-meta.js";
       applyBrandMeta({
-        pageUrl: "https://api.smdeltart.com/api-settings.html",
+        pageUrl: "https://api.caddeltai.com/api-settings",
         keepTitle: true,
       }).catch((e) => console.warn("brand-meta:", e));
     </script>
@@ -86,10 +91,11 @@
         justify-content: center;
         align-items: flex-start;
         min-height: 100dvh;
-        height: 100dvh;
+        height: auto;
         padding: 0;
         margin: 0;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
         background: var(--card-bg);
       }
 
@@ -108,7 +114,8 @@
       }
 
       .in-iframe body {
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
         display: flex;
         justify-content: center;
         align-items: stretch;
@@ -117,26 +124,25 @@
       .in-iframe .main-container {
         width: 100%;
         max-width: 460px;
-        height: 100%;
-        max-height: 100dvh;
+        height: auto;
+        max-height: none;
         margin: 0 auto;
         border-radius: 0;
         box-shadow: none;
-        overflow-y: auto !important;
-        overflow-x: hidden;
+        overflow: visible;
       }
 
       .main-container {
         width: 100%;
-        height: 100%;
+        height: auto;
         max-width: 100%;
-        max-height: 100dvh;
+        min-height: 100dvh;
+        max-height: none;
         margin: 0;
         background: var(--card-bg);
         border-radius: 0;
         box-shadow: none;
-        overflow-y: auto;
-        overflow-x: hidden;
+        overflow: visible;
         position: relative;
       }
 
@@ -152,7 +158,7 @@
       /* Standalone mode (new tab) - match clipboard height */
       .detached-mode .main-container {
         max-width: 420px;
-        max-height: calc(100dvh - 20px);
+        max-height: none;
         border-radius: var(--radius);
         box-shadow: var(--shadow);
       }
@@ -440,6 +446,30 @@
 
       .api-info-link:hover {
         text-decoration: underline;
+      }
+
+      .release-proxy-status {
+        display: none;
+        margin-bottom: 10px;
+        padding: 8px 10px;
+        border: 1px solid rgba(74, 222, 128, 0.35);
+        border-radius: 6px;
+        background: rgba(74, 222, 128, 0.08);
+        color: #86efac;
+        font-size: 0.82em;
+        font-weight: 600;
+      }
+
+      .release-connection-line {
+        display: none;
+        margin: 10px 0 12px;
+        padding: 8px 10px;
+        border: 1px solid rgba(74, 222, 128, 0.35);
+        border-radius: 6px;
+        background: rgba(74, 222, 128, 0.08);
+        color: #86efac;
+        font-size: 0.82em;
+        font-weight: 600;
       }
 
       .api-settings-actions {
@@ -801,7 +831,7 @@
 
         .main-container {
           max-width: 100%;
-          max-height: calc(100vh - 10px);
+          max-height: none;
           margin: 0;
           border-radius: 0;
         }
@@ -851,7 +881,7 @@
 
       @media (max-height: 700px) {
         .main-container {
-          max-height: calc(100vh - 40px);
+          max-height: none;
         }
       }
 
@@ -1062,13 +1092,7 @@
           </svg>
         </button>
         <h1>
-          <a
-            href="https://api.caddeltai.com/api-settings"
-            target="_blank"
-            rel="noopener"
-            class="header-logo-link"
-            title="Open CAD-ΔI API Settings standalone"
-          >
+          <span class="header-title-text">
             <img
               src="cad-deltai-logo-128.svg"
               alt="CAD-ΔI"
@@ -1084,16 +1108,21 @@
               >CAD-<span class="delta-i-text" id="titleDeltaI">ΔI</span> API
               Settings</span
             >
-          </a>
-          <span
+          </span>
+          <a
+            id="apiSettingsVersionBadge"
+            href="?dev=1#advancedDeveloperSettings"
+            title="Open developer proxy settings"
             style="
               font-size: 0.4em;
               color: #4ade80;
               font-weight: 300;
               margin-left: 8px;
               opacity: 0.8;
+              cursor: pointer;
+              text-decoration: none;
             "
-            >v2.2 ✅</span
+            >v2.3 ✅</a
           >
         </h1>
         <p style="font-size: 0.9em; opacity: 0.8; margin: 0">
@@ -1102,326 +1131,9 @@
       </div>
 
       <div class="api-settings-container">
-        <!-- ═══════════════════════════════════════════════════════════════
-             🔒 PROVIDER MODE SELECTOR  (added 2026-07)
-             Browser Fallback | Local BYOK | Vercel Secure Proxy
-             ═══════════════════════════════════════════════════════════════ -->
-        <div
-          class="api-category expanded"
-          data-category="provider-mode"
-          id="providerModeCategory"
-          style="border-color: #6d9eeb40; background: #1a2847"
-        >
-          <button
-            class="api-category-btn"
-            data-category="provider-mode"
-            style="background: #1a2847"
-          >
-            <svg
-              class="category-arrow"
-              width="16"
-              height="16"
-              viewBox="0 0 12 12"
-            >
-              <polygon
-                points="6,2 11,10 1,10"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              />
-            </svg>
-            <span class="category-label">🔒 API Provider Mode</span>
-            <span class="category-status" id="providerModeStatus">🔵</span>
-          </button>
-          <div
-            class="api-category-content"
-            id="providerModeContent"
-            style="background: #131c30; padding: 14px"
-          >
-            <!-- Mode radio buttons -->
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                margin-bottom: 12px;
-              "
-            >
-              <!-- Mode: Browser Fallback -->
-              <label
-                style="
-                  display: flex;
-                  align-items: flex-start;
-                  gap: 10px;
-                  padding: 10px;
-                  background: #1e2a47;
-                  border: 1px solid #3a4a6a;
-                  border-radius: 6px;
-                  cursor: pointer;
-                "
-              >
-                <input
-                  type="radio"
-                  name="providerMode"
-                  id="modeBrowser"
-                  value="browser"
-                  style="margin-top: 2px; accent-color: #6d9eeb"
-                />
-                <span>
-                  <span style="font-weight: 600; color: #e0e0e0"
-                    >🌐 Browser Fallback</span
-                  >
-                  <span
-                    style="
-                      display: block;
-                      font-size: 0.78em;
-                      color: #9ca3af;
-                      margin-top: 2px;
-                    "
-                    >No API keys required. Uses built-in browser APIs (Web
-                    Speech, etc.).</span
-                  >
-                </span>
-              </label>
-
-              <!-- Mode: Local BYOK -->
-              <label
-                style="
-                  display: flex;
-                  align-items: flex-start;
-                  gap: 10px;
-                  padding: 10px;
-                  background: #1e2a47;
-                  border: 1px solid #3a4a6a;
-                  border-radius: 6px;
-                  cursor: pointer;
-                "
-              >
-                <input
-                  type="radio"
-                  name="providerMode"
-                  id="modeByok"
-                  value="byok"
-                  checked
-                  style="margin-top: 2px; accent-color: #6d9eeb"
-                />
-                <span>
-                  <span style="font-weight: 600; color: #e0e0e0"
-                    >🔑 Local BYOK
-                    <span style="font-size: 0.75em; color: #fbbf24"
-                      >(Bring Your Own Keys)</span
-                    ></span
-                  >
-                  <span
-                    style="
-                      display: block;
-                      font-size: 0.78em;
-                      color: #9ca3af;
-                      margin-top: 2px;
-                    "
-                    >Enter your own API keys. Stored only on this device.</span
-                  >
-                </span>
-              </label>
-
-              <!-- Mode: Vercel Secure Proxy -->
-              <label
-                style="
-                  display: flex;
-                  align-items: flex-start;
-                  gap: 10px;
-                  padding: 10px;
-                  background: #1e2a47;
-                  border: 1px solid #3a4a6a;
-                  border-radius: 6px;
-                  cursor: pointer;
-                "
-              >
-                <input
-                  type="radio"
-                  name="providerMode"
-                  id="modeProxy"
-                  value="proxy"
-                  style="margin-top: 2px; accent-color: #6d9eeb"
-                />
-                <span>
-                  <span style="font-weight: 600; color: #e0e0e0"
-                    >🛡️ Vercel Secure Proxy
-                    <span style="font-size: 0.75em; color: #4ade80"
-                      >(Production)</span
-                    ></span
-                  >
-                  <span
-                    style="
-                      display: block;
-                      font-size: 0.78em;
-                      color: #9ca3af;
-                      margin-top: 2px;
-                    "
-                    >API keys stay on the server. Keys never sent to
-                    browser.</span
-                  >
-                </span>
-              </label>
-            </div>
-
-            <!-- BYOK warning banner (shown only in byok mode) -->
-            <div
-              id="byokWarning"
-              style="
-                display: none;
-                padding: 10px 12px;
-                background: rgba(251, 191, 36, 0.1);
-                border: 1px solid #f59e0b;
-                border-radius: 6px;
-                font-size: 0.78em;
-                color: #fcd34d;
-                margin-bottom: 10px;
-              "
-            >
-              ⚠️ <strong>Local API keys are stored only on this device.</strong
-              ><br />
-              Do not use this mode on shared or public computers.
-            </div>
-
-            <!-- Proxy config section (shown only in proxy mode) -->
-            <div id="proxyConfig" style="display: none">
-              <!-- Health status -->
-              <div
-                id="proxyHealthRow"
-                style="
-                  display: flex;
-                  align-items: center;
-                  gap: 8px;
-                  margin-bottom: 10px;
-                "
-              >
-                <span style="font-size: 0.8em; color: #9ca3af"
-                  >Proxy health:</span
-                >
-                <span
-                  id="proxyHealthStatus"
-                  style="font-size: 0.8em; color: #6b7280"
-                  >Not checked</span
-                >
-                <button
-                  id="checkProxyHealthBtn"
-                  style="
-                    padding: 3px 8px;
-                    background: #3b82f6;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    font-size: 0.75em;
-                    cursor: pointer;
-                  "
-                >
-                  🔍 Check
-                </button>
-              </div>
-
-              <!-- Proxy base URL -->
-              <label
-                style="
-                  font-size: 0.78em;
-                  color: #9ca3af;
-                  display: block;
-                  margin-bottom: 3px;
-                "
-                >Proxy base URL:</label
-              >
-              <input
-                type="text"
-                id="proxyBaseUrl"
-                class="api-key-input"
-                placeholder="Leave empty to use current origin (/api/…)"
-                autocomplete="off"
-                data-lpignore="true"
-                data-form-type="other"
-                style="
-                  margin-bottom: 8px;
-                  font-family: monospace;
-                  font-size: 0.8em;
-                "
-              />
-
-              <!-- Optional proxy token -->
-              <label
-                style="
-                  font-size: 0.78em;
-                  color: #9ca3af;
-                  display: block;
-                  margin-bottom: 3px;
-                "
-                >Proxy token
-                <span style="color: #6b7280">(optional, x-smrt-token)</span
-                >:</label
-              >
-              <input
-                type="password"
-                id="smrtProxyToken"
-                class="api-key-input"
-                placeholder="SMRT_PROXY_TOKEN (leave empty if not set)"
-                autocomplete="off"
-                data-lpignore="true"
-                data-form-type="other"
-                style="margin-bottom: 10px"
-              />
-
-              <!-- Proxy test buttons -->
-              <div
-                style="
-                  display: flex;
-                  flex-wrap: wrap;
-                  gap: 6px;
-                  margin-bottom: 8px;
-                "
-              >
-                <button
-                  id="testOpenAiProxyBtn"
-                  class="dashboard-btn"
-                  style="
-                    background: #22c55e;
-                    color: white;
-                    font-size: 0.78em;
-                    padding: 5px 10px;
-                  "
-                >
-                  🧪 Test OpenAI Proxy
-                </button>
-                <button
-                  id="testElevenLabsProxyBtn"
-                  class="dashboard-btn"
-                  style="
-                    background: #3b82f6;
-                    color: white;
-                    font-size: 0.78em;
-                    padding: 5px 10px;
-                  "
-                >
-                  🧪 Test ElevenLabs Proxy
-                </button>
-                <button
-                  id="testAiHealthBtn"
-                  class="dashboard-btn"
-                  style="
-                    background: #8b5cf6;
-                    color: white;
-                    font-size: 0.78em;
-                    padding: 5px 10px;
-                  "
-                >
-                  ❤️ AI Health
-                </button>
-              </div>
-              <div
-                id="proxyTestResult"
-                style="font-size: 0.75em; color: #9ca3af; min-height: 18px"
-              ></div>
-            </div>
-          </div>
+        <div id="managedProxyStatus" class="release-proxy-status">
+          🟢 Connected via CAD-DELTΔI Secure API
         </div>
-        <!-- END PROVIDER MODE -->
 
         <!-- Text API Category -->
         <div class="api-category" data-category="text">
@@ -1469,6 +1181,9 @@
                     </option>
                     <option value="google" data-key-format="AIza">
                       🥉 Google Gemini Pro
+                    </option>
+                    <option value="kimi" data-key-format="Moonshot global key">
+                      🌙 Moonshot Kimi (K3 / K2.7 Code)
                     </option>
                   </optgroup>
                   <optgroup label="⚡ Fast & Affordable">
@@ -1548,6 +1263,14 @@
                       <option value="gpt-5">gpt-5 (500K TPM, $$)</option>
                       <option value="gpt-5.1">gpt-5.1 (500K TPM, $$$)</option>
                     </optgroup>
+                    <optgroup label="🌙 Aliases (mapped → valid IDs)">
+                      <option value="gpt-5.6 luna">
+                        gpt-5.6 luna (→ gpt-5.5)
+                      </option>
+                      <option value="gpt-5.6 sol">
+                        gpt-5.6 sol (→ gpt-5.5)
+                      </option>
+                    </optgroup>
                     <optgroup label="💻 Coding">
                       <option value="gpt-5.3-codex">
                         gpt-5.3-codex (500K TPM, $$)
@@ -1585,6 +1308,52 @@
                   >
                     Current: saved model · Max: click Refresh All or Test Text
                     API
+                  </div>
+                </div>
+                <!-- Moonshot Kimi selector (global platform: api.moonshot.ai) -->
+                <div
+                  id="kimiTextModelSelector"
+                  style="display: none; margin-top: 8px"
+                >
+                  <label style="font-size: 0.75em; color: #888"
+                    >Kimi Model:</label
+                  >
+                  <select id="kimiTextModel" class="api-select">
+                    <option value="kimi-k3" selected>
+                      Kimi K3 · $3 in / $15 out · 1M · vision
+                    </option>
+                    <option value="kimi-k2.7-code">
+                      Kimi K2.7 Code · $0.95 in / $4 out · 256K
+                    </option>
+                    <option value="kimi-k2.7-code-highspeed">
+                      Kimi K2.7 Code Highspeed · coding
+                    </option>
+                    <option value="kimi-k2.6">
+                      Kimi K2.6 · $0.95 in / $4 out · vision · 256K
+                    </option>
+                  </select>
+                  <label style="font-size: 0.75em; color: #888"
+                    >Reasoning effort:</label
+                  >
+                  <select id="kimiReasoningEffort" class="api-select">
+                    <option value="low" selected>Low · fast / bounded</option>
+                    <option value="high">High</option>
+                    <option value="max">Max · deepest / most tokens</option>
+                  </select>
+                  <div
+                    id="kimiTextModelStatus"
+                    style="
+                      margin-top: 6px;
+                      padding: 6px 8px;
+                      border-radius: 6px;
+                      background: rgba(96, 165, 250, 0.09);
+                      color: #b8c1ec;
+                      font-size: 0.72em;
+                      line-height: 1.45;
+                    "
+                  >
+                    Text + coding + image/video understanding. No documented
+                    image generation, STT, or TTS API.
                   </div>
                 </div>
                 <a
@@ -2711,8 +2480,9 @@
                         value="openai-tts"
                         data-key-format="sk-"
                         data-paid="true"
+                        disabled
                       >
-                        🥈 OpenAI TTS (Select Model ↓)
+                        🥈 OpenAI TTS (Deprecated - use ElevenLabs)
                       </option>
                       <option
                         value="azure-tts"
@@ -2854,6 +2624,19 @@
                     id="elevenlabsVoiceSelector"
                     style="display: none; margin-top: 8px"
                   >
+                    <label style="font-size: 0.75em; color: #888"
+                      >TTS Model:</label
+                    >
+                    <select
+                      id="elevenlabsTtsModelId"
+                      class="api-select"
+                      style="font-size: 0.85em; margin-bottom: 6px"
+                    >
+                      <option value="eleven_v3" selected>Eleven v3</option>
+                      <option value="eleven_multilingual_v2">
+                        Multilingual v2
+                      </option>
+                    </select>
                     <label style="font-size: 0.75em; color: #888">Voice:</label>
                     <select
                       id="elevenlabsVoice"
@@ -2864,25 +2647,6 @@
                         Test API key to load voices…
                       </option>
                     </select>
-                    <div style="margin-top: 6px">
-                      <label style="font-size: 0.75em; color: #888"
-                        >Custom Voice ID
-                        <span style="color: #666"
-                          >(paste from ElevenLabs dashboard):</span
-                        ></label
-                      >
-                      <input
-                        type="text"
-                        id="elevenlabsCustomVoiceId"
-                        class="api-input"
-                        placeholder="e.g. pNInz6obpgDQGcFmaJgB"
-                        style="font-size: 0.85em; font-family: monospace"
-                      />
-                      <span
-                        id="elevenlabsCustomVoiceStatus"
-                        style="font-size: 0.75em; color: #888"
-                      ></span>
-                    </div>
                   </div>
                   <a
                     href="#"
@@ -3313,136 +3077,6 @@
             <span class="category-status" id="comparisonApiStatus">📈</span>
           </button>
           <div class="api-category-content" id="comparisonApiContent">
-            <!-- Provider Models Refresher Section -->
-            <div
-              class="comparison-section"
-              style="
-                background: linear-gradient(135deg, #142036 0%, #0f1a2e 100%);
-                border: 1px solid #22c55e;
-                margin-bottom: 12px;
-              "
-            >
-              <div class="comparison-header">
-                <h4 style="margin: 0; color: #4ade80; font-size: 1em">
-                  🔧 Provider Models
-                </h4>
-                <button
-                  type="button"
-                  class="dashboard-btn"
-                  id="refreshAllModelsBtn"
-                  style="
-                    background: #22c55e;
-                    color: #0b1320;
-                    font-size: 0.8em;
-                    padding: 5px 10px;
-                    font-weight: 600;
-                  "
-                  title="Query each provider's /v1/models with your saved keys, refresh local cache"
-                >
-                  🔄 Refresh All
-                </button>
-              </div>
-              <p
-                style="
-                  font-size: 0.75em;
-                  color: #9ca3af;
-                  margin: 4px 0 8px 0;
-                  line-height: 1.4;
-                "
-              >
-                Pulls live model lists directly from your browser to each
-                provider (OpenAI, Groq, DeepSeek, Google, Ollama). Keys never
-                leave this page. Cached locally for 24h.
-              </p>
-              <div
-                id="providerModelsStatus"
-                style="
-                  font-size: 0.75em;
-                  color: #b8c1ec;
-                  background: rgba(34, 197, 94, 0.08);
-                  border-radius: 4px;
-                  padding: 6px 8px;
-                  min-height: 20px;
-                  font-family: &quot;Courier New&quot;, monospace;
-                  line-height: 1.5;
-                "
-              >
-                Click <strong>Refresh All</strong> to update model lists.
-              </div>
-            </div>
-
-            <!-- API Revision Detector Section -->
-            <div
-              class="comparison-section"
-              style="
-                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-                border: 1px solid #3b82f6;
-                margin-bottom: 12px;
-              "
-            >
-              <div class="comparison-header">
-                <h4 style="margin: 0; color: #60a5fa; font-size: 1em">
-                  🔄 Latest AI API Revision
-                </h4>
-                <span
-                  id="apiRevBadge"
-                  style="
-                    background: #22c55e;
-                    color: #000;
-                    padding: 2px 8px;
-                    border-radius: 12px;
-                    font-size: 0.75em;
-                    font-weight: bold;
-                  "
-                  >v2025.11.28</span
-                >
-              </div>
-              <div
-                style="display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0"
-              >
-                <button
-                  class="dashboard-btn"
-                  id="checkApiUpdatesBtn"
-                  style="
-                    background: #8b5cf6;
-                    color: white;
-                    font-size: 0.8em;
-                    padding: 5px 10px;
-                  "
-                >
-                  🔍 Check Updates
-                </button>
-                <button
-                  class="dashboard-btn"
-                  id="applyApiUpdatesBtn"
-                  style="
-                    background: #22c55e;
-                    color: white;
-                    font-size: 0.8em;
-                    padding: 5px 10px;
-                    display: none;
-                  "
-                >
-                  ⬆️ Apply Updates
-                </button>
-              </div>
-              <div
-                id="apiRevStatus"
-                style="font-size: 0.8em; color: #9ca3af; margin-top: 4px"
-              >
-                Last checked: Never
-              </div>
-              <div
-                id="apiRevChanges"
-                style="
-                  font-size: 0.75em;
-                  color: #b8c1ec;
-                  margin-top: 6px;
-                  display: none;
-                "
-              ></div>
-            </div>
-
             <!-- Price & Model Comparison Section -->
             <div class="comparison-section">
               <div class="comparison-header">
@@ -3474,8 +3108,8 @@
                     <tr>
                       <th>API</th>
                       <th>Model</th>
-                      <th>Price</th>
-                      <th style="text-align: center">Quality</th>
+                      <th>Price (USD)</th>
+                      <th style="text-align: center">Est. quality</th>
                       <th>Notes</th>
                     </tr>
                   </thead>
@@ -3777,14 +3411,508 @@
             </div>
           </div>
         </div>
+
+        <!-- sync:begin developer-admin -->
+        <!-- ═══════════════════════════════════════════════════════════════
+             🛡 API ACCESS
+             ═══════════════════════════════════════════════════════════════ -->
+        <div
+          class="api-category"
+          data-category="provider-mode"
+          id="advancedDeveloperSettings"
+          style="border-color: #6d9eeb40; background: #1a2847; display: none"
+        >
+          <button
+            class="api-category-btn"
+            data-category="provider-mode"
+            style="background: #1a2847"
+          >
+            <svg
+              class="category-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 12 12"
+            >
+              <polygon
+                points="6,2 11,10 1,10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+            </svg>
+            <span class="category-label">🚫 API Access</span>
+            <span class="category-status" id="providerModeStatus">🔵</span>
+          </button>
+          <div
+            class="api-category-content"
+            id="providerModeContent"
+            style="background: #131c30; padding: 14px"
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 12px;
+              "
+            >
+              <label
+                style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 10px;
+                  padding: 10px;
+                  background: #1e2a47;
+                  border: 1px solid #3a4a6a;
+                  border-radius: 6px;
+                  cursor: pointer;
+                "
+              >
+                <input
+                  type="radio"
+                  name="providerMode"
+                  id="modeByok"
+                  value="byok"
+                  checked
+                  style="margin-top: 2px; accent-color: #6d9eeb"
+                />
+                <span>
+                  <span style="font-weight: 600; color: #e0e0e0"
+                    >🔑 Local BYOK
+                    <span style="font-size: 0.75em; color: #fbbf24"
+                      >(Bring Your Own Keys)</span
+                    ></span
+                  >
+                  <span
+                    style="
+                      display: block;
+                      font-size: 0.78em;
+                      color: #9ca3af;
+                      margin-top: 2px;
+                    "
+                    >Enter your own API keys. Stored only on this device.</span
+                  >
+                </span>
+              </label>
+
+              <label
+                style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 10px;
+                  padding: 10px;
+                  background: #1e2a47;
+                  border: 1px solid #3a4a6a;
+                  border-radius: 6px;
+                  cursor: pointer;
+                "
+              >
+                <input
+                  type="radio"
+                  name="providerMode"
+                  id="modeProxy"
+                  value="proxy"
+                  style="margin-top: 2px; accent-color: #6d9eeb"
+                />
+                <span>
+                  <span style="font-weight: 600; color: #e0e0e0"
+                    >🚫 Secure Proxy
+                    <span style="font-size: 0.75em; color: #4ade80"
+                      >(Production)</span
+                    ></span
+                  >
+                  <span
+                    style="
+                      display: block;
+                      font-size: 0.78em;
+                      color: #9ca3af;
+                      margin-top: 2px;
+                    "
+                    >API keys stay on the server. Keys never sent to
+                    browser.</span
+                  >
+                </span>
+              </label>
+            </div>
+
+            <div
+              id="byokWarning"
+              style="
+                display: none;
+                padding: 10px 12px;
+                background: rgba(251, 191, 36, 0.1);
+                border: 1px solid #f59e0b;
+                border-radius: 6px;
+                font-size: 0.78em;
+                color: #fcd34d;
+                margin-bottom: 10px;
+              "
+            >
+              ⚠️ <strong>Local API keys are stored only on this device.</strong
+              ><br />
+              Do not use this mode on shared or public computers.
+            </div>
+
+            <div id="proxyConfig" style="display: none">
+              <div
+                id="proxyHealthRow"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  margin-bottom: 10px;
+                "
+              >
+                <span style="font-size: 0.8em; color: #9ca3af"
+                  >Proxy health:</span
+                >
+                <span
+                  id="proxyHealthStatus"
+                  style="font-size: 0.8em; color: #6b7280"
+                  >Not checked</span
+                >
+                <button
+                  type="button"
+                  id="checkProxyHealthBtn"
+                  style="
+                    padding: 3px 8px;
+                    background: #3b82f6;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 0.75em;
+                    cursor: pointer;
+                  "
+                >
+                  🔍 Check
+                </button>
+              </div>
+
+              <label
+                style="
+                  font-size: 0.78em;
+                  color: #9ca3af;
+                  display: block;
+                  margin-bottom: 3px;
+                "
+                >Proxy base URL:</label
+              >
+              <input
+                type="text"
+                id="proxyBaseUrl"
+                class="api-key-input"
+                placeholder="https://api.caddeltai.com"
+                title="Managed proxy base URL. Production default is https://api.caddeltai.com; use Vercel URLs only for preview/staging."
+                autocomplete="off"
+                data-lpignore="true"
+                data-form-type="other"
+                style="
+                  margin-bottom: 8px;
+                  font-family: monospace;
+                  font-size: 0.8em;
+                "
+              />
+
+              <label
+                style="
+                  font-size: 0.78em;
+                  color: #9ca3af;
+                  display: block;
+                  margin-bottom: 3px;
+                "
+                >Proxy token
+                <span style="color: #f59e0b">(required, x-smrt-token)</span
+                >:</label
+              >
+              <input
+                type="text"
+                id="smrtProxyToken"
+                name="smrt-proxy-token"
+                class="api-key-input"
+                placeholder="SMRT_PROXY_TOKEN (required; save in Vault)"
+                title="Session proxy credential. Kept in sessionStorage at runtime; never saved as plain localStorage or a separate password-manager credential."
+                autocomplete="off"
+                spellcheck="false"
+                data-1p-ignore="true"
+                data-bwignore="true"
+                data-lpignore="true"
+                data-form-type="other"
+                style="margin-bottom: 10px; -webkit-text-security: disc"
+              />
+
+              <div
+                style="
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 6px;
+                  margin-bottom: 8px;
+                "
+              >
+                <button
+                  id="testOpenAiProxyBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #22c55e;
+                    color: white;
+                    font-size: 0.78em;
+                    padding: 5px 10px;
+                  "
+                >
+                  🧪 Test OpenAI Proxy
+                </button>
+                <button
+                  id="testMoonshotProxyBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #6366f1;
+                    color: white;
+                    font-size: 0.78em;
+                    padding: 5px 10px;
+                  "
+                >
+                  🌙 Test Kimi Proxy
+                </button>
+                <button
+                  id="testElevenLabsProxyBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #3b82f6;
+                    color: white;
+                    font-size: 0.78em;
+                    padding: 5px 10px;
+                  "
+                >
+                  🧪 Test ElevenLabs Proxy
+                </button>
+                <button
+                  id="testAiHealthBtn"
+                  class="dashboard-btn"
+                  style="
+                    background: #8b5cf6;
+                    color: white;
+                    font-size: 0.78em;
+                    padding: 5px 10px;
+                  "
+                >
+                  ❤️ AI Health
+                </button>
+              </div>
+              <div
+                id="proxyTestResult"
+                style="font-size: 0.75em; color: #9ca3af; min-height: 18px"
+              ></div>
+            </div>
+
+            <!-- ── Provider Models (moved into Secure API Access) ── -->
+            <div
+              class="comparison-section"
+              style="
+                background: linear-gradient(135deg, #142036 0%, #0f1a2e 100%);
+                border: 1px solid #22c55e;
+                margin-top: 14px;
+                margin-bottom: 12px;
+              "
+            >
+              <div class="comparison-header">
+                <h4 style="margin: 0; color: #4ade80; font-size: 1em">
+                  🔧 Provider Models
+                </h4>
+                <button
+                  type="button"
+                  class="dashboard-btn"
+                  id="refreshAllModelsBtn"
+                  style="
+                    background: #22c55e;
+                    color: #0b1320;
+                    font-size: 0.8em;
+                    padding: 5px 10px;
+                    font-weight: 600;
+                  "
+                  title="Query each provider's /v1/models with your saved keys, refresh local cache"
+                >
+                  🔄 Refresh All
+                </button>
+              </div>
+              <p
+                style="
+                  font-size: 0.75em;
+                  color: #9ca3af;
+                  margin: 4px 0 8px 0;
+                  line-height: 1.4;
+                "
+              >
+                Pulls live model lists directly from your browser to each
+                provider (OpenAI, Groq, DeepSeek, Google, Ollama). Keys never
+                leave this page. Cached locally for 24h.
+              </p>
+              <div
+                id="providerModelsStatus"
+                style="
+                  font-size: 0.75em;
+                  color: #b8c1ec;
+                  background: rgba(34, 197, 94, 0.08);
+                  border-radius: 4px;
+                  padding: 6px 8px;
+                  min-height: 20px;
+                  font-family: &quot;Courier New&quot;, monospace;
+                  line-height: 1.5;
+                "
+              >
+                Click <strong>Refresh All</strong> to update model lists.
+              </div>
+            </div>
+
+            <!-- ── Latest AI API Revision + Model Manifest (Secure) ── -->
+            <div
+              class="comparison-section"
+              style="
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                border: 1px solid #3b82f6;
+                margin-bottom: 4px;
+              "
+            >
+              <div class="comparison-header">
+                <h4 style="margin: 0; color: #60a5fa; font-size: 1em">
+                  🔄 Latest AI API Revision
+                </h4>
+                <span
+                  id="apiRevBadge"
+                  style="
+                    background: #22c55e;
+                    color: #000;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    font-size: 0.75em;
+                    font-weight: bold;
+                  "
+                  >v2025.11.28</span
+                >
+              </div>
+              <div
+                style="display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0"
+              >
+                <button
+                  class="dashboard-btn"
+                  id="checkApiUpdatesBtn"
+                  style="
+                    background: #8b5cf6;
+                    color: white;
+                    font-size: 0.8em;
+                    padding: 5px 10px;
+                  "
+                >
+                  🔍 Check Updates
+                </button>
+                <button
+                  class="dashboard-btn"
+                  id="applyApiUpdatesBtn"
+                  style="
+                    background: #22c55e;
+                    color: white;
+                    font-size: 0.8em;
+                    padding: 5px 10px;
+                    display: none;
+                  "
+                >
+                  ⬆️ Apply Updates
+                </button>
+              </div>
+              <div
+                id="apiRevStatus"
+                style="font-size: 0.8em; color: #9ca3af; margin-top: 4px"
+              >
+                Last checked: Never
+              </div>
+              <div
+                id="apiRevChanges"
+                style="
+                  font-size: 0.75em;
+                  color: #b8c1ec;
+                  margin-top: 6px;
+                  display: none;
+                "
+              ></div>
+
+              <div
+                style="
+                  border-top: 1px solid rgba(96, 165, 250, 0.25);
+                  margin-top: 10px;
+                  padding-top: 10px;
+                "
+              >
+                <div class="comparison-header">
+                  <h4 style="margin: 0; color: #93c5fd; font-size: 0.92em">
+                    🧬 Local Model Manifest
+                  </h4>
+                  <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      id="rebuildModelManifestBtn"
+                      style="
+                        background: #3b82f6;
+                        color: white;
+                        font-size: 0.78em;
+                        padding: 5px 10px;
+                      "
+                      title="Rebuild the local model manifest JSON (does not touch the 24h model cache)"
+                    >
+                      🧬 Rebuild
+                    </button>
+                    <button
+                      type="button"
+                      class="dashboard-btn"
+                      id="exportModelManifestBtn"
+                      style="
+                        background: #22c55e;
+                        color: white;
+                        font-size: 0.78em;
+                        padding: 5px 10px;
+                      "
+                      title="Download the local model manifest as JSON"
+                    >
+                      ⬇️ Export JSON
+                    </button>
+                  </div>
+                </div>
+                <div
+                  id="modelManifestStatus"
+                  style="
+                    font-size: 0.72em;
+                    color: #b8c1ec;
+                    background: rgba(59, 130, 246, 0.08);
+                    border-radius: 4px;
+                    padding: 6px 8px;
+                    margin-top: 6px;
+                    min-height: 18px;
+                    line-height: 1.5;
+                  "
+                >
+                  Rebuild to generate a structured JSON manifest (provider,
+                  model id, label, token parameter, notes) kept separate from
+                  the browser cache.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- sync:end developer-admin -->
       </div>
 
       <!-- Action Buttons -->
       <div class="api-settings-actions">
-        <button id="exportApiSettingsBtn" class="export-btn">
+        <button
+          id="exportApiSettingsBtn"
+          class="export-btn"
+          title="Portable API Settings backup. Includes normal settings and encrypted Vault material when present; never exports a plain proxy token."
+        >
           💾 File Export
         </button>
-        <button id="importApiSettingsBtn" class="load-btn">
+        <button
+          id="importApiSettingsBtn"
+          class="load-btn"
+          title="Restore an API Settings backup. Normal settings persist locally; recovered proxy token goes only to the current session."
+        >
           📁 File Import
         </button>
         <input
@@ -3793,25 +3921,31 @@
           accept=".ghfav,.scs,.json"
           style="display: none"
         />
-        <button id="testAllApisBtn" class="test-apis-btn">🧪 Test APIs</button>
+        <button
+          id="testAllApisBtn"
+          class="test-apis-btn"
+          title="Test the currently active configuration. BYOK tests local credentials; Secure Proxy tests managed proxy endpoints without saving settings."
+        >
+          🧪 Test APIs
+        </button>
         <button
           id="saveApiSettingsBtn"
           class="locally-btn"
-          title="⚠️ Saves UNENCRYPTED to localStorage"
+          title="Save normal non-secret settings in this browser/origin. Proxy token stays session-only; credential fields are encrypted/blank compatibility data."
         >
           💾 Locally
         </button>
         <button
           id="saveToVaultBtn"
           class="vault-save-btn"
-          title="Save encrypted to vault"
+          title="Save BYOK credentials and optional proxy-token recovery backup to the encrypted Smart API Vault."
         >
           💾 Vault
         </button>
         <button
           id="vaultBtn"
           class="vault-btn-header"
-          title="Manage encrypted API vault"
+          title="Vault state: 🔐 create, 🔒 unlock/manage, 🔓 manage/lock/delete. This is not the Save to Vault action."
         >
           🔐
         </button>
@@ -3824,7 +3958,6 @@
         style="display: none"
       ></div>
 
-      <!-- API Test Log -->
       <div class="api-log-container">
         <div
           style="
@@ -4148,8 +4281,8 @@
       ];
     </script>
 
-    <script src="src/api-settings.js"></script>
-    <script src="src/api-model-updater.js" defer></script>
+    <script src="src/api-settings.js?v=20260730-elevenv3-1"></script>
+    <script src="src/api-model-updater.js?v=20260729-kimi1" defer></script>
 
     <!-- SmΔrt Popup Library (optional - for popup integration) -->
     <!-- The library path is relative to parent app, not the widget itself -->

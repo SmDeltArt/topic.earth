@@ -1,50 +1,53 @@
-/**
- * /api/openai-tts — Secure OpenAI Text-to-Speech proxy
- *
- * Moved from app/api/openai-tts/route.ts (Next.js) to
- * public/api/openai-tts.js (Vercel Serverless Function).
- *
- * SECURITY:
- * - API key read ONLY from process.env.OPENAI_API_KEY (server side)
- * - Key is NEVER returned to the browser
- * - Returns audio/mpeg blob directly
- */
+import {
+  allowedValue,
+  contentLengthWithin,
+  envList,
+  preparePaidRequest,
+  sendJson,
+} from "./_security.js";
 
-function sendJson(res, status, body) {
-  res.setHeader("Content-Type", "application/json");
-  res.setHeader("Cache-Control", "no-store");
-  res.status(status).end(JSON.stringify(body));
-}
+const MODELS = ["gpt-4o-mini-tts", "tts-1", "tts-1-hd"];
+const VOICES = [
+  "alloy",
+  "ash",
+  "ballad",
+  "coral",
+  "echo",
+  "fable",
+  "nova",
+  "onyx",
+  "sage",
+  "shimmer",
+];
+const FORMATS = ["mp3", "wav", "opus", "aac", "flac", "pcm"];
 
 export default async function handler(req, res) {
-  if (req.method === "OPTIONS") return sendJson(res, 204, {});
-  if (req.method !== "POST")
-    return sendJson(res, 405, { error: "Method not allowed" });
-
-  // ── Optional token gate ──────────────────────────────────────────────────
-  const proxyToken = process.env.SMRT_PROXY_TOKEN;
-  if (proxyToken) {
-    const clientToken = req.headers["x-smrt-token"];
-    if (clientToken !== proxyToken) {
-      return sendJson(res, 401, { error: "Unauthorized" });
-    }
+  if (!preparePaidRequest(req, res, ["POST"])) return;
+  if (!contentLengthWithin(req, 100_000)) {
+    return sendJson(res, 413, { error: "Request body too large" });
   }
 
-  // ── Check server key is configured ─────────────────────────────────────
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    return sendJson(res, 503, {
-      error: "OpenAI TTS is not configured on this server",
-    });
-  }
+  if (!apiKey) return sendJson(res, 503, { error: "OpenAI is not configured" });
 
-  // ── Validate body ───────────────────────────────────────────────────────
   const body = req.body || {};
-  if (!body.input?.trim()) {
-    return sendJson(res, 400, { error: "Missing required field: input" });
+  const inputValue = body.input ?? body.text;
+  const input = typeof inputValue === "string" ? inputValue.trim() : "";
+  if (!input || input.length > 4_096) {
+    return sendJson(res, 400, { error: "TTS input is missing or too long" });
   }
 
-  // ── Forward to OpenAI TTS ───────────────────────────────────────────────
+  const model = allowedValue(
+    body.model,
+    "gpt-4o-mini-tts",
+    envList("OPENAI_TTS_MODELS", MODELS),
+  );
+  const voice = allowedValue(body.voice, "alloy", VOICES);
+  const format = allowedValue(body.format, "mp3", FORMATS);
+  if (!model || !voice || !format) {
+    return sendJson(res, 400, { error: "TTS configuration not allowed" });
+  }
+
   let upstream;
   try {
     upstream = await fetch("https://api.openai.com/v1/audio/speech", {
@@ -53,31 +56,29 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: body.model || "gpt-4o-mini-tts",
-        input: body.input,
-        voice: body.voice || "nova",
-        speed: body.speed ?? 1.0,
-        response_format: "mp3",
-      }),
+      body: JSON.stringify({ model, voice, input, format }),
     });
-  } catch (err) {
-    return sendJson(res, 502, {
-      error: "Failed to reach OpenAI TTS",
-      detail: String(err),
-    });
+  } catch {
+    return sendJson(res, 502, { error: "OpenAI is temporarily unavailable" });
   }
 
   if (!upstream.ok) {
-    const errText = await upstream.text().catch(() => "");
+    const data = await upstream.json().catch(() => null);
     return sendJson(res, upstream.status, {
-      error: `OpenAI TTS HTTP ${upstream.status}`,
-      detail: errText.slice(0, 200),
+      error: data?.error?.message || `OpenAI HTTP ${upstream.status}`,
     });
   }
 
-  const audioBuffer = await upstream.arrayBuffer();
-  res.setHeader("Content-Type", "audio/mpeg");
+  const types = {
+    mp3: "audio/mpeg",
+    wav: "audio/wav",
+    opus: "audio/opus",
+    aac: "audio/aac",
+    flac: "audio/flac",
+    pcm: "application/octet-stream",
+  };
+  res.setHeader("Content-Type", types[format]);
   res.setHeader("Cache-Control", "no-store");
-  res.status(200).end(Buffer.from(audioBuffer));
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  return res.status(200).end(Buffer.from(await upstream.arrayBuffer()));
 }
