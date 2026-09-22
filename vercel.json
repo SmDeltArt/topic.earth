@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/api-settings.html",
+      "destination": "/api-settings.html"
+    },
+    {
       "source": "/privacy",
       "destination": "/privacy.html"
     },
