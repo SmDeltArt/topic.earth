@@ -383,5 +383,27 @@ export const CARBON_HISTORY_TOPICS = [
       source('Climate Accountability Institute announcement', 'https://climateaccountability.org/carbon-majors/'),
       source('Carbon Majors FAQ', 'https://carbonmajors.org/EN/FAQ?lang=EN')
     ]
+  }),
+  makeCarbonHistoryTopic({
+    id: 'carbon-history-hormuz-pump-prices-2026',
+    sequence: 160,
+    track: 'fossil-carbon-system',
+    title: 'Hormuz disruption reaches European fuel pumps',
+    date: '2026-09-14',
+    country: 'European Union',
+    region: 'Europe',
+    lat: 50.85,
+    lon: 4.35,
+    sourceName: 'European Commission Weekly Oil Bulletin',
+    sourceUrl: 'https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en',
+    summary: 'With Middle East oil flows still disrupted, the EU weekly average reached about EUR 1.92 per litre for Euro 95 petrol and EUR 2.08 per litre for diesel. The pump-price rise made a distant shipping crisis visible in everyday transport costs across Europe.',
+    insight: 'This is a dated market snapshot, not a claim that crude was trading at USD 120 per barrel. The IEA reported a 2026 peak near USD 105 per barrel on 23 July and North Sea Dated near USD 92 in August; renewed disruption then pushed benchmark prices upward again. Pump prices also reflect refining margins, taxes, exchange rates, inventories, and time lags. Venezuela remains part of the wider supply picture, but should be linked only when a source demonstrates its specific contribution to this price move.',
+    sensitivity: 'sensitive',
+    sources: [
+      source('European Commission: Weekly Oil Bulletin', 'https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en'),
+      source('IEA: Oil Market Report, September 2026', 'https://www.iea.org/reports/oil-market-report-september-2026', 'scientific'),
+      source('IEA: Oil markets strain to plug the Middle East supply gap', 'https://www.iea.org/commentaries/oil-markets-strain-to-plug-the-gap-left-by-middle-east-supply-shortfall', 'scientific'),
+      source('AP: Strait of Hormuz, oil exports and prices', 'https://apnews.com/article/2b126da67b09de2f328846eb656abe0e', 'media')
+    ]
   })
 ];

@@ -605,7 +605,14 @@ export class LayerPanel {
     const canCreateLayer = AppAccess.can('layer:create');
     const canOpenTopicBuilder = AppAccess.canOpenTopicBuilder(this.layerFilter);
     const regionalProposalMode = this.layerFilter === 'regional';
-    const topicLabel = regionalProposalMode ? this.getRegionalProposalLabel() : this.t('layer.newTopic');
+    const translatedLayerLabel = this.t('layer.newLayer');
+    const translatedTopicLabel = this.t('layer.newTopic');
+    const layerLabel = translatedLayerLabel && translatedLayerLabel !== 'layer.newLayer'
+      ? translatedLayerLabel
+      : 'Layer';
+    const topicLabel = translatedTopicLabel && translatedTopicLabel !== 'layer.newTopic'
+      ? translatedTopicLabel
+      : 'Topic';
     const container = document.createElement('div');
     container.className = 'layer-action-buttons';
 
@@ -616,19 +623,23 @@ export class LayerPanel {
 
     container.innerHTML = `
       ${canCreateLayer ? `
-      <button class="action-btn-layer" data-action="new-layer" data-admin-only="true">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M7 1V13M1 7H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <button class="action-btn-layer" data-action="new-layer" data-admin-only="true" title="${this.escapeHtml(layerLabel)}" aria-label="${this.escapeHtml(layerLabel)}">
+        <svg class="action-create-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <path d="M9 2.25L15.5 5.5L9 8.75L2.5 5.5L9 2.25Z" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round"/>
+          <path d="M3.5 8.65L9 11.4L14.5 8.65M3.5 11.7L9 14.45L14.5 11.7" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span class="action-btn-text">${this.t('layer.newLayer')}</span>
+        <span class="action-btn-text">${this.escapeHtml(layerLabel)}</span>
       </button>
       ` : ''}
       ${canOpenTopicBuilder ? `
-      <button class="action-btn-topic ${regionalProposalMode ? 'proposal-btn' : ''}" data-action="new-topic" ${AppAccess.can('topic:create') && !regionalProposalMode ? 'data-admin-only="true"' : ''}>
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M7 1V13M1 7H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <button class="action-btn-topic ${regionalProposalMode ? 'proposal-btn' : ''}" data-action="new-topic" ${AppAccess.can('topic:create') && !regionalProposalMode ? 'data-admin-only="true"' : ''} title="${this.escapeHtml(topicLabel)}" aria-label="${this.escapeHtml(topicLabel)}">
+        <svg class="action-create-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <circle cx="9" cy="5" r="2.25" stroke="currentColor" stroke-width="1.45"/>
+          <circle cx="4" cy="13" r="1.75" stroke="currentColor" stroke-width="1.45"/>
+          <circle cx="14" cy="13" r="1.75" stroke="currentColor" stroke-width="1.45"/>
+          <path d="M7.7 6.85L5 11.35M10.3 6.85L13 11.35M5.75 13H12.25" stroke="currentColor" stroke-width="1.45" stroke-linecap="round"/>
         </svg>
-        <span class="action-btn-text">${topicLabel}</span>
+        <span class="action-btn-text">${this.escapeHtml(topicLabel)}</span>
       </button>
       ` : ''}
     `;

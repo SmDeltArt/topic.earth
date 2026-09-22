@@ -7029,7 +7029,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize Provider Mode UI (browser / BYOK / Vercel Proxy)
   initProviderMode();
+  initPortableOllamaQuickStart();
 });
+
+function initPortableOllamaQuickStart() {
+  if (!document.documentElement.classList.contains("portable-mode")) return;
+
+  document.getElementById("choosePortableOllama")?.addEventListener("click", () => {
+    const freeRadio = document.getElementById("freeTextApiRadio");
+    const freeSelect = document.getElementById("freeTextApi");
+    const textContent = document.getElementById("textApiContent");
+
+    if (freeRadio) {
+      freeRadio.checked = true;
+      freeRadio.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    if (freeSelect) {
+      freeSelect.value = "ollama";
+      freeSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    if (textContent) textContent.style.display = "block";
+    document.getElementById("ollamaModelSelector")?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  });
+}
 
 // ====================================================================
 // 🔐 API VAULT - Secure Storage with Browser Password Manager
@@ -9714,23 +9739,24 @@ function _applyProxySensitiveUi(mode) {
 
 function initProviderMode() {
   const developerUIEnabled = Boolean(window.DOMAIN_CONFIG?.showDeveloperUI?.());
+  const portableMode = document.documentElement.classList.contains("portable-mode");
 
   const apiAccessSection = document.getElementById("advancedDeveloperSettings");
   const managedBadge = document.getElementById("managedProxyStatus");
 
   if (apiAccessSection) {
-    apiAccessSection.style.display = developerUIEnabled ? "" : "none";
+    apiAccessSection.style.display = developerUIEnabled && !portableMode ? "" : "none";
   }
 
   if (managedBadge) {
-    managedBadge.style.display = developerUIEnabled ? "none" : "block";
+    managedBadge.style.display = developerUIEnabled || portableMode ? "none" : "block";
   }
 
   let mode = _getActiveProviderMode();
   // Restore the persisted mode (survives reload / "call back API") before we
   // apply UI — otherwise the HTML default (BYOK) would win and silently
   // override a saved Secure Proxy choice.
-  const storedMode = _readStoredProviderMode();
+  const storedMode = portableMode ? "byok" : _readStoredProviderMode();
   if (storedMode) {
     mode = storedMode;
     const r = document.querySelector(
@@ -9739,7 +9765,7 @@ function initProviderMode() {
     if (r) r.checked = true;
   }
   if (!mode) {
-    mode = "proxy";
+    mode = portableMode ? "byok" : "proxy";
     const r = document.querySelector(
       `input[name="providerMode"][value="${mode}"]`,
     );
@@ -9776,9 +9802,9 @@ function initProviderMode() {
   document
     .getElementById("testAiHealthBtn")
     ?.addEventListener("click", _proxyTestAiHealth);
-  if (mode === "proxy" && developerUIEnabled)
+  if (mode === "proxy" && developerUIEnabled && !portableMode)
     setTimeout(_proxyCheckHealth, 1500);
-  console.log(`🔒 Provider mode: ${mode} (developerUI=${developerUIEnabled})`);
+  console.log(`🔒 Provider mode: ${mode} (developerUI=${developerUIEnabled}, portable=${portableMode})`);
 }
 
 function _getActiveProviderMode() {

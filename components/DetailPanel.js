@@ -302,7 +302,7 @@ export class DetailPanel {
     return 'The signal continues into the next twenty-five year step.';
   }
 
-  getFeverNarrationText({ year, scenario, title, text }) {
+  getFeverNarrationText({ year, scenario, title, text, language }) {
     const speed = Number(this.currentGlobe?.feverSpeed || 2 / 3);
     const milestone = this.getScenarioMilestoneData(year, scenario);
 
@@ -310,8 +310,14 @@ export class DetailPanel {
       title,
       text,
       milestone,
-      speed
+      speed,
+      lg: language || this.getCurrentLanguage()
     });
+  }
+
+  shouldAutoNarrateFeverValues() {
+    const speed = Number(this.currentGlobe?.feverSpeed || 1 / 3);
+    return speed <= (1 / 3) + 0.001;
   }
 
   async localizeFeverWarning(warning) {
@@ -1201,13 +1207,20 @@ export class DetailPanel {
     }
   }
   
-  showFeverSimulation(globe) {
+  showFeverSimulation(globe, options = {}) {
     this.mode = 'fever-simulation';
     this.currentGlobe = globe;
     this.feverYears = this.getFeverYearsFromConfig();
-    this.setPanelSize('compact');
+    this.setPanelSize(options.panelSize || 'compact');
     this.renderFeverSimulation();
     this.container.classList.remove('hidden');
+    this.container.classList.toggle('fever-monitor-intro', options.introduce === true);
+    window.clearTimeout(this.feverMonitorIntroTimer);
+    if (options.introduce === true) {
+      this.feverMonitorIntroTimer = window.setTimeout(() => {
+        this.container.classList.remove('fever-monitor-intro');
+      }, 2200);
+    }
     this.updateTopicNavigation();
     
     // Hide year overlay when monitoring panel is visible
@@ -1533,6 +1546,7 @@ export class DetailPanel {
             <button class="speed-btn ${isFeverSpeedActive(2 / 3) ? 'active' : ''}" data-action="set-fever-speed" data-speed="0.6666666667">2/3</button>
             <button class="speed-btn ${isFeverSpeedActive(1) ? 'active' : ''}" data-action="set-fever-speed" data-speed="1">3/3</button>
           </div>
+          <div class="fever-speed-audio-hint">${this.escapeHtml(this.t('fever.speedAudioHint'))}</div>
         </div>
       </div>
       
@@ -2264,11 +2278,12 @@ export class DetailPanel {
     }, 5000);
     
     // Speak warning if voice enabled
-    if (this.currentGlobe && this.currentGlobe.getFeverVoiceEnabled() && window.ttsManager) {
+    if (this.currentGlobe && this.currentGlobe.getFeverVoiceEnabled() && this.shouldAutoNarrateFeverValues() && window.ttsManager) {
       const spokenWarning = this.getFeverNarrationText({
         year,
         scenario,
-        text: localizedWarning.text
+        text: localizedWarning.text,
+        language: localizedWarning.language
       });
       this.speakFeverNarration(spokenWarning, this.getFeverTtsLanguage(localizedWarning));
     }
@@ -2364,12 +2379,13 @@ export class DetailPanel {
     this.updateSelectedFeverTopic(year);
     
     // Read warning with TTS if enabled
-    if (this.currentGlobe && this.currentGlobe.getFeverVoiceEnabled() && window.ttsManager) {
+    if (this.currentGlobe && this.currentGlobe.getFeverVoiceEnabled() && this.shouldAutoNarrateFeverValues() && window.ttsManager) {
       const spokenWarning = this.getFeverNarrationText({
         year,
         scenario,
         title: localizedWarning.title,
-        text: localizedWarning.full
+        text: localizedWarning.full,
+        language: localizedWarning.language
       });
       this.speakFeverNarration(spokenWarning, localizedWarning.ttsLanguage);
     }
@@ -4078,6 +4094,11 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
     const speed = parseFloat(btn.dataset.speed);
     if (this.currentGlobe) {
       this.currentGlobe.setFeverSpeed(speed);
+    }
+
+    // Faster loops keep the heartbeat clear; automatic translated value narration is slow-only.
+    if (speed > (1 / 3) + 0.001) {
+      window.ttsManager?.stop?.();
     }
     
     // Update active button (only speed buttons)
@@ -10472,6 +10493,8 @@ Rules:
       const url = new URL(configuredSrc, window.location.href);
       url.searchParams.set('embed', 'true');
       url.searchParams.set('source', 'topic-earth');
+      url.searchParams.set('portable', 'true');
+      url.searchParams.set('host', 'topic-earth');
       return url.href;
     } catch {
       return configuredSrc;

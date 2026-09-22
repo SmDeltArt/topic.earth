@@ -3,7 +3,6 @@
  * Displays app branding and live status indicator
  */
 import { Settings } from '../lib/settings.js';
-import { AppAccess } from '../lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-tab-layers-20260507';
 
 const TOPIC_EARTH_MARK_FALLBACK_URL = './assets/icons/topic.earth_64x64.svg?v=topic-earth-icons-20260505';
@@ -31,7 +30,7 @@ export class TopBar {
   }
 
   handleClick(e) {
-    const target = e.target.closest('[data-action], [data-filter], #settings-btn, #admin-toggle-btn');
+    const target = e.target.closest('[data-action], [data-filter], #settings-btn');
     if (!target) return;
 
     if (target.dataset.action === 'toggle-mode') {
@@ -46,17 +45,10 @@ export class TopBar {
     } else if (target.id === 'settings-btn') {
       // Open settings in detail panel instead of modal
       window.dispatchEvent(new CustomEvent('openSettings'));
-    } else if (target.id === 'admin-toggle-btn') {
-      if (!AppAccess.can('admin:ui-toggle')) return;
-      const state = AppAccess.setAdminMode(!AppAccess.isAdminMode());
-      this.render();
-      window.dispatchEvent(new CustomEvent('adminModeChanged', { detail: state }));
     } else if (target.dataset.action === 'toggle-fullscreen') {
       window.dispatchEvent(new CustomEvent('topicFullscreenToggleRequested'));
     } else if (target.dataset.action === 'update-news') {
       window.dispatchEvent(new CustomEvent('newsUpdateClicked'));
-    } else if (target.dataset.action === 'open-api-settings') {
-      window.dispatchEvent(new CustomEvent('openApiSettingsOverlay'));
     } else if (target.dataset.action === 'open-fever-monitor') {
       window.dispatchEvent(new CustomEvent('openFeverMonitorRequested'));
     }
@@ -64,7 +56,7 @@ export class TopBar {
 
   handlePointerUp(e) {
     if (e.pointerType !== 'touch') return;
-    const target = e.target.closest('[data-action], [data-filter], #settings-btn, #admin-toggle-btn');
+    const target = e.target.closest('[data-action], [data-filter], #settings-btn');
     if (!target) return;
     const now = Date.now();
     if (this.lastTouchActionAt && now - this.lastTouchActionAt < 350) return;
@@ -75,7 +67,7 @@ export class TopBar {
 
   handleKeyDown(e) {
     if (!['Enter', ' '].includes(e.key)) return;
-    const target = e.target.closest('[data-action], [data-filter], #settings-btn, #admin-toggle-btn');
+    const target = e.target.closest('[data-action], [data-filter], #settings-btn');
     if (!target) return;
     e.preventDefault();
     this.handleClick({ target });
@@ -225,8 +217,6 @@ export class TopBar {
   }
 
   render() {
-    const isAdmin = AppAccess.isAdminMode();
-    const canToggleAdmin = AppAccess.can('admin:ui-toggle');
     const activeModeTab = this.layerFilter || this.mapViewModeToModeTab(this.viewMode) || 'main';
     const isRegionalMode = activeModeTab === 'regional';
     const interactionLabel = isRegionalMode
@@ -278,21 +268,6 @@ export class TopBar {
             <path d="M8 1L8 3M8 13L8 15M15 8L13 8M3 8L1 8M13.5 2.5L12 4M4 12L2.5 13.5M13.5 13.5L12 12M4 4L2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </button>
-        <button id="apiSettingsBtn" class="news-update-btn api-settings-top-btn" data-action="open-api-settings" title="Open API Settings" aria-label="Open API Settings">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          <span class="header-label">AI Keys</span>
-        </button>
-        ${canToggleAdmin ? `
-        <button id="admin-toggle-btn" class="admin-toggle-btn ${isAdmin ? 'active' : ''}" data-tutorial-id="admin-toggle" title="${this.escapeHtml(this.t('nav.toggleAdminMode'))}">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M8 1L10 5L14 6L11 9L12 13L8 11L4 13L5 9L2 6L6 5L8 1Z" stroke="currentColor" stroke-width="1.5" fill="${isAdmin ? 'currentColor' : 'none'}"/>
-          </svg>
-          <span class="btn-label">${this.escapeHtml(isAdmin ? this.t('common.admin') : this.t('common.user'))}</span>
-        </button>
-        ` : ''}
         <button id="news-update-btn" class="news-update-btn" title="${this.escapeHtml(this.t('nav.sourceSearchTitle'))}" data-action="update-news" data-tutorial-id="source-search">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M14 8C14 4.686 11.314 2 8 2C4.686 2 2 4.686 2 8C2 11.314 4.686 14 8 14C11.314 14 14 11.314 14 8Z" stroke="currentColor" stroke-width="1.5" fill="none"/>

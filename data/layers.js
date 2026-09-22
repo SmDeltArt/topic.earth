@@ -162,7 +162,8 @@ export const LAYERS = [
     icon: '\uD83D\uDD70\uFE0F',
     color: '#f6c85f',
     enabled: false,
-    chronologySort: 'asc'
+    chronologySort: 'asc',
+    previewLimit: 24
   },
   {
     id: 'extreme',
