@@ -71,7 +71,8 @@ metadata are also exposed through:
 - [codemeta.json](codemeta.json)
 - [CITATION.cff](CITATION.cff)
 - [assets/logo/metadata.json](assets/logo/metadata.json)
-- [docs/app-trust-and-store-publishing.md](docs/app-trust-and-store-publishing.md)
+- [Identity and local participation implementation brief (EN)](docs/topic-earth-identity-implementation-en.docx)
+- Local participation and youth protection: [FR](docs/topic-earth-participation-locale-et-jeunes-fr.docx) · [NL](docs/topic-earth-lokale-participatie-en-jongeren-nl.docx) · [DE](docs/topic-earth-lokale-beteiligung-und-jugendschutz-de.docx)
 
 ## Social Copy And Assets
 
