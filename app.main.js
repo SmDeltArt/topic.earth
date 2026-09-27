@@ -219,6 +219,11 @@ class TopicEarthApp {
     // Check for daily update
     this.checkDailyUpdate();
 
+    const requestedMode = new URLSearchParams(window.location.search).get('mode');
+    if (['main', 'regional', 'space', 'fever'].includes(requestedMode)) {
+      this.switchLayerFilter(requestedMode);
+    }
+
     // Hide loading screen
     this.hideLoadingScreen();
 
