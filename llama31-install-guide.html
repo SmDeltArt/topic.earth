@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🦙 Local AI Models - Quick Install Guide</title>
+    <script>
+      document.documentElement.classList.add(
+        window.self === window.top ? "detached-mode" : "in-iframe",
+      );
+    </script>
+    <link rel="stylesheet" href="shared/smart-spa-base.css" />
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #1a1d2e;
+        color: #e0e0e0;
+        padding: 0;
+        margin: 0 auto;
+        line-height: 1.6;
+        height: 100dvh;
+        width: 100%;
+        max-width: 420px;
+        display: block; /* Override smart-spa-base.css flex */
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      /* Standalone mode - match clipboard/api-settings height */
+      .detached-mode body {
+        max-height: calc(100dvh - 20px);
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+      }
+
+      /* Back button - always visible */
+      .back-btn {
+        position: fixed;
+        top: 8px;
+        left: 8px;
+        background: rgba(109, 158, 235, 0.2);
+        border: none;
+        color: #6d9eeb;
+        width: 28px;
+        height: 28px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        z-index: 100;
+      }
+      .back-btn:hover {
+        background: rgba(109, 158, 235, 0.3);
+        transform: scale(1.1);
+      }
+
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background: #2a2d3e;
+        padding: 15px;
+        padding-top: 40px; /* Space for back button */
+        border-radius: 8px;
+      }
+      .step-card {
+        background: #323548;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 10px 0;
+        border-left: 4px solid #6d9eeb;
+      }
+      .step-card.mistral {
+        border-left-color: #f97316;
+      }
+      .command-box {
+        background: #1a1d2e;
+        padding: 15px;
+        border-radius: 6px;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        border: 1px solid #444;
+        margin: 10px 0;
+        position: relative;
+      }
+      .copy-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #6d9eeb;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 11px;
+      }
+      .copy-btn:hover {
+        background: #5a87d6;
+      }
+      .model-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
+      .model-card {
+        background: #3a3d4e;
+        padding: 15px;
+        border-radius: 6px;
+        text-align: center;
+        border: 2px solid transparent;
+      }
+      .model-card.recommended {
+        border-color: #4ade80;
+        background: rgba(74, 222, 128, 0.1);
+      }
+      .model-card.large {
+        border-color: #fbbf24;
+        background: rgba(251, 191, 36, 0.1);
+      }
+      .model-card.mistral {
+        border-color: #f97316;
+        background: rgba(249, 115, 22, 0.1);
+      }
+      .download-size {
+        font-size: 18px;
+        font-weight: bold;
+        color: #6d9eeb;
+      }
+      .privacy-badge {
+        background: #4ade80;
+        color: #000;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: bold;
+        display: inline-block;
+        margin: 5px;
+      }
+      .test-section {
+        background: #3a3d4e;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      .status-indicator {
+        font-size: 24px;
+        margin: 0 10px;
+      }
+      .version-checker {
+        background: linear-gradient(135deg, #2d3a5a, #1a2332);
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+        border: 1px solid #444;
+      }
+      .version-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #444;
+      }
+      .version-item:last-child {
+        border-bottom: none;
+      }
+      .version-badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: bold;
+      }
+      .version-latest {
+        background: #4ade80;
+        color: #000;
+      }
+      .version-update {
+        background: #fbbf24;
+        color: #000;
+      }
+      .version-unknown {
+        background: #666;
+        color: #fff;
+      }
+      .link-btn {
+        background: #6d9eeb;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85em;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .link-btn:hover {
+        background: #5a87d6;
+      }
+      .link-btn.orange {
+        background: #f97316;
+      }
+      .link-btn.orange:hover {
+        background: #ea580c;
+      }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .tab-btn {
+        flex: 1;
+        padding: 12px;
+        background: #323548;
+        border: none;
+        border-radius: 8px 8px 0 0;
+        color: #888;
+        cursor: pointer;
+        font-size: 1em;
+        transition: all 0.2s;
+      }
+      .tab-btn.active {
+        background: #3a3d4e;
+        color: #fff;
+        border-bottom: 3px solid #6d9eeb;
+      }
+      .tab-btn.mistral.active {
+        border-bottom-color: #f97316;
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Custom Scrollbar Styling */
+      ::-webkit-scrollbar {
+        width: 8px;
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #6d9eeb, #5a87d6);
+        border-radius: 4px;
+        transition: all 0.3s ease;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #5a87d6, #4a76c5);
+      }
+
+      /* Hide close button when in widget mode */
+      .widget-mode .close-btn {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Back button for portal context -->
+    <button
+      class="back-btn"
+      onclick="window.location.href = 'api-settings.html'"
+      title="Back to API Settings"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M19 12H5M12 19L5 12L12 5"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+
+    <div class="container">
+      <h1>� Local AI Models - Quick Setup</h1>
+      <p>
+        Install AI models locally for <strong>100% private processing</strong>.
+      </p>
+
+      <div class="privacy-badge">🔒 PRIVACY COMPLIANT</div>
+      <div class="privacy-badge">📡 NO EXTERNAL CALLS</div>
+      <div class="privacy-badge">💻 LOCAL PROCESSING</div>
+
+      <!-- Version Checker -->
+      <div class="version-checker">
+        <h3>📊 Version & Status Checker</h3>
+        <div id="versionStatus">
+          <div class="version-item">
+            <span>🛠️ Ollama</span>
+            <span id="ollamaVersion"
+              ><span class="version-badge version-unknown"
+                >Checking...</span
+              ></span
+            >
+          </div>
+          <div class="version-item">
+            <span>🦙 Llama 3.1</span>
+            <span id="llamaVersion"
+              ><span class="version-badge version-unknown"
+                >Checking...</span
+              ></span
+            >
+          </div>
+          <div class="version-item">
+            <span>🌟 Mistral</span>
+            <span id="mistralVersion"
+              ><span class="version-badge version-unknown"
+                >Checking...</span
+              ></span
+            >
+          </div>
+        </div>
+        <div
+          style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap"
+        >
+          <a href="https://ollama.ai/download" target="_blank" class="link-btn"
+            >📥 Download Ollama</a
+          >
+          <a
+            href="https://ollama.com/library/llama3.1"
+            target="_blank"
+            class="link-btn"
+            >🦙 Llama Models</a
+          >
+          <a
+            href="https://ollama.com/library/mistral"
+            target="_blank"
+            class="link-btn orange"
+            >🌟 Mistral Models</a
+          >
+          <a
+            href="https://github.com/ollama/ollama/releases"
+            target="_blank"
+            class="link-btn"
+            >📋 Release Notes</a
+          >
+        </div>
+      </div>
+
+      <!-- Tabs for Llama / Mistral -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('llama')">
+          🦙 Llama 3.1
+        </button>
+        <button class="tab-btn mistral" onclick="showTab('mistral')">
+          🌟 Mistral AI
+        </button>
+      </div>
+
+      <!-- LLAMA TAB -->
+      <div id="llamaTab" class="tab-content active">
+        <div class="step-card">
+          <h2>Step 1: Install Ollama</h2>
+          <p>Download and install Ollama from the official website:</p>
+          <div class="command-box">
+            <button
+              class="copy-btn"
+              onclick="copyToClipboard('https://ollama.ai/download')"
+            >
+              Copy
+            </button>
+            Visit: https://ollama.ai/download
+          </div>
+          <p>Run the Windows installer and follow the setup wizard.</p>
+        </div>
+
+        <div class="step-card">
+          <h2>Step 2: Choose Your Llama 3.1 Model</h2>
+          <p>Based on your system capabilities:</p>
+
+          <div class="model-grid">
+            <div class="model-card recommended">
+              <h3>🥇 Llama 3.1 (8B)</h3>
+              <div class="download-size">4.9 GB</div>
+              <p><strong>RECOMMENDED</strong></p>
+              <p>Perfect balance</p>
+              <div class="command-box">
+                <button
+                  class="copy-btn"
+                  onclick="copyToClipboard('ollama pull llama3.1:latest')"
+                >
+                  Copy
+                </button>
+                ollama pull llama3.1:latest
+              </div>
+            </div>
+
+            <div class="model-card large">
+              <h3>🚀 Llama 3.1 (70B)</h3>
+              <div class="download-size">~40 GB</div>
+              <p><strong>HIGH PERF</strong></p>
+              <p>Needs more RAM</p>
+              <div class="command-box">
+                <button
+                  class="copy-btn"
+                  onclick="copyToClipboard('ollama pull llama3.1:70b')"
+                >
+                  Copy
+                </button>
+                ollama pull llama3.1:70b
+              </div>
+            </div>
+
+            <div class="model-card large">
+              <h3>🌟 Llama 3.1 (405B)</h3>
+              <div class="download-size">~230 GB</div>
+              <p><strong>MAX POWER</strong></p>
+              <p>High-end HW</p>
+              <div class="command-box">
+                <button
+                  class="copy-btn"
+                  onclick="copyToClipboard('ollama pull llama3.1:405b')"
+                >
+                  Copy
+                </button>
+                ollama pull llama3.1:405b
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <h2>Step 3: Start Ollama Service</h2>
+          <p>Open PowerShell as Administrator and run:</p>
+          <div class="command-box">
+            <button class="copy-btn" onclick="copyToClipboard('ollama serve')">
+              Copy
+            </button>
+            ollama serve
+          </div>
+          <p><em>Keep this terminal open while using local AI models.</em></p>
+        </div>
+      </div>
+
+      <!-- MISTRAL TAB -->
+      <div id="mistralTab" class="tab-content">
+        <div class="step-card mistral">
+          <h2>🌟 About Mistral AI</h2>
+          <p>
+            <strong>Mistral AI</strong> is a French AI company known for
+            high-quality open-weight models.
+          </p>
+          <ul>
+            <li>
+              ✅ <strong>Excellent for European users</strong> - GDPR compliant
+              when run locally
+            </li>
+            <li>
+              ✅ <strong>Great at coding</strong> - Strong code generation
+              abilities
+            </li>
+            <li>
+              ✅ <strong>Multilingual</strong> - Good French, German, Spanish
+              support
+            </li>
+            <li>
+              ✅ <strong>Efficient</strong> - Better performance per parameter
+              than older models
+            </li>
+          </ul>
+        </div>
+
+        <div class="step-card mistral">
+          <h2>Step 1: Install Ollama (Same as Llama)</h2>
+          <div class="command-box">
+            <button
+              class="copy-btn"
+              onclick="copyToClipboard('https://ollama.ai/download')"
+            >
+              Copy
+            </button>
+            Visit: https://ollama.ai/download
+          </div>
+        </div>
+
+        <div class="step-card mistral">
+          <h2>Step 2: Choose Your Mistral Model</h2>
+
+          <div class="model-grid">
+            <div class="model-card mistral recommended">
+              <h3>🥇 Mistral 7B</h3>
+              <div class="download-size" style="color: #f97316">4.1 GB</div>
+              <p><strong>RECOMMENDED</strong></p>
+              <p>Fast & capable</p>
+              <div class="command-box">
+                <button
+                  class="copy-btn"
+                  onclick="copyToClipboard('ollama pull mistral')"
+                >
+                  Copy
+                </button>
+                ollama pull mistral
+              </div>
+            </div>
+
+            <div class="model-card mistral">
+              <h3>🚀 Mixtral 8x7B</h3>
+              <div class="download-size" style="color: #f97316">26 GB</div>
+              <p><strong>MoE MODEL</strong></p>
+              <p>Expert mixture</p>
+              <div class="command-box">
+                <button
+                  class="copy-btn"
+                  onclick="copyToClipboard('ollama pull mixtral')"
+                >
+                  Copy
+                </button>
+                ollama pull mixtral
+              </div>
+            </div>
+
+            <div class="model-card mistral">
+              <h3>💻 Codestral</h3>
+              <div class="download-size" style="color: #f97316">12 GB</div>
+              <p><strong>FOR CODING</strong></p>
+              <p>Code specialist</p>
+              <div class="command-box">
+                <button
+                  class="copy-btn"
+                  onclick="copyToClipboard('ollama pull codestral')"
+                >
+                  Copy
+                </button>
+                ollama pull codestral
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card mistral">
+          <h2>Step 3: Configure in API Settings</h2>
+          <p>
+            In API Settings → Free APIs → Select <strong>Ollama</strong>, then
+            enter model name:
+          </p>
+          <div class="command-box">
+            <button class="copy-btn" onclick="copyToClipboard('mistral')">
+              Copy
+            </button>
+            mistral
+          </div>
+          <p>Or for Mixtral:</p>
+          <div class="command-box">
+            <button class="copy-btn" onclick="copyToClipboard('mixtral')">
+              Copy
+            </button>
+            mixtral
+          </div>
+        </div>
+
+        <div class="step-card mistral">
+          <h2>🔗 Mistral AI Resources</h2>
+          <div
+            style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px"
+          >
+            <a
+              href="https://mistral.ai/"
+              target="_blank"
+              class="link-btn orange"
+              >🏠 Mistral AI Website</a
+            >
+            <a
+              href="https://docs.mistral.ai/"
+              target="_blank"
+              class="link-btn orange"
+              >📚 Documentation</a
+            >
+            <a
+              href="https://ollama.com/library/mistral"
+              target="_blank"
+              class="link-btn orange"
+              >📥 Ollama Library</a
+            >
+            <a
+              href="https://huggingface.co/mistralai"
+              target="_blank"
+              class="link-btn orange"
+              >🤗 HuggingFace</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Test Section (shown for both) -->
+      <div class="test-section">
+        <h2>🧪 Live Test Your Installation</h2>
+        <p>Test if Ollama and your models are working:</p>
+        <div style="text-align: center; margin: 20px 0">
+          <span class="status-indicator" id="ollamaStatus">⏳</span>
+          <span id="statusText">Click to test Ollama connection</span>
+        </div>
+        <button
+          onclick="testOllamaConnection()"
+          id="testBtn"
+          style="
+            display: block;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background: #6d9eeb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+          "
+        >
+          🔍 Test Ollama & Models
+        </button>
+        <div id="testResults" style="margin-top: 20px"></div>
+      </div>
+
+      <div class="step-card">
+        <h2>🎯 Next Steps</h2>
+        <p>
+          Once installed, your SmΔrt Collection APIs will automatically detect
+          and use Ollama for:
+        </p>
+        <ul>
+          <li>
+            ✅ <strong>Private text generation</strong> - No data sent to
+            external servers
+          </li>
+          <li>
+            ✅ <strong>Sensitive document processing</strong> - Full privacy
+            compliance
+          </li>
+          <li>✅ <strong>Local AI assistance</strong> - Works offline</li>
+          <li>
+            ✅ <strong>Privacy policy compliance</strong> - "Use local models
+            for sensitive data"
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      // Check if we're in an iframe/widget and hide close button
+      if (window.self !== window.top) {
+        document.body.classList.add("widget-mode");
+        console.log("🔧 Local AI Widget mode detected");
+      }
+
+      // Tab switching
+      function showTab(tabName) {
+        // Hide all tabs
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((tab) => tab.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+
+        // Show selected tab
+        document.getElementById(tabName + "Tab").classList.add("active");
+        document
+          .querySelector(
+            `.tab-btn${tabName === "mistral" ? ".mistral" : ":not(.mistral)"}`,
+          )
+          .classList.add("active");
+      }
+
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+          // Show feedback
+          const event = window.event;
+          const btn = event.target;
+          const originalText = btn.textContent;
+          btn.textContent = "Copied!";
+          btn.style.background = "#4ade80";
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = "#6d9eeb";
+          }, 2000);
+        });
+      }
+
+      async function testOllamaConnection() {
+        const statusIcon = document.getElementById("ollamaStatus");
+        const statusText = document.getElementById("statusText");
+        const testResults = document.getElementById("testResults");
+        const testBtn = document.getElementById("testBtn");
+
+        statusIcon.textContent = "🔄";
+        statusText.textContent = "Testing Ollama connection...";
+        testBtn.disabled = true;
+        testBtn.textContent = "Testing...";
+
+        try {
+          // Test Ollama connection
+          const response = await fetch("http://localhost:11434/api/tags");
+
+          if (response.ok) {
+            const data = await response.json();
+            const models = data.models || [];
+            const llama31Models = models.filter((m) =>
+              m.name.includes("llama"),
+            );
+            const mistralModels = models.filter(
+              (m) =>
+                m.name.includes("mistral") ||
+                m.name.includes("mixtral") ||
+                m.name.includes("codestral"),
+            );
+
+            statusIcon.textContent = "✅";
+            statusText.textContent = `Found ${models.length} models`;
+
+            let resultsHtml =
+              '<div style="background: #323548; padding: 15px; border-radius: 6px; margin-top: 15px;">';
+            resultsHtml += "<h3>✅ Ollama is Working!</h3>";
+
+            if (llama31Models.length > 0) {
+              resultsHtml += "<h4>🦙 Llama Models Found:</h4>";
+              llama31Models.forEach((model) => {
+                const sizeGB = (model.size / 1024 / 1024 / 1024).toFixed(1);
+                resultsHtml += `<p>✅ <strong>${model.name}</strong> - ${sizeGB} GB</p>`;
+              });
+            }
+
+            if (mistralModels.length > 0) {
+              resultsHtml += "<h4>🌟 Mistral Models Found:</h4>";
+              mistralModels.forEach((model) => {
+                const sizeGB = (model.size / 1024 / 1024 / 1024).toFixed(1);
+                resultsHtml += `<p>✅ <strong>${model.name}</strong> - ${sizeGB} GB</p>`;
+              });
+            }
+
+            if (llama31Models.length > 0 || mistralModels.length > 0) {
+              resultsHtml +=
+                '<p style="color: #4ade80;"><strong>🔒 Privacy Policy Compliance: EXCELLENT</strong></p>';
+            } else {
+              resultsHtml +=
+                '<p style="color: #fbbf24;">⚠️ No AI models found. Use the commands above to install one!</p>';
+            }
+
+            if (models.length > 0) {
+              resultsHtml += "<h4>📋 All Available Models:</h4>";
+              models.forEach((model) => {
+                const sizeGB = (model.size / 1024 / 1024 / 1024).toFixed(1);
+                resultsHtml += `<p>• ${model.name} - ${sizeGB} GB</p>`;
+              });
+            }
+
+            resultsHtml += "</div>";
+            testResults.innerHTML = resultsHtml;
+
+            // Update version badges
+            updateVersionBadges(models);
+          } else {
+            throw new Error("Ollama not responding");
+          }
+        } catch (error) {
+          statusIcon.textContent = "❌";
+          statusText.textContent =
+            "Ollama not found - follow installation steps above";
+          testResults.innerHTML = `
+                    <div style="background: #3a2d2d; padding: 15px; border-radius: 6px; margin-top: 15px; border-left: 4px solid #f87171;">
+                        <h3>❌ Ollama Not Found</h3>
+                        <p><strong>Solution:</strong></p>
+                        <ol>
+                            <li>Download Ollama from <a href="https://ollama.ai/download" target="_blank">https://ollama.ai/download</a></li>
+                            <li>Install and restart your computer</li>
+                            <li>Open PowerShell and run: <code>ollama serve</code></li>
+                            <li>Test again with this button</li>
+                        </ol>
+                    </div>
+                `;
+          // Update badges to show not running
+          document.getElementById("ollamaVersion").innerHTML =
+            '<span class="version-badge version-missing">Not Running</span>';
+          document.getElementById("llamaVersion").innerHTML =
+            '<span class="version-badge version-unknown">—</span>';
+          document.getElementById("mistralVersion").innerHTML =
+            '<span class="version-badge version-unknown">—</span>';
+        }
+
+        testBtn.disabled = false;
+        testBtn.textContent = "🔍 Test Again";
+      }
+
+      // Update version badges
+      function updateVersionBadges(models) {
+        const ollamaVersionEl = document.getElementById("ollamaVersion");
+        const llamaVersionEl = document.getElementById("llamaVersion");
+        const mistralVersionEl = document.getElementById("mistralVersion");
+
+        // Ollama is running
+        ollamaVersionEl.innerHTML =
+          '<span class="version-badge version-installed">✓ Running</span>';
+
+        // Check for Llama
+        const llamaModels = models.filter((m) =>
+          m.name.toLowerCase().includes("llama"),
+        );
+        if (llamaModels.length > 0) {
+          llamaVersionEl.innerHTML = `<span class="version-badge version-installed">${llamaModels[0].name}</span>`;
+        } else {
+          llamaVersionEl.innerHTML =
+            '<span class="version-badge version-missing">Not Installed</span>';
+        }
+
+        // Check for Mistral
+        const mistralModels = models.filter(
+          (m) =>
+            m.name.toLowerCase().includes("mistral") ||
+            m.name.toLowerCase().includes("mixtral") ||
+            m.name.toLowerCase().includes("codestral"),
+        );
+        if (mistralModels.length > 0) {
+          mistralVersionEl.innerHTML = `<span class="version-badge version-installed">${mistralModels[0].name}</span>`;
+        } else {
+          mistralVersionEl.innerHTML =
+            '<span class="version-badge version-missing">Not Installed</span>';
+        }
+      }
+
+      // Auto-test on page load
+      document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(testOllamaConnection, 1000);
+
+        // Portal context detection
+        if (window.parent !== window) {
+          document.body.classList.add("in-portal");
+        } else {
+          document.body.classList.add("detached-mode");
+        }
+      });
+    </script>
+  </body>
+</html>

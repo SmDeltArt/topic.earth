@@ -2070,14 +2070,14 @@ function updateAllTablesAndChart() {
 function openLlamaQuickSetup() {
   logExplain("⚡ Opening Llama Quick Setup Widget...");
 
-  // Use centralized widget paths config
-  const llamaUrl =
-    window.parent.SMART_WIDGET_PATHS?.getWidgetUrl("llama-guide") ||
-    "../widgets/llama31-install-guide.html";
+  // Resolve beside this API Settings page; the parent may be cross-origin.
+  let llamaUrl = new URL("llama31-install-guide.html", window.location.href).href;
   console.log("📍 Llama URL:", llamaUrl);
 
   // FIRST: Try to access SmartPopup from parent window (portal context)
   try {
+    const portalUrl = window.parent.SMART_WIDGET_PATHS?.getWidgetUrl("llama-guide");
+    if (portalUrl) llamaUrl = portalUrl;
     if (
       window.parent !== window &&
       window.parent.SmartPopup &&
@@ -2108,7 +2108,7 @@ function openLlamaQuickSetup() {
     SmartPopup.widget({
       title: "Llama Quick Setup 🦙",
       icon: "🦙",
-      url: "llama31-install-guide.html",
+      url: llamaUrl,
       width: "420px", // Match API Settings size
       height: "650px", // Match API Settings size
       keepOthersOpen: true, // Keep API settings open underneath
@@ -2123,10 +2123,10 @@ function openLlamaQuickSetup() {
   // THIRD: Fallback - Use SmartNav for proper SPA navigation (no iframe trapping)
   console.log("⚠️ SmartPopup not available, using SmartNav...");
   if (typeof SmartNav !== "undefined" && SmartNav.navigateTo) {
-    SmartNav.navigateTo("llama31-install-guide.html");
+    SmartNav.navigateTo(llamaUrl);
   } else {
     // Ultimate fallback: direct navigation
-    window.location.href = "llama31-install-guide.html";
+    window.location.href = llamaUrl;
   }
 }
 
