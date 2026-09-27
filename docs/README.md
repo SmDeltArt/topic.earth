@@ -1,6 +1,8 @@
-# topic.earth participation documents
+# topic.earth project documents
 
-These four working documents describe a proposed path from climate education to local citizen initiatives. They are planning materials, not a statement that the login system or municipal partnerships have already been implemented.
+These working documents describe a proposed path from climate education to local citizen initiatives and controlled AI assistance. They are planning materials, not a statement that the login system, organization access, or municipal partnerships have already been implemented.
+
+## Participation and local initiatives
 
 | Document | Audience | Purpose |
 | --- | --- | --- |
@@ -8,6 +10,13 @@ These four working documents describe a proposed path from climate education to 
 | [Participation locale et protection des jeunes (FR)](topic-earth-participation-locale-et-jeunes-fr.docx) | Citizens and prospective local partners | Explains the educational mission, commune-to-world progression, youth participation, and local Ambassadors. |
 | [Lokale participatie en bescherming van jongeren (NL)](topic-earth-lokale-participatie-en-jongeren-nl.docx) | Citizens and prospective local partners | Dutch version of the civic note. |
 | [Lokale Beteiligung und Schutz junger Menschen (DE)](topic-earth-lokale-beteiligung-und-jugendschutz-de.docx) | Citizens and prospective local partners | German version of the civic note. |
+
+## AI access and API Settings
+
+| Document | Audience | Purpose |
+| --- | --- | --- |
+| [AI for learning and local action](ai-learning-presentation.md) | Citizens and prospective partners | Presentation of optional AI learning, local Ollama, personal BYOK and proposed BYORG or ASBL-funded assistance. |
+| [API Settings integration and local Ollama](ai-api-settings-local-ollama.md) | Developers and project administrators | Current code and source versions, Ollama request path, legal-entity boundaries, proposed entitlements and quotas, and deployment checks. |
 
 ## Shared proposal
 
@@ -21,4 +30,4 @@ These four working documents describe a proposed path from climate education to 
 
 Confirm itsme's available attributes, integration terms and costs; define age-specific posting and moderation rules; agree how local connection is verified; and establish how a participating commune authorizes its representatives. The documents keep these items open rather than assuming an agreement or technical capability.
 
-The three civic notes convey the same proposal in Belgium's French, Dutch, and German languages. The English brief is intended for implementation planning.
+The three civic notes convey the same participation proposal in Belgium's French, Dutch, and German languages. The English briefs support implementation planning. The AI documents distinguish current code from proposed account and organization permissions.
