@@ -110,7 +110,7 @@
     ollama: {
       name: "Ollama Local",
       endpoint: "http://localhost:11434/api/generate",
-      defaultModel: "llama3.1:8b",
+      defaultModel: "qwen3.5:4b",
       noKey: true,
       kind: "ollama",
     },

@@ -1898,7 +1898,7 @@ function openLlamaQuickSetup() {
   logExplain("⚡ Opening Llama Quick Setup Widget...");
 
   // Resolve beside this API Settings page; the parent may be cross-origin.
-  let llamaUrl = new URL("llama31-install-guide.html", window.location.href).href;
+  let llamaUrl = new URL("/ollama-install-guide.html", window.location.href).href;
   console.log("📍 Llama URL:", llamaUrl);
 
   // FIRST: Try to access SmartPopup from parent window (portal context)
@@ -3679,7 +3679,7 @@ async function testOllama(prompt) {
   try {
     // Get the selected Ollama model from UI
     const ollamaModelInput = document.getElementById("ollamaModel");
-    const ollamaModel = ollamaModelInput?.value?.trim() || "llama3.1:8b";
+    const ollamaModel = ollamaModelInput?.value?.trim() || "qwen3.5:4b";
 
     addLogEntry(
       `🔍 Testing Ollama: Checking server status... (Model: ${ollamaModel})`,
@@ -3781,7 +3781,7 @@ async function testOllama(prompt) {
         "CORS error - Ollama server needs CORS headers for browser access";
       addLogEntry(`🚫 ${errorMessage}`, "error");
       addLogEntry(
-        '💡 Try running: ollama serve --cors-allow-origin="*"',
+        '💡 Set OLLAMA_ORIGINS to the exact topic.earth origin, restart Ollama, then retry. See the Ollama install guide.',
         "info",
       );
     } else if (error.message.includes("Failed to fetch")) {
@@ -7734,7 +7734,7 @@ function saveSettingsToLocalStorage(skipWarning = false) {
         document.getElementById("openaiVideoModel")?.value || "",
       // Ollama model selector
       ollamaModel:
-        document.getElementById("ollamaModel")?.value || "llama3.1:8b",
+        document.getElementById("ollamaModel")?.value || "qwen3.5:4b",
       ollamaHost:
         document.getElementById("ollamaHost")?.value ||
         "http://localhost:11434",

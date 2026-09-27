@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Local Ollama - Quick Install Guide</title>
+    <script>
+      document.documentElement.classList.add(
+        window.self === window.top ? "detached-mode" : "in-iframe",
+      );
+    </script>
+    <link rel="stylesheet" href="shared/smart-spa-base.css" />
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #1a1d2e;
+        color: #e0e0e0;
+        padding: 0;
+        margin: 0 auto;
+        line-height: 1.6;
+        height: 100dvh;
+        width: 100%;
+        max-width: 420px;
+        display: block; /* Override smart-spa-base.css flex */
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      /* Standalone mode - match clipboard/api-settings height */
+      .detached-mode body {
+        max-height: calc(100dvh - 20px);
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+      }
+
+      /* Back button - always visible */
+      .back-btn {
+        position: fixed;
+        top: 8px;
+        left: 8px;
+        background: rgba(109, 158, 235, 0.2);
+        border: none;
+        color: #6d9eeb;
+        width: 28px;
+        height: 28px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        z-index: 100;
+      }
+      .back-btn:hover {
+        background: rgba(109, 158, 235, 0.3);
+        transform: scale(1.1);
+      }
+
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background: #2a2d3e;
+        padding: 15px;
+        padding-top: 40px; /* Space for back button */
+        border-radius: 8px;
+      }
+      .step-card {
+        background: #323548;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 10px 0;
+        border-left: 4px solid #6d9eeb;
+      }
+      .step-card.mistral {
+        border-left-color: #f97316;
+      }
+      .command-box {
+        background: #1a1d2e;
+        padding: 15px;
+        border-radius: 6px;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        border: 1px solid #444;
+        margin: 10px 0;
+        position: relative;
+      }
+      .copy-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #6d9eeb;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 11px;
+      }
+      .copy-btn:hover {
+        background: #5a87d6;
+      }
+      .model-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
+      .model-card {
+        background: #3a3d4e;
+        padding: 15px;
+        border-radius: 6px;
+        text-align: center;
+        border: 2px solid transparent;
+      }
+      .model-card.recommended {
+        border-color: #4ade80;
+        background: rgba(74, 222, 128, 0.1);
+      }
+      .model-card.large {
+        border-color: #fbbf24;
+        background: rgba(251, 191, 36, 0.1);
+      }
+      .model-card.mistral {
+        border-color: #f97316;
+        background: rgba(249, 115, 22, 0.1);
+      }
+      .download-size {
+        font-size: 18px;
+        font-weight: bold;
+        color: #6d9eeb;
+      }
+      .privacy-badge {
+        background: #4ade80;
+        color: #000;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: bold;
+        display: inline-block;
+        margin: 5px;
+      }
+      .test-section {
+        background: #3a3d4e;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      .status-indicator {
+        font-size: 24px;
+        margin: 0 10px;
+      }
+      .version-checker {
+        background: linear-gradient(135deg, #2d3a5a, #1a2332);
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+        border: 1px solid #444;
+      }
+      .version-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #444;
+      }
+      .version-item:last-child {
+        border-bottom: none;
+      }
+      .version-badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: bold;
+      }
+      .version-latest {
+        background: #4ade80;
+        color: #000;
+      }
+      .version-update {
+        background: #fbbf24;
+        color: #000;
+      }
+      .version-unknown {
+        background: #666;
+        color: #fff;
+      }
+      .link-btn {
+        background: #6d9eeb;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85em;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .link-btn:hover {
+        background: #5a87d6;
+      }
+      .link-btn.orange {
+        background: #f97316;
+      }
+      .link-btn.orange:hover {
+        background: #ea580c;
+      }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .tab-btn {
+        flex: 1;
+        padding: 12px;
+        background: #323548;
+        border: none;
+        border-radius: 8px 8px 0 0;
+        color: #888;
+        cursor: pointer;
+        font-size: 1em;
+        transition: all 0.2s;
+      }
+      .tab-btn.active {
+        background: #3a3d4e;
+        color: #fff;
+        border-bottom: 3px solid #6d9eeb;
+      }
+      .tab-btn.mistral.active {
+        border-bottom-color: #f97316;
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Custom Scrollbar Styling */
+      ::-webkit-scrollbar {
+        width: 8px;
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #6d9eeb, #5a87d6);
+        border-radius: 4px;
+        transition: all 0.3s ease;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #5a87d6, #4a76c5);
+      }
+
+      /* Hide close button when in widget mode */
+      .widget-mode .close-btn {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="back-btn" href="/api-settings.html" title="Back to API Settings" aria-label="Back to API Settings">←</a>
+    <main class="container">
+      <h1>Local Ollama · Quick setup</h1>
+      <p>Run a model on your own computer and connect it to topic.earth API Settings. Start with one small model; you can choose any installed model later.</p>
+
+      <section class="step-card">
+        <h2>1. Install or update Ollama</h2>
+        <p>Use the <a href="https://ollama.com/download" target="_blank" rel="noopener noreferrer">official Ollama download</a> for Windows, macOS or Linux. On Windows, open the Ollama app after installing. If Ollama is already running, you do not need a second <code>ollama serve</code> process.</p>
+      </section>
+
+      <section class="step-card">
+        <h2>2. Download a model</h2>
+        <div class="model-grid">
+          <div class="model-card recommended">
+            <h3>Qwen 3.5 · 4B</h3>
+            <p class="download-size">About 3.4 GB download</p>
+            <p>A current compact multilingual model for local text testing on a 16 GB computer. Actual memory use depends on context and hardware.</p>
+            <div class="command-box"><code>ollama pull qwen3.5:4b</code><button class="copy-btn" type="button" data-copy="ollama pull qwen3.5:4b">Copy</button></div>
+            <a href="https://ollama.com/library/qwen3.5:4b" target="_blank" rel="noopener noreferrer">Model details</a>
+          </div>
+          <div class="model-card">
+            <h3>Gemma 3 · 4B</h3>
+            <p>A compact alternative with text and image support. topic.earth's Ollama text setting uses it for text prompts.</p>
+            <div class="command-box"><code>ollama pull gemma3:4b</code><button class="copy-btn" type="button" data-copy="ollama pull gemma3:4b">Copy</button></div>
+            <a href="https://ollama.com/library/gemma3:4b" target="_blank" rel="noopener noreferrer">Model details</a>
+          </div>
+        </div>
+        <p>Already have <code>llama3.1:8b</code> or another model? Keep using it if you prefer. No download is required just to change this guide.</p>
+      </section>
+
+      <section class="step-card">
+        <h2>3. Connect API Settings</h2>
+        <ol>
+          <li>Open <a href="/api-settings.html">topic.earth API Settings</a> and choose <strong>Ollama</strong> for text.</li>
+          <li>Keep the host at <code>http://localhost:11434</code> when Ollama runs on the same computer.</li>
+          <li>Refresh installed models, select <code>qwen3.5:4b</code> (or your own model), save, then use the Ollama test.</li>
+        </ol>
+        <p>The model must be installed on the device running the browser. A visitor to topic.earth does not use your computer's Ollama server.</p>
+      </section>
+
+      <section class="test-section">
+        <h2>Check this browser</h2>
+        <p>This reads <code>localhost:11434/api/version</code> and <code>/api/tags</code>. It does not generate a prompt.</p>
+        <button id="testBtn" class="link-btn" type="button">Check Ollama and models</button>
+        <p id="testStatus" role="status" aria-live="polite"></p>
+        <ul id="modelList"></ul>
+      </section>
+
+      <section class="step-card">
+        <h2>If the connection fails</h2>
+        <ul>
+          <li>Check that the Ollama app is running and that <code>ollama list</code> shows your downloaded model.</li>
+          <li>A page on <code>https://www.topic.earth</code> may need its exact origin allowed in Ollama using <code>OLLAMA_ORIGINS</code>; restart Ollama after changing it. Browser local-network restrictions can also apply. See the <a href="https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama" target="_blank" rel="noopener noreferrer">official origin guidance</a>.</li>
+          <li>Do not bind Ollama to the public internet or allow every origin to fix a browser error. The local API has no authentication by default.</li>
+        </ul>
+      </section>
+      <p>Local Ollama requests stay on your machine only when the selected host is local and external fallbacks are disabled. Other topic.earth features may still use online services. <a href="https://docs.ollama.com/api/authentication" target="_blank" rel="noopener noreferrer">Ollama API authentication details</a>.</p>
+    </main>
+    <script>
+      document.querySelectorAll('[data-copy]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(button.dataset.copy);
+            button.textContent = 'Copied';
+            setTimeout(() => { button.textContent = 'Copy'; }, 1800);
+          } catch {
+            button.textContent = 'Select the command';
+          }
+        });
+      });
+      document.getElementById('testBtn').addEventListener('click', async () => {
+        const status = document.getElementById('testStatus');
+        const list = document.getElementById('modelList');
+        const button = document.getElementById('testBtn');
+        button.disabled = true;
+        list.replaceChildren();
+        status.textContent = 'Checking this browser’s local Ollama connection…';
+        try {
+          const options = { signal: AbortSignal.timeout(5000) };
+          const version = await fetch('http://localhost:11434/api/version', options);
+          const tags = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(5000) });
+          if (!version.ok || !tags.ok) throw new Error(`HTTP ${!version.ok ? version.status : tags.status}`);
+          const info = await version.json();
+          const data = await tags.json();
+          const models = Array.isArray(data.models) ? data.models : [];
+          status.textContent = `Ollama ${info.version || ''} is reachable. ${models.length} installed model(s).`;
+          for (const model of models) {
+            const item = document.createElement('li');
+            item.textContent = `${model.name} · ${(Number(model.size || 0) / 1e9).toFixed(1)} GB download`;
+            list.appendChild(item);
+          }
+        } catch {
+          status.textContent = 'This browser cannot reach Ollama. Check the app, host, origin and browser local-network permission below.';
+        } finally {
+          button.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
