@@ -9,3 +9,10 @@ Thumbs.db
 
 .vercel/
 node_modules/
+
+# Local and generated asset backups
+*.bak
+*.blend1
+assets/**/export-*.csv
+assets/logo/generated/**/frames/
+assets/models/_solar-system-archive-*/
