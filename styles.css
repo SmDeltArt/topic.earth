@@ -813,6 +813,11 @@ body.mode-transitioning .filter-btn {
     max-height: 1800px;
 }
 
+/* The Solar System list grows with curated topics; let its panel scroll. */
+.layer-item[data-layer-id="space"].expanded .layer-news {
+    max-height: none;
+}
+
 .layer-icon.mixed {
     opacity: 1;
     box-shadow: 0 0 0 1px currentColor inset, 0 0 10px currentColor;
