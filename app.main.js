@@ -13,7 +13,7 @@ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js
 import { TopBar } from './components/TopBar.js?v=topic-earth-live-clock-logo-20260605';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-janus-system-20261001';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-chronos-images-20261001';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-secure-install-20261001';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-meteo-draft-20260531';
 import { Settings } from './lib/settings.js?v=topic-earth-admin-api-settings-20261001';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';

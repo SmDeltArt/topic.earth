@@ -5,7 +5,7 @@ import { ReadTranslationService } from '../lib/read-translation.js';
 import { buildFeverAudioText } from '../lib/fever-audio-manifest.mjs';
 import { getFeverWarmingTranslation } from '../lib/fever-warming-translations.js?v=topic-earth-fever-json-i18n-20260422';
 import { LocalStorage } from '../lib/storage.js?v=topic-earth-meteo-draft-20260531';
-import { pwaInstallManager } from '../lib/pwa-install-manager.js';
+import { pwaInstallManager } from '../lib/pwa-install-manager.js?v=topic-earth-secure-install-20261001';
 import { renderResponsiveMediaImage, installMediaFallbackHandler } from '../lib/responsive-media.mjs';
 import {
   createMediaToken as createTopicMediaToken,
@@ -11048,29 +11048,24 @@ Rules:
     status.dataset.state = state;
   }
 
-  async installTopicEarth(content) {
-    const result = await pwaInstallManager.promptInstall();
-    const messages = {
-      accepted: 'Installation started. Mode shortcuts will be available from the installed app launcher where supported.',
-      dismissed: 'Installation was cancelled.',
-      installed: 'topic.earth is already running as an installed app.',
-      unavailable: 'Use your browser menu and choose Install app or Add to Home Screen.'
-    };
-    this.setPwaActionStatus(content, messages[result.outcome] || messages.unavailable, result.outcome === 'accepted' ? 'success' : 'info');
+  openInstallDialog(content) {
+    const dialog = content?.querySelector('#pwa-install-dialog');
+    if (!dialog) return;
+    if (typeof dialog.showModal === 'function') dialog.showModal();
+    else dialog.setAttribute('open', '');
   }
 
-  async createModeShortcut(mode, content) {
-    try {
-      const result = await pwaInstallManager.createModeShortcut(mode);
-      const message = result.outcome === 'shared'
-        ? 'The direct mode link was sent to the device share menu. Choose Add to Home Screen when available.'
-        : 'Shortcut downloaded. Open it directly or move it to your desktop.';
-      this.setPwaActionStatus(content, message, 'success');
-    } catch (error) {
-      if (error?.name !== 'AbortError') {
-        this.setPwaActionStatus(content, 'The browser could not create this shortcut. Open the mode and use the browser menu instead.', 'error');
-      }
-    }
+  async installTopicEarth(content) {
+    const selectedMode = content?.querySelector('[data-install-mode][aria-pressed="true"]')?.dataset.installMode || 'main';
+    const result = await pwaInstallManager.promptInstall(selectedMode);
+    const messages = {
+      accepted: `Installation started. ${result.browser?.label || 'Your browser'} controls the secure app entry.`,
+      dismissed: 'Installation was cancelled.',
+      installed: 'topic.earth is already running as an installed app.',
+      unavailable: result.browser?.advice || 'Use your browser menu and choose Install app or Add to Home Screen.'
+    };
+    content?.querySelector('#pwa-install-dialog')?.close?.();
+    this.setPwaActionStatus(content, messages[result.outcome] || messages.unavailable, result.outcome === 'accepted' ? 'success' : 'info');
   }
   
   renderSettings() {
@@ -11114,14 +11109,16 @@ Rules:
     const pwaState = pwaInstallManager.getState();
     const pwaCopy = frenchUi
       ? {
-          label: 'Installer et raccourcis',
-          intro: 'Installez topic.earth une fois, puis lancez directement chaque mode depuis les raccourcis de l application lorsque le navigateur les prend en charge.',
-          install: pwaState.installed ? 'Application installee' : 'Installer topic.earth',
+          label: 'Installer l application',
+          intro: 'Choisissez une vue, puis laissez le navigateur creer et proteger l application installee.',
+          install: pwaState.installed ? 'Gerer l application installee' : 'Installer topic.earth',
+          confirm: 'Continuer l installation',
+          choose: 'Vue de demarrage preferee',
+          openSelected: 'Ouvrir la vue',
+          close: 'Fermer',
           unavailable: 'Si le bouton d installation ne s affiche pas, utilisez Installer l application ou Ajouter a l ecran d accueil dans le menu du navigateur.',
           compatible: 'WebGL2 disponible : les vues 3D peuvent fonctionner sur ce navigateur.',
           incompatible: 'WebGL2 indisponible : utilisez Regional ou un navigateur recent compatible WebGL2.',
-          shortcut: 'Raccourci',
-          open: 'Ouvrir',
           modes: {
             regional: ['Regional', 'Carte 2D legere. Aucun grand rendu Three.js/WebGL2.'],
             main: ['World', 'Globe Three.js. WebGL2 requis.'],
@@ -11130,14 +11127,16 @@ Rules:
           }
         }
       : {
-          label: 'Install and shortcuts',
-          intro: 'Install topic.earth once, then launch each mode directly from the installed app shortcuts where the browser supports them.',
-          install: pwaState.installed ? 'App installed' : 'Install topic.earth',
+          label: 'Install app',
+          intro: 'Choose a view, then let the browser create and protect the installed app.',
+          install: pwaState.installed ? 'Manage installed app' : 'Install topic.earth',
+          confirm: 'Continue installation',
+          choose: 'Preferred start view',
+          openSelected: 'Open selected view',
+          close: 'Close',
           unavailable: 'If the install button is unavailable, use Install app or Add to Home Screen from the browser menu.',
           compatible: 'WebGL2 available: the 3D views can run in this browser.',
           incompatible: 'WebGL2 unavailable: use Regional or a current WebGL2-capable browser.',
-          shortcut: 'Shortcut',
-          open: 'Open',
           modes: {
             regional: ['Regional', 'Lightweight 2D map. No large Three.js/WebGL2 renderer.'],
             main: ['World', 'Three.js globe. WebGL2 required.'],
@@ -11364,29 +11363,37 @@ Rules:
         <div class="section-label">${this.escapeHtml(pwaCopy.label)}</div>
         <p class="setting-hint pwa-install-intro">${this.escapeHtml(pwaCopy.intro)}</p>
         <div class="pwa-install-toolbar">
-          <button class="btn-primary" data-action="install-topic-earth" ${pwaState.installed ? 'disabled' : ''}>
+          <button class="btn-primary" data-action="open-install-dialog">
             ${this.escapeHtml(pwaCopy.install)}
           </button>
           <span class="pwa-capability ${pwaState.webgl2Supported ? 'supported' : 'unsupported'}">
             ${this.escapeHtml(pwaState.webgl2Supported ? pwaCopy.compatible : pwaCopy.incompatible)}
           </span>
         </div>
-        ${!pwaState.canPrompt && !pwaState.installed ? `<div class="setting-hint">${this.escapeHtml(pwaCopy.unavailable)}</div>` : ''}
-        <div class="pwa-mode-grid">
-          ${Object.entries(pwaCopy.modes).map(([mode, details]) => `
-            <article class="pwa-mode-card ${mode === 'regional' ? 'lightweight' : 'webgl'}">
-              <div class="pwa-mode-copy">
-                <strong>${this.escapeHtml(details[0])}</strong>
-                <span>${this.escapeHtml(details[1])}</span>
-              </div>
-              <div class="pwa-mode-actions">
-                <button class="btn-secondary" data-action="create-mode-shortcut" data-mode="${mode}">${this.escapeHtml(pwaCopy.shortcut)}</button>
-                <button class="btn-secondary" data-action="open-mode-shortcut" data-mode="${mode}">${this.escapeHtml(pwaCopy.open)}</button>
-              </div>
-            </article>
-          `).join('')}
-        </div>
+        <div class="setting-hint">${this.escapeHtml(`${pwaState.browser.label}: ${pwaState.browser.advice}`)}</div>
         <div id="pwa-action-status" class="pwa-action-status" role="status" aria-live="polite"></div>
+        <dialog id="pwa-install-dialog" class="pwa-install-dialog" aria-labelledby="pwa-install-title">
+          <div class="pwa-install-dialog-content">
+            <div class="pwa-install-dialog-header">
+              <strong id="pwa-install-title">${this.escapeHtml(pwaCopy.label)}</strong>
+              <button class="icon-btn" data-action="close-install-dialog" aria-label="${this.escapeHtml(pwaCopy.close)}">&times;</button>
+            </div>
+            <p>${this.escapeHtml(`${pwaState.browser.label}: ${pwaState.browser.advice}`)}</p>
+            <div class="pwa-install-choice-label">${this.escapeHtml(pwaCopy.choose)}</div>
+            <div class="pwa-install-mode-tabs" role="group" aria-label="${this.escapeHtml(pwaCopy.choose)}">
+              ${Object.entries(pwaCopy.modes).map(([mode, details]) => {
+                const selected = mode === pwaState.preferredMode;
+                return `<button class="pwa-install-mode-tab ${selected ? 'active' : ''}" data-action="select-install-mode" data-install-mode="${mode}" aria-pressed="${selected ? 'true' : 'false'}">${this.escapeHtml(details[0])}</button>`;
+              }).join('')}
+            </div>
+            <p class="setting-hint pwa-install-mode-description">${this.escapeHtml(pwaCopy.modes[pwaState.preferredMode]?.[1] || pwaCopy.modes.main[1])}</p>
+            ${!pwaState.canPrompt && !pwaState.installed ? `<div class="pwa-browser-advice">${this.escapeHtml(pwaCopy.unavailable)}</div>` : ''}
+            <div class="pwa-install-dialog-actions">
+              <button class="btn-secondary" data-action="open-selected-install-mode">${this.escapeHtml(pwaCopy.openSelected)}</button>
+              <button class="btn-primary" data-action="install-topic-earth" ${pwaState.installed ? 'disabled' : ''}>${this.escapeHtml(pwaCopy.confirm)}</button>
+            </div>
+          </div>
+        </dialog>
       </div>
 
       <div class="detail-section">
@@ -11584,12 +11591,23 @@ Rules:
         this.refreshAiApiSettingsStatus(target);
       } else if (action === 'open-api-settings-window') {
         this.openApiSettingsWindow();
+      } else if (action === 'open-install-dialog') {
+        this.openInstallDialog(content);
+      } else if (action === 'close-install-dialog') {
+        content.querySelector('#pwa-install-dialog')?.close?.();
+      } else if (action === 'select-install-mode') {
+        content.querySelectorAll('[data-install-mode]').forEach(button => {
+          const selected = button === target;
+          button.classList.toggle('active', selected);
+          button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+        });
+        const description = content.querySelector('.pwa-install-mode-description');
+        if (description) description.textContent = pwaCopy.modes[target.dataset.installMode]?.[1] || '';
       } else if (action === 'install-topic-earth') {
         this.installTopicEarth(content);
-      } else if (action === 'create-mode-shortcut') {
-        this.createModeShortcut(target.dataset.mode, content);
-      } else if (action === 'open-mode-shortcut') {
-        window.location.assign(pwaInstallManager.getModeUrl(target.dataset.mode));
+      } else if (action === 'open-selected-install-mode') {
+        const mode = content.querySelector('[data-install-mode][aria-pressed="true"]')?.dataset.installMode || 'main';
+        window.location.assign(pwaInstallManager.getModeUrl(mode));
       } else if (action === 'export-admin-topic-zip') {
         this.exportAdminTopicZip(target);
       }
