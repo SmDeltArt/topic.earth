@@ -31,5 +31,35 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Regional Map",
+      "short_name": "Regional",
+      "description": "Open the lightweight 2D regional map",
+      "url": "/?mode=regional",
+      "icons": [{ "src": "/assets/icons/topic.earth_64x64.svg", "sizes": "64x64", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "World Globe",
+      "short_name": "World",
+      "description": "Open the Three.js world globe",
+      "url": "/?mode=main",
+      "icons": [{ "src": "/assets/icons/topic.earth_64x64.svg", "sizes": "64x64", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Space",
+      "short_name": "Space",
+      "description": "Open the Three.js solar-system view",
+      "url": "/?mode=space",
+      "icons": [{ "src": "/assets/icons/topic.earth_64x64.svg", "sizes": "64x64", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Fever Monitor",
+      "short_name": "Fever",
+      "description": "Open animated climate scenarios",
+      "url": "/?mode=fever",
+      "icons": [{ "src": "/assets/icons/topic.earth_64x64.svg", "sizes": "64x64", "type": "image/svg+xml" }]
+    }
   ]
 }

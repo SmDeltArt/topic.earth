@@ -1,10 +1,11 @@
-import { Settings } from '../lib/settings.js?v=topic-earth-fever-scenario-layer-20260521';
-import { AppAccess } from '../lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
+import { Settings } from '../lib/settings.js?v=topic-earth-admin-api-settings-20261001';
+import { AppAccess } from '../lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-fever-scenario-layer-20260521';
 import { ReadTranslationService } from '../lib/read-translation.js';
 import { buildFeverAudioText } from '../lib/fever-audio-manifest.mjs';
 import { getFeverWarmingTranslation } from '../lib/fever-warming-translations.js?v=topic-earth-fever-json-i18n-20260422';
 import { LocalStorage } from '../lib/storage.js?v=topic-earth-meteo-draft-20260531';
+import { pwaInstallManager } from '../lib/pwa-install-manager.js';
 import {
   createMediaToken as createTopicMediaToken,
   getDirectImageUrl as getTopicDirectImageUrl,
@@ -17,6 +18,8 @@ import {
   downloadTopicAdminSubmission,
   getAdminTopicExportSummary
 } from '../lib/topic-exporter.js?v=topic-earth-embedded-story-20260521';
+
+const CAD_DELTAI_BRAND_LOGO_URL = 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1785945660/cad-deltai/api/assets/brand/favicon/svg/smai-cad-deltai-brand-favicon-animated-192x192-en-v001.svg';
 
 /**
  * Detail panel component
@@ -66,6 +69,9 @@ export class DetailPanel {
       if (!content) return;
       const { currentLang } = this.getSettingsLanguageState(Settings.get());
       this.updateBrowserVoicePicker(content, currentLang, Settings.get().preferredBrowserVoice || '');
+    });
+    window.addEventListener('pwa-install-state-changed', () => {
+      if (this.mode === 'settings') this.renderSettings();
     });
   }
 
@@ -10478,12 +10484,13 @@ Rules:
   }
 
   getApiSettingsWidgetUrl() {
+    if (AppAccess.isAdminMode()) {
+      return Settings.API_SETTINGS_WIDGET_URLS.ADMIN;
+    }
+
     const settingsUrl = Settings.get().aiApiSettingsFrameUrl;
     if (settingsUrl) return settingsUrl;
-
-    return AppAccess.isAdminMode()
-      ? Settings.API_SETTINGS_WIDGET_URLS.ADMIN
-      : Settings.API_SETTINGS_WIDGET_URLS.USER;
+    return Settings.API_SETTINGS_WIDGET_URLS.USER;
   }
 
   getApiSettingsFrameSrc() {
@@ -10504,6 +10511,9 @@ Rules:
   openApiSettingsWindow() {
     const existingOverlay = document.getElementById('api-settings-overlay');
     if (existingOverlay) {
+      const existingFrame = existingOverlay.querySelector('#api-settings-overlay-iframe');
+      const frameSrc = this.getApiSettingsFrameSrc();
+      if (existingFrame && existingFrame.src !== frameSrc) existingFrame.src = frameSrc;
       existingOverlay.classList.remove('api-settings-overlay-hidden');
       existingOverlay.setAttribute('aria-hidden', 'false');
       return;
@@ -11011,6 +11021,49 @@ Rules:
       const activeLabel = state.isAdminMode ? 'Admin mode active' : 'User mode active';
       status.textContent = `${activeLabel}. ${state.isAdminMode ? 'Layer and topic editing are unlocked.' : 'Published content stays protected; local drafts remain available.'}`;
     }
+
+    if (state.isAdminMode) {
+      this.openApiSettingsWindow();
+    }
+  }
+
+  unlockSettingsAccess() {
+    AppAccess.unlockAdminAccess(true);
+    AppAccess.setMode('user');
+    window.dispatchEvent(new CustomEvent('adminModeChanged', { detail: AppAccess.getState() }));
+    this.renderSettings();
+  }
+
+  setPwaActionStatus(content, message, state = 'info') {
+    const status = content?.querySelector('#pwa-action-status');
+    if (!status) return;
+    status.textContent = message;
+    status.dataset.state = state;
+  }
+
+  async installTopicEarth(content) {
+    const result = await pwaInstallManager.promptInstall();
+    const messages = {
+      accepted: 'Installation started. Mode shortcuts will be available from the installed app launcher where supported.',
+      dismissed: 'Installation was cancelled.',
+      installed: 'topic.earth is already running as an installed app.',
+      unavailable: 'Use your browser menu and choose Install app or Add to Home Screen.'
+    };
+    this.setPwaActionStatus(content, messages[result.outcome] || messages.unavailable, result.outcome === 'accepted' ? 'success' : 'info');
+  }
+
+  async createModeShortcut(mode, content) {
+    try {
+      const result = await pwaInstallManager.createModeShortcut(mode);
+      const message = result.outcome === 'shared'
+        ? 'The direct mode link was sent to the device share menu. Choose Add to Home Screen when available.'
+        : 'Shortcut downloaded. Open it directly or move it to your desktop.';
+      this.setPwaActionStatus(content, message, 'success');
+    } catch (error) {
+      if (error?.name !== 'AbortError') {
+        this.setPwaActionStatus(content, 'The browser could not create this shortcut. Open the mode and use the browser menu instead.', 'error');
+      }
+    }
   }
   
   renderSettings() {
@@ -11051,6 +11104,40 @@ Rules:
       settings.preferredBrowserVoice || ''
     );
     const frenchUi = LanguageManager.normalizeLanguageCode(currentLang).startsWith('fr');
+    const pwaState = pwaInstallManager.getState();
+    const pwaCopy = frenchUi
+      ? {
+          label: 'Installer et raccourcis',
+          intro: 'Installez topic.earth une fois, puis lancez directement chaque mode depuis les raccourcis de l application lorsque le navigateur les prend en charge.',
+          install: pwaState.installed ? 'Application installee' : 'Installer topic.earth',
+          unavailable: 'Si le bouton d installation ne s affiche pas, utilisez Installer l application ou Ajouter a l ecran d accueil dans le menu du navigateur.',
+          compatible: 'WebGL2 disponible : les vues 3D peuvent fonctionner sur ce navigateur.',
+          incompatible: 'WebGL2 indisponible : utilisez Regional ou un navigateur recent compatible WebGL2.',
+          shortcut: 'Raccourci',
+          open: 'Ouvrir',
+          modes: {
+            regional: ['Regional', 'Carte 2D legere. Aucun grand rendu Three.js/WebGL2.'],
+            main: ['World', 'Globe Three.js. WebGL2 requis.'],
+            space: ['Space', 'Systeme solaire et couches 3D. WebGL2 requis.'],
+            fever: ['Fever', 'Scenarios climatiques animes. WebGL2 requis.']
+          }
+        }
+      : {
+          label: 'Install and shortcuts',
+          intro: 'Install topic.earth once, then launch each mode directly from the installed app shortcuts where the browser supports them.',
+          install: pwaState.installed ? 'App installed' : 'Install topic.earth',
+          unavailable: 'If the install button is unavailable, use Install app or Add to Home Screen from the browser menu.',
+          compatible: 'WebGL2 available: the 3D views can run in this browser.',
+          incompatible: 'WebGL2 unavailable: use Regional or a current WebGL2-capable browser.',
+          shortcut: 'Shortcut',
+          open: 'Open',
+          modes: {
+            regional: ['Regional', 'Lightweight 2D map. No large Three.js/WebGL2 renderer.'],
+            main: ['World', 'Three.js globe. WebGL2 required.'],
+            space: ['Space', 'Solar system and 3D layers. WebGL2 required.'],
+            fever: ['Fever', 'Animated climate scenarios. WebGL2 required.']
+          }
+        };
     const accessCopy = frenchUi
       ? {
           label: 'Mode d acces',
@@ -11070,8 +11157,16 @@ Rules:
         <h2 class="detail-title">${this.escapeHtml(t('common.settings'))}</h2>
       </div>
 
-      ${canToggleAdmin ? `
-        <div class="detail-section settings-access-section" data-tutorial-id="settings-access">
+      <div class="detail-section settings-access-section" data-tutorial-id="settings-access">
+        <button
+          type="button"
+          class="settings-access-unlock ${canToggleAdmin ? 'unlocked' : ''}"
+          data-action="unlock-settings-access"
+          aria-label="${this.escapeHtml(canToggleAdmin ? accessCopy.label : 'Unlock access mode controls')}"
+          aria-expanded="${canToggleAdmin ? 'true' : 'false'}"
+          title="${this.escapeHtml(canToggleAdmin ? accessCopy.label : 'Access mode')}"
+        >&#916;</button>
+        ${canToggleAdmin ? `
           <div class="section-label">${this.escapeHtml(accessCopy.label)}</div>
           <div class="settings-mode-switch" role="radiogroup" aria-label="${this.escapeHtml(accessCopy.label)}">
             <button
@@ -11107,8 +11202,8 @@ Rules:
             ${this.escapeHtml(accessCopy.hint)}
             <span class="settings-access-profile">${this.escapeHtml(accessState.profile)}</span>
           </div>
-        </div>
-      ` : ''}
+        ` : ''}
+      </div>
       
       <div class="detail-section" data-tutorial-id="settings-language">
         <div class="section-label">${this.escapeHtml(t('settings.language'))}</div>
@@ -11258,6 +11353,35 @@ Rules:
         ` : ''}
       </div>
 
+      <div class="detail-section pwa-install-section" data-tutorial-id="settings-pwa-install">
+        <div class="section-label">${this.escapeHtml(pwaCopy.label)}</div>
+        <p class="setting-hint pwa-install-intro">${this.escapeHtml(pwaCopy.intro)}</p>
+        <div class="pwa-install-toolbar">
+          <button class="btn-primary" data-action="install-topic-earth" ${pwaState.installed ? 'disabled' : ''}>
+            ${this.escapeHtml(pwaCopy.install)}
+          </button>
+          <span class="pwa-capability ${pwaState.webgl2Supported ? 'supported' : 'unsupported'}">
+            ${this.escapeHtml(pwaState.webgl2Supported ? pwaCopy.compatible : pwaCopy.incompatible)}
+          </span>
+        </div>
+        ${!pwaState.canPrompt && !pwaState.installed ? `<div class="setting-hint">${this.escapeHtml(pwaCopy.unavailable)}</div>` : ''}
+        <div class="pwa-mode-grid">
+          ${Object.entries(pwaCopy.modes).map(([mode, details]) => `
+            <article class="pwa-mode-card ${mode === 'regional' ? 'lightweight' : 'webgl'}">
+              <div class="pwa-mode-copy">
+                <strong>${this.escapeHtml(details[0])}</strong>
+                <span>${this.escapeHtml(details[1])}</span>
+              </div>
+              <div class="pwa-mode-actions">
+                <button class="btn-secondary" data-action="create-mode-shortcut" data-mode="${mode}">${this.escapeHtml(pwaCopy.shortcut)}</button>
+                <button class="btn-secondary" data-action="open-mode-shortcut" data-mode="${mode}">${this.escapeHtml(pwaCopy.open)}</button>
+              </div>
+            </article>
+          `).join('')}
+        </div>
+        <div id="pwa-action-status" class="pwa-action-status" role="status" aria-live="polite"></div>
+      </div>
+
       <div class="detail-section">
         <div class="section-label">${this.escapeHtml(t('settings.globeSettings'))}</div>
         <div class="form-group" data-tutorial-id="settings-country-hover">
@@ -11353,7 +11477,7 @@ Rules:
           <div class="api-settings-launch-actions">
             <button class="btn-secondary" data-action="refresh-ai-api-settings">${this.escapeHtml(t('settings.refreshLinkedModels'))}</button>
             <button class="btn-primary api-settings-open-btn" data-action="open-api-settings-window">
-              <img src="https://res.cloudinary.com/dsbfcgtdv/image/upload/v1779289516/robot-tr_64x64_lv1huc.svg" alt="" aria-hidden="true">
+              <img src="${CAD_DELTAI_BRAND_LOGO_URL}" alt="" aria-hidden="true">
               <span>${this.escapeHtml(t('settings.apiSettingsButton'))}</span>
             </button>
           </div>
@@ -11443,6 +11567,8 @@ Rules:
         this.applySettingsFormChange(content);
       } else if (action === 'set-settings-access-mode') {
         this.setSettingsAccessMode(target.dataset.mode, content);
+      } else if (action === 'unlock-settings-access') {
+        this.unlockSettingsAccess();
       } else if (action === 'save-settings') {
         this.saveSettings();
       } else if (action === 'reset-settings') {
@@ -11451,6 +11577,12 @@ Rules:
         this.refreshAiApiSettingsStatus(target);
       } else if (action === 'open-api-settings-window') {
         this.openApiSettingsWindow();
+      } else if (action === 'install-topic-earth') {
+        this.installTopicEarth(content);
+      } else if (action === 'create-mode-shortcut') {
+        this.createModeShortcut(target.dataset.mode, content);
+      } else if (action === 'open-mode-shortcut') {
+        window.location.assign(pwaInstallManager.getModeUrl(target.dataset.mode));
       } else if (action === 'export-admin-topic-zip') {
         this.exportAdminTopicZip(target);
       }

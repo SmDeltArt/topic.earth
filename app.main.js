@@ -1,5 +1,5 @@
 import { GlobeRenderer } from './lib/globe.js?v=topic-earth-janus-system-20261001';
-import { AppAccess } from './lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
+import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LAYERS } from './data/layers.js?v=topic-earth-janus-system-20261001';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-climate-studies-watch-20260601';
@@ -7,15 +7,15 @@ import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-
 import { FEVER_TOPICS } from './data/fever-topics.js?v=topic-earth-embedded-story-20260521';
 import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
 import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-system-20261001';
-import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-hormuz-pump-prices-20260922';
+import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=topic-earth-settings-only-20260922';
+import { TopBar } from './components/TopBar.js?v=topic-earth-live-clock-logo-20260605';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-janus-system-20261001';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-portable-api-settings-20260922';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-access-controls-v2-20261001';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-meteo-draft-20260531';
-import { Settings } from './lib/settings.js?v=topic-earth-greek-language-20260521';
+import { Settings } from './lib/settings.js?v=topic-earth-admin-api-settings-20261001';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
 import { ReadTranslationService } from './lib/read-translation.js?v=topic-earth-warning-panel-collapse-20260430';
 import { TTSManager } from './lib/tts.js?v=topic-earth-legacy-key-decode-20260520';
@@ -145,7 +145,7 @@ class TopicEarthApp {
     await this.initSettings();
     this.applyDocumentLanguage();
     AppAccess.enforceProfile();
-    AppAccess.setMode('user');
+    AppAccess.restoreLocalDevelopmentAdminMode();
     this.applyAdminMode();
     this.setupAdminUnlockShortcut();
     
@@ -212,6 +212,7 @@ class TopicEarthApp {
     
     // Setup fever warning history access
     this.setupFeverWarningAccess();
+    this.setupFeverMonitorDock();
 
     // Initialize debug tools if admin
     this.initDebugTools();
@@ -801,6 +802,15 @@ class TopicEarthApp {
     // Settings now use the detail panel
     window.addEventListener('openSettings', () => {
       this.detailPanel.showSettings(this.ttsManager);
+    });
+  }
+
+  setupFeverMonitorDock() {
+    const dockButton = document.getElementById('fever-monitor-dock');
+    if (!dockButton) return;
+
+    dockButton.addEventListener('click', () => {
+      this.openFeverMonitorPanel();
     });
   }
 
@@ -1764,13 +1774,9 @@ class TopicEarthApp {
     `;
   }
   
-  showFeverSimulation(options = {}) {
-    const monitorPresentationActive = Date.now() < (this.feverMonitorPresentationUntil || 0);
-    const presentation = monitorPresentationActive
-      ? { ...options, panelSize: 'top', introduce: true }
-      : options;
+  showFeverSimulation() {
     this.feverSimulationActive = true;
-    this.detailPanel.showFeverSimulation(this.globe, presentation);
+    this.detailPanel.showFeverSimulation(this.globe);
   }
   
   hideFeverSimulation() {
@@ -2206,8 +2212,6 @@ class TopicEarthApp {
   }
 
   openFeverMonitorPanel() {
-    // Keep asynchronous Fever-mode events from collapsing a monitor-requested full view.
-    this.feverMonitorPresentationUntil = Date.now() + 5000;
     if (this.currentLayerFilter !== 'fever') {
       this.topBar?.setLayerFilter?.('fever');
     }
@@ -2216,7 +2220,7 @@ class TopicEarthApp {
         this.currentLayerFilter = 'fever';
         this.enterFeverMode(this.modeTransitionToken);
       }
-      this.showFeverSimulation({ panelSize: 'top', introduce: true });
+      this.showFeverSimulation();
       document.getElementById('layer-panel')?.classList.remove('mobile-hidden');
     }, 80);
   }
@@ -3748,3 +3752,4 @@ if (document.readyState === 'loading') {
 } else {
   new TopicEarthApp();
 }
+
