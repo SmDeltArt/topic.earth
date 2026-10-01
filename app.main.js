@@ -6,7 +6,7 @@ import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-i
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
 import { FEVER_TOPICS } from './data/fever-topics.js?v=topic-earth-embedded-story-20260521';
 import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
-import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-chronos-images-20261001';
+import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-bennu-20261001';
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';

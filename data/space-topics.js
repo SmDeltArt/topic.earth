@@ -600,6 +600,22 @@ export const SPACE_TOPICS = [
     ]
   }),
   makeSpaceTopic({
+    id: 'space_bennu_organic_matter',
+    order: 20.6,
+    date: '2026-10-01',
+    object: 'Earth',
+    title: 'Bennu: Unexpected Organic Matter',
+    type: 'Asteroid Samples and Origins of Life',
+    isPlanet: false,
+    summary: 'NASA reports ancient gum-like organic material in Bennu samples, alongside sugars and presolar dust. Explore what this discovery reveals about early Solar System chemistry, with the suggested video and primary NASA evidence.',
+    insight: '<p><strong>What was discovered?</strong> NASA reported on 2 December 2025 that Bennu samples contain a gum-like, polymer-like organic material rich in nitrogen and oxygen, not previously observed in space rocks. Its formation history is still being studied. This is unusual chemistry, not evidence of a new fundamental kind of matter.</p><p><strong>Ingredients, not life:</strong> researchers also identified ribose and glucose. Earlier analyses found amino acids and nucleobases. These findings inform prebiotic chemistry; they do not demonstrate living organisms.</p><p><strong>Deep time:</strong> the material may record chemical changes in Bennu\'s parent asteroid during the early Solar System. Some sample grains predate the Solar System itself. Such discoveries connect planetary formation to the ingredients later available on Earth.</p><p><strong>Watch and compare:</strong> <a href="https://www.youtube.com/watch?v=zAwMn-wOsko" target="_blank" rel="noopener noreferrer">Suggested video: « La NASA découvre une MATIÈRE INCONNUE sur BENNU ! »</a>. The user-provided video is commentary; its headline is not a NASA quotation, and its full contents have not been independently reviewed here.</p><p><strong>Sample-return context:</strong> OSIRIS-REx delivered Bennu material to Earth on 24 September 2023. This topic focuses the scene on Earth, where the samples are studied; the scene does not model Bennu\'s trajectory.</p>',
+    researchSources: [
+      { name: 'NASA: sugars, gum and stardust in Bennu samples (2 December 2025)', url: 'https://www.nasa.gov/missions/osiris-rex/sugars-gum-stardust-found-in-nasas-asteroid-bennu-samples/', category: 'official', reliability: 'high', verified: true },
+      { name: 'NASA: OSIRIS-REx sample-return mission', url: 'https://science.nasa.gov/mission/osiris-rex/', category: 'official', reliability: 'high', verified: true },
+      { name: 'Suggested video: La NASA découvre une MATIÈRE INCONNUE sur BENNU !', url: 'https://www.youtube.com/watch?v=zAwMn-wOsko', category: 'commentary', reliability: 'needs-review', verified: false, provider: 'youtube', notes: 'User-provided link; full video not independently reviewed. Compare its claims with the NASA sources above.' }
+    ]
+  }),
+  makeSpaceTopic({
     id: 'space_janus_system',
     order: 21,
     object: 'Universe',
