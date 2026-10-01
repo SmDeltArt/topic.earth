@@ -1,18 +1,18 @@
-import { GlobeRenderer } from './lib/globe.js?v=topic-earth-space-focus-admin-20260606';
+import { GlobeRenderer } from './lib/globe.js?v=topic-earth-janus-system-20261001';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-admin-unlock-20260519';
-import { LAYERS } from './data/layers.js?v=topic-earth-carbon-history-full-timeline-20260922';
+import { LAYERS } from './data/layers.js?v=topic-earth-janus-system-20261001';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-climate-studies-watch-20260601';
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
 import { FEVER_TOPICS } from './data/fever-topics.js?v=topic-earth-embedded-story-20260521';
 import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
-import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-aura-eyes-20260605';
+import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-system-20261001';
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-hormuz-pump-prices-20260922';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=topic-earth-settings-only-20260922';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-meteo-cloud-severity-20260601';
-import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-mobile-create-icons-20260922';
+import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-janus-system-20261001';
 import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-portable-api-settings-20260922';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-meteo-draft-20260531';
 import { Settings } from './lib/settings.js?v=topic-earth-greek-language-20260521';
@@ -956,6 +956,9 @@ class TopicEarthApp {
     window.addEventListener('viewModeChanged', (e) => {
       if (this.topBar) {
         this.topBar.updateViewMode(e.detail.mode);
+      }
+      if (e.detail.mode === 'solar-system' && this.currentLayerFilter === 'space' && this.getActiveLayersForFilter('space').has('janus-system')) {
+        this.globe.janusLayer.setVisible(true).catch(error => console.error('[Janus System]', error));
       }
       
       // Show/hide fever simulation panel
@@ -2395,6 +2398,14 @@ class TopicEarthApp {
     const container = document.getElementById('layer-panel');
     this.layerPanel = new LayerPanel(container, this.allLayers, this.allPoints, {
       onLayerToggle: (layerId, visible) => {
+        if (layerId === 'janus-system') {
+          this.globe.janusLayer.setVisible(visible && this.currentLayerFilter === 'space').catch((error) => {
+            console.error('[Janus System] Could not load layer:', error);
+            this.layerPanel.setLayerActive('janus-system', false);
+            this.layerPanel.updateData(this.allLayers, this.allPoints);
+          });
+          return;
+        }
         if (this.handleRealtimeMeteoLayerToggle(layerId, visible)) {
           return;
         }
@@ -2760,6 +2771,7 @@ class TopicEarthApp {
     // - Main mode hides fever-only markers/overlays but otherwise respects layer toggles
 
     const activeLayers = this.getActiveLayersForFilter(filter);
+    if (filter !== 'space') this.globe.janusLayer.setVisible(false);
 
     this.globe.markers.forEach(marker => {
       const category = marker.userData.category;
@@ -3350,6 +3362,17 @@ class TopicEarthApp {
     if (point.isSpaceTopic || point.solarSystemObject) {
       const showAndFocusSpaceObject = () => {
         this.detailPanel.show(point);
+        if (point.isJanus) {
+          this.layerPanel.setLayerActive('janus-system', true);
+          this.layerPanel.updateData(this.allLayers, this.allPoints);
+          this.globe.janusLayer.setVisible(true).catch(error => console.error('[Janus System]', error));
+          return;
+        }
+        if (this.globe.janusLayer.requested) {
+          this.layerPanel.setLayerActive('janus-system', false);
+          this.layerPanel.updateData(this.allLayers, this.allPoints);
+          this.globe.janusLayer.setVisible(false);
+        }
         setTimeout(() => {
           const focused = this.globe.focusSolarSystemObject?.(point.solarSystemObject || point.planetData?.name || point.title);
           if (!focused) {
@@ -3725,4 +3748,3 @@ if (document.readyState === 'loading') {
 } else {
   new TopicEarthApp();
 }
-

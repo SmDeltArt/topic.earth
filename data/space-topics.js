@@ -28,6 +28,7 @@ const makeSpaceTopic = ({
   id,
   order,
   object,
+  category = 'space',
   title,
   type,
   summary,
@@ -38,13 +39,15 @@ const makeSpaceTopic = ({
   insight,
   latestNews = '',
   scaleReference = null,
+  isPlanet = true,
+  isJanus = false,
   researchSources = [],
   mediaTokens = []
 }) => ({
   id,
   spaceOrder: order,
   solarSystemObject: object,
-  category: 'space',
+  category,
   date: '2026-05-05',
   country: 'Solar System',
   region: type,
@@ -52,8 +55,9 @@ const makeSpaceTopic = ({
   source: 'topic.earth solar-system model',
   summary,
   insight,
-  isPlanet: true,
+  isPlanet,
   isSpaceTopic: true,
+  isJanus,
   isCustom: false,
   researchSources,
   mediaTokens,
@@ -561,6 +565,38 @@ export const SPACE_TOPICS = [
         mediaType: 'iframe',
         embedUrl: 'https://eyes.nasa.gov/apps/solar-system/#/home?embed=true',
         watermarkText: 'NASA Eyes | official interactive reference'
+      }
+    ]
+  }),
+  makeSpaceTopic({
+    id: 'space_janus_system',
+    order: 21,
+    object: 'Universe',
+    category: 'janus-system',
+    title: 'Janus System: Two Interacting Sectors',
+    type: 'Speculative Bimetric Cosmology',
+    summary: 'The Janus cosmological model proposes that the universe can be described with two coupled space-time metrics. In simplified terms, ordinary matter belongs to one sector while a second sector has opposite mass and energy signs; the two sectors interact mainly through gravity.',
+    diameter: 'No measured size or scale ratio; the displayed ratios are illustrative controls',
+    temperature: 'Not a temperature model',
+    composition: 'A positive-energy sector and a hypothetical negative-energy sector described by two coupled metrics',
+    atmosphere: 'Cosmological theory, not a planetary atmosphere',
+    insight: 'The model attempts to explain observations such as cosmic acceleration and large-scale structure without conventional dark matter or dark energy. The mirrored hemispheres and opposite arrows are teaching aids only: they do not prove that a second sector exists, do not show literal twin planets, and do not solve the model\'s field equations. Janus remains a speculative, non-consensus proposal that must be compared with established cosmology and observational tests.',
+    isPlanet: false,
+    isJanus: true,
+    researchSources: [
+      {
+        name: 'Petit, Margnat and Zejli: bimetric twin-universe model (2024)',
+        url: 'https://arxiv.org/abs/2412.04644',
+        category: 'primary-theoretical-source',
+        reliability: 'theoretical-preprint',
+        verified: true
+      },
+      {
+        name: 'Planck 2018 cosmological parameters',
+        url: 'https://arxiv.org/abs/1807.06209',
+        category: 'comparison-reference',
+        reliability: 'high',
+        verified: true
       }
     ]
   })

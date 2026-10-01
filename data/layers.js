@@ -149,6 +149,14 @@ export const LAYERS = [
     enabled: false
   },
   {
+    id: 'janus-system',
+    name: 'Janus System',
+    modeTabs: ['space'],
+    icon: '\u21C4',
+    color: '#63d9ff',
+    enabled: false
+  },
+  {
     id: 'climate',
     name: 'Climate Change',
     icon: '\uD83C\uDF21\uFE0F',

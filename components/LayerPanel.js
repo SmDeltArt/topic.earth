@@ -987,7 +987,9 @@ export class LayerPanel {
     if (filter === 'fever') {
       allowedLayers = this.layers.filter(layer => layer.feverOnly && !layer.isGroup).map(layer => layer.id);
     } else if (filter === 'space') {
-      allowedLayers = ['space'];
+      allowedLayers = this.layers
+        .filter(layer => !layer.isGroup && this.layerBelongsToFilter(layer, 'space'))
+        .map(layer => layer.id);
     }
 
     this.layers.forEach(layer => {

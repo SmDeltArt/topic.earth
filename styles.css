@@ -6420,6 +6420,74 @@ body:not(.tutorial-mode-off) .tutorial-anchor-cursor-target {
 }
 
 /* Fever Simulation Styles */
+#janus-layer-controls {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 120;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: min(680px, calc(100vw - 32px));
+    padding: 12px 16px;
+    border: 1px solid rgba(99, 217, 255, 0.5);
+    border-radius: 8px;
+    background: rgba(10, 18, 34, 0.94);
+    color: #edf3ff;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    line-height: 1.35;
+    transform: translateX(-50%);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+#janus-layer-controls[hidden] { display: none; }
+
+#janus-layer-controls label,
+#janus-layer-controls small { color: #bcd0e8; }
+
+#janus-layer-controls label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#janus-layer-controls select,
+#janus-layer-controls button {
+    min-height: 34px;
+    border: 1px solid rgba(99, 217, 255, 0.4);
+    border-radius: 6px;
+    background: #182640;
+    color: #edf3ff;
+}
+
+#janus-layer-controls small { flex: 1 1 220px; }
+
+@media (max-width: 768px) {
+    #janus-layer-controls {
+        bottom: 8px;
+        flex-wrap: wrap;
+        gap: 7px 10px;
+        padding: 8px 10px;
+        font-size: 10px;
+    }
+}
+
+@media (max-height: 400px) {
+    #janus-layer-controls {
+        bottom: 5px;
+        width: min(620px, calc(100vw - 12px));
+        padding: 5px 8px;
+        gap: 5px 8px;
+        font-size: 9px;
+    }
+
+    #janus-layer-controls strong { flex: 1 1 100%; }
+    #janus-layer-controls small { display: none; }
+    #janus-layer-controls select,
+    #janus-layer-controls button { min-height: 28px; }
+}
+
 .fever-monitor-header {
     display: flex;
     justify-content: space-between;
