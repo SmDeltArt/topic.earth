@@ -577,6 +577,20 @@ export const SPACE_TOPICS = [
     title: 'Chronos: A Habitable World, a Brief Humanity',
     type: 'Deep Time, SETI and Planetary Responsibility',
     isPlanet: false,
+    mediaTokens: [{
+      id: 'media_chronos_moon_forming_impact',
+      url: 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1790856478/ai-image-1790851347955_knql9g.png',
+      mobileUrl: 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1790856481/ai-edited-image-1790851657386_pl1xzm.png',
+      fallbackUrl: './assets/images/chronos/moon-impact-square.webp',
+      mobileFallbackUrl: './assets/images/chronos/moon-impact-mobile.webp',
+      sourceUrl: 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1790856478/ai-image-1790851347955_knql9g.png',
+      sourceName: 'User-provided AI illustration',
+      provider: 'cloudinary',
+      mediaType: 'image',
+      generated: true,
+      alt: 'Artistic illustration of a giant impact involving the early Earth and a Moon-forming impactor',
+      watermarkText: 'Moon-forming impact | AI illustration, not an observation or scale model'
+    }],
     summary: 'Billions of years built the conditions we inhabit. Connect the Drake equation, the Moon-forming impact, planetary habitability and climate feedbacks to a more humble view of humanity: powerful enough to disturb our home, responsible for caring for it.',
     insight: '<p><strong>The Drake equation:</strong> N = R* × fp × ne × fl × fi × fc × L. R* is the rate of suitable star formation; fp is the fraction with planets; ne is the number of suitable worlds per system; fl, fi and fc describe life, intelligence and detectable technology; L is the duration of detectable technological activity. This framework organizes uncertainty; several terms remain poorly constrained.</p><p><strong>Chance and planetary history:</strong> a giant impact around 4.5 billion years ago likely formed the Moon. Research suggests impactor material may survive deep in Earth\'s mantle. A connection to the emergence of plate tectonics is a hypothesis, not an established explanation. Explore collision histories within habitability (ne), without inventing a probability or multiplying in a separate Moon factor that double-counts habitability. A large moon is not a proven universal requirement for life.</p><p><strong>Chronos / deep time:</strong> the Solar System began forming about 4.6 billion years ago; formation was a process, not a single instant. On a one-year calendar representing that span, 200 years occupy about 1.4 seconds. Human urgency unfolds inside planetary timescales.</p><p><strong>The climate snowball:</strong> here “snowball” means accumulating consequences and amplifying feedbacks. Human emissions drive warming. A literal Snowball Earth is an ancient glaciation concept, not the expected outcome of current climate inaction. Natural geological climate regulation does not promise a timely rescue from rapid emissions.</p><p><strong>Responsibility and L:</strong> civilization\'s ability to sustain itself is an ethical question prompted by Drake\'s longevity term, not a prediction from the equation. We inherited conditions built over billions of years. A brief presence can carry a lasting responsibility.</p><p><strong>Read the evidence:</strong> <a href="https://www.seti.org/research/seti-101/drake-equation/" target="_blank" rel="noopener noreferrer">SETI: Drake equation</a> · <a href="https://science.nasa.gov/moon/formation/" target="_blank" rel="noopener noreferrer">NASA: Moon formation</a> · <a href="https://www.nature.com/articles/s41586-023-06589-1" target="_blank" rel="noopener noreferrer">Theia and mantle structures (modelling study)</a> · <a href="https://science.nasa.gov/astrobiology/learning-resources/alp/how-did-our-solar-system-form/" target="_blank" rel="noopener noreferrer">NASA: Solar System formation</a> · <a href="https://www.ipcc.ch/report/ar6/wg1/resources/spm-headline-statements/" target="_blank" rel="noopener noreferrer">IPCC: human-caused warming</a>.</p>',
     researchSources: [

@@ -6,14 +6,14 @@ import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-i
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
 import { FEVER_TOPICS } from './data/fever-topics.js?v=topic-earth-embedded-story-20260521';
 import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
-import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-chronos-orbits-20261001';
+import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-chronos-images-20261001';
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=topic-earth-live-clock-logo-20260605';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-janus-system-20261001';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-access-controls-v2-20261001';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-chronos-images-20261001';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-meteo-draft-20260531';
 import { Settings } from './lib/settings.js?v=topic-earth-admin-api-settings-20261001';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -3364,6 +3364,10 @@ class TopicEarthApp {
 
   showPointDetail(point) {
     if (point.isSpaceTopic || point.solarSystemObject) {
+      if (!this.globe) {
+        this.detailPanel.show(point);
+        return;
+      }
       const showAndFocusSpaceObject = () => {
         this.detailPanel.show(point);
         if (point.isJanus) {

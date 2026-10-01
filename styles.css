@@ -5382,6 +5382,31 @@ body.regional-map-search-open #layer-panel {
     display: block;
 }
 
+.media-responsive-frame {
+    aspect-ratio: 1 / 1;
+    height: auto;
+    background: #05070b;
+}
+
+.media-responsive-picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.media-responsive-frame .media-responsive-picture img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+@media (max-width: 600px) {
+    .media-responsive-frame {
+        aspect-ratio: 9 / 16;
+    }
+}
+
 .topic-media-zoom-label {
     position: absolute;
     right: 8px;

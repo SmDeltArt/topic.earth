@@ -6,6 +6,7 @@ import { buildFeverAudioText } from '../lib/fever-audio-manifest.mjs';
 import { getFeverWarmingTranslation } from '../lib/fever-warming-translations.js?v=topic-earth-fever-json-i18n-20260422';
 import { LocalStorage } from '../lib/storage.js?v=topic-earth-meteo-draft-20260531';
 import { pwaInstallManager } from '../lib/pwa-install-manager.js';
+import { renderResponsiveMediaImage, installMediaFallbackHandler } from '../lib/responsive-media.mjs';
 import {
   createMediaToken as createTopicMediaToken,
   getDirectImageUrl as getTopicDirectImageUrl,
@@ -61,6 +62,7 @@ export class DetailPanel {
     this.panelSize = 'middle';
     
     this.installVisibilityObserver();
+    installMediaFallbackHandler(this.container);
     this.setupCloseButton();
     this.installFeverAudioUnlockHandlers();
     window.addEventListener('browserVoicesChanged', () => {
@@ -614,7 +616,8 @@ export class DetailPanel {
       } else if (action === 'generate-news-media') {
         this.generateNewsMedia(target);
       } else if (action === 'zoom-topic-media') {
-        this.showTopicMediaZoom(target.dataset.mediaUrl, target.dataset.mediaCaption);
+        const image = target.querySelector('.media-responsive-picture img');
+        this.showTopicMediaZoom(image?.currentSrc || target.dataset.mediaUrl, target.dataset.mediaCaption);
       } else if (action === 'close-topic-media-zoom') {
         this.closeTopicMediaZoom();
       }
@@ -10295,6 +10298,10 @@ Rules:
       ? `data-browser-asset-key="${this.escapeHtml(normalized.browserAssetKey)}"`
       : '';
     const browserAssetClass = normalized.browserAssetKey && !normalized.url ? ' browser-asset-pending' : '';
+
+    if (normalized.mobileUrl || normalized.fallbackUrl) {
+      return renderResponsiveMediaImage(normalized, imageClass, alt, value => this.escapeHtml(value));
+    }
 
     return `
       <div class="media-token-frame">
