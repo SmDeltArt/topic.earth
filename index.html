@@ -204,7 +204,7 @@
     <link
       rel="preload"
       as="image"
-      href="./assets/logo/topic-earth-vignette-animated.svg?v=topic-earth-loading-vignette-20260521"
+      href="./assets/logo/generated/earth-rotate/topic-earth-logo-earth-rotate-128.webp?v=topic-earth-clock-globe-20261001"
     />
     <script src="./shared/topic-favicon.js?v=topic-earth-g6-favicon-20260606"></script>
     <link
@@ -422,18 +422,103 @@
 
       <!-- Loading Indicator -->
       <div id="loading">
-        <img
-          class="loading-intro"
-          src="./assets/logo/topic-earth-vignette-animated.svg?v=topic-earth-loading-vignette-20260521"
-          alt="topic.earth modes loading preview"
-        />
+        <section class="loading-intro" data-loading-mode="main" aria-labelledby="loading-brand-name">
+          <div class="loading-brand-lockup">
+            <div class="loading-clock" aria-hidden="true">
+              <img
+                class="loading-clock-earth"
+                src="./assets/logo/generated/earth-rotate/topic-earth-logo-earth-rotate-128.webp?v=topic-earth-clock-globe-20261001"
+                alt=""
+              />
+              <svg class="loading-clock-face" viewBox="0 0 100 100">
+                <circle class="loading-clock-ring" cx="50" cy="50" r="46" />
+                <line class="loading-clock-hand loading-clock-hour" x1="50" y1="52" x2="50" y2="27" />
+                <line class="loading-clock-hand loading-clock-minute" x1="50" y1="53" x2="50" y2="16" />
+                <line class="loading-clock-hand loading-clock-second" x1="50" y1="55" x2="50" y2="12" />
+                <circle class="loading-clock-pin" cx="50" cy="50" r="3.5" />
+              </svg>
+            </div>
+            <div class="loading-brand-copy">
+              <div class="loading-wordmark" id="loading-brand-name">
+                <span>topic.</span><span>earth</span>
+              </div>
+              <div class="loading-mode" id="loading-mode-label">Global</div>
+              <time class="loading-local-time" id="loading-local-time"></time>
+            </div>
+          </div>
+          <div class="loading-signal" aria-hidden="true"><span></span></div>
+        </section>
         <div class="loading-build" aria-live="polite">
-          <p>Building Globe...</p>
+          <p id="loading-build-label">Building Global Globe...</p>
           <div class="loading-build-bar" aria-hidden="true">
             <span></span>
           </div>
         </div>
       </div>
+      <script>
+        (() => {
+          const modes = {
+            main: { label: "Global", build: "Building Global Globe..." },
+            regional: { label: "Regional", build: "Building Regional Map..." },
+            space: { label: "Space", build: "Building Space View..." },
+            fever: { label: "Fever", build: "Building Fever Monitor..." },
+          };
+          const requested = new URLSearchParams(location.search).get("mode") || "main";
+          const requestedMode = requested === "world" ? "main" : requested;
+          const intro = document.querySelector(".loading-intro");
+          const modeLabel = document.getElementById("loading-mode-label");
+          const buildLabel = document.getElementById("loading-build-label");
+          const timeLabel = document.getElementById("loading-local-time");
+          const clockHands = {
+            hour: document.querySelector(".loading-clock-hour"),
+            minute: document.querySelector(".loading-clock-minute"),
+            second: document.querySelector(".loading-clock-second"),
+          };
+          const modeNames = Object.keys(modes);
+          let modeIndex = 0;
+
+          const setMode = (mode) => {
+            const activeMode = modes[mode] ? mode : "main";
+            intro.dataset.loadingMode = activeMode;
+            modeLabel.textContent = modes[activeMode].label;
+            buildLabel.textContent = modes[activeMode].build;
+          };
+
+          const updateTime = () => {
+            const now = new Date();
+            const offsetMinutes = -now.getTimezoneOffset();
+            const offsetSign = offsetMinutes >= 0 ? "+" : "-";
+            const offsetHours = String(Math.floor(Math.abs(offsetMinutes) / 60)).padStart(2, "0");
+            const offsetRemainder = String(Math.abs(offsetMinutes) % 60).padStart(2, "0");
+            const zone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local";
+            const localTime = now.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            });
+            const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
+            const minutes = now.getMinutes() + seconds / 60;
+            const hours = (now.getHours() % 12) + minutes / 60;
+            clockHands.hour.setAttribute("transform", `rotate(${hours * 30} 50 50)`);
+            clockHands.minute.setAttribute("transform", `rotate(${minutes * 6} 50 50)`);
+            clockHands.second.setAttribute("transform", `rotate(${seconds * 6} 50 50)`);
+            timeLabel.dateTime = now.toISOString();
+            timeLabel.textContent = `${localTime} · ${zone} · GMT${offsetSign}${offsetHours}:${offsetRemainder}`;
+          };
+
+          if (requestedMode === "all") {
+            setMode(modeNames[modeIndex]);
+            window.setInterval(() => {
+              modeIndex = (modeIndex + 1) % modeNames.length;
+              setMode(modeNames[modeIndex]);
+            }, 1800);
+          } else {
+            setMode(requestedMode);
+          }
+          updateTime();
+          window.setInterval(updateTime, 1000);
+        })();
+      </script>
     </div>
 
     <script src="./shared/smart-ai-api-bridge.js?v=topic-earth-api-settings-bridge-20260602"></script>

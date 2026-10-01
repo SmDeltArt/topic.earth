@@ -47,7 +47,7 @@
     @keyframes orbitTurn { to { transform: rotate(360deg); } }
   </style>
   <ellipse class="orbit" cx="256" cy="256" rx="238" ry="86" transform="rotate(-14 256 256)"/>
-  <image class="earth" href="../generated/earth-rotate/topic-earth-logo-earth-rotate-512.webp" x="42" y="42" width="428" height="428" preserveAspectRatio="xMidYMid slice" clip-path="url(#earthClip)"/>
+  <image class="earth" href="../generated/earth-rotate/topic-earth-logo-earth-rotate-128.webp" x="42" y="42" width="428" height="428" preserveAspectRatio="xMidYMid slice" clip-path="url(#earthClip)"/>
   <circle cx="256" cy="256" r="214" fill="url(#edgeLight)" clip-path="url(#earthClip)"/>
   <circle class="ring" cx="256" cy="256" r="220"/>
   <g clip-path="url(#earthClip)">

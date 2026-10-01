@@ -2478,15 +2478,149 @@ body.regional-map-search-open #layer-panel {
 }
 
 .loading-intro {
-    width: min(86vw, 820px);
-    height: auto;
+    --intro-topic: #00d4ff;
+    --intro-earth: #9ff5ff;
+    --intro-accent: #7cffd6;
+    --intro-glow: rgba(0, 212, 255, 0.28);
+    width: min(88vw, 640px);
     max-width: 100%;
-    max-height: calc(100dvh - 116px);
-    aspect-ratio: 1200 / 630;
-    display: block;
+    display: grid;
+    gap: 14px;
+    padding: clamp(16px, 4vw, 28px);
+    border: 1px solid color-mix(in srgb, var(--intro-topic) 34%, transparent);
+    border-radius: 8px;
+    background: rgba(7, 16, 25, 0.76);
+    box-shadow: 0 20px 70px rgba(0, 0, 0, 0.42), 0 0 36px var(--intro-glow);
+    transition: border-color 0.45s ease, box-shadow 0.45s ease;
+}
+
+.loading-intro[data-loading-mode="regional"] {
+    --intro-topic: #39ff88;
+    --intro-earth: #d8ff7a;
+    --intro-accent: #f9d85d;
+    --intro-glow: rgba(57, 255, 136, 0.28);
+}
+
+.loading-intro[data-loading-mode="space"] {
+    --intro-topic: #7aa8ff;
+    --intro-earth: #00d4ff;
+    --intro-accent: #f9d85d;
+    --intro-glow: rgba(122, 168, 255, 0.3);
+}
+
+.loading-intro[data-loading-mode="fever"] {
+    --intro-topic: #ff3030;
+    --intro-earth: #f9d85d;
+    --intro-accent: #ff7b54;
+    --intro-glow: rgba(255, 48, 48, 0.3);
+}
+
+.loading-brand-lockup {
+    display: grid;
+    grid-template-columns: clamp(90px, 22vw, 150px) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(14px, 4vw, 28px);
+}
+
+.loading-clock {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    filter: drop-shadow(0 0 18px var(--intro-glow));
+}
+
+.loading-clock-earth,
+.loading-clock-face {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.loading-clock-earth {
     object-fit: contain;
-    border-radius: 12px;
-    filter: drop-shadow(0 0 26px rgba(0, 212, 255, 0.18));
+    border-radius: 50%;
+}
+
+.loading-clock-face {
+    overflow: visible;
+}
+
+.loading-clock-ring {
+    fill: none;
+    stroke: var(--intro-topic);
+    stroke-width: 2.5;
+    stroke-dasharray: 5 3;
+    opacity: 0.9;
+    transform-origin: 50px 50px;
+    animation: loadingClockOrbit 24s linear infinite;
+}
+
+.loading-clock-hand {
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.loading-clock-hour { stroke: #39ff88; stroke-width: 4; }
+.loading-clock-minute { stroke: #00d4ff; stroke-width: 2.5; }
+.loading-clock-second { stroke: #ff3030; stroke-width: 1.5; }
+
+.loading-clock-pin {
+    fill: #05070a;
+    stroke: rgba(255, 255, 255, 0.86);
+    stroke-width: 1.3;
+}
+
+@keyframes loadingClockOrbit {
+    to { transform: rotate(360deg); }
+}
+
+.loading-brand-copy {
+    min-width: 0;
+}
+
+.loading-wordmark {
+    font-size: clamp(30px, 7vw, 58px);
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+    filter: drop-shadow(0 0 12px var(--intro-glow));
+}
+
+.loading-wordmark span:first-child { color: var(--intro-topic); }
+.loading-wordmark span:last-child { color: var(--intro-earth); }
+
+.loading-mode {
+    margin-top: 10px;
+    color: var(--intro-accent);
+    font-size: clamp(11px, 2.4vw, 15px);
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.loading-local-time {
+    display: block;
+    margin-top: 8px;
+    color: var(--text-secondary);
+    font-size: clamp(9px, 2vw, 12px);
+    line-height: 1.45;
+}
+
+.loading-signal {
+    height: 3px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--intro-topic) 14%, transparent);
+}
+
+.loading-signal span {
+    display: block;
+    width: 38%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, transparent, var(--intro-topic), var(--intro-accent), transparent);
+    animation: loadingBuildSweep 2.2s ease-in-out infinite;
 }
 
 .loading-build {
@@ -2502,9 +2636,13 @@ body.regional-map-search-open #layer-panel {
     }
 
     .loading-intro {
-        width: min(100%, 820px);
-        max-height: calc(100dvh - 92px);
-        border-radius: 8px;
+        width: min(100%, 640px);
+        padding: 14px;
+    }
+
+    .loading-brand-lockup {
+        grid-template-columns: clamp(72px, 24vw, 116px) minmax(0, 1fr);
+        gap: 12px;
     }
 
     .loading-build {
