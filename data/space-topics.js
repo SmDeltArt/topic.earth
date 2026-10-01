@@ -27,6 +27,7 @@ export const SOLAR_SYSTEM_SCALE_REFERENCE = {
 const makeSpaceTopic = ({
   id,
   order,
+  date = '2026-05-05',
   object,
   category = 'space',
   title,
@@ -48,7 +49,7 @@ const makeSpaceTopic = ({
   spaceOrder: order,
   solarSystemObject: object,
   category,
-  date: '2026-05-05',
+  date,
   country: 'Solar System',
   region: type,
   title,
@@ -138,7 +139,7 @@ export const SPACE_TOPICS = [
     temperature: `-173${degreeC} to 127${degreeC}`,
     composition: 'Rocky body with a small iron-rich core',
     atmosphere: 'Very thin exosphere',
-    insight: 'The Moon is a bridge topic between Earth systems and human exploration.'
+    insight: 'The visible Moon path is an enlarged mean-element ellipse around the moving Earth: eccentricity 0.0549, inclination 5.145 degrees to the ecliptic, and sidereal period 27.32166 days. Its orbital period uses the same simulation clock as Earth; its rotation is synchronous. Distance is enlarged for readability. Orbital orientation and starting phase are illustrative, not a live ephemeris; solar perturbations and precession are omitted. <a href="https://eclipse.gsfc.nasa.gov/SEhelp/moonorbit.html" target="_blank" rel="noopener noreferrer">NASA: lunar orbit</a>. <a href="https://ssd.jpl.nasa.gov/horizons/" target="_blank" rel="noopener noreferrer">JPL Horizons: date-specific positions</a>.'
   }),
   makeSpaceTopic({
     id: 'space_mars',
@@ -248,14 +249,14 @@ export const SPACE_TOPICS = [
     id: 'space_planet9',
     order: 14,
     object: 'Planet9',
-    title: 'Planet 9',
+    title: 'Planet 9 (hypothetical)',
     type: 'Hypothetical Planet',
     summary: 'A hypothetical outer solar-system planet used here as a special-orbit topic. Its existence is not confirmed, so the scene should label it as a model and not a detected planet.',
     diameter: 'Unknown; often discussed as super-Earth/sub-Neptune scale',
     temperature: 'Unknown',
     composition: 'Unknown',
     atmosphere: 'Unknown',
-    insight: 'Planet 9 is a good place to teach uncertainty: orbital clues can suggest a possible object before direct observation confirms it.'
+    insight: 'The dashed path illustrates one published Planet Nine hypothesis: semimajor axis 380 AU, perihelion 300 AU, eccentricity about 0.211, and inclination 16 degrees (Brown and Batygin, 2021). Kepler\'s third law gives an orbital period of about 7,408 years. Display distances are compressed; the Sun is at a focus. Orientation and starting phase are arbitrary and are not a sky-position prediction. At the shared simulation speed it barely moves during a human visit. This is a two-body teaching model, not a demonstration of long-term dynamical stability. Planet Nine remains unconfirmed. <a href="https://arxiv.org/abs/2108.09868" target="_blank" rel="noopener noreferrer">Primary study and uncertainties</a>. <a href="https://science.nasa.gov/solar-system/planet-x/" target="_blank" rel="noopener noreferrer">NASA: hypothetical Planet X</a>.'
   }),
   makeSpaceTopic({
     id: 'space_starship',
@@ -566,6 +567,22 @@ export const SPACE_TOPICS = [
         embedUrl: 'https://eyes.nasa.gov/apps/solar-system/#/home?embed=true',
         watermarkText: 'NASA Eyes | official interactive reference'
       }
+    ]
+  }),
+  makeSpaceTopic({
+    id: 'space_chronos_habitable_world',
+    order: 20.5,
+    date: '2026-10-01',
+    object: 'Earth',
+    title: 'Chronos: A Habitable World, a Brief Humanity',
+    type: 'Deep Time, SETI and Planetary Responsibility',
+    isPlanet: false,
+    summary: 'Billions of years built the conditions we inhabit. Connect the Drake equation, the Moon-forming impact, planetary habitability and climate feedbacks to a more humble view of humanity: powerful enough to disturb our home, responsible for caring for it.',
+    insight: '<p><strong>The Drake equation:</strong> N = R* × fp × ne × fl × fi × fc × L. R* is the rate of suitable star formation; fp is the fraction with planets; ne is the number of suitable worlds per system; fl, fi and fc describe life, intelligence and detectable technology; L is the duration of detectable technological activity. This framework organizes uncertainty; several terms remain poorly constrained.</p><p><strong>Chance and planetary history:</strong> a giant impact around 4.5 billion years ago likely formed the Moon. Research suggests impactor material may survive deep in Earth\'s mantle. A connection to the emergence of plate tectonics is a hypothesis, not an established explanation. Explore collision histories within habitability (ne), without inventing a probability or multiplying in a separate Moon factor that double-counts habitability. A large moon is not a proven universal requirement for life.</p><p><strong>Chronos / deep time:</strong> the Solar System began forming about 4.6 billion years ago; formation was a process, not a single instant. On a one-year calendar representing that span, 200 years occupy about 1.4 seconds. Human urgency unfolds inside planetary timescales.</p><p><strong>The climate snowball:</strong> here “snowball” means accumulating consequences and amplifying feedbacks. Human emissions drive warming. A literal Snowball Earth is an ancient glaciation concept, not the expected outcome of current climate inaction. Natural geological climate regulation does not promise a timely rescue from rapid emissions.</p><p><strong>Responsibility and L:</strong> civilization\'s ability to sustain itself is an ethical question prompted by Drake\'s longevity term, not a prediction from the equation. We inherited conditions built over billions of years. A brief presence can carry a lasting responsibility.</p><p><strong>Read the evidence:</strong> <a href="https://www.seti.org/research/seti-101/drake-equation/" target="_blank" rel="noopener noreferrer">SETI: Drake equation</a> · <a href="https://science.nasa.gov/moon/formation/" target="_blank" rel="noopener noreferrer">NASA: Moon formation</a> · <a href="https://www.nature.com/articles/s41586-023-06589-1" target="_blank" rel="noopener noreferrer">Theia and mantle structures (modelling study)</a> · <a href="https://science.nasa.gov/astrobiology/learning-resources/alp/how-did-our-solar-system-form/" target="_blank" rel="noopener noreferrer">NASA: Solar System formation</a> · <a href="https://www.ipcc.ch/report/ar6/wg1/resources/spm-headline-statements/" target="_blank" rel="noopener noreferrer">IPCC: human-caused warming</a>.</p>',
+    researchSources: [
+      { name: 'SETI Institute: Drake equation', url: 'https://www.seti.org/research/seti-101/drake-equation/', category: 'official', reliability: 'high', verified: true },
+      { name: 'NASA: Moon formation', url: 'https://science.nasa.gov/moon/formation/', category: 'official', reliability: 'high', verified: true },
+      { name: 'IPCC AR6: physical science headline statements', url: 'https://www.ipcc.ch/report/ar6/wg1/resources/spm-headline-statements/', category: 'scientific-assessment', reliability: 'high', verified: true }
     ]
   }),
   makeSpaceTopic({

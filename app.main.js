@@ -1,4 +1,4 @@
-import { GlobeRenderer } from './lib/globe.js?v=topic-earth-janus-system-20261001';
+import { GlobeRenderer } from './lib/globe.js?v=topic-earth-chronos-orbits-20261001';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LAYERS } from './data/layers.js?v=topic-earth-janus-system-20261001';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
@@ -6,7 +6,7 @@ import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-i
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
 import { FEVER_TOPICS } from './data/fever-topics.js?v=topic-earth-embedded-story-20260521';
 import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
-import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-system-20261001';
+import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-chronos-orbits-20261001';
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
@@ -3604,7 +3604,7 @@ class TopicEarthApp {
   
   showPlanetDetail(planetInfo) {
     const matchingSpaceTopic = SPACE_TOPICS.find(topic => (
-      topic.object === planetInfo.name ||
+      (topic.isPlanet && topic.solarSystemObject === planetInfo.name) ||
       topic.title === planetInfo.name ||
       topic.id === `planet_${planetInfo.name}`
     ));
