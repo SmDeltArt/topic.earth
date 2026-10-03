@@ -87,7 +87,23 @@ export const SPACE_TOPICS = [
     temperature: `5,500${degreeC} surface, about 15,000,000${degreeC} core`,
     composition: 'Hydrogen, helium, and trace heavier elements',
     atmosphere: 'Photosphere, chromosphere, and corona',
-    insight: 'Use the Sun as the anchor for scale, energy, and orbital relationships in Space mode.'
+    insight: 'Use the Sun as the anchor for scale, energy, and orbital relationships in Space mode.',
+    mediaTokens: [{
+      id: 'media_sun_milky_way_portrait',
+      url: 'https://api.websim.com/blobs/01988508-3c5b-769d-bf4a-86108ba766a3.mp4',
+      sourceUrl: 'https://api.websim.com/blobs/01988508-3c5b-769d-bf4a-86108ba766a3.mp4',
+      sourceName: 'Sun and our place in the Milky Way — user-provided clip',
+      watermarkText: '',
+      provider: 'direct-video',
+      mediaType: 'video',
+      width: 360,
+      height: 640,
+      portrait: true,
+      autoplay: true,
+      loop: true,
+      generated: false,
+      createdAt: '2026-10-03T11:00:00Z'
+    }]
   }),
   makeSpaceTopic({
     id: 'space_mercury',

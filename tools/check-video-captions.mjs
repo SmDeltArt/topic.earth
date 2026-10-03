@@ -55,7 +55,8 @@ const context = vm.createContext({
   window: { location: { href: 'https://topic.earth/?mode=main' } },
   LanguageManager: { detectBrowserLanguage: () => 'nl' },
   getTopicMediaTokensForPoint: media.getMediaTokensForPoint,
-  normalizeTopicMediaToken: media.normalizeMediaToken
+  normalizeTopicMediaToken: media.normalizeMediaToken,
+  getDirectVideoUrl: media.getDirectVideoUrl
 });
 vm.runInContext(`${panelSource}\nglobalThis.Panel = DetailPanel;`, context);
 const panel = Object.create(context.Panel.prototype);
@@ -81,3 +82,39 @@ Settings.set({ videoCaptionsFollowUi: false });
 panel.showTopicMediaZoom(youtube, 'Video');
 assert.ok(!zoomPanel.innerHTML.includes('cc_load_policy'));
 console.log('PASS: settings persistence/reset, UI and browser language, original-language rule, YouTube/Vimeo preferences, private Vimeo hash, unsupported URLs, saved metadata, inline and zoom players.');
+
+const { SPACE_TOPICS } = await load('data/space-topics.js');
+const sun = SPACE_TOPICS.find(point => point.id === 'space_sun');
+const clip = media.getMediaTokensForPoint(sun)[0];
+assert.equal(clip.mediaType, 'video');
+assert.equal(clip.width, 360);
+assert.equal(clip.height, 640);
+assert.equal(clip.portrait, true);
+assert.equal(clip.url, 'https://api.websim.com/blobs/01988508-3c5b-769d-bf4a-86108ba766a3.mp4');
+assert.equal(media.normalizeMediaToken(clip.url).mediaType, 'video');
+assert.equal(media.getDirectVideoUrl('javascript:alert(1).mp4'), '');
+const item = panel.renderTopicMediaItem(clip, 'Sun clip');
+assert.ok(item.includes('<video'));
+assert.ok(item.includes('controls playsinline muted autoplay loop'));
+assert.ok(item.includes('topic-media-item-portrait'));
+assert.ok(!item.includes('<button'));
+assert.ok(!panel.renderMediaTokenImage(clip, 'topic-builder-media-image').includes('muted autoplay'));
+const shorts = panel.getYoutubeVideoMeta('https://www.youtube.com/shorts/fsfq-OuB5sI');
+assert.equal(shorts.portrait, true);
+panel.currentPoint = { mediaTokens: [{ sourceUrl: 'https://www.youtube.com/shorts/fsfq-OuB5sI', url: shorts.thumbnailUrl, embedUrl: shorts.embedUrl, mediaType: 'youtube' }] };
+panel.showTopicMediaZoom(shorts.embedUrl, 'Short');
+assert.ok(zoomPanel.innerHTML.includes('topic-media-zoom-video-portrait'));
+panel.showTopicMediaZoom(clip.url, 'Clip');
+assert.ok(zoomPanel.innerHTML.includes('<video'));
+assert.ok(!zoomPanel.innerHTML.includes('<iframe'));
+// Exercise the same URL import path used by the Add URL UI.
+panel.saveFormState = () => {};
+panel.ensureCurrentPointMedia = () => true;
+panel.createMediaToken = media.createMediaToken;
+panel.getHostFromUrl = media.getHostFromUrl;
+panel.addMediaTokenToCurrentPoint = token => { panel.currentPoint.mediaTokens.push(token); return true; };
+panel.renderCreateTopic = () => {};
+await panel.importURL(clip.url);
+assert.equal(panel.currentPoint.mediaTokens.at(-1).mediaType, 'video');
+assert.equal(panel.topicSources.at(-1).url, clip.url);
+console.log('PASS: Sun portrait clip, muted autoplay with controls, paused editor previews, direct URL imports and legacy tokens, Shorts detection and portrait zoom.');

@@ -11,10 +11,11 @@ import { renderResponsiveMediaImage, installMediaFallbackHandler } from '../lib/
 import {
   createMediaToken as createTopicMediaToken,
   getDirectImageUrl as getTopicDirectImageUrl,
+  getDirectVideoUrl,
   getHostFromUrl as getTopicHostFromUrl,
   getMediaTokensForPoint as getTopicMediaTokensForPoint,
   normalizeMediaToken as normalizeTopicMediaToken
-} from '../lib/media-utils.js?v=topic-earth-video-captions-20261003';
+} from '../lib/media-utils.js?v=topic-earth-portrait-video-20261003';
 import {
   downloadAdminTopicPackage,
   downloadTopicAdminSubmission,
@@ -419,6 +420,14 @@ export class DetailPanel {
     });
     
     // Handle source input changes
+    this.container.addEventListener('loadedmetadata', e => {
+      const video = e.target;
+      if (video.tagName !== 'VIDEO') return;
+      const portrait = video.videoHeight > video.videoWidth;
+      video.closest('.media-token-frame')?.classList.toggle('media-token-portrait', portrait);
+      video.closest('.topic-media-item')?.classList.toggle('topic-media-item-portrait', portrait);
+    }, true);
+
     this.container.addEventListener('input', (e) => {
       if (e.target.classList.contains('source-name-input') || e.target.classList.contains('source-url-input') || e.target.classList.contains('source-notes-input') || e.target.classList.contains('source-video-language-input')) {
         const index = parseInt(e.target.dataset.index);
@@ -2939,21 +2948,7 @@ Keep response concise (3-4 sentences).`;
         <div class="detail-section">
           <div class="section-label">Media</div>
           <div class="topic-media-grid">
-            ${mediaGridTokens.map((token, index) => `
-              <div class="topic-media-item">
-                <button 
-                  type="button" 
-                  class="topic-media-zoom-btn" 
-                  data-action="zoom-topic-media"
-                  data-media-url="${this.escapeHtml(token.embedUrl || token.url)}"
-                  data-media-caption="${this.escapeHtml(token.watermarkText || `${point.title || 'Topic'} image ${index + 1}`)}"
-                  title="Zoom image inside the detail panel"
-                >
-                  ${this.renderMediaTokenImage(token, 'topic-media-image', `${point.title || 'Topic'} media ${index + 1}`)}
-                  <span class="topic-media-zoom-label">Zoom</span>
-                </button>
-              </div>
-            `).join('')}
+            ${mediaGridTokens.map((token, index) => this.renderTopicMediaItem(token, `${point.title || 'Topic'} media ${index + 1}`)).join('')}
           </div>
           ${canManageTopicSources ? `<button class="manage-sources-btn media-manage-btn" data-action="manage-sources" title="Manage evidence and media">Evidence & Media</button>` : ''}
         </div>
@@ -3384,11 +3379,7 @@ Keep response concise (3-4 sentences).`;
       <div class="detail-section">
         <div class="section-label">Mission Media</div>
         <div class="topic-media-grid">
-          ${mediaTokens.map((token, index) => `
-            <div class="topic-media-item">
-              ${this.renderMediaTokenImage(token, 'topic-media-image', `${planet.title || 'Space topic'} media ${index + 1}`)}
-            </div>
-          `).join('')}
+          ${mediaTokens.map((token, index) => this.renderTopicMediaItem(token, `${planet.title || 'Space topic'} media ${index + 1}`)).join('')}
         </div>
       </div>
     ` : '';
@@ -7827,6 +7818,11 @@ ${body}
   async addComposerUrl(url = '') {
     if (!url) return false;
 
+    if (getDirectVideoUrl(url)) {
+      await this.importURL(url);
+      return true;
+    }
+
     const directImageUrl = this.getDirectImageUrl(url);
     const host = this.getHostFromUrl(url);
     const videoMeta = this.getVideoEmbedMeta(url);
@@ -7881,6 +7877,7 @@ ${body}
         embedUrl: videoMeta.embedUrl,
         thumbnailUrl: videoDetails?.thumbnailUrl || videoMeta.thumbnailUrl,
         videoId: videoMeta.videoId,
+        portrait: videoMeta.portrait,
         authorName: videoDetails?.authorName || ''
       });
       added = this.addMediaTokenToCurrentPoint(mediaToken) || added;
@@ -8700,6 +8697,14 @@ Return ONLY JSON:
     }
 
     try {
+      if (getDirectVideoUrl(url)) {
+        this.mediaUrlPreviewToken = this.createMediaToken({
+          url, sourceUrl: url, sourceName: 'Direct video', provider: 'direct-video', mediaType: 'video'
+        });
+        this.showMediaUrlInput = true;
+        this.renderCreateTopic({ preserveState: true });
+        return;
+      }
       const youtubeMeta = this.getYoutubeVideoMeta(url);
       if (youtubeMeta) {
         const youtubeDetails = await this.fetchYoutubeMetadata(url);
@@ -8712,6 +8717,7 @@ Return ONLY JSON:
           embedUrl: youtubeMeta.embedUrl,
           thumbnailUrl: youtubeDetails?.thumbnailUrl || youtubeMeta.thumbnailUrl,
           videoId: youtubeMeta.videoId,
+          portrait: youtubeMeta.portrait,
           authorName: youtubeDetails?.authorName || ''
         });
         this.showMediaUrlInput = true;
@@ -8972,6 +8978,21 @@ Return ONLY JSON:
     }
 
     const youtubeMeta = this.getYoutubeVideoMeta(safeUrl);
+    if (getDirectVideoUrl(safeUrl)) {
+      const mediaToken = this.createMediaToken({
+        url: safeUrl, sourceUrl: safeUrl, sourceName: this.getHostFromUrl(safeUrl) || 'Direct video',
+        provider: 'direct-video', mediaType: 'video', autoplay: true
+      });
+      if (!this.addMediaTokenToCurrentPoint(mediaToken)) return;
+      if (!this.topicSources.some(source => source.url === safeUrl)) {
+        this.topicSources.push({ name: mediaToken.sourceName, url: safeUrl, category: 'media', verified: false, provider: 'direct-video', mediaTokenId: mediaToken.id });
+      }
+      this.showMediaUrlInput = false;
+      this.mediaUrlDraftUrl = '';
+      this.mediaUrlPreviewToken = null;
+      this.renderCreateTopic({ preserveState: true });
+      return;
+    }
     if (youtubeMeta) {
       const youtubeDetails = await this.fetchYoutubeMetadata(safeUrl);
       const mediaToken = this.createMediaToken({
@@ -8983,6 +9004,7 @@ Return ONLY JSON:
         embedUrl: youtubeMeta.embedUrl,
         thumbnailUrl: youtubeDetails?.thumbnailUrl || youtubeMeta.thumbnailUrl,
         videoId: youtubeMeta.videoId,
+        portrait: youtubeMeta.portrait,
         authorName: youtubeDetails?.authorName || ''
       });
       this.addMediaTokenToCurrentPoint(mediaToken);
@@ -9888,6 +9910,7 @@ Return ONLY a JSON object with this exact format, no other text:
 
       return {
         videoId,
+        portrait: parsed.pathname.startsWith('/shorts/'),
         watchUrl: `https://www.youtube.com/watch?v=${videoId}`,
         embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
         thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
@@ -10291,9 +10314,25 @@ Rules:
       this.scheduleBrowserMediaHydration();
     }
 
+    const portraitClass = normalized.portrait ? ' media-token-portrait' : '';
+    if (normalized.mediaType === 'video' && getDirectVideoUrl(normalized.url)) {
+      const autoplay = normalized.autoplay && imageClass === 'topic-media-image';
+      return `
+        <div class="media-token-frame media-token-video-frame${portraitClass}">
+          <video class="topic-direct-video" src="${this.escapeHtml(normalized.url)}"
+            aria-label="${this.escapeHtml(normalized.sourceName || alt)}"
+            ${normalized.width ? `width="${normalized.width}"` : ''}
+            ${normalized.height ? `height="${normalized.height}"` : ''}
+            controls playsinline muted ${autoplay ? 'autoplay' : ''} ${normalized.loop ? 'loop' : ''} preload="metadata">
+            <a href="${this.escapeHtml(normalized.url)}" target="_blank" rel="noopener noreferrer">Open video</a>
+          </video>
+        </div>
+      `;
+    }
+
     if (isIframe) {
       return `
-        <div class="media-token-frame media-token-iframe-frame">
+        <div class="media-token-frame media-token-iframe-frame${portraitClass}">
           <iframe
             class="media-token-iframe ${this.escapeHtml(imageClass)}"
             src="${this.escapeHtml(this.getCaptionEmbedUrl(normalized.embedUrl, normalized.videoLanguage))}"
@@ -10316,7 +10355,7 @@ Rules:
     }
 
     return `
-      <div class="media-token-frame">
+      <div class="media-token-frame${portraitClass}">
         <img
           src="${this.escapeHtml(normalized.thumbnailUrl || normalized.url)}"
           alt="${this.escapeHtml(alt)}"
@@ -10331,6 +10370,21 @@ Rules:
         <div class="media-token-watermark">${this.escapeHtml(normalized.watermarkText)}</div>
       </div>
     `;
+  }
+
+  renderTopicMediaItem(token, title = 'Topic media') {
+    const media = this.normalizeMediaToken(token);
+    if (!media) return '';
+    const content = this.renderMediaTokenImage(media, 'topic-media-image', title);
+    const player = media.mediaType === 'video' || media.mediaType === 'iframe';
+    return `<div class="topic-media-item${media.portrait ? ' topic-media-item-portrait' : ''}">
+      ${player ? content : `<button type="button" class="topic-media-zoom-btn" data-action="zoom-topic-media"
+        data-media-url="${this.escapeHtml(media.embedUrl || media.url)}"
+        data-video-language="${this.escapeHtml(media.videoLanguage)}"
+        data-media-caption="${this.escapeHtml(media.sourceName || title)}" title="Open topic media">
+        ${content}<span class="topic-media-zoom-label">${media.embedUrl ? 'Play' : 'Zoom'}</span>
+      </button>`}
+    </div>`;
   }
 
   scheduleBrowserMediaHydration() {
@@ -10734,15 +10788,24 @@ Rules:
     if (!safeUrl) return;
     const isVideoEmbed = /youtube(?:-nocookie)?\.com\/embed\//i.test(safeUrl)
       || /player\.vimeo\.com\/video\/\d+/i.test(safeUrl);
+    const isDirectVideo = Boolean(getDirectVideoUrl(safeUrl));
+    const videoMeta = this.getVideoEmbedMeta(safeUrl);
+    const portraitRecords = [...this.getMediaTokensForPoint(this.currentPoint || {}), ...(this.currentPoint?.researchSources || []), ...(this.topicSources || [])];
+    const portrait = videoMeta?.portrait || portraitRecords.some(token => {
+      const meta = this.getVideoEmbedMeta(token.sourceUrl || token.embedUrl || token.url || '');
+      if (!token.portrait && !meta?.portrait) return false;
+      return token.url === safeUrl || token.embedUrl === safeUrl
+        || (meta && videoMeta && meta.provider === videoMeta.provider && meta.videoId === videoMeta.videoId);
+    });
 
     zoomPanel.innerHTML = `
       <div class="topic-media-zoom-header">
         <span>${this.escapeHtml(caption || 'Topic media')}</span>
         <button class="topic-media-zoom-close" data-action="close-topic-media-zoom" title="Close media zoom">Close</button>
       </div>
-      ${isVideoEmbed ? `
+      ${isDirectVideo ? this.renderMediaTokenImage({ url: safeUrl, mediaType: 'video', portrait, sourceName: caption }, 'topic-media-image', caption) : isVideoEmbed ? `
         <iframe
-          class="topic-media-zoom-video"
+          class="topic-media-zoom-video${portrait ? ' topic-media-zoom-video-portrait' : ''}"
           src="${this.escapeHtml(this.getCaptionEmbedUrl(safeUrl, videoLanguage))}"
           title="${this.escapeHtml(caption || 'Topic video')}"
           referrerpolicy="strict-origin-when-cross-origin"
@@ -11726,6 +11789,7 @@ Rules:
   }
   
   hide() {
+    this.container.querySelectorAll('video').forEach(video => video.pause());
     if (this.currentGlobe && this.currentGlobe.inFeverMode && this.mode === 'detail') {
       const isFeverRelated = this.currentPoint?.isTippingPoint || 
                             this.currentPoint?.isFeverWarning || 
