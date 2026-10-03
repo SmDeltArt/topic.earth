@@ -599,6 +599,62 @@ export const TIPPING_POINT_TOPICS = [
 
 export const MOCK_POINTS = [
   {
+    id: 'earth_thwaites_doomsday_glacier',
+    lat: -75.5,
+    lon: -106.75,
+    category: 'climate',
+    title: 'Thwaites Glacier — the Doomsday Glacier',
+    country: 'Antarctica',
+    region: 'West Antarctica · Amundsen Sea',
+    date: '2026-10-03',
+    source: 'British Antarctic Survey · International Thwaites Glacier Collaboration',
+    summary: 'Thwaites Glacier in West Antarctica is losing ice as ocean water melts it from below. Its retreat matters for coastal communities worldwide: complete loss of the glacier would contribute about 65 cm to global sea-level rise over the coming centuries.',
+    insight: '<p><strong>Why “Doomsday”?</strong> The nickname reflects the consequences of long-term ice loss. It is not a scientific countdown to an imminent catastrophe.</p><p><strong>How retreat works:</strong> warm ocean water melts the ice from below near the grounding line, where grounded ice begins to float. Loss of the floating ice shelf can reduce its restraint on the glacier, allowing more land ice to flow into the ocean.</p><p><strong>Sea level and timescales:</strong> about 65 cm is the potential contribution from complete loss of Thwaites over centuries, not a prediction for the next few years. British Antarctic Survey reports that full collapse is unlikely in the next few decades, while further retreat through the 21st and 22nd centuries remains a concern.</p><p><strong>Watch:</strong> <a href="https://www.youtube.com/watch?v=fsfq-OuB5sI" target="_blank" rel="noopener noreferrer">Doomsday Glacier — suggested video</a>.</p>',
+    researchSources: [
+      {
+        name: 'British Antarctic Survey: Thwaites Glacier and sea-level rise — ITGC results',
+        url: 'https://www.bas.ac.uk/data/our-data/publication/antarcticas-thwaites-glacier-and-sea-level-rise-results-from-the-international-thwaites-glacier-collaboration-itgc-environment-audit-committee-call-for-evidence/',
+        category: 'scientific',
+        reliability: 'high',
+        verified: true
+      },
+      {
+        name: 'British Antarctic Survey: fieldwork and sea-level context',
+        url: 'https://www.bas.ac.uk/news/fieldwork-starts-on-thwaites-glacier/',
+        category: 'scientific',
+        reliability: 'high',
+        verified: true
+      },
+      {
+        name: 'Doomsday Glacier — suggested YouTube video',
+        url: 'https://www.youtube.com/watch?v=fsfq-OuB5sI',
+        category: 'media',
+        reliability: 'needs-review',
+        verified: false,
+        provider: 'youtube',
+        notes: 'User-provided video. The full video has not been independently reviewed; the topic explanation uses the scientific sources above.'
+      }
+    ],
+    media: ['https://img.youtube.com/vi/fsfq-OuB5sI/hqdefault.jpg'],
+    mediaTokens: [
+      {
+        id: 'media_thwaites_doomsday_video',
+        url: 'https://img.youtube.com/vi/fsfq-OuB5sI/hqdefault.jpg',
+        thumbnailUrl: 'https://img.youtube.com/vi/fsfq-OuB5sI/hqdefault.jpg',
+        sourceUrl: 'https://www.youtube.com/watch?v=fsfq-OuB5sI',
+        embedUrl: 'https://www.youtube-nocookie.com/embed/fsfq-OuB5sI',
+        videoId: 'fsfq-OuB5sI',
+        sourceName: 'Doomsday Glacier — suggested video',
+        sourceHost: 'youtube.com',
+        watermarkText: 'YouTube | Doomsday Glacier',
+        mediaType: 'youtube',
+        provider: 'youtube',
+        generated: false,
+        createdAt: '2026-10-03T00:00:00Z'
+      }
+    ]
+  },
+  {
     id: 1,
     lat: 48.8566,
     lon: 2.3522,
