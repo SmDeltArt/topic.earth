@@ -646,6 +646,23 @@ export const SPACE_TOPICS = [
     insight: 'The model attempts to explain observations such as cosmic acceleration and large-scale structure without conventional dark matter or dark energy. The mirrored hemispheres and opposite arrows are teaching aids only: they do not prove that a second sector exists, do not show literal twin planets, and do not solve the model\'s field equations. Janus remains a speculative, non-consensus proposal that must be compared with established cosmology and observational tests.',
     isPlanet: false,
     isJanus: true,
+    mediaTokens: [{
+      id: 'media_janus_youtube_short',
+      url: 'https://img.youtube.com/vi/yCM9IseAcJ8/hqdefault.jpg',
+      thumbnailUrl: 'https://img.youtube.com/vi/yCM9IseAcJ8/hqdefault.jpg',
+      sourceUrl: 'https://www.youtube.com/shorts/yCM9IseAcJ8',
+      embedUrl: 'https://www.youtube-nocookie.com/embed/yCM9IseAcJ8?autoplay=1&mute=1&playsinline=1',
+      videoId: 'yCM9IseAcJ8',
+      sourceName: 'Janus — suggested YouTube Short',
+      provider: 'youtube',
+      mediaType: 'iframe',
+      portrait: true,
+      width: 360,
+      height: 640,
+      autoplay: true,
+      generated: false,
+      createdAt: '2026-10-03T12:00:00Z'
+    }],
     researchSources: [
       {
         name: 'Petit, Margnat and Zejli: bimetric twin-universe model (2024)',
@@ -660,6 +677,14 @@ export const SPACE_TOPICS = [
         category: 'comparison-reference',
         reliability: 'high',
         verified: true
+      },
+      {
+        name: 'Janus — suggested YouTube Short',
+        url: 'https://www.youtube.com/shorts/yCM9IseAcJ8',
+        category: 'media',
+        reliability: 'needs-review',
+        verified: false,
+        provider: 'youtube'
       }
     ]
   })

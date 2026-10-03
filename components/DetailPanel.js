@@ -10331,17 +10331,27 @@ Rules:
     }
 
     if (isIframe) {
+      let embedUrl = this.getCaptionEmbedUrl(normalized.embedUrl, normalized.videoLanguage);
+      if (imageClass !== 'topic-media-image') {
+        const previewUrl = new URL(embedUrl, window.location.href);
+        previewUrl.searchParams.delete('autoplay');
+        embedUrl = previewUrl.toString();
+      }
+      const sourceUrl = this.sanitizeUrl(normalized.sourceUrl);
       return `
         <div class="media-token-frame media-token-iframe-frame${portraitClass}">
           <iframe
             class="media-token-iframe ${this.escapeHtml(imageClass)}"
-            src="${this.escapeHtml(this.getCaptionEmbedUrl(normalized.embedUrl, normalized.videoLanguage))}"
+            src="${this.escapeHtml(embedUrl)}"
             title="${this.escapeHtml(normalized.sourceName || alt)}"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"
             allowfullscreen
           ></iframe>
           <div class="media-token-watermark">${this.escapeHtml(normalized.watermarkText)}</div>
         </div>
+        ${sourceUrl ? `<a href="${this.escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">${normalized.provider === 'youtube' ? 'Watch on YouTube' : 'Open source'}</a>` : ''}
       `;
     }
 
@@ -11790,6 +11800,7 @@ Rules:
   
   hide() {
     this.container.querySelectorAll('video').forEach(video => video.pause());
+    this.container.querySelectorAll('iframe.media-token-iframe, iframe.topic-media-zoom-video').forEach(frame => { frame.src = 'about:blank'; });
     if (this.currentGlobe && this.currentGlobe.inFeverMode && this.mode === 'detail') {
       const isFeverRelated = this.currentPoint?.isTippingPoint || 
                             this.currentPoint?.isFeverWarning || 
