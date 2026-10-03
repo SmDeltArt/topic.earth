@@ -1,4 +1,5 @@
-import { Settings } from '../lib/settings.js?v=topic-earth-admin-api-settings-20261001';
+import { Settings } from '../lib/settings.js?v=topic-earth-video-captions-20261003';
+import { buildCaptionEmbedUrl } from '../lib/video-captions.mjs?v=topic-earth-video-captions-20261003';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-fever-scenario-layer-20260521';
 import { ReadTranslationService } from '../lib/read-translation.js';
@@ -13,7 +14,7 @@ import {
   getHostFromUrl as getTopicHostFromUrl,
   getMediaTokensForPoint as getTopicMediaTokensForPoint,
   normalizeMediaToken as normalizeTopicMediaToken
-} from '../lib/media-utils.js';
+} from '../lib/media-utils.js?v=topic-earth-video-captions-20261003';
 import {
   downloadAdminTopicPackage,
   downloadTopicAdminSubmission,
@@ -419,11 +420,15 @@ export class DetailPanel {
     
     // Handle source input changes
     this.container.addEventListener('input', (e) => {
-      if (e.target.classList.contains('source-name-input') || e.target.classList.contains('source-url-input') || e.target.classList.contains('source-notes-input')) {
+      if (e.target.classList.contains('source-name-input') || e.target.classList.contains('source-url-input') || e.target.classList.contains('source-notes-input') || e.target.classList.contains('source-video-language-input')) {
         const index = parseInt(e.target.dataset.index);
         const field = e.target.dataset.field;
         if (!isNaN(index) && this.topicSources[index]) {
           this.topicSources[index][field] = e.target.value;
+          if (field === 'videoLanguage') {
+            const preview = e.target.closest('.source-editor-content')?.querySelector('.youtube-preview-button');
+            if (preview) preview.dataset.videoLanguage = e.target.value;
+          }
         }
       }
     });
@@ -617,7 +622,7 @@ export class DetailPanel {
         this.generateNewsMedia(target);
       } else if (action === 'zoom-topic-media') {
         const image = target.querySelector('.media-responsive-picture img');
-        this.showTopicMediaZoom(image?.currentSrc || target.dataset.mediaUrl, target.dataset.mediaCaption);
+        this.showTopicMediaZoom(image?.currentSrc || target.dataset.mediaUrl, target.dataset.mediaCaption, target.dataset.videoLanguage);
       } else if (action === 'close-topic-media-zoom') {
         this.closeTopicMediaZoom();
       }
@@ -6620,7 +6625,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
   syncSourceEditorState(root = this.container) {
     if (!root || !Array.isArray(this.topicSources)) return;
 
-    root.querySelectorAll('.source-name-input, .source-url-input, .source-notes-input').forEach(input => {
+    root.querySelectorAll('.source-name-input, .source-url-input, .source-notes-input, .source-video-language-input').forEach(input => {
       const index = parseInt(input.dataset.index, 10);
       const field = input.dataset.field;
       if (!Number.isFinite(index) || !field || !this.topicSources[index]) return;
@@ -9871,7 +9876,7 @@ Return ONLY a JSON object with this exact format, no other text:
 
       if (host === 'youtu.be') {
         videoId = parsed.pathname.split('/').filter(Boolean)[0] || '';
-      } else if (host.endsWith('youtube.com')) {
+      } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
         if (parsed.pathname.startsWith('/watch')) {
           videoId = parsed.searchParams.get('v') || '';
         } else if (parsed.pathname.startsWith('/embed/') || parsed.pathname.startsWith('/shorts/')) {
@@ -10004,8 +10009,14 @@ Return ONLY a JSON object with this exact format, no other text:
         data-field="adminNotes"
       >${this.escapeHtml(notes)}</textarea>
       ${videoMeta ? `
+        <label>Original video language
+          <select class="source-video-language-input" data-index="${index}" data-field="videoLanguage">
+            <option value="">Unknown</option>
+            ${this.renderLanguageOptions(LanguageManager.getAllLanguages(), source.videoLanguage || '')}
+          </select>
+        </label>
         <div class="youtube-evidence-editor-preview">
-          <button type="button" class="youtube-preview-button" data-action="zoom-topic-media" data-media-url="${this.escapeHtml(videoMeta.embedUrl)}" data-media-caption="${this.escapeHtml(source.name || `${videoMeta.label} evidence`)}">
+          <button type="button" class="youtube-preview-button" data-action="zoom-topic-media" data-video-language="${this.escapeHtml(source.videoLanguage || '')}" data-media-url="${this.escapeHtml(videoMeta.embedUrl)}" data-media-caption="${this.escapeHtml(source.name || `${videoMeta.label} evidence`)}">
             ${videoMeta.thumbnailUrl ? `<img src="${this.escapeHtml(videoMeta.thumbnailUrl)}" alt="" loading="lazy">` : '<span class="media-token-play-badge">Play</span>'}
             <span>Play inline</span>
           </button>
@@ -10027,6 +10038,7 @@ Return ONLY a JSON object with this exact format, no other text:
         type="button"
         class="youtube-source-preview"
         data-action="zoom-topic-media"
+        data-video-language="${this.escapeHtml(source.videoLanguage || '')}"
         data-media-url="${this.escapeHtml(videoMeta.embedUrl)}"
         data-media-caption="${this.escapeHtml(source.name || `${videoMeta.label} evidence`)}"
         title="Play video inside the panel"
@@ -10284,7 +10296,7 @@ Rules:
         <div class="media-token-frame media-token-iframe-frame">
           <iframe
             class="media-token-iframe ${this.escapeHtml(imageClass)}"
-            src="${this.escapeHtml(normalized.embedUrl)}"
+            src="${this.escapeHtml(this.getCaptionEmbedUrl(normalized.embedUrl, normalized.videoLanguage))}"
             title="${this.escapeHtml(normalized.sourceName || alt)}"
             loading="lazy"
             allowfullscreen
@@ -10680,7 +10692,28 @@ Rules:
     }
   }
 
-  showTopicMediaZoom(url, caption = 'Topic media') {
+  getCaptionEmbedUrl(url, videoLanguage = '') {
+    // Resolve original language from saved media or evidence metadata, never
+    // from the topic's prose language or the user's interface language.
+    const video = this.getVideoEmbedMeta(url);
+    const matchesVideo = item => {
+      const meta = this.getVideoEmbedMeta(item.sourceUrl || item.url || item.embedUrl || '');
+      return video && meta && video.provider === meta.provider && video.videoId === meta.videoId;
+    };
+    const records = [
+      ...this.getMediaTokensForPoint(this.currentPoint || {}),
+      ...(this.currentPoint?.researchSources || []),
+      ...(this.topicSources || [])
+    ];
+    const original = videoLanguage || records.find(item => item.videoLanguage && matchesVideo(item))?.videoLanguage || '';
+    return buildCaptionEmbedUrl(url, {
+      enabled: Settings.get().videoCaptionsFollowUi,
+      uiLanguage: this.getCurrentLanguage(),
+      videoLanguage: original
+    });
+  }
+
+  showTopicMediaZoom(url, caption = 'Topic media', videoLanguage = '') {
     if (!url) return;
 
     const content = this.container.querySelector('#detail-content');
@@ -10710,7 +10743,7 @@ Rules:
       ${isVideoEmbed ? `
         <iframe
           class="topic-media-zoom-video"
-          src="${this.escapeHtml(safeUrl)}"
+          src="${this.escapeHtml(this.getCaptionEmbedUrl(safeUrl, videoLanguage))}"
           title="${this.escapeHtml(caption || 'Topic video')}"
           referrerpolicy="strict-origin-when-cross-origin"
           allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
@@ -10949,6 +10982,7 @@ Rules:
       autoDetectLanguage,
       uiLanguage: autoDetectLanguage ? null : selectedLang,
       translationLanguage: content.querySelector('[data-action="set-translation-language"].active')?.dataset.language || currentSettings.translationLanguage || selectedLang,
+      videoCaptionsFollowUi: content.querySelector('#video-captions-follow-ui')?.checked ?? currentSettings.videoCaptionsFollowUi,
       tutorialModeEnabled: content.querySelector('#tutorial-mode-enabled')?.checked ?? true,
       tutorialLevel: content.querySelector('#tutorial-level')?.value || 'guided',
       ttsEnabled: content.querySelector('#tts-enabled')?.checked ?? true,
@@ -11225,6 +11259,13 @@ Rules:
             ${this.escapeHtml(`${t('settings.using')}: ${currentLanguageName}`)}
           </div>
           <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.languagePickerHint'))}</div>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="video-captions-follow-ui" ${settings.videoCaptionsFollowUi !== false ? 'checked' : ''}>
+            <span>Video captions: follow app language</span>
+          </label>
+          <div class="setting-hint">Requests available YouTube and Vimeo captions in your interface language. When the original video language matches, original captions are requested. Applies when a video is opened. If a translated track is missing, use the player’s subtitle settings; YouTube auto-translation may be available there.</div>
         </div>
         <div class="form-group language-picker translation-language-picker">
           <div class="settings-language-row-label">Translate + Read language</div>
@@ -11649,6 +11690,7 @@ Rules:
         this.applySettingsFormChange(content);
       } else if ([
         'tutorial-mode-enabled',
+        'video-captions-follow-ui',
         'tutorial-level',
         'auto-show-transcript',
         'show-country-hover',
