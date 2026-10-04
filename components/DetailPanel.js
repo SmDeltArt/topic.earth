@@ -1,3 +1,4 @@
+import { readTopicZip } from '../lib/topic-importer.mjs?v=topic-earth-review-upload-20261003';
 import { Settings } from '../lib/settings.js?v=topic-earth-video-captions-20261003';
 import { buildCaptionEmbedUrl } from '../lib/video-captions.mjs?v=topic-earth-video-captions-20261003';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
@@ -86,6 +87,9 @@ export class DetailPanel {
       document.body.classList.toggle('detail-panel-compact', isOpen && this.isCompact);
       document.body.classList.toggle('detail-panel-top', isOpen && this.panelSize === 'top');
       if (isOpen) this.updateCompactSummary();
+      if (isOpen && !this.isCompact && window.innerWidth <= 768) {
+        window.dispatchEvent(new CustomEvent('expandMobileTopic'));
+      }
     };
 
     this.visibilityObserver = new MutationObserver(sync);
@@ -803,14 +807,10 @@ export class DetailPanel {
 
     const button = this.container.querySelector('.detail-collapse-btn');
     if (button) {
-      const titleKey = this.panelSize === 'middle'
-        ? 'detail.collapseShort'
-        : this.panelSize === 'compact'
-          ? 'detail.expandTop'
-          : 'detail.restoreMiddle';
       button.setAttribute('aria-expanded', String(this.panelSize !== 'compact'));
-      button.setAttribute('aria-label', this.t(titleKey));
-      button.title = this.t(titleKey);
+      const sizeLabel = this.isCompact ? 'Extend topic' : this.panelSize === 'top' ? 'Restore topic' : 'Collapse topic';
+      button.setAttribute('aria-label', sizeLabel);
+      button.title = sizeLabel;
       button.classList.toggle('is-extend', this.isCompact);
       button.classList.toggle('is-top', this.panelSize === 'top');
     }
@@ -10567,13 +10567,9 @@ Rules:
   }
 
   getApiSettingsWidgetUrl() {
-    if (AppAccess.isAdminMode()) {
-      return Settings.API_SETTINGS_WIDGET_URLS.ADMIN;
-    }
-
-    const settingsUrl = Settings.get().aiApiSettingsFrameUrl;
-    if (settingsUrl) return settingsUrl;
-    return Settings.API_SETTINGS_WIDGET_URLS.USER;
+    return AppAccess.isAdminMode() && navigator.onLine !== false
+      ? Settings.API_SETTINGS_WIDGET_URLS.ADMIN
+      : './ollama-install-guide.html';
   }
 
   getApiSettingsFrameSrc() {
@@ -11113,7 +11109,7 @@ Rules:
 
   setSettingsAccessMode(mode = 'user', content = this.container.querySelector('#detail-content')) {
     const nextMode = mode === 'admin' ? 'admin' : 'user';
-    if (!AppAccess.can('admin:ui-toggle')) return;
+    if (nextMode === 'admin' && !AppAccess.can('admin:ui-toggle')) AppAccess.unlockAdminAccess(true);
 
     const state = AppAccess.setMode(nextMode);
     window.dispatchEvent(new CustomEvent('adminModeChanged', { detail: state }));
@@ -11136,16 +11132,13 @@ Rules:
       status.textContent = `${activeLabel}. ${state.isAdminMode ? 'Layer and topic editing are unlocked.' : 'Published content stays protected; local drafts remain available.'}`;
     }
 
-    if (state.isAdminMode) {
-      this.openApiSettingsWindow();
-    }
   }
 
   unlockSettingsAccess() {
-    AppAccess.unlockAdminAccess(true);
-    AppAccess.setMode('user');
-    window.dispatchEvent(new CustomEvent('adminModeChanged', { detail: AppAccess.getState() }));
+    const scrollTop = this.container.scrollTop;
+    this.settingsAccessExpanded = !this.settingsAccessExpanded;
     this.renderSettings();
+    this.container.scrollTop = scrollTop;
   }
 
   setPwaActionStatus(content, message, state = 'info') {
@@ -11177,6 +11170,9 @@ Rules:
   
   renderSettings() {
     const content = this.container.querySelector('#detail-content');
+    this.settingsEvents?.abort();
+    this.settingsEvents = new AbortController();
+    const settingsEventOptions = { signal: this.settingsEvents.signal };
     const settings = Settings.get();
     const languages = LanguageManager.getAllLanguages();
     const { detectedLang, currentLang } = this.getSettingsLanguageState(settings);
@@ -11256,66 +11252,18 @@ Rules:
           label: 'Mode d acces',
           hint: 'Le mode utilisateur protege reste actif au chargement. Admin local passe par le raccourci volontaire.',
           userHint: 'Explorer et enregistrer des brouillons locaux sans modifier les donnees publiees.',
-          adminHint: 'Creer des couches, creer des sujets, modifier les brouillons et exporter les packages admin.'
+          adminHint: 'Creer des couches et des sujets, modifier les brouillons et importer les ZIP de sujets pour validation.'
         }
       : {
           label: 'Access mode',
           hint: 'Protected user mode stays active on load. Local admin is available only through the deliberate shortcut.',
           userHint: 'Explore and save local drafts without changing published data.',
-          adminHint: 'Create layers, create topics, edit saved drafts, and export admin packages.'
+          adminHint: 'Create layers, create topics, edit saved drafts, and upload topic ZIPs for review.'
         };
 
     content.innerHTML = `
       <div class="detail-header">
         <h2 class="detail-title">${this.escapeHtml(t('common.settings'))}</h2>
-      </div>
-
-      <div class="detail-section settings-access-section" data-tutorial-id="settings-access">
-        <button
-          type="button"
-          class="settings-access-unlock ${canToggleAdmin ? 'unlocked' : ''}"
-          data-action="unlock-settings-access"
-          aria-label="${this.escapeHtml(canToggleAdmin ? accessCopy.label : 'Unlock access mode controls')}"
-          aria-expanded="${canToggleAdmin ? 'true' : 'false'}"
-          title="${this.escapeHtml(canToggleAdmin ? accessCopy.label : 'Access mode')}"
-        >&#916;</button>
-        ${canToggleAdmin ? `
-          <div class="section-label">${this.escapeHtml(accessCopy.label)}</div>
-          <div class="settings-mode-switch" role="radiogroup" aria-label="${this.escapeHtml(accessCopy.label)}">
-            <button
-              type="button"
-              class="settings-mode-option ${!isAdmin ? 'active' : ''}"
-              data-action="set-settings-access-mode"
-              data-mode="user"
-              role="radio"
-              aria-checked="${!isAdmin ? 'true' : 'false'}"
-            >
-              <span class="settings-mode-icon">&#128065;</span>
-              <span>
-                <strong>${this.escapeHtml(t('common.user'))}</strong>
-                <small>${this.escapeHtml(accessCopy.userHint)}</small>
-              </span>
-            </button>
-            <button
-              type="button"
-              class="settings-mode-option ${isAdmin ? 'active' : ''}"
-              data-action="set-settings-access-mode"
-              data-mode="admin"
-              role="radio"
-              aria-checked="${isAdmin ? 'true' : 'false'}"
-            >
-              <span class="settings-mode-icon">&#9733;</span>
-              <span>
-                <strong>${this.escapeHtml(t('common.admin'))}</strong>
-                <small>${this.escapeHtml(accessCopy.adminHint)}</small>
-              </span>
-            </button>
-          </div>
-          <div id="settings-access-status" class="setting-hint">
-            ${this.escapeHtml(accessCopy.hint)}
-            <span class="settings-access-profile">${this.escapeHtml(accessState.profile)}</span>
-          </div>
-        ` : ''}
       </div>
       
       <div class="detail-section" data-tutorial-id="settings-language">
@@ -11612,6 +11560,54 @@ Rules:
         </div>
       </div>
 
+      <div class="detail-section settings-access-section">
+        <button
+          type="button"
+          class="settings-access-unlock ${canToggleAdmin ? 'unlocked' : ''}"
+          data-action="unlock-settings-access"
+          aria-label="${this.escapeHtml('Access mode')}"
+          aria-expanded="${this.settingsAccessExpanded ? 'true' : 'false'}"
+          title="${this.escapeHtml(canToggleAdmin ? accessCopy.label : 'Access mode')}"
+        >&#916;</button>
+        ${this.settingsAccessExpanded ? `
+          <div class="section-label">${this.escapeHtml(accessCopy.label)}</div>
+          <div class="settings-mode-switch" role="radiogroup" aria-label="${this.escapeHtml(accessCopy.label)}">
+            <button
+              type="button"
+              class="settings-mode-option ${!isAdmin ? 'active' : ''}"
+              data-action="set-settings-access-mode"
+              data-mode="user"
+              role="radio"
+              aria-checked="${!isAdmin ? 'true' : 'false'}"
+            >
+              <span class="settings-mode-icon">&#128065;</span>
+              <span>
+                <strong>${this.escapeHtml(t('common.user'))}</strong>
+                <small>${this.escapeHtml(accessCopy.userHint)}</small>
+              </span>
+            </button>
+            <button
+              type="button"
+              class="settings-mode-option ${isAdmin ? 'active' : ''}"
+              data-action="set-settings-access-mode"
+              data-mode="admin"
+              role="radio"
+              aria-checked="${isAdmin ? 'true' : 'false'}"
+            >
+              <span class="settings-mode-icon">&#9733;</span>
+              <span>
+                <strong>${this.escapeHtml(t('common.admin'))}</strong>
+                <small>${this.escapeHtml(accessCopy.adminHint)}</small>
+              </span>
+            </button>
+          </div>
+          <div id="settings-access-status" class="setting-hint">
+            ${this.escapeHtml(accessCopy.hint)}
+            <span class="settings-access-profile">${this.escapeHtml(accessState.profile)}</span>
+          </div>
+        ` : ''}
+      </div>
+
       <div class="detail-section regional-settings-section" data-tutorial-id="settings-regional">
         <div class="section-label">${this.escapeHtml(t('settings.regional'))}</div>
         <div class="form-group">
@@ -11643,13 +11639,14 @@ Rules:
           <div class="section-label">${this.escapeHtml(t('settings.adminReviewPackage'))}</div>
           <div class="admin-topic-export-card">
             <div>
-              <div class="admin-topic-export-title">${this.escapeHtml(t('settings.browserDraftPackage'))}</div>
+              <div class="admin-topic-export-title">Import topics for review</div>
               <div class="setting-hint">
-                ${this.escapeHtml(t('settings.browserDraftPackageHint', { topics: topicExportSummary.topicCount, media: topicExportSummary.mediaCount }))}
+                Topics appear in their tab and layer as local drafts awaiting review. Uploading the same package again will not duplicate them.
               </div>
               <div id="admin-topic-export-status" class="admin-topic-export-status"></div>
             </div>
-            <button class="btn-primary" data-action="export-admin-topic-zip" data-admin-only="true">${this.escapeHtml(t('settings.downloadAdminPackage'))}</button>
+            <label class="btn-primary" for="topic-review-upload">Upload topic ZIP</label>
+            <input id="topic-review-upload" type="file" accept=".zip,application/zip" data-admin-only="true">
           </div>
         </div>
       ` : ''}
@@ -11725,7 +11722,7 @@ Rules:
       } else if (action === 'export-admin-topic-zip') {
         this.exportAdminTopicZip(target);
       }
-    });
+    }, settingsEventOptions);
     
     // Real-time slider updates
     content.addEventListener('input', (e) => {
@@ -11742,11 +11739,13 @@ Rules:
         }
         this.applySettingsFormChange(content);
       }
-    });
+    }, settingsEventOptions);
     
     // Auto-detect toggle
     content.addEventListener('change', (e) => {
-      if (e.target.id === 'auto-detect-lang') {
+      if (e.target.id === 'topic-review-upload') {
+        this.importTopicZip(e.target);
+      } else if (e.target.id === 'auto-detect-lang') {
         const languageSelect = content.querySelector('#ui-language');
         const nextLang = e.target.checked
           ? LanguageManager.detectBrowserLanguage()
@@ -11776,8 +11775,35 @@ Rules:
       ].includes(e.target.id)) {
         this.applySettingsFormChange(content);
       }
-    });
+    }, settingsEventOptions);
 
+  }
+
+  async importTopicZip(input) {
+    if (!this.isAdminMode() || this.topicImportBusy || !input.files?.[0]) return;
+    this.topicImportBusy = true;
+    input.disabled = true;
+    const status = this.container.querySelector('#admin-topic-export-status');
+    try {
+      if (status) status.textContent = 'Reading topic ZIP…';
+      const topics = await readTopicZip(input.files[0]);
+      for (const topic of topics) {
+        if (!topic.mediaTokens.length) topic.mediaTokens = topic.media.map((url, index) => ({ id: `media-${index + 1}`, url }));
+        for (const token of topic.mediaTokens) {
+          if (!token.url.startsWith('data:')) continue;
+          const key = LocalStorage.buildAssetKey(topic.id, token.id || 'media', token.url);
+          await LocalStorage.putBrowserAsset({ key, dataUrl: token.url, mime: LocalStorage.getDataUrlMime(token.url), size: token.url.length, createdAt: new Date().toISOString() });
+          token.browserAssetKey = key;
+        }
+      }
+      window.dispatchEvent(new CustomEvent('topicReviewPackageImported', { detail: { topics } }));
+    } catch (error) {
+      if (status) status.textContent = error.message;
+    } finally {
+      this.topicImportBusy = false;
+      input.disabled = false;
+      input.value = '';
+    }
   }
   
   saveSettings() {

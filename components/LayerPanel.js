@@ -5,6 +5,7 @@
 import { Settings } from '../lib/settings.js';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-shortcuts-20260517';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-tab-layers-20260507';
+import { getDirectImageUrl, getMediaTokensForPoint } from '../lib/media-utils.js';
 
 const REGIONAL_GROUP_ID = 'regional-live';
 
@@ -15,6 +16,9 @@ export class LayerPanel {
     this.points = points;
     this.callbacks = callbacks;
     this.activeLayers = new Set(layers.filter(layer => layer.enabled && !layer.isGroup).map(layer => layer.id));
+    // Regional keeps a quiet, independent view state so shared layers can stay
+    // enabled in World without flooding the Regional map.
+    this.regionalActiveLayers = new Set();
     this.knownLayerIds = new Set(layers.map(layer => layer.id));
     this.isCollapsed = false;
     this.isClosed = false;
@@ -23,6 +27,16 @@ export class LayerPanel {
     this.regionalContext = null;
 
     this.handleClick = this.handleClick.bind(this);
+    this.container.addEventListener('keydown', event => {
+      if (!['Enter', ' '].includes(event.key) || !event.target.classList.contains('news-item')) return;
+      event.preventDefault();
+      this.handleShowDetail(event.target);
+    });
+    this.container.addEventListener('pointerover', event => this.showTopicPreview(event));
+    this.container.addEventListener('pointerout', event => {
+      if (!event.target.closest('.news-item')?.contains(event.relatedTarget)) this.hideTopicPreview();
+    });
+    this.container.addEventListener('scroll', () => this.hideTopicPreview(), true);
     this.handleSettingsChanged = this.handleSettingsChanged.bind(this);
     this.handleRegionalContextChanged = this.handleRegionalContextChanged.bind(this);
 
@@ -55,15 +69,9 @@ export class LayerPanel {
     }
 
     if (filter === 'regional') {
-      [
-        'regional-news',
-        'community-projects',
-        'bike-ways',
-        'ev-charging',
-        'hydrogen-charging'
-      ].forEach(layerId => {
-        if (this.getLayerById(layerId)) this.expandedLayers.add(layerId);
-      });
+      this.layers
+        .filter(layer => this.layerBelongsToFilter(layer, 'regional'))
+        .forEach(layer => this.expandedLayers.delete(layer.id));
     } else if (filter === 'space') {
       this.expandedLayers.add('space');
     } else if (filter === 'fever') {
@@ -532,6 +540,15 @@ export class LayerPanel {
     return `${year}: ${title}`;
   }
 
+  getNewsThumbnail(point = {}) {
+    const imageToken = getMediaTokensForPoint(point).find(token => (
+      token?.kind === 'image'
+      || token?.type === 'image'
+      || getDirectImageUrl(token?.url)
+    ));
+    return imageToken?.thumbnailUrl || imageToken?.url || '';
+  }
+
   escapeHtml(value = '') {
     return String(value)
       .replace(/&/g, '&amp;')
@@ -555,6 +572,11 @@ export class LayerPanel {
       : '';
     const onlineClass = point.onlineLayerSignal ? ' news-item-online-signal' : '';
     item.className = `news-item${point.worldMeteoRuntime ? ' news-item-meteo-runtime' : ''}${onlineClass}${severityClass}`;
+    item.dataset.action = 'show-detail';
+    item.dataset.pointId = point.id;
+    item.tabIndex = 0;
+    item.setAttribute('role', 'button');
+    item.setAttribute('aria-label', this.getNewsTitle(point));
     if ((point.worldMeteoRuntime || point.onlineLayerSignal) && point.markerColor) {
       item.style.setProperty('--news-meteo-color', point.markerColor);
     }
@@ -571,24 +593,54 @@ export class LayerPanel {
     const metaLine = this.getNewsMetaLine(point);
     const tags = this.getNewsTags(point);
     const tagsHtml = tags.map(tag => `<span class="news-tag">${this.escapeHtml(tag)}</span>`).join('');
+    const thumbnail = this.getNewsThumbnail(point);
+    const layer = this.getLayerById(point.category);
+    const previewMedia = thumbnail
+      ? `<img src="${this.escapeHtml(thumbnail)}" alt="" loading="lazy">`
+      : `<span aria-hidden="true">${this.escapeHtml(layer?.icon || '\u2022')}</span>`;
 
     item.innerHTML = `
-      <div class="news-date" title="${this.escapeHtml(fullDate)}" data-action="show-detail-collapsed" data-point-id="${point.id}">${shortDate}</div>
+      <div class="news-date" title="${this.escapeHtml(fullDate)}" data-action="show-detail" data-point-id="${point.id}">${shortDate}</div>
+      <div class="news-collapsed-preview" data-action="show-detail-collapsed" data-point-id="${point.id}" title="${this.escapeHtml(this.getNewsTitle(point))}">
+        <div class="news-collapsed-thumb" style="--news-preview-color: ${this.escapeHtml(layer?.color || '#00d4ff')}">${previewMedia}</div>
+        <div class="news-collapsed-title">${this.escapeHtml(this.getNewsTitle(point))}</div>
+      </div>
       <div class="news-content" data-action="show-detail" data-point-id="${point.id}">
         <div class="news-title">${this.escapeHtml(this.getNewsTitle(point))}</div>
         ${metaLine ? `<div class="news-meta-line">${this.escapeHtml(metaLine)}</div>` : ''}
         <div class="news-desc">${this.escapeHtml(point.summary || '')}</div>
         ${tagsHtml ? `<div class="news-tags">${tagsHtml}</div>` : ''}
       </div>
-      <button class="news-research-btn" data-action="open-research" data-point-id="${point.id}" title="${this.escapeHtml(this.getCurrentLanguage().startsWith('fr') ? 'Mettre ce sujet a jour' : 'Update this topic')}">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M6 1V11M1 6H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
+      <button class="news-info-btn" data-action="show-detail" data-point-id="${point.id}" title="Open topic" aria-label="Open topic: ${this.escapeHtml(this.getNewsTitle(point))}">
+        ?
       </button>
       ${deleteButton}
     `;
 
     return item;
+  }
+
+  hideTopicPreview() {
+    this.topicPreview?.remove();
+    this.topicPreview = null;
+  }
+
+  showTopicPreview(event) {
+    if (event.pointerType === 'touch' || !this.isCollapsed) return;
+    const item = event.target.closest('.news-item');
+    if (!item || item.contains(event.relatedTarget)) return;
+    this.hideTopicPreview();
+    const content = item.querySelector('.news-collapsed-preview');
+    if (!content) return;
+    const preview = document.createElement('div');
+    preview.className = 'topic-date-preview';
+    preview.setAttribute('role', 'tooltip');
+    preview.innerHTML = content.innerHTML;
+    document.body.appendChild(preview);
+    const rect = item.getBoundingClientRect();
+    preview.style.left = `${Math.min(rect.right + 8, window.innerWidth - preview.offsetWidth - 8)}px`;
+    preview.style.top = `${Math.max(8, Math.min(rect.top, window.innerHeight - preview.offsetHeight - 8))}px`;
+    this.topicPreview = preview;
   }
 
   getRegionalProposalLabel() {
@@ -597,7 +649,8 @@ export class LayerPanel {
 
   getPreferredRegionalProposalLayerId() {
     const preferredOrder = ['community-projects', 'regional-news', 'bike-ways', 'ev-charging', 'hydrogen-charging'];
-    const activeRegionalLayer = preferredOrder.find((layerId) => this.activeLayers.has(layerId) && this.getLayerById(layerId));
+    const regionalLayers = this.getLayerStateSet('regional');
+    const activeRegionalLayer = preferredOrder.find((layerId) => regionalLayers.has(layerId) && this.getLayerById(layerId));
     return activeRegionalLayer || 'community-projects';
   }
 
@@ -694,6 +747,7 @@ export class LayerPanel {
 
   setCollapsed(isCollapsed) {
     this.isCollapsed = Boolean(isCollapsed);
+    if (!this.isCollapsed && window.innerWidth <= 768) window.dispatchEvent(new CustomEvent('expandMobileLayers'));
     if (this.isCollapsed) this.isClosed = false;
     this.container.classList.remove('closed');
     this.container.classList.toggle('collapsed', this.isCollapsed);
@@ -712,6 +766,7 @@ export class LayerPanel {
 
   setClosed(isClosed) {
     this.isClosed = Boolean(isClosed);
+    if (!this.isClosed && !this.isCollapsed && window.innerWidth <= 768) window.dispatchEvent(new CustomEvent('expandMobileLayers'));
     if (this.isClosed) {
       this.isCollapsed = false;
       this.container.classList.remove('collapsed');
@@ -737,7 +792,8 @@ export class LayerPanel {
 
     if (this.isLayerGroup(layer)) {
       const targetLayers = this.getDescendantLeafLayers(layer);
-      const shouldActivate = !targetLayers.every(child => this.activeLayers.has(child.id));
+      const stateSet = this.getLayerStateSet();
+      const shouldActivate = !targetLayers.every(child => stateSet.has(child.id));
       targetLayers.forEach(childLayer => {
         this.setLayerActive(childLayer.id, shouldActivate);
       });
@@ -745,16 +801,17 @@ export class LayerPanel {
       return;
     }
 
-    const nextActive = !this.activeLayers.has(layerId);
+    const nextActive = !this.getLayerStateSet().has(layerId);
     this.setLayerActive(layerId, nextActive);
     this.updateData(this.layers, this.points);
   }
 
   setLayerActive(layerId, isActive) {
+    const stateSet = this.getLayerStateSet();
     if (isActive) {
-      this.activeLayers.add(layerId);
+      stateSet.add(layerId);
     } else {
-      this.activeLayers.delete(layerId);
+      stateSet.delete(layerId);
     }
 
     if (this.callbacks.onLayerToggle) {
@@ -918,10 +975,38 @@ export class LayerPanel {
   }
 
   getActiveLayersForFilter(filter = this.layerFilter) {
+    const stateSet = this.getLayerStateSet(filter);
     return new Set(
-      Array.from(this.activeLayers)
+      Array.from(stateSet)
         .filter(layerId => this.layerBelongsToFilter(this.getLayerById(layerId), filter))
     );
+  }
+
+  getLayerStateSet(filter = this.layerFilter) {
+    return this.normalizeLayerFilter(filter) === 'regional'
+      ? this.regionalActiveLayers
+      : this.activeLayers;
+  }
+
+  setActiveLayersForFilter(filter, layerIds = [], options = {}) {
+    const normalizedFilter = this.normalizeLayerFilter(filter);
+    const stateSet = this.getLayerStateSet(normalizedFilter);
+    const nextIds = new Set(layerIds);
+    const eligibleLayers = this.layers.filter(layer => (
+      !this.isLayerGroup(layer) && this.layerBelongsToFilter(layer, normalizedFilter)
+    ));
+
+    eligibleLayers.forEach(layer => {
+      if (nextIds.has(layer.id)) stateSet.add(layer.id);
+      else stateSet.delete(layer.id);
+      this.expandedLayers.delete(layer.id);
+    });
+
+    if (options.expandedLayerId && nextIds.has(options.expandedLayerId)) {
+      this.expandedLayers.add(options.expandedLayerId);
+    }
+
+    this.updateData(this.layers, this.points);
   }
 
   updateFeverYearOverlay(visible) {
@@ -964,7 +1049,7 @@ export class LayerPanel {
   }
 
   activatLayer(layerId) {
-    this.activeLayers.add(layerId);
+    this.getLayerStateSet().add(layerId);
     const icon = this.container.querySelector(`.layer-icon[data-layer-id="${layerId}"]`);
     if (icon) {
       icon.classList.add('active');
@@ -1041,15 +1126,16 @@ export class LayerPanel {
   }
 
   getLayerActiveState(layer) {
+    const stateSet = this.getLayerStateSet();
     if (!this.isLayerGroup(layer)) {
       return {
-        active: this.activeLayers.has(layer.id),
+        active: stateSet.has(layer.id),
         mixed: false
       };
     }
 
     const childLayers = this.getDescendantLeafLayers(layer);
-    const activeChildren = childLayers.filter(child => this.activeLayers.has(child.id)).length;
+    const activeChildren = childLayers.filter(child => stateSet.has(child.id)).length;
     return {
       active: activeChildren > 0,
       mixed: activeChildren > 0 && activeChildren < childLayers.length

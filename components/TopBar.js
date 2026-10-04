@@ -15,15 +15,11 @@ export class TopBar {
     this.layerFilter = 'main';
     this.viewMode = 'globe';
     this.handleClick = this.handleClick.bind(this);
-    this.handlePointerUp = this.handlePointerUp.bind(this);
-    this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleDocumentClick = this.handleDocumentClick.bind(this);
     this.handleSettingsChanged = this.handleSettingsChanged.bind(this);
     this.updateLogoClock = this.updateLogoClock.bind(this);
     this.logoClockFrame = null;
     this.container.addEventListener('click', this.handleClick);
-    this.container.addEventListener('pointerup', this.handlePointerUp);
-    this.container.addEventListener('keydown', this.handleKeyDown);
     document.addEventListener('click', this.handleDocumentClick);
     window.addEventListener('settingsChanged', this.handleSettingsChanged);
     this.render();
@@ -40,6 +36,8 @@ export class TopBar {
       }
       const newMode = this.interactionMode === 'rotate' ? 'interaction' : 'rotate';
       this.setInteractionMode(newMode);
+    } else if (target.dataset.action?.startsWith('regional-')) {
+      window.dispatchEvent(new CustomEvent('regionalMapControlRequested', { detail: { action: target.dataset.action, button: target } }));
     } else if (target.dataset.filter) {
       this.setLayerFilter(target.dataset.filter);
     } else if (target.id === 'settings-btn') {
@@ -52,25 +50,6 @@ export class TopBar {
     } else if (target.dataset.action === 'open-fever-monitor') {
       window.dispatchEvent(new CustomEvent('openFeverMonitorRequested'));
     }
-  }
-
-  handlePointerUp(e) {
-    if (e.pointerType !== 'touch') return;
-    const target = e.target.closest('[data-action], [data-filter], #settings-btn');
-    if (!target) return;
-    const now = Date.now();
-    if (this.lastTouchActionAt && now - this.lastTouchActionAt < 350) return;
-    this.lastTouchActionAt = now;
-    e.preventDefault();
-    this.handleClick({ target });
-  }
-
-  handleKeyDown(e) {
-    if (!['Enter', ' '].includes(e.key)) return;
-    const target = e.target.closest('[data-action], [data-filter], #settings-btn');
-    if (!target) return;
-    e.preventDefault();
-    this.handleClick({ target });
   }
 
   handleDocumentClick(e) {
@@ -243,21 +222,6 @@ export class TopBar {
           </span>
         </div>
       </div>
-      <button class="mode-toggle-btn ${this.interactionMode === 'interaction' ? 'active' : ''}" id="mode-toggle-btn" data-action="toggle-mode" data-tutorial-id="interaction-mode" title="${this.escapeHtml(interactionLabel)}" aria-label="${this.escapeHtml(interactionLabel)}">
-        ${this.interactionMode === 'rotate' && !isRegionalMode ? `
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <path d="M7 3L7 7L10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          <span class="header-label">${this.escapeHtml(interactionLabel)}</span>
-        ` : `
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            <path d="M7 1V3M7 11V13M1 7H3M11 7H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          <span class="header-label">${this.escapeHtml(interactionLabel)}</span>
-        `}
-      </button>
       <div class="layer-filter-group" role="tablist" aria-label="Primary modes" data-tutorial-id="mode-tabs">
         ${modeTabs}
       </div>
@@ -275,19 +239,42 @@ export class TopBar {
           </svg>
           <span class="btn-label">${this.escapeHtml(this.t('topic.search'))}</span>
         </button>
-        <button id="fever-monitor-btn" class="settings-btn fever-monitor-btn ${activeModeTab === 'fever' ? 'active' : ''}" data-action="open-fever-monitor" title="Open Fever monitor" aria-label="Open Fever monitor">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M8 2V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-            <path d="M6 10.5C6 9.4 6.9 8.5 8 8.5C9.1 8.5 10 9.4 10 10.5C10 11.6 9.1 12.5 8 12.5C6.9 12.5 6 11.6 6 10.5Z" stroke="currentColor" stroke-width="1.4" fill="none"/>
-            <path d="M3 11C4 8.5 5 7.5 6.2 8.3C7.6 9.2 8.2 12 10 11.2C11.2 10.7 12 9.3 13 7" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" fill="none"/>
-          </svg>
-        </button>
         <button id="fullscreen-btn" class="settings-btn fullscreen-btn" data-action="toggle-fullscreen" title="Full screen" aria-label="Full screen">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M2 6V2H6M10 2H14V6M14 10V14H10M6 14H2V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </button>
       </div>
+    `;
+
+    if (!this.sceneControls) {
+      this.sceneControls = document.createElement('div');
+      this.sceneControls.id = 'scene-interaction-controls';
+      this.sceneControls.addEventListener('click', this.handleClick);
+      document.getElementById('globe-container').appendChild(this.sceneControls);
+    }
+    this.sceneControls.hidden = !['main', 'regional'].includes(activeModeTab);
+    this.sceneControls.innerHTML = `
+      <button class="mode-toggle-btn ${this.interactionMode === 'interaction' ? 'active' : ''}" id="mode-toggle-btn" data-action="toggle-mode" data-tutorial-id="interaction-mode" title="${this.escapeHtml(interactionLabel)}" aria-label="${this.escapeHtml(interactionLabel)}">
+        ${this.interactionMode === 'rotate' && !isRegionalMode ? `
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <path d="M7 3L7 7L10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span class="header-label">${this.escapeHtml(interactionLabel)}</span>
+        ` : `
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <path d="M7 1V3M7 11V13M1 7H3M11 7H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span class="header-label">${this.escapeHtml(interactionLabel)}</span>
+        `}
+      </button>
+      ${isRegionalMode ? `
+        <button type="button" class="scene-map-btn" data-action="regional-zoom-in" aria-label="Zoom in" title="Zoom in">+</button>
+        <button type="button" class="scene-map-btn" data-action="regional-zoom-out" aria-label="Zoom out" title="Zoom out">&minus;</button>
+        <button type="button" class="scene-map-btn" data-action="regional-search" aria-label="Open map search" title="Open map search" aria-controls="regional-map-search-panel" aria-expanded="false">${this.escapeHtml(this.t('topic.search'))}</button>
+      ` : ''}
     `;
 
     // Dispatch custom event after render so listeners can rebind

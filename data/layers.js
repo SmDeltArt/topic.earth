@@ -67,6 +67,15 @@ export const LAYERS = [
     enabled: true
   },
   {
+    id: 'regional-relief',
+    name: '3D Relief',
+    modeTabs: ['regional'],
+    icon: '\u26F0\uFE0F',
+    color: '#d8c28f',
+    enabled: false,
+    layerKind: 'terrain-relief'
+  },
+  {
     id: 'community-projects',
     name: 'Community Projects',
     modeTabs: ['regional'],

@@ -48,7 +48,7 @@ assert.equal(media.normalizeMediaToken({ url: youtube, videoLanguage: 'fr' }).vi
 
 // Exercise the real panel methods without constructing the globe or UI.
 const panelSource = (await readFile(new URL('components/DetailPanel.js', root), 'utf8'))
-  .replace(/^import[\s\S]*?;\n/gm, '')
+  .replace(/^import[\s\S]*?;\r?\n/gm, '')
   .replace('export class DetailPanel', 'class DetailPanel');
 const context = vm.createContext({
   URL, Settings, buildCaptionEmbedUrl,

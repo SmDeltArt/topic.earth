@@ -12,9 +12,12 @@ const EUROPE_CENTER = [50.5, 10.5];
 const LEAFLET_CSS_URL = './vendor/leaflet/leaflet.css';
 const LEAFLET_JS_URL = './vendor/leaflet/leaflet.js';
 const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const OPEN_TOPO_TILE_URL = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
 const NOMINATIM_SEARCH_URL = 'https://nominatim.openstreetmap.org/search';
+const ELEVATION_API_URL = 'https://api.open-meteo.com/v1/elevation';
 const METEO_CLOUD_LAYER_ID = 'meteo-clouds';
 const METEO_REALTIME_LAYER_ID = 'meteo-live';
+const REGIONAL_RELIEF_LAYER_ID = 'regional-relief';
 const ROUTING_PROFILES = {
   bike: {
     endpoint: 'https://routing.openstreetmap.de/routed-bike',
@@ -70,9 +73,13 @@ export class RegionalMap {
     this.activeLayers = null;
     this.meteoOverlayLayer = null;
     this.meteoLegendControl = null;
+    this.reliefTileLayer = null;
+    this.reliefElevationCache = new Map();
+    this.reliefElevationPromise = null;
     this.meteoDigestDismissed = false;
     this.meteoCloudSurfaceHidden = false;
     this.meteoWarningSurfaceHidden = false;
+    this.statusTimer = null;
     this.pendingView = null;
     this.markerByTopicId = new Map();
     this.activeTopicId = null;
@@ -98,6 +105,16 @@ export class RegionalMap {
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
     this.handleDocumentClick = this.handleDocumentClick.bind(this);
     document.addEventListener('click', this.handleDocumentClick);
+    window.addEventListener('regionalMapControlRequested', event => {
+      if (!this.visible || !this.map) return;
+      const { action, button } = event.detail;
+      if (action === 'regional-zoom-in') this.map.zoomIn();
+      else if (action === 'regional-zoom-out') this.map.zoomOut();
+      else if (action === 'regional-search') {
+        this.searchToggleButton = button;
+        this.toggleSearchPanel(button);
+      }
+    });
   }
 
   getCurrentLanguage() {
@@ -209,6 +226,7 @@ export class RegionalMap {
     `;
 
     return `
+      <button type="button" class="regional-map-tool" data-action="collapse-regional-tools" aria-expanded="true">Drawing tools ▾</button>
       <div class="regional-map-toolbar" role="toolbar" aria-label="${this.escapeHtml(this.t('regional.toolsLabel'))}">
         ${tool('drag', 'regional.toolDrag', '✋')}
         ${tool('point', 'regional.toolAddPoint', '📍')}
@@ -238,7 +256,9 @@ export class RegionalMap {
   }
 
   renderMeteoDigest() {
-    if (this.meteoDigestDismissed || !this.hasActiveMeteoSurfaceSource()) return '';
+    // Warning details belong to Live Meteo. The Clouds layer can render its
+    // surface without opening a large, unrelated card over the map.
+    if (this.meteoDigestDismissed || !this.isMeteoWarningSurfaceActive()) return '';
 
     const meteoPoints = this.getMeteoAvailablePoints();
     if (!meteoPoints.length) return '';
@@ -308,22 +328,24 @@ export class RegionalMap {
       if (!this.visible || !this.element?.contains(mapElement)) return;
 
       this.map = L.map(mapElement, {
-        zoomControl: true,
+        zoomControl: false,
         scrollWheelZoom: true,
         attributionControl: true
       }).setView(EUROPE_CENTER, 4);
       this.L = L;
-      this.addSearchToggleControl(L);
       this.map.on('click', (event) => this.handleMapAuthorClick(event));
+      this.map.on('moveend', () => this.loadVisiblePointElevations());
 
       L.tileLayer(OSM_TILE_URL, {
         maxZoom: 18,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(this.map);
 
+      this.syncReliefLayer(L);
       this.addMeteoOverlay(L);
       this.markerLayer = L.layerGroup().addTo(this.map);
       this.points.forEach((point) => this.addLeafletMarker(L, point));
+      this.loadVisiblePointElevations();
 
       setTimeout(() => this.map?.invalidateSize(), 50);
       if (this.pendingView) {
@@ -1026,6 +1048,103 @@ export class RegionalMap {
     marker.__baseWeight = isMeteoWarning ? 3 : (isRealtimeMeteo ? 2.25 : 1.5);
     this.markerByTopicId.set(topicId, marker);
     this.styleLeafletMarker(marker, topicId === this.activeTopicId);
+    this.addReliefHeightMarker(L, point);
+  }
+
+  isReliefActive() {
+    return !!this.activeLayers?.has(REGIONAL_RELIEF_LAYER_ID);
+  }
+
+  syncReliefLayer(L = this.L) {
+    if (!this.map || !L) return;
+
+    if (!this.isReliefActive()) {
+      if (this.reliefTileLayer) this.map.removeLayer(this.reliefTileLayer);
+      this.reliefTileLayer = null;
+      this.element?.classList.remove('regional-relief-active');
+      return;
+    }
+
+    if (!this.map.getPane('regionalReliefPane')) {
+      const pane = this.map.createPane('regionalReliefPane');
+      pane.style.zIndex = '215';
+      pane.style.pointerEvents = 'none';
+    }
+
+    if (!this.reliefTileLayer) {
+      this.reliefTileLayer = L.tileLayer(OPEN_TOPO_TILE_URL, {
+        pane: 'regionalReliefPane',
+        maxZoom: 17,
+        opacity: 0.9,
+        className: 'regional-relief-tiles',
+        attribution: 'Map data &copy; OpenStreetMap contributors | SRTM | Map style &copy; OpenTopoMap (CC-BY-SA)'
+      }).addTo(this.map);
+    }
+    this.element?.classList.add('regional-relief-active');
+  }
+
+  getPointElevation(point = {}) {
+    const rawElevation = point.elevation ?? point.altitude ?? point.heightAboveSeaLevel;
+    const explicit = rawElevation == null || rawElevation === '' ? NaN : Number(rawElevation);
+    if (Number.isFinite(explicit)) return explicit;
+    const cached = Number(this.reliefElevationCache.get(this.getTopicKey(point)));
+    return Number.isFinite(cached) ? cached : null;
+  }
+
+  addReliefHeightMarker(L, point) {
+    if (!this.isReliefActive() || !this.markerLayer) return;
+    const elevation = this.getPointElevation(point);
+    if (!Number.isFinite(elevation)) return;
+
+    const height = this.clamp(18 + Math.log10(Math.max(1, elevation + 1)) * 17, 18, 70);
+    const icon = L.divIcon({
+      className: 'regional-relief-height-icon',
+      iconSize: [42, Math.ceil(height + 18)],
+      iconAnchor: [21, Math.ceil(height + 9)],
+      html: `<span class="regional-relief-height-label">${this.escapeHtml(`${Math.round(elevation)} m`)}</span><i style="height:${height.toFixed(1)}px"></i>`
+    });
+    L.marker([point.lat, point.lon], {
+      icon,
+      interactive: false,
+      keyboard: false,
+      pane: 'markerPane'
+    }).addTo(this.markerLayer);
+  }
+
+  async loadVisiblePointElevations() {
+    if (!this.visible || !this.map || !this.isReliefActive() || this.reliefElevationPromise) return;
+    const bounds = this.map.getBounds();
+    const pending = this.points
+      .filter(point => Number.isFinite(point.lat) && Number.isFinite(point.lon))
+      .filter(point => bounds.contains([point.lat, point.lon]))
+      .filter(point => !Number.isFinite(this.getPointElevation(point)))
+      .slice(0, 80);
+    if (!pending.length) return;
+
+    const url = new URL(ELEVATION_API_URL);
+    url.searchParams.set('latitude', pending.map(point => point.lat).join(','));
+    url.searchParams.set('longitude', pending.map(point => point.lon).join(','));
+
+    this.reliefElevationPromise = fetch(url.toString(), { headers: { Accept: 'application/json' } })
+      .then(response => {
+        if (!response.ok) throw new Error(`Elevation HTTP ${response.status}`);
+        return response.json();
+      })
+      .then(payload => {
+        const elevations = Array.isArray(payload?.elevation) ? payload.elevation : [];
+        pending.forEach((point, index) => {
+          const rawElevation = elevations[index];
+          const elevation = rawElevation == null ? NaN : Number(rawElevation);
+          if (Number.isFinite(elevation)) this.reliefElevationCache.set(this.getTopicKey(point), elevation);
+        });
+        if (this.visible && this.isReliefActive() && this.map && this.L) {
+          this.refreshLeafletLayers(this.getCurrentView());
+        }
+      })
+      .catch(error => console.debug('[Regional Relief] Elevation lookup unavailable:', error))
+      .finally(() => {
+        this.reliefElevationPromise = null;
+      });
   }
 
   addMeteoOverlay(L) {
@@ -1172,9 +1291,11 @@ export class RegionalMap {
     if (!this.map || !this.L) return false;
 
     this.clearDynamicLeafletLayers();
+    this.syncReliefLayer(this.L);
     this.addMeteoOverlay(this.L);
     this.markerLayer = this.L.layerGroup().addTo(this.map);
     this.points.forEach((point) => this.addLeafletMarker(this.L, point));
+    this.loadVisiblePointElevations();
     this.renderFallbackPins();
     this.refreshSearchSuggestions();
 
@@ -1238,10 +1359,16 @@ export class RegionalMap {
     this.searchMarker = null;
     this.searchControl = null;
     this.searchToggleButton = null;
+    if (this.statusTimer) {
+      window.clearTimeout(this.statusTimer);
+      this.statusTimer = null;
+    }
     if (this.map) {
       this.map.remove();
       this.map = null;
     }
+    this.reliefTileLayer = null;
+    this.element?.classList.remove('regional-relief-active');
     this.L = null;
   }
 
@@ -1476,8 +1603,21 @@ export class RegionalMap {
   setStatus(message, state = 'loading') {
     const status = this.element?.querySelector('#regional-map-status');
     if (!status) return;
+    if (this.statusTimer) {
+      window.clearTimeout(this.statusTimer);
+      this.statusTimer = null;
+    }
     status.textContent = message;
     status.className = `regional-map-status ${state}`;
+    if (message && state === 'ready') {
+      this.statusTimer = window.setTimeout(() => {
+        if (status.isConnected && status.textContent === message) {
+          status.textContent = '';
+          status.className = 'regional-map-status';
+        }
+        this.statusTimer = null;
+      }, 2200);
+    }
   }
 
   renderSearchControl() {
@@ -1585,7 +1725,7 @@ export class RegionalMap {
 
     const target = event.target;
     if (!(target instanceof Element)) return;
-    if (panel.contains(target) || target.closest('.regional-map-search-toggle')) return;
+    if (panel.contains(target) || target.closest('.regional-map-search-toggle, [data-action="regional-search"]')) return;
 
     this.closeSearchPanel();
   }
@@ -1852,6 +1992,15 @@ export class RegionalMap {
   }
 
   handleClick(event) {
+    const collapse = event.target.closest('[data-action="collapse-regional-tools"]');
+    if (collapse) {
+      const panel = collapse.closest('.regional-map-search');
+      const collapsed = panel.classList.toggle('tools-collapsed');
+      collapse.setAttribute('aria-expanded', String(!collapsed));
+      collapse.textContent = collapsed ? 'Drawing tools ▸' : 'Drawing tools ▾';
+      if (collapsed) this.setAuthorMode('drag');
+      return;
+    }
     const toolButton = event.target.closest('[data-regional-tool]');
     if (toolButton) {
       this.setAuthorMode(toolButton.dataset.regionalTool);

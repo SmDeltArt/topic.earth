@@ -1,6 +1,6 @@
-import { GlobeRenderer } from './lib/globe.js?v=topic-earth-chronos-orbits-20261001';
+import { GlobeRenderer } from './lib/globe.js?v=topic-earth-layout-20261003';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
-import { LAYERS } from './data/layers.js?v=topic-earth-janus-system-20261001';
+import { LAYERS } from './data/layers.js?v=topic-earth-regional-merged-20261003';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-climate-studies-watch-20260601';
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-thwaites-20261003';
@@ -10,10 +10,10 @@ import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-short-2
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=topic-earth-live-clock-logo-20260605';
-import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-meteo-cloud-severity-20260601';
-import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-janus-system-20261001';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-janus-short-20261003';
+import { TopBar } from './components/TopBar.js?v=topic-earth-review-upload-20261003';
+import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-review-upload-20261003';
+import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-review-upload-20261003';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-review-upload-20261003';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-meteo-draft-20260531';
 import { Settings } from './lib/settings.js?v=topic-earth-video-captions-20261003';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -88,6 +88,8 @@ class TopicEarthApp {
     this.tutorialGuide = null;
     this.modeTransitionToken = 0;
     this.modeTransitionTimer = null;
+    this.regionalLayerPreviewTimers = [];
+    this.regionalLayerPreviewActive = false;
     this.aiApiBridge = installAiApiBridge({ appName: 'topic-earth' });
     this.loadingWatchdog = window.setTimeout(() => {
       console.warn('[App Init] Loading screen watchdog released the startup overlay.');
@@ -307,7 +309,7 @@ class TopicEarthApp {
   ensureRegionalTopicLayerActive(point = null) {
     const layerId = point?.regionalState?.layerId || point?.category;
     if (!layerId || !this.isRegionalLayerId(layerId)) return false;
-    if (!this.layerPanel?.activeLayers?.has(layerId)) {
+    if (!this.layerPanel?.getActiveLayersForFilter?.('regional')?.has(layerId)) {
       this.layerPanel?.setLayerActive?.(layerId, true);
       this.layerPanel?.updateData?.(this.allLayers, this.allPoints);
     }
@@ -1125,7 +1127,7 @@ class TopicEarthApp {
       this.globe.options.autoRotate = false;
     }
 
-    this.refreshRegionalMap(true);
+    this.startRegionalLayerPreview(transitionToken);
     this.maybeAutoLocateRegionalMode();
     document.body.classList.add('regional-mode');
     window.dispatchEvent(new CustomEvent('viewModeChanged', { detail: { mode: 'regional-map' } }));
@@ -1141,7 +1143,54 @@ class TopicEarthApp {
     });
   }
 
+  cancelRegionalLayerPreview() {
+    this.regionalLayerPreviewTimers.forEach(timer => window.clearTimeout(timer));
+    this.regionalLayerPreviewTimers = [];
+    this.regionalLayerPreviewActive = false;
+  }
+
+  applyRegionalLayerPreview(layerIds = [], expandedLayerId = '') {
+    if (this.currentLayerFilter !== 'regional') return;
+    this.layerPanel?.setActiveLayersForFilter?.('regional', layerIds, { expandedLayerId });
+    const activeLayers = this.getActiveLayersForFilter('regional');
+    this.syncRealtimeMeteoLayers('regional', activeLayers);
+    if (activeLayers.has(METEO_CLOUD_LAYER_ID) || activeLayers.has(METEO_REALTIME_LAYER_ID)) {
+      this.refreshRealtimeMeteo({
+        force: !this.realtimeMeteoPoints.length,
+        reason: 'regional-layer-preview'
+      });
+    }
+    this.refreshRegionalMap(!this.regionalMap?.visible);
+  }
+
+  startRegionalLayerPreview(transitionToken = this.modeTransitionToken) {
+    this.cancelRegionalLayerPreview();
+    this.regionalLayerPreviewActive = true;
+
+    // Start clear, introduce the two live surfaces briefly, then settle on the
+    // editorial Regional News layer and leave every other Regional layer off.
+    this.applyRegionalLayerPreview([]);
+    const steps = [
+      { delay: 260, layers: [METEO_CLOUD_LAYER_ID], expanded: METEO_CLOUD_LAYER_ID },
+      { delay: 1660, layers: [METEO_REALTIME_LAYER_ID], expanded: METEO_REALTIME_LAYER_ID },
+      { delay: 3060, layers: ['regional-news'], expanded: 'regional-news', final: true }
+    ];
+
+    steps.forEach(step => {
+      const timer = window.setTimeout(() => {
+        if (!this.isCurrentModeTransition(transitionToken) || this.currentLayerFilter !== 'regional') return;
+        this.applyRegionalLayerPreview(step.layers, step.expanded);
+        if (step.final) {
+          this.regionalLayerPreviewActive = false;
+          this.regionalLayerPreviewTimers = [];
+        }
+      }, step.delay);
+      this.regionalLayerPreviewTimers.push(timer);
+    });
+  }
+
   hideRegionalMode() {
+    this.cancelRegionalLayerPreview();
     if (!this.regionalMap?.visible) return;
 
     this.regionalMap.hide();
@@ -2378,6 +2427,46 @@ class TopicEarthApp {
       this.toggleFullscreenView();
     });
     
+    window.addEventListener('expandMobileTopic', () => this.layerPanel?.setCollapsed(true));
+    window.addEventListener('expandMobileLayers', () => this.detailPanel?.setPanelSize('compact'));
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 768 && this.detailPanel && !this.detailPanel.isCompact
+        && !this.detailPanel.container.classList.contains('hidden')) this.layerPanel?.setCollapsed(true);
+    });
+    window.addEventListener('topicReviewPackageImported', event => {
+      if (!AppAccess.isAdminMode()) return;
+      const topics = event.detail.topics;
+      const existing = new Set(this.customPoints.map(topic => String(topic.id)));
+      const additions = topics.filter(topic => !existing.has(String(topic.id)));
+      const points = [...this.customPoints, ...additions];
+      const layers = [...this.customLayers];
+      for (const topic of additions) {
+        if (![...LAYERS, ...layers].some(layer => layer.id === topic.category)) {
+          const mode = topic.regionalState || topic.regionalScope ? 'regional' : topic.isPlanet ? 'space' : topic.isFeverWarning || topic.isTippingPoint || topic.isAMOC ? 'fever' : 'main';
+          layers.push({ id: topic.category, name: topic.category, icon: '📥', color: '#00d4ff', enabled: false, modeTabs: [mode] });
+        }
+      }
+      const status = this.detailPanel.container.querySelector('#admin-topic-export-status');
+      if (!LocalStorage.saveCustomPoints(points)) {
+        if (status) status.textContent = 'Browser storage is full. No topics were added.';
+        return;
+      }
+      if (!LocalStorage.saveCustomLayers(layers)) {
+        LocalStorage.saveCustomPoints(this.customPoints);
+        if (status) status.textContent = 'Could not save layers. No topics were added.';
+        return;
+      }
+      this.customPoints = points;
+      this.customLayers = layers;
+      this.rebuildAllLayers();
+      this.rebuildAllPoints();
+      this.layerPanel.updateData(this.allLayers, this.allPoints);
+      this.detailPanel.updateLayers(this.allLayers);
+      this.updateMarkers();
+      this.updateMarkersByFilter(this.currentLayerFilter);
+      if (status) status.textContent = `${additions.length} topic(s) added for review; ${topics.length - additions.length} already present.`;
+    });
+
     // Listen for admin mode changes to update layer panel and initialize debug tools
     window.addEventListener('adminModeChanged', (e) => {
       const accessState = AppAccess.enforceProfile();
@@ -2402,6 +2491,9 @@ class TopicEarthApp {
     const container = document.getElementById('layer-panel');
     this.layerPanel = new LayerPanel(container, this.allLayers, this.allPoints, {
       onLayerToggle: (layerId, visible) => {
+        if (this.currentLayerFilter === 'regional' && this.regionalLayerPreviewActive) {
+          this.cancelRegionalLayerPreview();
+        }
         if (layerId === 'janus-system') {
           this.globe.janusLayer.setVisible(visible && this.currentLayerFilter === 'space').catch((error) => {
             console.error('[Janus System] Could not load layer:', error);
@@ -2907,16 +2999,18 @@ class TopicEarthApp {
       return this.meteoRefreshPromise;
     }
 
-    const regionalContext = options.regionalContext
-      || this.regionalContext
-      || (Settings.get().regionalAutoLocate
-        ? await this.fetchRegionalIpLocation(Settings.get().regionalLocationPrecision || 'region').catch(() => null)
-        : null);
+    this.meteoRefreshPromise = Promise.resolve().then(async () => {
+      const regionalContext = options.regionalContext
+        || this.regionalContext
+        || (Settings.get().regionalAutoLocate
+          ? await this.fetchRegionalIpLocation(Settings.get().regionalLocationPrecision || 'region').catch(() => null)
+          : null);
 
-    this.meteoRefreshPromise = fetchRealtimeMeteoSnapshot({
-      regionalContext,
-      pastHours: options.pastHours || 12,
-      forecastHours: options.forecastHours || 36
+      return fetchRealtimeMeteoSnapshot({
+        regionalContext,
+        pastHours: options.pastHours || 12,
+        forecastHours: options.forecastHours || 36
+      });
     })
       .then(snapshot => {
         this.meteoRealtimeStatus = snapshot;

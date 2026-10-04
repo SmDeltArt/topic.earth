@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Janus — deux secteurs</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#080d1b;color:#e7eefc;font:15px system-ui}main{display:grid;grid-template-columns:1fr 290px;min-height:100vh}#view{min-height:500px;height:100vh;position:relative}canvas{display:block;width:100%;height:100%}aside{padding:26px;background:#111a2c}h1{font-size:23px}p{line-height:1.5;color:#afbdd7}label{display:block;margin:22px 0 7px}input[type=range],select,button{width:100%}select,button{padding:10px;background:#202f4b;color:white;border:1px solid #526687;border-radius:6px}button{margin-top:20px;cursor:pointer}.legend{position:absolute;left:24px;top:24px;pointer-events:none}.plus{color:#63d9ff}.minus{color:#ffb681}output{font-variant-numeric:tabular-nums}.note{font-size:12px}.legend p{margin:7px 0}a{color:#63d9ff}@media(max-width:700px){main{grid-template-columns:1fr}#view{height:60vh;min-height:350px}aside{padding:20px}}
+</style></head><body><main><div id="view"><div class="legend"><h1>Janus · miroir & échelles</h1><p class="plus">Secteur + · t₊ →</p><p class="minus">Secteur − · ← t₋</p><p id="status">Chargement du système solaire…</p></div></div>
+<aside><h2>Deux demi-sphères</h2><p>La sphère est ouverte sur son équateur. La moitié inférieure est réfléchie, puis réduite.</p>
+<label for="ratio">Rapport spatial illustratif a₋ / a₊</label><select id="ratio"><option value="1">1:1</option><option value="0.6" selected>0,6:1</option><option value="0.1">1:10</option><option value="0.01">1:100</option></select>
+<label for="flat">Aplatissement Z · <output id="flatValue">0.50</output></label><input id="flat" type="range" min="0.15" max="1" step="0.05" value="0.5">
+<label for="rate">Vitesse de l'animation − / + · <output id="rateValue">1.00</output></label><input id="rate" type="range" min="0.25" max="2" step="0.25" value="1">
+<label><input id="turn" type="checkbox"> Rotation supplémentaire X 180° + Y 180°</label>
+<button id="pause">Pause</button><p>Glisser pour tourner · molette pour zoomer.</p>
+<p class="note">Ratios d'exploration, sans valeur cosmologique établie. Les flèches indiquent des orientations temporelles opposées ; leur vitesse est un réglage graphique indépendant. Les planètes du miroir sont des repères, sans assertion de planètes jumelles.</p>
+<p class="note">La surface, la séparation et l'aplatissement sont des conventions de dessin. Ce dessin ne calcule ni les métriques ni les équations de champ.</p><a href="https://arxiv.org/abs/2412.04644" target="_blank" rel="noopener">Article de référence</a></aside></main>
+<script type="module" src="./demo.mjs"></script></body></html>

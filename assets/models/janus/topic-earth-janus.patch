@@ -1,0 +1,420 @@
+diff --git a/app.main.js b/app.main.js
+index 32e7a7b..ea4676c 100644
+--- a/app.main.js
++++ b/app.main.js
+@@ -6,7 +6,7 @@ import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-i
+ import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
+ import { FEVER_TOPICS } from './data/fever-topics.js?v=topic-earth-embedded-story-20260521';
+ import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-live-meteo-only-20260531';
+-import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-aura-eyes-20260605';
++import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-space-janus-20260930';
+ import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-hormuz-pump-prices-20260922';
+ import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
+ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
+diff --git a/assets/janus/demo.html b/assets/janus/demo.html
+new file mode 100644
+index 0000000..8c176be
+--- /dev/null
++++ b/assets/janus/demo.html
+@@ -0,0 +1,15 @@
++<!doctype html>
++<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
++<title>Janus — deux secteurs</title>
++<style>
++*{box-sizing:border-box}body{margin:0;background:#080d1b;color:#e7eefc;font:15px system-ui}main{display:grid;grid-template-columns:1fr 290px;min-height:100vh}#view{min-height:500px;height:100vh;position:relative}canvas{display:block;width:100%;height:100%}aside{padding:26px;background:#111a2c}h1{font-size:23px}p{line-height:1.5;color:#afbdd7}label{display:block;margin:22px 0 7px}input[type=range],select,button{width:100%}select,button{padding:10px;background:#202f4b;color:white;border:1px solid #526687;border-radius:6px}button{margin-top:20px;cursor:pointer}.legend{position:absolute;left:24px;top:24px;pointer-events:none}.plus{color:#63d9ff}.minus{color:#ffb681}output{font-variant-numeric:tabular-nums}.note{font-size:12px}.legend p{margin:7px 0}a{color:#63d9ff}@media(max-width:700px){main{grid-template-columns:1fr}#view{height:60vh;min-height:350px}aside{padding:20px}}
++</style></head><body><main><div id="view"><div class="legend"><h1>Janus · miroir & échelles</h1><p class="plus">Secteur + · t₊ →</p><p class="minus">Secteur − · ← t₋</p><p id="status">Chargement du système solaire…</p></div></div>
++<aside><h2>Deux demi-sphères</h2><p>La sphère est ouverte sur son équateur. La moitié inférieure est réfléchie, puis réduite.</p>
++<label for="ratio">Rapport spatial illustratif a₋ / a₊</label><select id="ratio"><option value="1">1:1</option><option value="0.6" selected>0,6:1</option><option value="0.1">1:10</option><option value="0.01">1:100</option></select>
++<label for="flat">Aplatissement Z · <output id="flatValue">0.50</output></label><input id="flat" type="range" min="0.15" max="1" step="0.05" value="0.5">
++<label for="rate">Vitesse de l'animation − / + · <output id="rateValue">1.00</output></label><input id="rate" type="range" min="0.25" max="2" step="0.25" value="1">
++<label><input id="turn" type="checkbox"> Rotation supplémentaire X 180° + Y 180°</label>
++<button id="pause">Pause</button><p>Glisser pour tourner · molette pour zoomer.</p>
++<p class="note">Ratios d'exploration, sans valeur cosmologique établie. Les flèches indiquent des orientations temporelles opposées ; leur vitesse est un réglage graphique indépendant. Les planètes du miroir sont des repères, sans assertion de planètes jumelles.</p>
++<p class="note">La surface, la séparation et l'aplatissement sont des conventions de dessin. Ce dessin ne calcule ni les métriques ni les équations de champ.</p><a href="https://arxiv.org/abs/2412.04644" target="_blank" rel="noopener">Article de référence</a></aside></main>
++<script type="module" src="./demo.mjs"></script></body></html>
+diff --git a/assets/janus/demo.mjs b/assets/janus/demo.mjs
+new file mode 100644
+index 0000000..b1127fc
+--- /dev/null
++++ b/assets/janus/demo.mjs
+@@ -0,0 +1,97 @@
++import * as THREE from '../../vendor/three/three.mjs';
++import { OrbitControls } from '../../vendor/three/examples/jsm/controls/OrbitControls.mjs';
++import { GLTFLoader } from '../../vendor/three/examples/jsm/loaders/GLTFLoader.mjs';
++
++const view = document.querySelector('#view');
++const scene = new THREE.Scene();
++const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 1000);
++// Blender Z-up convention for the cut and flattening controls.
++camera.up.set(0, 0, 1); camera.position.set(24, -34, 20);
++const renderer = new THREE.WebGLRenderer({ antialias: true });
++renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); view.append(renderer.domElement);
++const controls = new OrbitControls(camera, renderer.domElement);
++controls.enableDamping = true; controls.target.set(0, 0, 0);
++scene.add(new THREE.AmbientLight(0xffffff, 1.4));
++const light = new THREE.DirectionalLight(0xffffff, 2); light.position.set(10, -20, 30); scene.add(light);
++const plus = new THREE.Group(), minus = new THREE.Group(); scene.add(plus, minus);
++plus.position.z = 1.4; minus.position.z = -1.4;
++const colors = [0x63d9ff, 0xffb681];
++function line(parent, points, color, opacity = 0.65) {
++  const geometry = new THREE.BufferGeometry().setFromPoints(points);
++  const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity });
++  const result = new THREE.Line(geometry, material); parent.add(result); return result;
++}
++function hemisphere(parent, color) {
++  for (let j = 0; j < 7; j++) {
++    const phi = Math.PI / 2 * j / 7;
++    line(parent, Array.from({ length: 97 }, (_, i) => {
++      const theta = Math.PI * 2 * i / 96;
++      return new THREE.Vector3(10 * Math.cos(phi) * Math.cos(theta), 10 * Math.cos(phi) * Math.sin(theta), 10 * Math.sin(phi));
++    }), color);
++  }
++  for (let j = 0; j < 16; j++) {
++    const theta = Math.PI * 2 * j / 16;
++    line(parent, Array.from({ length: 33 }, (_, i) => {
++      const phi = Math.PI / 2 * i / 32;
++      return new THREE.Vector3(10 * Math.cos(phi) * Math.cos(theta), 10 * Math.cos(phi) * Math.sin(theta), 10 * Math.sin(phi));
++    }), color);
++  }
++}
++hemisphere(plus, colors[0]); hemisphere(minus, colors[1]);
++// Separate reflection (determinant < 0) and optional proper rotation.
++const mirrorTurn = new THREE.Group(); minus.add(mirrorTurn);
++const mirroredContents = [...minus.children].filter(child => child !== mirrorTurn);
++for (const child of mirroredContents) mirrorTurn.add(child);
++const arrows = [1, -1].map((sign, i) => {
++  const z = sign * 9;
++  line(scene, [new THREE.Vector3(-11, 0, z), new THREE.Vector3(11, 0, z)], colors[i]);
++  const arrow = new THREE.ArrowHelper(new THREE.Vector3(sign, 0, 0), new THREE.Vector3(), 2.4, colors[i], 0.8, 0.5);
++  scene.add(arrow); return arrow;
++});
++const ratio = document.querySelector('#ratio'), flat = document.querySelector('#flat'), rate = document.querySelector('#rate');
++function update() {
++  const r = Number(ratio.value), z = Number(flat.value);
++  plus.scale.set(1, 1, z); minus.scale.set(r, r, -r * z);
++  mirrorTurn.rotation.set(document.querySelector('#turn').checked ? Math.PI : 0, document.querySelector('#turn').checked ? Math.PI : 0, 0);
++  document.querySelector('#flatValue').value = z.toFixed(2);
++  document.querySelector('#rateValue').value = Number(rate.value).toFixed(2);
++  window.janusState = { ratio: r, flatten: z, negativeAnimationRate: Number(rate.value), reflectionDeterminant: -(r ** 3) * z, modelLoaded: Boolean(window.janusModelLoaded) };
++}
++for (const element of [ratio, flat, rate, document.querySelector('#turn')]) element.addEventListener('input', update);
++update();
++// The solar GLB is Y-up; convert it to the explicit Z-up diagram convention.
++new GLTFLoader().load('../models/solar-system.glb', gltf => {
++  const model = gltf.scene;
++  model.traverse(node => { if (/universe|soalr_system|rootnode/i.test(node.name)) node.visible = false; });
++  // Measure only the teaching solar model, without its enclosing universe shell.
++  const box = new THREE.Box3();
++  model.updateMatrixWorld(true);
++  model.traverse(node => { if (node.isMesh && !/universe/i.test(node.name)) box.expandByObject(node); });
++  const radius = new THREE.Vector3(
++    Math.max(Math.abs(box.min.x), Math.abs(box.max.x)),
++    Math.max(Math.abs(box.min.y), Math.abs(box.max.y)),
++    Math.max(Math.abs(box.min.z), Math.abs(box.max.z))
++  ).length();
++  const holder = new THREE.Group(); holder.rotation.x = Math.PI / 2;
++  holder.scale.setScalar(8 / radius); holder.add(model); plus.add(holder);
++  const ghost = holder.clone(true);
++  ghost.traverse(node => { if (node.isMesh) node.material = new THREE.MeshBasicMaterial({ color: colors[1], wireframe: true, transparent: true, opacity: 0.45 }); });
++  mirrorTurn.add(ghost);
++  window.janusModelLoaded = true;
++  document.querySelector('#status').textContent = 'Système solaire topic.earth · repères graphiques'; update();
++}, undefined, error => {
++  document.querySelector('#status').textContent = 'Modèle indisponible · géométrie Janus visible'; console.error(error);
++});
++let paused = false, phasePlus = 0, phaseMinus = 0;
++document.querySelector('#pause').addEventListener('click', event => { paused = !paused; event.target.textContent = paused ? 'Reprendre' : 'Pause'; });
++new ResizeObserver(() => { const w = view.clientWidth, h = view.clientHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }).observe(view);
++const clock = new THREE.Clock();
++function animate() {
++  requestAnimationFrame(animate);
++  const dt = Math.min(clock.getDelta(), 0.1);
++  if (!paused) { phasePlus = (phasePlus + dt / 6) % 1; phaseMinus = (phaseMinus + dt / 6 * Number(rate.value)) % 1; }
++  arrows[0].position.set(-10 + 20 * phasePlus, 0, 9);
++  arrows[1].position.set(10 - 20 * phaseMinus, 0, -9);
++  controls.update(); renderer.render(scene, camera);
++}
++animate();
+diff --git a/data/space-topics.js b/data/space-topics.js
+index 69b0b4f..5cc2310 100644
+--- a/data/space-topics.js
++++ b/data/space-topics.js
+@@ -563,5 +563,35 @@ export const SPACE_TOPICS = [
+         watermarkText: 'NASA Eyes | official interactive reference'
+       }
+     ]
++  }),
++  makeSpaceTopic({
++    id: 'space_janus_metric_demo',
++    order: 21,
++    object: 'Universe',
++    title: 'Janus — Mirrored Sectors & Time Arrows',
++    type: 'Theoretical Cosmology Illustration',
++    summary: 'Explore two open hemispheres, a reflected coordinate representation, independent spatial-ratio presets, and opposing animated time arrows inspired by Jean-Pierre Petit\'s Janus model.',
++    diameter: 'Illustrative spatial ratios: 1:1, 0.6:1, 1:10, 1:100; no inferred cosmological estimate',
++    temperature: 'Not a temperature topic',
++    composition: 'Two sector grids and solar-system reference markers; no assertion of twin planets',
++    atmosphere: 'Cut plane XY, flattened Z; reflection and optional X/Y rotations are separate controls',
++    insight: 'The hemispheres are teaching geometry. Spatial scale, graphical flattening, and arrow playback rates are independent. Arrows show opposite temporal orientations, not a measured universal time or reversed physical planetary dynamics. This is not a solution of the Janus field equations.',
++    researchSources: [{
++      name: 'Petit, Margnat & Zejli — bimetric twin-universe model (2024)',
++      url: 'https://arxiv.org/abs/2412.04644',
++      category: 'research',
++      reliability: 'primary-theoretical-source',
++      verified: true
++    }],
++    mediaTokens: [{
++      id: 'media_janus_interactive_demo',
++      url: '',
++      sourceUrl: './assets/janus/demo.html',
++      sourceName: 'topic.earth Janus illustration',
++      provider: 'iframe',
++      mediaType: 'iframe',
++      embedUrl: './assets/janus/demo.html',
++      watermarkText: 'Janus illustration | ratios are exploratory parameters'
++    }]
+   })
+ ];
+diff --git a/docs/janus-demo.md b/docs/janus-demo.md
+new file mode 100644
+index 0000000..7399143
+--- /dev/null
++++ b/docs/janus-demo.md
+@@ -0,0 +1,35 @@
++# Janus illustration
++
++The final built-in Space topic opens `assets/janus/demo.html` through the existing
++media viewer. It is a separate interactive diagram using the existing solar GLB,
++not a replacement for the normal solar scene.
++
++The open hemisphere grids use Blender's Z-up convention: cut at Z=0, flatten Z,
++and reflect through Z for the negative-sector diagram. The browser converts the
++Y-up GLB into this Z-up diagram convention. Optional X180 + Y180 rotation changes
++orientation; it is separate from reflection. Their combination is a proper
++rotation, so cannot supply mirror parity by itself.
++
++Spatial presets 1, 0.6, 0.1 and 0.01 are illustrative parameters. Flattening is a
++presentation control, not part of that spatial ratio. The time-arrow rate control
++changes playback only, independently of the spatial ratio. Opposite arrows do not
++claim a universal proper-time coordinate or reverse physical planetary dynamics.
++Ghost planets serve as coordinate references, not predicted twin worlds. The
++hemispheres and their separation do not represent an embedding of physical space.
++
++Blender generator: `tools/janus_metric_demo_blender.py`. Open it in Blender 4.2+
++and set PROJECT_ROOT, or run:
++
++```powershell
++blender --background --python tools/janus_metric_demo_blender.py -- --project-root "C:\Users\bedes\OneDrive\SmDeltArt_Collection\__actual_vs\topic.earth" --ratio 0.6 --flatten 0.5
++```
++
++It creates a new scene and writes `assets/models/solar-system.janus-demo.blend`
++and `.glb`. Existing scenes are kept; save your current work first. Output files
++with these names are overwritten on rerun. The new scene freezes imported orbital
++animation and adds separately animated time arrows. The Blender export uses the
++chosen fixed ratio and equal arrow playback rates; the browser provides live ratio
++and rate controls. The browser demo does not require the generated Blender files.
++
++Reference: https://arxiv.org/abs/2412.04644 — Petit, Margnat & Zejli (2024).
++This visual does not implement or solve the paper's field equations.
+diff --git a/tools/janus_metric_demo_blender.py b/tools/janus_metric_demo_blender.py
+new file mode 100644
+index 0000000..6988b75
+--- /dev/null
++++ b/tools/janus_metric_demo_blender.py
+@@ -0,0 +1,196 @@
++"""Create a separate Janus teaching scene from topic.earth's solar-system.glb.
++
++Blender 4.2+ Text Editor: set PROJECT_ROOT, then Run Script.
++CLI: blender --background --python tools/janus_metric_demo_blender.py --
++     --project-root /path/to/topic.earth --ratio 0.6 --flatten 0.5
++
++Ratios and motion are illustrative. No field equations, physical twin planets,
++universal proper time, or inferred cosmological ratio are implemented.
++Creates a NEW scene; keeps objects in existing scenes untouched.
++"""
++from pathlib import Path
++import argparse
++import math
++import sys
++
++import bpy
++from mathutils import Vector
++
++PROJECT_ROOT = Path(r"C:\Users\bedes\OneDrive\SmDeltArt_Collection\__actual_vs\topic.earth")
++SPATIAL_RATIO = 0.6
++FLATTEN_Z = 0.5
++EXTRA_ROTATE_XY_180 = False
++FRAMES = 180
++
++
++def material(name, color):
++    mat = bpy.data.materials.new(name)
++    mat.diffuse_color = (*color, 1)
++    mat.use_nodes = True
++    shader = mat.node_tree.nodes.get('Principled BSDF')
++    shader.inputs['Base Color'].default_value = (*color, 1)
++    shader.inputs['Emission Color'].default_value = (*color, 1)
++    shader.inputs['Emission Strength'].default_value = 0.5
++    return mat
++
++
++def empty(name, parent=None):
++    obj = bpy.data.objects.new(name, None)
++    bpy.context.scene.collection.objects.link(obj)
++    obj.parent = parent
++    return obj
++
++
++def polyline(name, points, mat, parent=None):
++    curve = bpy.data.curves.new(name, 'CURVE')
++    curve.dimensions = '3D'
++    curve.bevel_depth = 0.025
++    curve.bevel_resolution = 1
++    spline = curve.splines.new('POLY')
++    spline.points.add(len(points) - 1)
++    for dest, point in zip(spline.points, points):
++        dest.co = (*point, 1)
++    obj = bpy.data.objects.new(name, curve)
++    bpy.context.scene.collection.objects.link(obj)
++    obj.parent = parent
++    obj.data.materials.append(mat)
++    return obj
++
++
++def hemisphere(root, mat):
++    for j in range(7):
++        phi = math.pi / 2 * j / 7
++        polyline(f'{root.name}_Latitude_{j}', [
++            (10 * math.cos(phi) * math.cos(math.tau * i / 96),
++             10 * math.cos(phi) * math.sin(math.tau * i / 96), 10 * math.sin(phi))
++            for i in range(97)], mat, root)
++    for j in range(16):
++        theta = math.tau * j / 16
++        polyline(f'{root.name}_Meridian_{j}', [
++            (10 * math.cos(math.pi / 2 * i / 32) * math.cos(theta),
++             10 * math.cos(math.pi / 2 * i / 32) * math.sin(theta),
++             10 * math.sin(math.pi / 2 * i / 32)) for i in range(33)], mat, root)
++
++
++def time_arrow(sign, mat):
++    root = empty('Time_Plus' if sign > 0 else 'Time_Minus')
++    z = sign * 9
++    polyline(f'{root.name}_Axis', [(-11, 0, z), (11, 0, z)], mat)
++    polyline(f'{root.name}_Shaft', [(0, 0, 0), (sign * 2, 0, 0)], mat, root)
++    polyline(f'{root.name}_Head', [(sign * 1.3, 0, 0.5), (sign * 2, 0, 0), (sign * 1.3, 0, -0.5)], mat, root)
++    # Sample each frame to avoid action API differences in Blender 4/5.
++    for frame in range(1, FRAMES + 1):
++        root.location = (sign * (-10 + 20 * (frame - 1) / (FRAMES - 1)), 0, z)
++        root.keyframe_insert(data_path='location', frame=frame)
++    root['meaning'] = 'Opposite time orientation; playback rate is graphical only'
++
++
++def main():
++    parser = argparse.ArgumentParser()
++    parser.add_argument('--project-root', type=Path, default=PROJECT_ROOT)
++    parser.add_argument('--ratio', type=float, default=SPATIAL_RATIO)
++    parser.add_argument('--flatten', type=float, default=FLATTEN_Z)
++    parser.add_argument('--rotate-xy-180', action='store_true', default=EXTRA_ROTATE_XY_180)
++    argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
++    args = parser.parse_args(argv)
++    if not 0 < args.ratio <= 1 or not 0 < args.flatten <= 1:
++        raise ValueError('ratio and flatten must be in (0, 1]')
++    source = args.project_root / 'assets/models/solar-system.glb'
++    if not source.is_file():
++        raise FileNotFoundError(source)
++    output = args.project_root / 'assets/models/solar-system.janus-demo'
++    scene = bpy.data.scenes.new('Janus_Metric_Illustration')
++    bpy.context.window.scene = scene
++    scene.frame_start, scene.frame_end = 1, FRAMES
++    scene.render.fps = 30
++    scene['janus_spatial_ratio'] = args.ratio
++    scene['ratio_status'] = 'Illustrative user parameter, not an established estimate'
++    scene['cut_plane'] = 'XY; flatten Z; negative sector reflected through Z'
++    plus_mat = material('Janus_Plus_Cyan', (0.15, 0.7, 1))
++    minus_mat = material('Janus_Minus_Amber', (1, 0.45, 0.15))
++    plus, minus = empty('Janus_Plus'), empty('Janus_Minus')
++    plus.location.z, minus.location.z = 1.4, -1.4
++    plus.scale = (1, 1, args.flatten)
++    minus.scale = (args.ratio, args.ratio, -args.ratio * args.flatten)
++    turn = empty('Janus_Mirror_Extra_Rotation', minus)
++    if args.rotate_xy_180:
++        turn.rotation_euler = (math.pi, math.pi, 0)
++    hemisphere(plus, plus_mat)
++    hemisphere(turn, minus_mat)
++    # Import only into the new scene. A snapshot prevents modifying prior objects.
++    before = set(bpy.data.objects)
++    bpy.ops.import_scene.gltf(filepath=str(source))
++    imported = set(bpy.data.objects) - before
++    for obj in list(imported):
++        if 'universe' in obj.name.lower() and obj.type == 'MESH':
++            imported.remove(obj)
++            bpy.data.objects.remove(obj, do_unlink=True)
++    # Freeze planetary motion: time arrows are independent of orbital dynamics.
++    scene.frame_set(1)
++    bpy.context.view_layer.update()
++    corners = [obj.matrix_world @ Vector(corner) for obj in imported if obj.type == 'MESH' for corner in obj.bound_box]
++    if not corners:
++        raise RuntimeError('No solar meshes found')
++    radius = max(p.length for p in corners)
++    holder = empty('Janus_Solar_Reference', plus)
++    holder.scale = (8 / radius,) * 3
++    for obj in imported:
++        obj.animation_data_clear()
++        if obj.parent not in imported:
++            obj.parent = holder
++    copies = {}
++    for obj in imported:
++        copy = obj.copy()
++        scene.collection.objects.link(copy)
++        copy.name = 'Janus_Ghost_' + obj.name
++        copies[obj] = copy
++        if copy.type == 'MESH':
++            for slot in copy.material_slots:
++                slot.link = 'OBJECT'
++                slot.material = minus_mat
++    ghost_holder = empty('Janus_Solar_Ghost_Reference', turn)
++    ghost_holder.scale = holder.scale
++    for original, copy in copies.items():
++        copy.parent = copies.get(original.parent, ghost_holder)
++    time_arrow(1, plus_mat)
++    time_arrow(-1, minus_mat)
++    scene.frame_set(1)
++    scene.world = bpy.data.worlds.new('Janus_Background')
++    scene.world.color = (0.015, 0.025, 0.05)
++    camera_data = bpy.data.cameras.new('Janus_Camera')
++    camera = bpy.data.objects.new('Janus_Camera', camera_data)
++    scene.collection.objects.link(camera)
++    camera.location = (24, -34, 20)
++    camera.rotation_euler = (-camera.location).to_track_quat('-Z', 'Y').to_euler()
++    camera_data.type, camera_data.ortho_scale = 'ORTHO', 36
++    scene.camera = camera
++    scene.render.resolution_x, scene.render.resolution_y = 1280, 900
++    scene.render.resolution_percentage = 100
++    for name, body, location, mat in [
++        ('Label_Plus', 'Secteur + | t+ ->', (-10, 0, 10.5), plus_mat),
++        ('Label_Minus', 'Secteur - | <- t-', (-10, 0, -10.5), minus_mat),
++        ('Label_Ratio', f'a- / a+ = {args.ratio:g} | ratio illustratif', (-11, 0, -13), minus_mat),
++    ]:
++        text = bpy.data.curves.new(name, 'FONT')
++        text.body, text.size = body, 0.6
++        label = bpy.data.objects.new(name, text)
++        scene.collection.objects.link(label)
++        label.location = location
++        label.rotation_euler = camera.rotation_euler.copy()
++        label.data.materials.append(mat)
++    # Convert our curves for GLB; restrict selection to this new scene.
++    bpy.ops.object.select_all(action='DESELECT')
++    for obj in list(scene.objects):
++        if obj.type in {'CURVE', 'FONT'}:
++            obj.select_set(True)
++            bpy.context.view_layer.objects.active = obj
++    bpy.ops.object.convert(target='MESH')
++    bpy.ops.object.select_all(action='SELECT')
++    bpy.ops.export_scene.gltf(filepath=str(output) + '.glb', export_format='GLB',
++                              use_selection=True, export_animations=True, export_extras=True)
++    bpy.ops.wm.save_as_mainfile(filepath=str(output) + '.blend')
++    print(f'Janus illustration saved: {output}; spatial ratio={args.ratio} (illustrative)')
++
++
++if __name__ == '__main__':
++    main()
