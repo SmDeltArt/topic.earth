@@ -3,12 +3,21 @@ Thumbs.db
 *.log
 *.tmp
 
+assets/audio/read-messages/*.mp3
+
 .env
 .env.*
 !.env.example
 
 .vercel/
 node_modules/
+
+# Generated output and local caches
+build/
+dist/
+*.map
+__pycache__/
+*.py[cod]
 
 # Local and generated asset backups
 *.bak

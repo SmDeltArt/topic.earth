@@ -2,7 +2,7 @@
 
 Interactive climate globe and topic workspace for exploring global systems, climate pressure, regional initiatives, and AI-assisted topic research.
 
-The app is currently an advanced static prototype deployed from this repository to Vercel, with `topic.earth` pointed at the Vercel deployment.
+The app is currently an advanced browser prototype deployed from this repository to Vercel, with `topic.earth` pointed at the Vercel deployment. The frontend is static; the optional MCP endpoint runs as a Vercel serverless function.
 
 ## What It Does
 
@@ -12,6 +12,9 @@ The app is currently an advanced static prototype deployed from this repository 
 - Supports a right-side monitoring panel for scenario explanation and warnings.
 - Includes an evolving topic contribution workflow based on drafts, evidence, review, and admin export.
 - Keeps scenario data in `fever-scenarios.json` so values and texture routing are visible.
+- Offers a lightweight Regional map with drawing tools and paths associated with topic layers.
+- Includes a Space view with synchronized solar orbits, video caption preferences, and ZIP topic review imports.
+- Provides an installable app shell; offline shell access does not imply that all remote maps, media, or AI services are available offline.
 
 ## Project Shape
 
@@ -32,6 +35,10 @@ The app is currently an advanced static prototype deployed from this repository 
   data/                      Topic, layer, point, and research data
   lib/                       Runtime services and Three.js renderer
   shared/                    Shared AI bridge, widget sync, CSV, and favicon helpers
+  vendor/                    Bundled browser libraries
+  api/mcp.js                 Optional MCP serverless endpoint
+  service-worker.js          App-shell caching
+  package.json              MCP dependencies and development checks
   site.webmanifest           Web app metadata
   robots.txt                 Crawler policy
   sitemap.xml                Public URL map for search crawlers
@@ -53,11 +60,38 @@ Then open:
 http://127.0.0.1:8123
 ```
 
+VS Code Live Server is also configured for port `5501`. A static server does not execute Vercel serverless routes.
+
+Run the existing checks from the development folder:
+
+```powershell
+npm ci
+npm run check:captions
+npm run check:solar
+npm run check:mcp
+node tools/check-regional.mjs
+node tools/check-settings-routing.mjs
+node tools/check-topic-import.mjs
+npm --prefix api run check
+node --test api/tests/ai-health.test.mjs
+```
+
+The development-only `tools/` folder is not part of new runtime syncs.
+
 ## Deployment Notes
 
 The repo is ready for static hosting on Vercel. Keep runtime asset URLs relative to the repository root, for example `./assets/textures/fever/earth_2025_1k.png`.
 
 Cloudinary CDN delivery is bridged through [lib/asset-bridge.js](lib/asset-bridge.js), so code can keep stable local asset names while selected assets resolve to Cloudinary.
+
+Development lives in `__actual_vs\topic.earth`; the GitHub staging checkout is `C:\Git\__actual_github\topic.earth`. Sync, commit, push, and deployment are deliberate operations requiring user authorization. Before a sync, list and exclude files over 5 MB, `build/`, `dist/`, `*.map`, `*.log`, and `node_modules/` unless inclusion is explicitly confirmed. Development documents, agent instructions, tools, editor settings, and Python caches stay local. Excluding an existing checkout file does not delete it.
+
+## AI Settings Routing
+
+- The main Settings panel opens the local [Ollama guide](ollama-install-guide.html) for User mode and offline Admin mode. Online Admin mode opens `https://api.caddeltai.com/api-settings` with embedding and topic.earth host parameters. Changing the mode does not launch the iframe automatically.
+- The separate top-bar bridge in [index.html](index.html) retains `./api/api-settings.html?embed=true` locally and `https://api-caddeltai.vercel.app/api-settings.html?embed=true` in production.
+- The local API Settings copies are generated integration copies, not the source of truth. Change the canonical `__actual_vs\private\api\` product (or its production repository), then run an explicitly authorized sync rather than editing a local copy directly.
+- API Settings belongs to CAD-DELTAI. Shared browser integration does not grant topic.earth identity, billing, or organization-funded AI permissions.
 
 ## Public Metadata
 
@@ -71,8 +105,8 @@ metadata are also exposed through:
 - [codemeta.json](codemeta.json)
 - [CITATION.cff](CITATION.cff)
 - [assets/logo/metadata.json](assets/logo/metadata.json)
-- [Identity and local participation implementation brief (EN)](docs/topic-earth-identity-implementation-en.docx)
-- Local participation and youth protection: [FR](docs/topic-earth-participation-locale-et-jeunes-fr.docx) · [NL](docs/topic-earth-lokale-participatie-en-jongeren-nl.docx) · [DE](docs/topic-earth-lokale-beteiligung-und-jugendschutz-de.docx)
+
+Identity, participation, and youth-protection planning briefs are maintained in the development-only `docs/` folder, not newly synced into the public runtime bundle.
 
 ## Social Copy And Assets
 
