@@ -2543,6 +2543,7 @@ body.regional-map-search-open #layer-panel {
     --intro-glow: rgba(0, 212, 255, 0.28);
     width: min(88vw, 640px);
     max-width: 100%;
+    box-sizing: border-box;
     display: grid;
     gap: 14px;
     padding: clamp(16px, 4vw, 28px);
@@ -2700,8 +2701,26 @@ body.regional-map-search-open #layer-panel {
     }
 
     .loading-brand-lockup {
-        grid-template-columns: clamp(72px, 24vw, 116px) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
         gap: 12px;
+    }
+
+    .loading-clock {
+        width: min(42vw, 24dvh, 150px);
+    }
+
+    .loading-brand-copy {
+        width: 100%;
+        text-align: center;
+    }
+
+    .loading-wordmark {
+        font-size: clamp(24px, 8vw, 42px);
+    }
+
+    .loading-local-time {
+        overflow-wrap: anywhere;
     }
 
     .loading-build {
@@ -2712,6 +2731,16 @@ body.regional-map-search-open #layer-panel {
     #loading p {
         margin-bottom: 7px;
     }
+}
+
+@media (max-height: 360px) {
+    #loading { padding: 8px; }
+    .loading-intro { padding: 10px; gap: 8px; }
+    .loading-brand-lockup { gap: 8px; }
+    .loading-clock { width: min(30vw, 20dvh, 72px); }
+    .loading-wordmark { font-size: 24px; }
+    .loading-mode, .loading-local-time { margin-top: 5px; }
+    .loading-build { margin-top: 8px; }
 }
 
 .spinner {
@@ -6538,11 +6567,20 @@ body:not(.tutorial-mode-off) .tutorial-anchor-cursor-target {
 
 .tts-vignette-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     justify-content: flex-end;
     padding: 8px 12px 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+.tts-vignette-btn[hidden] { display: none; }
+
+.admin-topic-export-card [hidden] { display: none; }
+.topic-zip-scan-report { margin: 12px 0; font-size: 12px; overflow-wrap: anywhere; }
+.topic-zip-scan-report:empty { display: none; }
+.topic-zip-scan-report ul { max-height: 240px; overflow-y: auto; padding-left: 20px; }
+.topic-zip-scan-report li { margin: 6px 0; }
 
 .tts-vignette-btn {
     min-height: 32px;
@@ -8395,7 +8433,8 @@ canvas:hover {
 
 .admin-topic-export-card {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     justify-content: space-between;
     gap: 14px;
     padding: 14px;
@@ -8403,6 +8442,8 @@ canvas:hover {
     border-radius: 10px;
     background: rgba(255, 183, 77, 0.08);
 }
+
+.admin-topic-export-card > * { min-width: 0; max-width: 100%; }
 
 .admin-topic-export-title {
     color: #ffb74d;

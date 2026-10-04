@@ -1,4 +1,4 @@
-const CACHE_NAME = 'topic-earth-shell-v4';
+const CACHE_NAME = 'topic-earth-shell-v7';
 const APP_SHELL = [
   './',
   './index.html',

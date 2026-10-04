@@ -13,12 +13,13 @@ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js
 import { TopBar } from './components/TopBar.js?v=translation-20261004-topic-earth-regional-drawing-20261004';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-regional-drawing-20261004';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-drawing-20261004';
-import { DetailPanel } from './components/DetailPanel.js?v=translation-20261004';
-import { LocalStorage } from './lib/storage.js?v=topic-earth-meteo-draft-20260531';
+import { DetailPanel } from './components/DetailPanel.js?v=zip-scan-20261004';
+import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=topic-earth-video-captions-20261003';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
 import { ReadTranslationService } from './lib/read-translation.js?v=translation-20261004';
-import { TTSManager } from './lib/tts.js?v=topic-earth-legacy-key-decode-20260520';
+import { TopicTranslations } from './lib/topic-translations.mjs?v=reading-save-20261004';
+import { TTSManager } from './lib/tts.js?v=reading-save-20261004';
 import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-meteo-draft-20260531';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
 import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-warning-panel-collapse-20260430';
@@ -1934,11 +1935,11 @@ class TopicEarthApp {
             const translatedSpeechLang = translated.speechLang || LanguageManager.getSpeechCode(translated.language || translationLang);
             const status = translated.provider === 'original' && translationLang !== 'en'
               ? `Translation unavailable. Original text is shown.`
-              : action === 'translate' ? `Translated to ${targetLanguage}` : `Reading in ${targetLanguage} with browser voice`;
+              : action === 'translate' ? `Translated to ${targetLanguage}` : `Reading in ${targetLanguage}…`;
             console.info('[Read Test] Translation route resolved.', {
               provider: translated.provider,
               speechLang: translatedSpeechLang,
-              paidTts: false
+              linkedSpeech: this.ttsManager?.canSaveMP3?.() || false
             });
             this.updateTTSVignette({
               translatedText: translated.text,
@@ -1969,16 +1970,16 @@ class TopicEarthApp {
           }
         } else {
           actionButton.querySelector('span').textContent = 'Reading...';
-          console.info('[Read Test] Read started in browser-only mode.', {
+          console.info('[Read] Selected text read requested.', {
             speechLang,
-            paidTts: false
+            linkedSpeech: this.ttsManager?.canSaveMP3?.() || false
           });
           this.showTTSVignette({
             mode: 'Read',
             originalText: text,
             translatedText: text,
             languageLabel: LanguageManager.getLanguageInfo(currentLang)?.nativeName || currentLang,
-            status: 'Reading with browser voice...',
+            status: 'Preparing voice...',
             provider: 'browserTts',
             debugLabel: 'BROWSER TTS',
             debugTone: 'local',
@@ -2074,6 +2075,8 @@ class TopicEarthApp {
       <div class="tts-vignette-actions">
         <button type="button" class="tts-vignette-btn" data-tts-vignette-action="replay">Read</button>
         <button type="button" class="tts-vignette-btn stop" data-tts-vignette-action="stop">Stop</button>
+        <button type="button" class="tts-vignette-btn" data-tts-vignette-action="save-json" aria-label="Save JSON locally" title="Save this text in the topic JSON and future ZIP exports">💾 JSON</button>
+        <button type="button" class="tts-vignette-btn" data-tts-vignette-action="save-mp3" aria-label="Save MP3" title="Download audio from the configured speech API" hidden>🎵 MP3</button>
       </div>
     `;
 
@@ -2081,7 +2084,11 @@ class TopicEarthApp {
       const action = event.target.closest('[data-tts-vignette-action]')?.dataset.ttsVignetteAction;
       if (!action) return;
 
-      if (action === 'close') {
+      if (action === 'save-json') {
+        this.saveVignetteJSON();
+      } else if (action === 'save-mp3') {
+        this.saveVignetteMP3();
+      } else if (action === 'close') {
         this.removeTTSVignette({ stopAudio: true });
       } else if (action === 'stop') {
         this.ttsManager?.stop();
@@ -2110,7 +2117,9 @@ class TopicEarthApp {
       provider,
       debugLabel,
       debugTone,
-      speechLang
+      speechLang,
+      topic: this.detailPanel?.mode === 'detail' ? this.detailPanel.currentPoint : null,
+      audioBlob: null
     });
   }
 
@@ -2130,6 +2139,13 @@ class TopicEarthApp {
     };
 
     const state = this.ttsVignetteState;
+    const jsonButton = this.ttsVignette.querySelector('[data-tts-vignette-action="save-json"]');
+    if (jsonButton) jsonButton.disabled = !state.translatedText;
+    const mp3Button = this.ttsVignette.querySelector('[data-tts-vignette-action="save-mp3"]');
+    if (mp3Button) {
+      mp3Button.hidden = !this.ttsManager?.canSaveMP3?.();
+      mp3Button.disabled = !state.translatedText || Boolean(state.savingMP3);
+    }
     const providerLabels = {
       ai: 'Configured AI translation',
       csv: 'Saved UI translation',
@@ -2218,7 +2234,52 @@ class TopicEarthApp {
     return tokens;
   }
 
+  downloadVignetteFile(blob, extension, state = this.ttsVignetteState) {
+    const slug = String(state.topic?.id || 'selected-text').replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 80);
+    const language = String(state.speechLang || 'en').split('-')[0];
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${slug}-${language}-v001.${extension}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  saveVignetteJSON() {
+    const state = this.ttsVignetteState;
+    if (!state?.translatedText) return;
+    try {
+      const topic = state.topic || { id: 'selected-text', title: 'Selected text', language: 'en' };
+      const updated = TopicTranslations.saveSelection(topic, { originalText: state.originalText,
+        translatedText: state.translatedText, language: String(state.speechLang || 'en').split('-')[0],
+        provider: state.provider || 'original' });
+      this.downloadVignetteFile(new Blob([JSON.stringify(updated, null, 2)], { type: 'application/json' }), 'json', state);
+      this.updateTTSVignette({ status: state.topic
+        ? 'JSON saved locally. Included when this topic is exported to ZIP for Admin upload.'
+        : 'JSON saved locally. Select text from a topic to include it in a topic ZIP.' });
+    } catch (error) { this.updateTTSVignette({ status: `JSON save failed: ${error.message}` }); }
+  }
+
+  async saveVignetteMP3() {
+    const state = this.ttsVignetteState;
+    if (!state?.translatedText || state.savingMP3 || !this.ttsManager?.canSaveMP3?.()) return;
+    this.updateTTSVignette({ savingMP3: true, status: 'Preparing MP3 with configured speech API…' });
+    try {
+      const blob = state.audioBlob || await this.ttsManager.createMP3(state.translatedText);
+      if (this.ttsVignetteState?.id !== state.id) return;
+      this.downloadVignetteFile(blob, 'mp3', state);
+      this.updateTTSVignette({ audioBlob: blob, status: 'MP3 downloaded.' });
+    } catch (error) {
+      if (this.ttsVignetteState?.id === state.id) this.updateTTSVignette({ status: `MP3 unavailable: ${error.message}` });
+    } finally {
+      if (this.ttsVignetteState?.id === state.id) this.updateTTSVignette({ savingMP3: false });
+    }
+  }
+
   speakFromVignette(text, speechLang) {
+    const vignetteId = this.ttsVignetteState?.id;
     this.updateTTSVignette({
       translatedText: text,
       speechLang,
@@ -2226,17 +2287,21 @@ class TopicEarthApp {
       cancelled: false
     });
 
-    console.info('[Read Test] Browser speech requested.', {
+    console.info('[Read] Speech requested.', {
       speechLang,
-      paidTts: false,
+      linkedSpeech: this.ttsManager?.canSaveMP3?.() || false,
       source: 'selection-vignette'
     });
     this.ttsManager?.speak(text, speechLang, {
       priority: 'manual',
       channel: 'selection',
-      forceBrowser: true,
-      aiVoiceFallbackToBrowser: false,
+      forceBrowser: !this.ttsManager?.canSaveMP3?.(),
+      aiVoiceFallbackToBrowser: true,
+      onAudioReady: blob => {
+        if (this.ttsVignetteState?.id === vignetteId) this.updateTTSVignette({ audioBlob: blob });
+      },
       onStart: ({ source } = {}) => {
+        if (this.ttsVignetteState?.id !== vignetteId) return;
         this.startTTSHighlight();
         const statusBySource = {
           ai: 'Reading with linked OpenAI voice...',
@@ -2260,21 +2325,24 @@ class TopicEarthApp {
         });
       },
       onBoundary: (event) => {
+        if (this.ttsVignetteState?.id !== vignetteId) return;
         this.handleTTSBoundary(event.charIndex || 0);
       },
       onEnd: () => {
+        if (this.ttsVignetteState?.id !== vignetteId) return;
         this.stopTTSHighlight();
         this.updateTTSVignette({
           status: 'Finished',
-          debugLabel: 'LOCAL TEST OK',
+          debugLabel: 'READ COMPLETE',
           debugTone: 'done'
         });
       },
       onError: (error) => {
+        if (this.ttsVignetteState?.id !== vignetteId) return;
         this.stopTTSHighlight();
         console.warn('[Read Test] Browser speech failed:', error?.message || error);
         this.updateTTSVignette({
-          status: `Browser voice unavailable: ${error?.message || 'check browser voices'}`,
+          status: `Voice unavailable: ${error?.message || 'check voice settings'}`,
           debugLabel: 'VOICE ERROR',
           debugTone: 'error'
         });

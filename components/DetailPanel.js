@@ -1,4 +1,4 @@
-import { readTopicZip } from '../lib/topic-importer.mjs?v=topic-earth-review-upload-20261003';
+import { scanTopicZip } from '../lib/topic-importer.mjs?v=zip-scan-20261004';
 import { Settings } from '../lib/settings.js?v=topic-earth-video-captions-20261003';
 import { buildCaptionEmbedUrl } from '../lib/video-captions.mjs?v=topic-earth-video-captions-20261003';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
@@ -22,7 +22,7 @@ import {
   downloadAdminTopicPackage,
   downloadTopicAdminSubmission,
   getAdminTopicExportSummary
-} from '../lib/topic-exporter.js?v=topic-earth-embedded-story-20260521';
+} from '../lib/topic-exporter.js?v=reading-save-20261004';
 
 const CAD_DELTAI_BRAND_LOGO_URL = 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1785945660/cad-deltai/api/assets/brand/favicon/svg/smai-cad-deltai-brand-favicon-animated-192x192-en-v001.svg';
 
@@ -11724,8 +11724,10 @@ Rules:
                 Topics appear in their tab and layer as local drafts awaiting review. Uploading the same package again will not duplicate them.
               </div>
               <div id="admin-topic-export-status" class="admin-topic-export-status"></div>
+              <div id="topic-zip-scan-report" class="topic-zip-scan-report" aria-live="polite"></div>
+              <button type="button" class="btn-primary" data-action="import-scanned-topic-zip" hidden>Import checked topics for review</button>
             </div>
-            <label class="btn-primary" for="topic-review-upload">Upload topic ZIP</label>
+            <label class="btn-primary" for="topic-review-upload">Choose ZIP · free local scan</label>
             <input id="topic-review-upload" type="file" accept=".zip,application/zip" data-admin-only="true">
           </div>
         </div>
@@ -11801,6 +11803,8 @@ Rules:
         window.location.assign(pwaInstallManager.getModeUrl(mode));
       } else if (action === 'export-admin-topic-zip') {
         this.exportAdminTopicZip(target);
+      } else if (action === 'import-scanned-topic-zip') {
+        this.importScannedTopicZip(target);
       }
     }, settingsEventOptions);
     
@@ -11864,9 +11868,47 @@ Rules:
     this.topicImportBusy = true;
     input.disabled = true;
     const status = this.container.querySelector('#admin-topic-export-status');
+    const reportNode = this.container.querySelector('#topic-zip-scan-report');
+    const importButton = this.container.querySelector('[data-action="import-scanned-topic-zip"]');
+    this.pendingTopicZip = null;
+    if (importButton) importButton.hidden = true;
     try {
-      if (status) status.textContent = 'Reading topic ZIP…';
-      const topics = await readTopicZip(input.files[0]);
+      if (status) status.textContent = 'Scanning ZIP locally…';
+      if (reportNode) reportNode.textContent = '';
+      const result = await scanTopicZip(input.files[0]);
+      if (!input.isConnected || !this.isAdminMode()) return;
+      const { report, topics } = result;
+      const size = bytes => bytes < 1024 ? `${bytes} B` : bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+      if (reportNode) reportNode.innerHTML = `
+        <strong>${report.passed ? 'Local checks passed' : 'Import blocked'}</strong>
+        <p>${report.files.length} entries · ZIP ${size(report.compressedBytes)} · expanded ${size(report.expandedBytes)}</p>
+        ${report.error ? `<p>${this.escapeHtml(report.error)}</p>` : ''}
+        <p>Local validation only. Antivirus is not connected; remote links and factual accuracy are not checked.</p>
+        <details ${report.passed ? '' : 'open'}><summary>File scan report</summary><ul>
+          ${report.files.map(entry => `<li><strong>${this.escapeHtml(entry.status)}</strong> ${this.escapeHtml(entry.path)} (${size(entry.size)})${entry.reason ? ` — ${this.escapeHtml(entry.reason)}` : ''}</li>`).join('')}
+        </ul></details>`;
+      if (report.passed) {
+        this.pendingTopicZip = { topics, reportNode };
+        if (importButton) importButton.hidden = false;
+        if (status) status.textContent = `${topics.length} topics ready. Review the scan report, then import.`;
+      } else if (status) status.textContent = 'Nothing imported. Fix the blocked files and choose the ZIP again.';
+    } catch (error) {
+      if (status) status.textContent = error.message;
+    } finally {
+      this.topicImportBusy = false;
+      input.disabled = false;
+      input.value = '';
+    }
+  }
+
+  async importScannedTopicZip(button) {
+    const pending = this.pendingTopicZip;
+    if (!this.isAdminMode() || this.topicImportBusy || !pending?.reportNode?.isConnected) return;
+    this.topicImportBusy = true;
+    button.disabled = true;
+    const status = this.container.querySelector('#admin-topic-export-status');
+    try {
+      const { topics } = pending;
       for (const topic of topics) {
         if (!topic.mediaTokens.length) topic.mediaTokens = topic.media.map((url, index) => ({ id: `media-${index + 1}`, url }));
         for (const token of topic.mediaTokens) {
@@ -11877,12 +11919,13 @@ Rules:
         }
       }
       window.dispatchEvent(new CustomEvent('topicReviewPackageImported', { detail: { topics } }));
+      this.pendingTopicZip = null;
+      button.hidden = true;
     } catch (error) {
       if (status) status.textContent = error.message;
     } finally {
       this.topicImportBusy = false;
-      input.disabled = false;
-      input.value = '';
+      button.disabled = false;
     }
   }
   
