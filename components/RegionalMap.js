@@ -100,11 +100,13 @@ export class RegionalMap {
     this.actionHistory = [];
     this.redoHistory = [];
     this.searchPanelCollapsed = false;
+    this.drawingToolsExpanded = false;
     this.handleClick = this.handleClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
     this.handleDocumentClick = this.handleDocumentClick.bind(this);
     document.addEventListener('click', this.handleDocumentClick);
+    window.addEventListener('topBarRendered', () => this.syncDrawingToolbar());
     window.addEventListener('regionalMapControlRequested', event => {
       if (!this.visible || !this.map) return;
       const { action, button } = event.detail;
@@ -154,6 +156,7 @@ export class RegionalMap {
     this.element.classList.remove('hidden');
     this.container.classList.add('regional-map-active');
     this.visible = true;
+    this.syncDrawingToolbar();
     this.mountLeafletMap();
   }
 
@@ -165,6 +168,7 @@ export class RegionalMap {
     this.destroyLeafletMap();
     this.container.classList.remove('regional-map-active');
     this.visible = false;
+    this.syncDrawingToolbar();
   }
 
   ensureElement() {
@@ -201,13 +205,6 @@ export class RegionalMap {
   }
 
   renderAuthorToolbar() {
-    const tool = (mode, labelKey, icon) => `
-      <button
-        type="button"
-        class="regional-map-tool ${this.authorMode === mode ? 'active' : ''}"
-        data-regional-tool="${this.escapeHtml(mode)}"
-      ><span aria-hidden="true">${this.escapeHtml(icon)}</span><span>${this.escapeHtml(this.t(labelKey))}</span></button>
-    `;
     const routeProfile = (profile, labelKey, icon) => `
       <button
         type="button"
@@ -226,17 +223,7 @@ export class RegionalMap {
     `;
 
     return `
-      <button type="button" class="regional-map-tool" data-action="collapse-regional-tools" aria-expanded="true">Drawing tools ▾</button>
-      <div class="regional-map-toolbar" role="toolbar" aria-label="${this.escapeHtml(this.t('regional.toolsLabel'))}">
-        ${tool('drag', 'regional.toolDrag', '✋')}
-        ${tool('point', 'regional.toolAddPoint', '📍')}
-        ${tool('path', 'regional.toolTracePath', '〰️')}
-        ${tool('route', 'regional.toolRoute', '🧭')}
-        <button type="button" class="regional-map-tool" data-action="finish-regional-path">${this.escapeHtml(this.t('regional.toolFinishPath'))}</button>
-        <button type="button" class="regional-map-tool ghost" data-action="undo-regional-tool"><span aria-hidden="true">↶</span><span>${this.escapeHtml(this.t('regional.toolUndo'))}</span></button>
-        <button type="button" class="regional-map-tool ghost" data-action="redo-regional-tool"><span aria-hidden="true">↷</span><span>${this.escapeHtml(this.t('regional.toolRedo'))}</span></button>
-        <button type="button" class="regional-map-tool ghost" data-action="clear-regional-path">${this.escapeHtml(this.t('regional.toolClearPath'))}</button>
-      </div>
+      <button type="button" class="regional-map-tool" data-action="collapse-regional-tools" aria-expanded="${this.drawingToolsExpanded ? 'true' : 'false'}">Drawing tools ${this.drawingToolsExpanded ? '▾' : '▸'}</button>
       <div class="regional-route-panel" aria-label="${this.escapeHtml(this.t('regional.routeOptions'))}">
         <div class="regional-route-row">
           <span class="regional-route-label">${this.escapeHtml(this.t('regional.routeProfile'))}</span>
@@ -253,6 +240,71 @@ export class RegionalMap {
         <div class="regional-route-hint">${this.escapeHtml(this.t('regional.routeHint'))}</div>
       </div>
     `;
+  }
+
+  renderDrawingToolbar() {
+    const tool = (mode, key, icon) => `<button type="button" class="regional-map-tool ${this.authorMode === mode ? 'active' : ''}" data-regional-tool="${mode}" aria-label="${this.escapeHtml(this.t(key))}" title="${this.escapeHtml(this.t(key))}"><span aria-hidden="true">${icon}</span><span class="drawing-tool-label">${this.escapeHtml(this.t(key))}</span></button>`;
+    return `      <div class="regional-map-toolbar" role="toolbar" aria-label="${this.escapeHtml(this.t('regional.toolsLabel'))}">
+        ${tool('drag', 'regional.toolDrag', '✋')}
+        ${tool('point', 'regional.toolAddPoint', '📍')}
+        ${tool('path', 'regional.toolTracePath', '〰️')}
+        ${tool('route', 'regional.toolRoute', '🧭')}
+        <button type="button" class="regional-map-tool" data-action="finish-regional-path" aria-label="Finish path" title="Finish path"><span aria-hidden="true">✓</span><span class="drawing-tool-label">${this.escapeHtml(this.t('regional.toolFinishPath'))}</span></button>
+        <button type="button" class="regional-map-tool ghost" data-action="undo-regional-tool" aria-label="Undo" title="Undo"><span aria-hidden="true">↶</span><span class="drawing-tool-label">${this.escapeHtml(this.t('regional.toolUndo'))}</span></button>
+        <button type="button" class="regional-map-tool ghost" data-action="redo-regional-tool" aria-label="Redo" title="Redo"><span aria-hidden="true">↷</span><span class="drawing-tool-label">${this.escapeHtml(this.t('regional.toolRedo'))}</span></button>
+        <button type="button" class="regional-map-tool ghost" data-action="clear-regional-path" aria-label="Clear path" title="Clear path"><span aria-hidden="true">×</span><span class="drawing-tool-label">${this.escapeHtml(this.t('regional.toolClearPath'))}</span></button>
+      </div>
+`;
+  }
+
+  syncDrawingToolbar() {
+    const host = document.getElementById('scene-interaction-controls');
+    if (!host) return;
+    let controls = host.querySelector('#regional-drawing-controls');
+    if (!controls) {
+      controls = document.createElement('div');
+      controls.id = 'regional-drawing-controls';
+      controls.addEventListener('click', this.handleClick);
+      host.prepend(controls);
+    }
+    controls.hidden = !this.visible || !this.drawingToolsExpanded;
+    controls.innerHTML = this.renderDrawingToolbar();
+    this.updateToolButtons();
+  }
+
+  getTopicRegionalState(options = {}) {
+    if (this.pathPoints.length < 2 && !this.routeGeometry?.length) return null;
+    return {
+      version: 1, capturedAt: new Date().toISOString(), layerId: options.layerId || options.topic?.category || '',
+      restoreMode: options.restoreMode || (this.routeGeometry?.length ? 'route' : 'path'),
+      map: { ...this.getCurrentView(), activeLayers: options.activeLayers || Array.from(this.activeLayers || []) },
+      path: this.pathPoints.length >= 2 ? { points: this.pathPoints.map(pair => [...pair]), source: 'regional-map-drawn' } : null,
+      route: this.routeGeometry?.length ? { ...this.routeDetails, profile: this.routeProfile, preference: this.routePreference,
+        waypoints: this.routePoints.map(([lat, lon]) => ({ lat, lon })), geometry: this.routeGeometry.map(pair => [...pair]) } : null
+    };
+  }
+
+  restoreTopicState(state) {
+    if (!state || !this.map) return false;
+    this.restorePath(Array.isArray(state.path) ? state.path : state.path?.points || []);
+    this.clearRoute({ silent: true });
+    if (state.route) {
+      this.routeProfile = state.route.profile || 'bike';
+      this.routePreference = state.route.preference || 'shortest';
+      this.routePoints = (state.route.waypoints || []).map(point => Array.isArray(point) ? point : [point.lat, point.lon]);
+      this.routeDetails = { ...state.route };
+      this.drawRoute(state.route.geometry || this.routePoints, { fallback: !!state.route.fallback });
+    }
+    if (state.map) this.restoreMapView(state.map);
+    this.updateToolButtons();
+    return true;
+  }
+
+  linkCompletedDrawing(topicId = this.activeTopicId) {
+    const state = this.getTopicRegionalState();
+    if (!state) return;
+    const first = state.path?.points?.[0] || state.route?.geometry?.[0];
+    this.callbacks.onDrawingComplete?.({ topicId, state, lat: first[0], lon: first[1] });
   }
 
   renderMeteoDigest() {
@@ -474,18 +526,18 @@ export class RegionalMap {
   updateToolButtons() {
     if (!this.element) return;
 
-    this.element.querySelectorAll('[data-regional-tool]').forEach((button) => {
+    this.container.querySelectorAll('[data-regional-tool]').forEach((button) => {
       button.classList.toggle('active', button.dataset.regionalTool === this.authorMode);
     });
-    this.element.querySelectorAll('[data-action="set-regional-route-profile"]').forEach((button) => {
+    this.container.querySelectorAll('[data-action="set-regional-route-profile"]').forEach((button) => {
       button.classList.toggle('active', button.dataset.routeProfile === this.routeProfile);
     });
-    this.element.querySelectorAll('[data-action="set-regional-route-preference"]').forEach((button) => {
+    this.container.querySelectorAll('[data-action="set-regional-route-preference"]').forEach((button) => {
       button.classList.toggle('active', button.dataset.routePreference === this.routePreference);
     });
 
-    const undoButton = this.element.querySelector('[data-action="undo-regional-tool"]');
-    const redoButton = this.element.querySelector('[data-action="redo-regional-tool"]');
+    const undoButton = this.container.querySelector('[data-action="undo-regional-tool"]');
+    const redoButton = this.container.querySelector('[data-action="redo-regional-tool"]');
     if (undoButton) undoButton.disabled = this.actionHistory.length === 0;
     if (redoButton) redoButton.disabled = this.redoHistory.length === 0;
   }
@@ -727,6 +779,7 @@ export class RegionalMap {
     this.renderPathLayer();
     this.setAuthorMode('drag');
     this.setStatus(this.t('regional.pathFinished', { count: this.pathPoints.length }), 'ready');
+    this.linkCompletedDrawing();
   }
 
   clearPath(options = {}) {
@@ -825,6 +878,7 @@ export class RegionalMap {
   }
 
   clearRouteLayer() {
+    this.routeGeometry = [];
     if (this.routeLayer) {
       this.routeLayer.remove();
       this.routeLayer = null;
@@ -847,6 +901,7 @@ export class RegionalMap {
     }
 
     const [start, end] = this.routePoints;
+    const routeTopicId = this.activeTopicId;
     const requestId = this.routeRequestId + 1;
     this.routeRequestId = requestId;
     this.clearRouteLayer();
@@ -864,7 +919,9 @@ export class RegionalMap {
 
       this.drawRoute(route.points, { fallback: false });
       const summary = this.formatRouteSummary(route);
+      this.routeDetails = { distanceM: route.distance, durationS: route.duration, provider: 'OSRM', calculatedAt: new Date().toISOString(), fallback: false };
       this.setStatus(this.t('regional.routeReady', summary), 'ready');
+      this.linkCompletedDrawing(routeTopicId);
       return true;
     } catch (error) {
       console.warn('[Regional Map] Route service failed, drawing direct line:', error);
@@ -873,7 +930,9 @@ export class RegionalMap {
       }
 
       this.drawRoute([start, end], { fallback: true });
+      this.routeDetails = { provider: 'direct-line', fallback: true };
       this.setStatus(this.t('regional.routeFallback'), 'fallback');
+      this.linkCompletedDrawing(routeTopicId);
       return false;
     }
   }
@@ -932,6 +991,7 @@ export class RegionalMap {
     if (!this.map || !this.L || points.length < 2) return false;
     const { fallback = false } = options;
     this.clearRouteLayer();
+    this.routeGeometry = points.map(pair => [...pair]);
     this.routeLayer = this.L.polyline(points, {
       color: fallback ? '#ffb74d' : '#00d4ff',
       weight: fallback ? 4 : 7,
@@ -1622,7 +1682,7 @@ export class RegionalMap {
 
   renderSearchControl() {
     return `
-      <form id="regional-map-search-panel" class="regional-map-search hidden" data-regional-map-search>
+      <form id="regional-map-search-panel" class="regional-map-search hidden ${this.drawingToolsExpanded ? '' : 'tools-collapsed'}" data-regional-map-search>
         <button
           type="button"
           class="regional-map-panel-collapse"
@@ -1725,7 +1785,7 @@ export class RegionalMap {
 
     const target = event.target;
     if (!(target instanceof Element)) return;
-    if (panel.contains(target) || target.closest('.regional-map-search-toggle, [data-action="regional-search"]')) return;
+    if (panel.contains(target) || target.closest('#regional-drawing-controls, .regional-map-search-toggle, [data-action="regional-search"]')) return;
 
     this.closeSearchPanel();
   }
@@ -1995,7 +2055,10 @@ export class RegionalMap {
     const collapse = event.target.closest('[data-action="collapse-regional-tools"]');
     if (collapse) {
       const panel = collapse.closest('.regional-map-search');
-      const collapsed = panel.classList.toggle('tools-collapsed');
+      this.drawingToolsExpanded = !this.drawingToolsExpanded;
+      const collapsed = !this.drawingToolsExpanded;
+      panel.classList.toggle('tools-collapsed', collapsed);
+      this.syncDrawingToolbar();
       collapse.setAttribute('aria-expanded', String(!collapsed));
       collapse.textContent = collapsed ? 'Drawing tools ▸' : 'Drawing tools ▾';
       if (collapsed) this.setAuthorMode('drag');

@@ -10,10 +10,10 @@ import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-short-2
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=topic-earth-review-upload-20261003';
-import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-review-upload-20261003';
-import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-review-upload-20261003';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-review-upload-20261003';
+import { TopBar } from './components/TopBar.js?v=topic-earth-regional-drawing-20261004';
+import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-regional-drawing-20261004';
+import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-drawing-20261004';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-regional-drawing-20261004';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-meteo-draft-20260531';
 import { Settings } from './lib/settings.js?v=topic-earth-video-captions-20261003';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -1280,8 +1280,8 @@ class TopicEarthApp {
     };
 
     add(point.lat, point.lon);
-    (point.regionalState?.path || []).forEach(addPair);
-    (point.regionalState?.route?.waypoints || []).forEach(addPair);
+    (Array.isArray(point.regionalState?.path) ? point.regionalState.path : point.regionalState?.path?.points || []).forEach(addPair);
+    (point.regionalState?.route?.waypoints || []).forEach(point => addPair(Array.isArray(point) ? point : [point.lat, point.lon]));
     (point.regionalState?.route?.geometry || []).forEach(addPair);
     return coordinates;
   }
@@ -2443,7 +2443,7 @@ class TopicEarthApp {
       for (const topic of additions) {
         if (![...LAYERS, ...layers].some(layer => layer.id === topic.category)) {
           const mode = topic.regionalState || topic.regionalScope ? 'regional' : topic.isPlanet ? 'space' : topic.isFeverWarning || topic.isTippingPoint || topic.isAMOC ? 'fever' : 'main';
-          layers.push({ id: topic.category, name: topic.category, icon: '📥', color: '#00d4ff', enabled: false, modeTabs: [mode] });
+          layers.push({ id: topic.category, name: topic.category, icon: 'ðŸ“¥', color: '#00d4ff', enabled: false, modeTabs: [mode] });
         }
       }
       const status = this.detailPanel.container.querySelector('#admin-topic-export-status');
@@ -2809,6 +2809,16 @@ class TopicEarthApp {
       onMeteoTopicDraft: (point) => this.openMeteoTopicDraft(point),
       onLocationFocus: (context) => this.handleRegionalContextChange(context),
       onMapPointDraft: (context) => this.handleRegionalMapPointDraft(context),
+      onDrawingComplete: ({ topicId, state, lat, lon }) => {
+        if (['create-topic', 'edit-topic'].includes(this.detailPanel?.mode)) return;
+        const topic = this.allPoints.find(point => String(point.id) === String(topicId));
+        if (topic && AppAccess.canModifyTopic(topic)) {
+          state.layerId = topic.category;
+          this.handleRegionalTopicStateRecord(topic, state);
+        } else {
+          this.openRegionalProposal({ regionalContext: { lat, lon, precision: 'address', source: 'map-path' }, defaultLayerId: 'community-projects' });
+        }
+      },
       onTopicMove: (point, context) => this.handleRegionalTopicMove(point, context),
       onTopicRegionalStateChange: (point, state) => this.handleRegionalTopicStateRecord(point, state)
     });

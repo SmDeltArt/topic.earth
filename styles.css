@@ -9380,3 +9380,23 @@ body.regional-map-search-open #layer-panel:not(.closed) {
     opacity: 0 !important; pointer-events: none !important;
   }
 }
+
+#regional-drawing-controls[hidden] { display: none; }
+#regional-drawing-controls .regional-map-toolbar { position: static; margin: 0; padding: 0; border: 0; display: flex; flex-wrap: nowrap; gap: 4px; background: none; }
+#regional-drawing-controls .regional-map-tool { min-width: 32px; min-height: 34px; padding: 5px 7px; background: rgba(20,24,36,.94); border-color: rgba(0,212,255,.35); color: var(--text-primary); }
+.regional-route-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.regional-route-panel .regional-route-row { flex-wrap: wrap; gap: 4px; }
+.regional-route-panel .regional-route-hint { grid-column: 1 / -1; }
+@media (max-width: 1400px) {
+  #regional-drawing-controls .drawing-tool-label { display: none; }
+  body.regional-mode #mode-toggle-btn .header-label { display: none; }
+  body.regional-mode #mode-toggle-btn { min-width: 34px; width: 34px; padding: 5px; }
+}
+@media (max-width: 768px) {
+  body.regional-mode #scene-interaction-controls { left: 12px; right: 54px; gap: 3px; }
+  #regional-drawing-controls { min-width: 0; flex: 1; overflow-x: auto; }
+  #regional-drawing-controls .regional-map-tool { flex-shrink: 0; min-width: 30px; padding: 4px; }
+}
+
+#regional-drawing-controls .regional-map-tool.active,
+#regional-drawing-controls .regional-map-tool:hover { background: rgba(0,45,62,.96); color: var(--accent); border-color: var(--accent); }
