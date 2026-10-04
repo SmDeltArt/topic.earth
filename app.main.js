@@ -1,4 +1,4 @@
-import { GlobeRenderer } from './lib/globe.js?v=topic-earth-layout-20261003';
+import { GlobeRenderer } from './lib/globe.js?v=translation-20261004-topic-earth-layout-20261003';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LAYERS } from './data/layers.js?v=topic-earth-regional-merged-20261003';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
@@ -10,14 +10,14 @@ import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-short-2
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=topic-earth-regional-drawing-20261004';
+import { TopBar } from './components/TopBar.js?v=translation-20261004-topic-earth-regional-drawing-20261004';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-regional-drawing-20261004';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-drawing-20261004';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-earth-regional-drawing-20261004';
+import { DetailPanel } from './components/DetailPanel.js?v=translation-20261004';
 import { LocalStorage } from './lib/storage.js?v=topic-earth-meteo-draft-20260531';
 import { Settings } from './lib/settings.js?v=topic-earth-video-captions-20261003';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
-import { ReadTranslationService } from './lib/read-translation.js?v=topic-earth-warning-panel-collapse-20260430';
+import { ReadTranslationService } from './lib/read-translation.js?v=translation-20261004';
 import { TTSManager } from './lib/tts.js?v=topic-earth-legacy-key-decode-20260520';
 import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-meteo-draft-20260531';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
@@ -1834,6 +1834,28 @@ class TopicEarthApp {
   }
 
   setupTextSelection() {
+    const selectionTool = document.createElement('button');
+    selectionTool.type = 'button';
+    selectionTool.className = 'text-selection-tool';
+    selectionTool.textContent = 'Select text';
+    selectionTool.setAttribute('aria-pressed', 'false');
+    selectionTool.title = 'Enable text selection. Tap a paragraph, or long-press and adjust the selection handles.';
+    selectionTool.addEventListener('click', () => {
+      const active = document.body.classList.toggle('text-selection-enabled');
+      selectionTool.setAttribute('aria-pressed', String(active));
+      selectionTool.textContent = active ? 'Select text: on' : 'Select text';
+    });
+    document.body.appendChild(selectionTool);
+    document.addEventListener('click', event => {
+      if (!document.body.classList.contains('text-selection-enabled') || event.target.closest('button, a, input, textarea, select, .tts-vignette')) return;
+      const prose = event.target.closest('#detail-content .section-content, #detail-content .insight-content, #detail-content .detail-title, #warming-message, #fever-warning-content');
+      if (!prose) return;
+      const range = document.createRange();
+      range.selectNodeContents(prose);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    });
     let selectionTimeout;
     let ttsButton = null;
     const escapeHtml = (value = '') => String(value)
@@ -1846,6 +1868,9 @@ class TopicEarthApp {
     const showTTSButton = (x, y, text) => {
       this.removeTTSButton();
       
+      const selectionNode = window.getSelection()?.anchorNode;
+      const selectionElement = selectionNode?.nodeType === 1 ? selectionNode : selectionNode?.parentElement;
+      const sourceLanguage = selectionElement?.closest('[data-content-language]')?.dataset.contentLanguage || 'en';
       const settings = Settings.get();
       const currentLang = this.getCurrentUiLanguage(settings);
       const translationLang = LanguageManager.getLanguageInfo(settings.translationLanguage)?.code || currentLang;
@@ -1869,6 +1894,7 @@ class TopicEarthApp {
           </svg>
           <span>${escapeHtml(readLabel)}</span>
         </button>
+        <button type="button" class="tts-selection-action translate" data-tts-action="translate" title="Show translated selected text">🌐 Translate</button>
         <button type="button" class="tts-selection-action translate" data-tts-action="translate-read" title="${escapeHtml(translateReadTitle)}">
           <span>${escapeHtml(translateReadLabel)}</span>
           <span class="tts-selection-lang">${escapeHtml(targetLanguage)}</span>
@@ -1877,6 +1903,7 @@ class TopicEarthApp {
       ttsButton.style.left = `${x}px`;
       ttsButton.style.top = `${y}px`;
       
+      ttsButton.addEventListener('pointerdown', event => event.preventDefault());
       ttsButton.addEventListener('click', async (e) => {
         const actionButton = e.target.closest('[data-tts-action]');
         if (!actionButton) return;
@@ -1888,10 +1915,10 @@ class TopicEarthApp {
         });
         ttsButton.classList.add('loading');
 
-        if (action === 'translate-read') {
-          actionButton.querySelector('span').textContent = 'Translating...';
+        if (action === 'translate-read' || action === 'translate') {
+          actionButton.textContent = 'Translating...';
           this.showTTSVignette({
-            mode: 'Translate + Read',
+            mode: action === 'translate' ? 'Translate' : 'Translate + Read',
             originalText: text,
             translatedText: '',
             languageLabel: targetLanguage,
@@ -1901,22 +1928,13 @@ class TopicEarthApp {
           const vignetteId = this.ttsVignetteState?.id;
 
           try {
-            console.info('[Read Test] Translate + Read started in local-first mode.', {
-              targetLanguage: translationLang,
-              tts: 'browser-forced',
-              linkedAiTranslation: 'skipped-unless-called-elsewhere'
-            });
-            this.updateTTSVignette({
-              status: `No API first: checking local ${targetLanguage} translation...`,
-              debugLabel: 'NO API FIRST',
-              debugTone: 'local'
-            });
-            const translated = await ReadTranslationService.translateText(text, translationLang, { localOnly: true });
+            this.updateTTSVignette({ status: 'Checking saved and browser translation, then configured API or free fallback…' });
+            const translated = await ReadTranslationService.translateText(text, translationLang, { sourceLanguage, allowFreeApi: true });
             if (!this.isActiveTTSVignette(vignetteId)) return;
             const translatedSpeechLang = translated.speechLang || LanguageManager.getSpeechCode(translated.language || translationLang);
             const status = translated.provider === 'original' && translationLang !== 'en'
-              ? `No local translation available. Reading original text with browser voice.`
-              : `Reading in ${targetLanguage} with browser voice`;
+              ? `Translation unavailable. Original text is shown.`
+              : action === 'translate' ? `Translated to ${targetLanguage}` : `Reading in ${targetLanguage} with browser voice`;
             console.info('[Read Test] Translation route resolved.', {
               provider: translated.provider,
               speechLang: translatedSpeechLang,
@@ -1930,24 +1948,24 @@ class TopicEarthApp {
                 ? 'CSV LOCAL'
                 : translated.provider === 'browser'
                   ? 'BROWSER TRANSLATION'
-                  : 'LOCAL ORIGINAL',
+                  : translated.provider === 'mymemory' ? 'MYMEMORY FREE' : translated.provider === 'ai' ? 'CONFIGURED AI' : 'ORIGINAL',
               debugTone: translated.provider === 'original' ? 'warn' : 'local',
               speechLang: translatedSpeechLang
             });
-            this.speakFromVignette(translated.text, translatedSpeechLang);
+            if (action === 'translate-read') this.speakFromVignette(translated.text, translatedSpeechLang);
           } catch (error) {
             if (!this.isActiveTTSVignette(vignetteId)) return;
             console.warn('[Translate Read] Could not prepare translation vignette:', error);
             const fallbackSpeechLang = speechLang;
             this.updateTTSVignette({
               translatedText: text,
-              status: 'Translation failed. Reading original text with browser voice.',
+              status: 'Translation failed. Original text is shown.',
               provider: 'original',
               debugLabel: 'LOCAL FALLBACK',
               debugTone: 'warn',
               speechLang: fallbackSpeechLang
             });
-            this.speakFromVignette(text, fallbackSpeechLang);
+            if (action === 'translate-read') this.speakFromVignette(text, fallbackSpeechLang);
           }
         } else {
           actionButton.querySelector('span').textContent = 'Reading...';
@@ -1974,20 +1992,20 @@ class TopicEarthApp {
       
       document.body.appendChild(ttsButton);
       
-      // Auto-hide after 5 seconds
-      setTimeout(() => {
-        this.removeTTSButton();
-      }, 5000);
+      const bounds = ttsButton.getBoundingClientRect();
+      ttsButton.style.left = `${Math.max(bounds.width / 2 + 8, Math.min(x, window.innerWidth - bounds.width / 2 - 8))}px`;
+      ttsButton.style.top = `${Math.min(y, window.innerHeight - bounds.height - 8)}px`;
     };
 
-    document.addEventListener('mouseup', (e) => {
+    const updateSelection = () => {
       clearTimeout(selectionTimeout);
       
       selectionTimeout = setTimeout(() => {
         const selection = window.getSelection();
+        if (!selection?.rangeCount || this.ttsVignette?.contains(selection.anchorNode)) return;
         const text = selection.toString().trim();
         
-        if (text.length > 5) { // Only show for meaningful selections
+        if (text.length > 1) { // Only show for meaningful selections
           const range = selection.getRangeAt(0);
           const rect = range.getBoundingClientRect();
           
@@ -1999,8 +2017,11 @@ class TopicEarthApp {
         } else {
           this.removeTTSButton();
         }
-      }, 100);
-    });
+      }, 180);
+    };
+    document.addEventListener('mouseup', updateSelection);
+    document.addEventListener('touchend', updateSelection, { passive: true });
+    document.addEventListener('selectionchange', updateSelection);
     
     // Remove button when clicking elsewhere
     document.addEventListener('mousedown', (e) => {
@@ -2051,7 +2072,7 @@ class TopicEarthApp {
         <div class="tts-vignette-text translated" data-tts-vignette-translated></div>
       </div>
       <div class="tts-vignette-actions">
-        <button type="button" class="tts-vignette-btn" data-tts-vignette-action="replay">Replay</button>
+        <button type="button" class="tts-vignette-btn" data-tts-vignette-action="replay">Read</button>
         <button type="button" class="tts-vignette-btn stop" data-tts-vignette-action="stop">Stop</button>
       </div>
     `;
@@ -2110,7 +2131,9 @@ class TopicEarthApp {
 
     const state = this.ttsVignetteState;
     const providerLabels = {
-      ai: 'AI translation',
+      ai: 'Configured AI translation',
+      csv: 'Saved UI translation',
+      mymemory: 'MyMemory free translation',
       browser: 'Browser translation',
       cache: 'Cached translation',
       original: 'Original text',

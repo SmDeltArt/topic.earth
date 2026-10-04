@@ -3,7 +3,8 @@ import { Settings } from '../lib/settings.js?v=topic-earth-video-captions-202610
 import { buildCaptionEmbedUrl } from '../lib/video-captions.mjs?v=topic-earth-video-captions-20261003';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-fever-scenario-layer-20260521';
-import { ReadTranslationService } from '../lib/read-translation.js';
+import { ReadTranslationService } from '../lib/read-translation.js?v=translation-20261004';
+import { TopicTranslations, plainTopicText } from '../lib/topic-translations.mjs?v=translation-20261004';
 import { buildFeverAudioText } from '../lib/fever-audio-manifest.mjs';
 import { getFeverWarmingTranslation } from '../lib/fever-warming-translations.js?v=topic-earth-fever-json-i18n-20260422';
 import { LocalStorage } from '../lib/storage.js?v=topic-earth-meteo-draft-20260531';
@@ -68,6 +69,10 @@ export class DetailPanel {
     installMediaFallbackHandler(this.container);
     this.setupCloseButton();
     this.installFeverAudioUnlockHandlers();
+    window.addEventListener('translationProviderChanged', () => {
+      const status = this.container.querySelector('[data-translation-route]');
+      if (status) status.textContent = ReadTranslationService.getRouteLabel();
+    });
     window.addEventListener('browserVoicesChanged', () => {
       if (this.mode !== 'settings') return;
       const content = this.container.querySelector('#detail-content');
@@ -318,6 +323,7 @@ export class DetailPanel {
 
   getFeverNarrationText({ year, scenario, title, text, language }) {
     const speed = Number(this.currentGlobe?.feverSpeed || 2 / 3);
+    if (speed > (1 / 3) + 0.001) return String(text || title || '').trim();
     const milestone = this.getScenarioMilestoneData(year, scenario);
 
     return buildFeverAudioText({
@@ -327,6 +333,10 @@ export class DetailPanel {
       speed,
       lg: language || this.getCurrentLanguage()
     });
+  }
+
+  shouldAutoNarrateFeverMessages() {
+    return Number(this.currentGlobe?.feverSpeed || 2 / 3) <= (2 / 3) + 0.001;
   }
 
   shouldAutoNarrateFeverValues() {
@@ -585,6 +595,10 @@ export class DetailPanel {
         this.submitTopic('save');
       } else if (action === 'manage-sources') {
         this.manageSources();
+      } else if (action === 'translate-topic') {
+        this.translateCurrentTopic(target);
+      } else if (action === 'read-topic') {
+        this.readCurrentTopic();
       } else if (action === 'check-topic-update') {
         this.checkTopicUpdate();
       } else if (action === 'draft-meteo-topic') {
@@ -2301,7 +2315,7 @@ export class DetailPanel {
     }, 5000);
     
     // Speak warning if voice enabled
-    if (this.currentGlobe && this.currentGlobe.getFeverVoiceEnabled() && this.shouldAutoNarrateFeverValues() && window.ttsManager) {
+    if (this.currentGlobe && this.currentGlobe.getFeverVoiceEnabled() && this.shouldAutoNarrateFeverMessages() && window.ttsManager) {
       const spokenWarning = this.getFeverNarrationText({
         year,
         scenario,
@@ -2402,7 +2416,7 @@ export class DetailPanel {
     this.updateSelectedFeverTopic(year);
     
     // Read warning with TTS if enabled
-    if (this.currentGlobe && this.currentGlobe.getFeverVoiceEnabled() && this.shouldAutoNarrateFeverValues() && window.ttsManager) {
+    if (this.currentGlobe && this.currentGlobe.getFeverVoiceEnabled() && this.shouldAutoNarrateFeverMessages() && window.ttsManager) {
       const spokenWarning = this.getFeverNarrationText({
         year,
         scenario,
@@ -2889,8 +2903,66 @@ Keep response concise (3-4 sentences).`;
     window.dispatchEvent(new CustomEvent('topicDetailOpened', { detail: { point } }));
   }
 
+  getTopicTranslationLanguage() {
+    const settings = Settings.get();
+    return LanguageManager.normalizeLanguageCode(settings.translationLanguage || this.getCurrentLanguage());
+  }
+
+  async translateCurrentTopic(button) {
+    const topic = this.currentPoint;
+    if (!topic) return;
+    const language = this.getTopicTranslationLanguage();
+    const status = this.container.querySelector('[data-topic-translation-status]');
+    if (button) button.disabled = true;
+    if (status) status.textContent = 'Translating…';
+    try {
+      const record = await TopicTranslations.translate(topic, language, ReadTranslationService);
+      if (this.currentPoint !== topic || this.mode !== 'detail') return;
+      this.renderDetail(topic);
+      const nextStatus = this.container.querySelector('[data-topic-translation-status]');
+      if (nextStatus) nextStatus.textContent = `${language.toUpperCase()} · ${record.provider} · saved in this browser`;
+    } catch (error) {
+      if (this.currentPoint === topic && status?.isConnected) status.textContent = error.message;
+    } finally { if (button) button.disabled = false; }
+  }
+
+  readCurrentTopic() {
+    const topic = this.currentPoint;
+    if (!topic) return;
+    const language = this.getTopicTranslationLanguage();
+    const saved = TopicTranslations.get(topic, language);
+    const display = saved || topic;
+    const text = [display.title, display.summary, display.insight].filter(Boolean).join('. ');
+    const plain = plainTopicText(text);
+    window.ttsManager?.speak(plain, LanguageManager.getSpeechCode(saved ? language : topic.language || 'en'), { forceBrowser: true });
+  }
+
   renderDetail(point) {
+    const originalPoint = point;
+    const language = this.getTopicTranslationLanguage();
+    const translated = TopicTranslations.get(point, language);
+    if (translated) point = { ...point, title: translated.title, summary: this.escapeHtml(translated.summary), insight: this.escapeHtml(translated.insight) };
+    if (!translated && point.translationFiles?.[language]) {
+      TopicTranslations.loadPackaged(point, language).then(record => {
+        if (record && this.currentPoint === originalPoint && this.mode === 'detail') this.renderDetail(originalPoint);
+      });
+    }
+    if (!translated && TopicTranslations.hasSaved(point, language)) {
+      const revision = JSON.stringify([point.id, language, point.title, point.summary, point.insight]);
+      if (this.topicTranslationRefreshRevision !== revision) {
+        this.topicTranslationRefreshRevision = revision;
+        TopicTranslations.translate(point, language, ReadTranslationService).then(() => {
+          if (this.currentPoint === originalPoint && this.mode === 'detail') this.renderDetail(originalPoint);
+        }).catch(error => {
+          if (this.currentPoint === originalPoint) {
+            const status = this.container.querySelector('[data-topic-translation-status]');
+            if (status) status.textContent = error.message;
+          }
+        });
+      }
+    }
     const content = this.container.querySelector('#detail-content');
+    content.dataset.contentLanguage = translated ? language : originalPoint.language || 'en';
     const layer = this.layers.find(l => l.id === point.category);
 
     if (!layer) return;
@@ -2990,6 +3062,7 @@ Keep response concise (3-4 sentences).`;
 
     const topicActions = `
       <div class="topic-detail-actions">
+
         <button class="btn-secondary topic-action-btn" data-action="check-topic-update" title="Check latest news against this topic">
           Check Topic Update
         </button>
@@ -3053,6 +3126,11 @@ Keep response concise (3-4 sentences).`;
         <div class="detail-meta">
           <span>&#128205; ${point.region}, ${point.country}</span>
           <span>&#128197; ${point.date}</span>
+        </div>
+        <div class="topic-language-controls">
+        <button type="button" class="btn-secondary topic-action-btn" data-action="translate-topic" title="Translate this topic to the selected translation language">&#127760; Translate · ${this.escapeHtml(LanguageManager.getLanguageInfo(language)?.nativeName || language)}</button>
+        <button type="button" class="btn-secondary topic-action-btn" data-action="read-topic" title="Read this topic with a browser voice">&#128266; Read</button>
+        <span data-topic-translation-status role="status">${translated ? this.escapeHtml(`${language.toUpperCase()} · saved translation`) : 'Translation checks saved language versions first.'}</span>
         </div>
       </div>
 
@@ -4101,7 +4179,7 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
       this.currentGlobe.setFeverSpeed(speed);
     }
 
-    // Faster loops keep the heartbeat clear; automatic translated value narration is slow-only.
+    // Stop the previous speed profile before the next milestone message.
     if (speed > (1 / 3) + 0.001) {
       window.ttsManager?.stop?.();
     }
@@ -10519,6 +10597,7 @@ Rules:
     meta.innerHTML = `
       <span><strong>Text:</strong> ${this.escapeHtml(textProvider)}${textModel ? ` / ${this.escapeHtml(textModel)}` : ''}</span>
       <span><strong>Image:</strong> ${this.escapeHtml(imageProvider)}</span>
+        <span><strong>Translation:</strong> <span data-translation-route>${this.escapeHtml(ReadTranslationService.getRouteLabel())}</span></span>
       <span><strong>TTS:</strong> ${this.escapeHtml(ttsProvider)} / ${this.escapeHtml(ttsVoice)}</span>
       <span><strong>STT:</strong> ${this.escapeHtml(sttProvider)} / ${this.escapeHtml(sttModel)}</span>
       <span><strong>Mode:</strong> ${this.escapeHtml(webSearchMode)}</span>
@@ -11516,6 +11595,7 @@ Rules:
           <div id="ai-api-link-meta" class="ai-api-link-meta">
             <span><strong>${this.escapeHtml(t('settings.aiText'))}:</strong> ${this.escapeHtml(aiTextProvider)}${aiTextModel ? ` / ${this.escapeHtml(aiTextModel)}` : ''}</span>
             <span><strong>${this.escapeHtml(t('settings.aiImage'))}:</strong> ${this.escapeHtml(aiImageProvider)}</span>
+            <span><strong>Translation:</strong> <span data-translation-route>${this.escapeHtml(ReadTranslationService.getRouteLabel())}</span></span>
             <span><strong>TTS:</strong> ${this.escapeHtml(aiTtsProvider)} / ${this.escapeHtml(aiTtsVoice)}</span>
             <span><strong>STT:</strong> ${this.escapeHtml(aiSttProvider)} / ${this.escapeHtml(aiSttModel)}</span>
             <span><strong>${this.escapeHtml(t('settings.aiMode'))}:</strong> ${this.escapeHtml(aiSearchMode)}</span>

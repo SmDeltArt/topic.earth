@@ -84,7 +84,11 @@ The repo is ready for static hosting on Vercel. Keep runtime asset URLs relative
 
 Cloudinary CDN delivery is bridged through [lib/asset-bridge.js](lib/asset-bridge.js), so code can keep stable local asset names while selected assets resolve to Cloudinary.
 
-Development lives in `__actual_vs\topic.earth`; the GitHub staging checkout is `C:\Git\__actual_github\topic.earth`. Sync, commit, push, and deployment are deliberate operations requiring user authorization. Before a sync, list and exclude files over 5 MB, `build/`, `dist/`, `*.map`, `*.log`, and `node_modules/` unless inclusion is explicitly confirmed. Development documents, agent instructions, tools, editor settings, and Python caches stay local. Excluding an existing checkout file does not delete it.
+As of 4 October 2026, BenDes selected `C:\Git\__actual_github\topic.earth`, including reviewed local commit `e8bc315`, as the authoritative working checkout. Edit and validate there directly; do not sync older OneDrive files back over it. This is a topic.earth-specific exception to the collection's default development-root policy.
+
+A verified archive copy of the former `__actual_vs\topic.earth` folder is at `C:\Git\_archive\topic.earth-onedrive-20261004`, outside OneDrive and this repository. Windows blocked moving the original, which remains a retired copy. Neither copy is an active development source or runtime deployment input.
+
+Commit, push, deployment, and imports remain deliberate operations requiring user authorization. Before an import, list and exclude files over 5 MB, `build/`, `dist/`, `*.map`, `*.log`, and `node_modules/` unless inclusion is explicitly confirmed. Development documents, tools, editor settings, and Python caches are not new runtime sync inputs. Excluding an existing checkout file does not delete it. Local Codex guidance is supplied by a Git-excluded `AGENTS.override.md`.
 
 ## AI Settings Routing
 

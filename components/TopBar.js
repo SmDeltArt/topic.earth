@@ -255,7 +255,7 @@ export class TopBar {
     }
     this.sceneControls.hidden = !['main', 'regional'].includes(activeModeTab);
     this.sceneControls.innerHTML = `
-      <button class="mode-toggle-btn ${this.interactionMode === 'interaction' ? 'active' : ''}" id="mode-toggle-btn" data-action="toggle-mode" data-tutorial-id="interaction-mode" title="${this.escapeHtml(interactionLabel)}" aria-label="${this.escapeHtml(interactionLabel)}">
+      <button class="mode-toggle-btn ${this.interactionMode === 'interaction' ? 'active' : ''}" id="mode-toggle-btn" data-action="toggle-mode" data-tutorial-id="interaction-mode" title="${this.escapeHtml(interactionLabel)} · ${this.interactionMode === 'interaction' ? 'Left drag: pan; right drag: rotate' : 'Left drag: rotate; right drag: pan'}" aria-label="${this.escapeHtml(interactionLabel)}">
         ${this.interactionMode === 'rotate' && !isRegionalMode ? `
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/>

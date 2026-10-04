@@ -1,0 +1,4 @@
+{
+  "version": "2.0.0",
+  "tasks": [{ "label": "topic.earth: local preview", "type": "shell", "command": "python", "args": ["-m", "http.server", "5501", "--bind", "127.0.0.1"], "options": { "cwd": "${workspaceFolder}" }, "isBackground": true, "problemMatcher": [] }]
+}
