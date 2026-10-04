@@ -25,3 +25,6 @@ __pycache__/
 assets/**/export-*.csv
 assets/logo/generated/**/frames/
 assets/models/_solar-system-archive-*/
+
+# Accidental command scratch file
+/bash
