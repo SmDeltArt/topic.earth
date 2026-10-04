@@ -1,5 +1,5 @@
 import { scanTopicZip } from '../lib/topic-importer.mjs?v=zip-scan-20261004';
-import { Settings } from '../lib/settings.js?v=topic-earth-video-captions-20261003';
+import { Settings } from '../lib/settings.js?v=rotation-speed-20261004';
 import { buildCaptionEmbedUrl } from '../lib/video-captions.mjs?v=topic-earth-video-captions-20261003';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-fever-scenario-layer-20260521';
@@ -92,6 +92,7 @@ export class DetailPanel {
       document.body.classList.toggle('detail-panel-compact', isOpen && this.isCompact);
       document.body.classList.toggle('detail-panel-top', isOpen && this.panelSize === 'top');
       if (isOpen) this.updateCompactSummary();
+      this.updateTopicLanguageControls();
       if (isOpen && !this.isCompact && window.innerWidth <= 768) {
         window.dispatchEvent(new CustomEvent('expandMobileTopic'));
       }
@@ -456,6 +457,10 @@ export class DetailPanel {
       }
     });
     
+    this.container.querySelector('.detail-toolbar')?.addEventListener('pointerdown', event => {
+      if (event.target.closest('.detail-read-btn, .detail-translate-btn')) event.preventDefault();
+    });
+
     // Delegate event handling for dynamic content
     this.container.addEventListener('click', (e) => {
       const disclosureSummary = e.target.closest('#monitoring-tab-content details > summary');
@@ -2908,6 +2913,22 @@ Keep response concise (3-4 sentences).`;
     return LanguageManager.normalizeLanguageCode(settings.translationLanguage || this.getCurrentLanguage());
   }
 
+  updateTopicLanguageControls() {
+    const available = this.mode === 'detail' && this.currentPoint
+      && !this.currentPoint.isCluster && !this.currentPoint.isCountry;
+    const language = this.getTopicTranslationLanguage();
+    const languageName = LanguageManager.getLanguageInfo(language)?.nativeName || language;
+    this.container.querySelectorAll('.detail-translate-btn, .detail-read-btn').forEach(button => {
+      button.hidden = !available;
+    });
+    const translate = this.container.querySelector('.detail-translate-btn');
+    if (translate) {
+      translate.querySelector('[data-topic-language-code]').textContent = language.toUpperCase();
+      translate.title = `Translate topic to ${languageName}`;
+      translate.setAttribute('aria-label', translate.title);
+    }
+  }
+
   async translateCurrentTopic(button) {
     const topic = this.currentPoint;
     if (!topic) return;
@@ -2929,15 +2950,11 @@ Keep response concise (3-4 sentences).`;
   readCurrentTopic() {
     const topic = this.currentPoint;
     if (!topic) return;
-    const language = this.getTopicTranslationLanguage();
-    const saved = TopicTranslations.get(topic, language);
-    const display = saved || topic;
-    const text = [display.title, display.summary, display.insight].filter(Boolean).join('. ');
-    const plain = plainTopicText(text);
-    window.ttsManager?.speak(plain, LanguageManager.getSpeechCode(saved ? language : topic.language || 'en'), { forceBrowser: true });
+    this.callbacks.onReadTopic?.(topic);
   }
 
   renderDetail(point) {
+    this.updateTopicLanguageControls();
     const originalPoint = point;
     const language = this.getTopicTranslationLanguage();
     const translated = TopicTranslations.get(point, language);
@@ -3127,11 +3144,7 @@ Keep response concise (3-4 sentences).`;
           <span>&#128205; ${point.region}, ${point.country}</span>
           <span>&#128197; ${point.date}</span>
         </div>
-        <div class="topic-language-controls">
-        <button type="button" class="btn-secondary topic-action-btn" data-action="translate-topic" title="Translate this topic to the selected translation language">&#127760; Translate · ${this.escapeHtml(LanguageManager.getLanguageInfo(language)?.nativeName || language)}</button>
-        <button type="button" class="btn-secondary topic-action-btn" data-action="read-topic" title="Read this topic with a browser voice">&#128266; Read</button>
-        <span data-topic-translation-status role="status">${translated ? this.escapeHtml(`${language.toUpperCase()} · saved translation`) : 'Translation checks saved language versions first.'}</span>
-        </div>
+        <span data-topic-translation-status role="status">${translated ? this.escapeHtml(`${language.toUpperCase()} · saved translation`) : ''}</span>
       </div>
 
       ${carbonHistoryBannerHtml}
@@ -11139,6 +11152,7 @@ Rules:
       speechPitch: parseFloat(content.querySelector('#speech-pitch')?.value || currentSettings.speechPitch || 1),
       autoShowTranscript: content.querySelector('#auto-show-transcript')?.checked ?? currentSettings.autoShowTranscript ?? false,
       showCountryHover: content.querySelector('#show-country-hover')?.checked ?? false,
+      rotationSpeed: Number(content.querySelector('#rotation-speed')?.value ?? currentSettings.rotationSpeed),
       baseTextureQuality: content.querySelector('#base-texture-quality')?.value || 'auto',
       feverLoopResolution: nextFeverLoopResolution === '8k' ? '4k' : nextFeverLoopResolution,
       aiWebSearchEnabled: content.querySelector('#ai-web-search-enabled')?.checked ?? true,
@@ -11550,6 +11564,14 @@ Rules:
           </label>
           <div class="setting-hint">${this.escapeHtml(t('settings.showCountryLabelsHint'))}</div>
         </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="rotation-speed">${this.escapeHtml(t('settings.rotationSpeed'))}</label>
+          <div class="slider-container">
+            <input type="range" id="rotation-speed" min="0" max="3" step="0.1" value="${settings.rotationSpeed}">
+            <output class="slider-value" for="rotation-speed">${settings.rotationSpeed.toFixed(1)}×</output>
+          </div>
+          <div class="setting-hint">${this.escapeHtml(t('settings.rotationSpeedHint'))}</div>
+        </div>
         <div class="form-group" style="margin-top: 12px;" data-tutorial-id="settings-main-texture">
           <label>${this.escapeHtml(t('settings.mainTextureResolution'))}</label>
           <select id="base-texture-quality">
@@ -11810,7 +11832,10 @@ Rules:
     
     // Real-time slider updates
     content.addEventListener('input', (e) => {
-      if (e.target.id === 'speech-rate') {
+      if (e.target.id === 'rotation-speed') {
+        e.target.parentElement.querySelector('.slider-value').textContent = `${Number(e.target.value).toFixed(1)}×`;
+        this.applySettingsFormChange(content);
+      } else if (e.target.id === 'speech-rate') {
         const valueDisplay = e.target.parentElement.querySelector('.slider-value');
         if (valueDisplay) {
           valueDisplay.textContent = `${e.target.value}x`;
@@ -11943,6 +11968,7 @@ Rules:
       settings.detectedBrowserLanguage = LanguageManager.detectBrowserLanguage();
       Settings.set(settings);
       this.ttsManager.updateSettings(settings);
+      window.dispatchEvent(new CustomEvent('settingsChanged', { detail: { settings, feverResolutionChanged: settingsBeforeReset.feverLoopResolution !== settings.feverLoopResolution } }));
       this.renderSettings();
     }
   }

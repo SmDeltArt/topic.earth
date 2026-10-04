@@ -126,12 +126,23 @@ assert.equal(panel.shouldAutoNarrateFeverMessages(), false);
 const globeContext = vm.createContext({ THREE: { MOUSE: { ROTATE: 0, PAN: 2 } }, DRACOLoader: class { setDecoderPath() {} } });
 vm.runInContext(strip(await read('lib/globe.js')) + '\nglobalThis.Globe = GlobeRenderer;', globeContext);
 const globe = Object.create(globeContext.Globe.prototype);
+globe.options = { autoRotate: true, rotationSpeed: 1 };
+globe.isFocused = true;
 globe.controls = { mouseButtons: { LEFT: 0, RIGHT: 2 } };
 globe.setInteractionMode('interaction');
 assert.equal(globe.controls.mouseButtons.LEFT, 2);
 assert.equal(globe.controls.mouseButtons.RIGHT, 0);
+assert.equal(globe.options.autoRotate, false, 'Drag mode pauses auto-rotation');
 globe.setInteractionMode('rotate');
 assert.equal(globe.controls.mouseButtons.LEFT, 0);
+assert.equal(globe.options.autoRotate, true, 'Rotate mode resumes auto-rotation');
+assert.equal(globe.isFocused, false, 'Rotate mode releases the topic focus pause');
 globe.globePointerDragged = true;
 globe.onMouseClick({ button: 0 }); // Must return before any raycasting.
 console.log('Translation routes, selection JSON and Admin ZIP round-trip, MP3 gating/reuse/cancellation, Fever profiles and mouse swap passed.');
+
+const settingsContext = vm.createContext({ console });
+vm.runInContext(strip(await read('lib/settings.js')) + '\nglobalThis.Settings = Settings;', settingsContext);
+assert.equal(settingsContext.Settings.sanitize({ rotationSpeed: 0 }).rotationSpeed, 0);
+assert.equal(settingsContext.Settings.sanitize({ rotationSpeed: 99 }).rotationSpeed, 3);
+assert.equal(settingsContext.Settings.sanitize({ rotationSpeed: 'bad' }).rotationSpeed, 1);

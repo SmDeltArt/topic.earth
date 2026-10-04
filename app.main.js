@@ -1,4 +1,4 @@
-import { GlobeRenderer } from './lib/globe.js?v=translation-20261004-topic-earth-layout-20261003';
+import { GlobeRenderer } from './lib/globe.js?v=rotation-speed-20261004';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LAYERS } from './data/layers.js?v=topic-earth-regional-merged-20261003';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
@@ -10,15 +10,15 @@ import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-short-2
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=translation-20261004-topic-earth-regional-drawing-20261004';
+import { TopBar } from './components/TopBar.js?v=mobile-toolbar-wrap-20261004';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-regional-drawing-20261004';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-drawing-20261004';
-import { DetailPanel } from './components/DetailPanel.js?v=zip-scan-20261004';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-toolbar-editor-20261004';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
-import { Settings } from './lib/settings.js?v=topic-earth-video-captions-20261003';
+import { Settings } from './lib/settings.js?v=rotation-speed-20261004';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
 import { ReadTranslationService } from './lib/read-translation.js?v=translation-20261004';
-import { TopicTranslations } from './lib/topic-translations.mjs?v=reading-save-20261004';
+import { TopicTranslations, plainTopicText, topicSourceRevision } from './lib/topic-translations.mjs?v=reading-save-20261004';
 import { TTSManager } from './lib/tts.js?v=reading-save-20261004';
 import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-meteo-draft-20260531';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
@@ -259,6 +259,10 @@ class TopicEarthApp {
     this.interactionMode = mode;
     if (this.globe) {
       this.globe.setInteractionMode(mode);
+      if (this.currentLayerFilter === 'regional') {
+        this.regionalPreviousAutoRotate = mode === 'rotate';
+        this.globe.options.autoRotate = false;
+      }
     }
     
     if (mode === 'rotate') {
@@ -683,6 +687,8 @@ class TopicEarthApp {
       this.applyTutorialMode(settings);
       this.applyDocumentLanguage(settings);
       this.ttsManager?.updateSettings?.(settings);
+      this.detailPanel?.updateTopicLanguageControls();
+      if (this.globe) this.globe.options.rotationSpeed = settings.rotationSpeed;
       LanguageManager.translateDom(document.body, this.getCurrentUiLanguage(settings));
       
       // If Fever loop resolution changed and we're in Fever mode, reload textures
@@ -1838,15 +1844,44 @@ class TopicEarthApp {
     const selectionTool = document.createElement('button');
     selectionTool.type = 'button';
     selectionTool.className = 'text-selection-tool';
-    selectionTool.textContent = 'Select text';
+    selectionTool.textContent = '▧';
+    selectionTool.setAttribute('aria-label', 'Select text');
     selectionTool.setAttribute('aria-pressed', 'false');
     selectionTool.title = 'Enable text selection. Tap a paragraph, or long-press and adjust the selection handles.';
     selectionTool.addEventListener('click', () => {
       const active = document.body.classList.toggle('text-selection-enabled');
       selectionTool.setAttribute('aria-pressed', String(active));
-      selectionTool.textContent = active ? 'Select text: on' : 'Select text';
+      selectionTool.title = active ? 'Text selection enabled. Tap a paragraph to select it.' : 'Enable text selection. Tap a paragraph, or long-press and adjust the selection handles.';
     });
-    document.body.appendChild(selectionTool);
+    const toolbar = document.querySelector('.detail-toolbar');
+    const sceneControls = document.getElementById('scene-interaction-controls');
+    const mobileSelection = window.matchMedia('(max-width: 900px), (pointer: coarse)');
+    const placeSelectionTool = () => {
+      const mobile = mobileSelection.matches;
+      selectionTool.classList.toggle('mobile-scene-selection', mobile);
+      selectionTool.classList.toggle('detail-tool-btn', !mobile);
+      selectionTool.textContent = mobile ? 'Select text' : '▧';
+      if (mobile || !toolbar) {
+        if (selectionTool.parentElement !== document.body) document.body.appendChild(selectionTool);
+        const anchor = sceneControls?.querySelector('[data-action="regional-search"]') || sceneControls;
+        const bounds = anchor && !sceneControls.hidden ? anchor.getBoundingClientRect() : null;
+        const sceneBottom = sceneControls && !sceneControls.hidden ? sceneControls.getBoundingClientRect().bottom : 94;
+        const selectionTop = Math.max(bounds?.bottom || 94, sceneBottom) + 6;
+        selectionTool.style.setProperty('--selection-top', `${selectionTop}px`);
+        document.documentElement.style.setProperty('--mobile-controls-bottom', `${selectionTop + 44}px`);
+        selectionTool.style.setProperty('--selection-right', `${bounds ? Math.max(8, window.innerWidth - bounds.right) : 12}px`);
+      } else if (selectionTool.parentElement !== toolbar) {
+        toolbar.insertBefore(selectionTool, toolbar.querySelector('.detail-collapse-btn'));
+      }
+    };
+    placeSelectionTool();
+    mobileSelection.addEventListener('change', placeSelectionTool);
+    window.addEventListener('resize', placeSelectionTool);
+    window.addEventListener('topBarLayoutChanged', placeSelectionTool);
+    if (sceneControls) {
+      new ResizeObserver(placeSelectionTool).observe(sceneControls);
+      new MutationObserver(placeSelectionTool).observe(sceneControls, { attributes: true, attributeFilter: ['hidden'], childList: true, subtree: true });
+    }
     document.addEventListener('click', event => {
       if (!document.body.classList.contains('text-selection-enabled') || event.target.closest('button, a, input, textarea, select, .tts-vignette')) return;
       const prose = event.target.closest('#detail-content .section-content, #detail-content .insight-content, #detail-content .detail-title, #warming-message, #fever-warning-content');
@@ -1916,77 +1951,12 @@ class TopicEarthApp {
         });
         ttsButton.classList.add('loading');
 
-        if (action === 'translate-read' || action === 'translate') {
-          actionButton.textContent = 'Translating...';
-          this.showTTSVignette({
-            mode: action === 'translate' ? 'Translate' : 'Translate + Read',
-            originalText: text,
-            translatedText: '',
-            languageLabel: targetLanguage,
-            status: 'Translating...',
-            speechLang
-          });
-          const vignetteId = this.ttsVignetteState?.id;
-
-          try {
-            this.updateTTSVignette({ status: 'Checking saved and browser translation, then configured API or free fallback…' });
-            const translated = await ReadTranslationService.translateText(text, translationLang, { sourceLanguage, allowFreeApi: true });
-            if (!this.isActiveTTSVignette(vignetteId)) return;
-            const translatedSpeechLang = translated.speechLang || LanguageManager.getSpeechCode(translated.language || translationLang);
-            const status = translated.provider === 'original' && translationLang !== 'en'
-              ? `Translation unavailable. Original text is shown.`
-              : action === 'translate' ? `Translated to ${targetLanguage}` : `Reading in ${targetLanguage}…`;
-            console.info('[Read Test] Translation route resolved.', {
-              provider: translated.provider,
-              speechLang: translatedSpeechLang,
-              linkedSpeech: this.ttsManager?.canSaveMP3?.() || false
-            });
-            this.updateTTSVignette({
-              translatedText: translated.text,
-              status,
-              provider: translated.provider,
-              debugLabel: translated.provider === 'csv'
-                ? 'CSV LOCAL'
-                : translated.provider === 'browser'
-                  ? 'BROWSER TRANSLATION'
-                  : translated.provider === 'mymemory' ? 'MYMEMORY FREE' : translated.provider === 'ai' ? 'CONFIGURED AI' : 'ORIGINAL',
-              debugTone: translated.provider === 'original' ? 'warn' : 'local',
-              speechLang: translatedSpeechLang
-            });
-            if (action === 'translate-read') this.speakFromVignette(translated.text, translatedSpeechLang);
-          } catch (error) {
-            if (!this.isActiveTTSVignette(vignetteId)) return;
-            console.warn('[Translate Read] Could not prepare translation vignette:', error);
-            const fallbackSpeechLang = speechLang;
-            this.updateTTSVignette({
-              translatedText: text,
-              status: 'Translation failed. Original text is shown.',
-              provider: 'original',
-              debugLabel: 'LOCAL FALLBACK',
-              debugTone: 'warn',
-              speechLang: fallbackSpeechLang
-            });
-            if (action === 'translate-read') this.speakFromVignette(text, fallbackSpeechLang);
-          }
-        } else {
-          actionButton.querySelector('span').textContent = 'Reading...';
-          console.info('[Read] Selected text read requested.', {
-            speechLang,
-            linkedSpeech: this.ttsManager?.canSaveMP3?.() || false
-          });
-          this.showTTSVignette({
-            mode: 'Read',
-            originalText: text,
-            translatedText: text,
-            languageLabel: LanguageManager.getLanguageInfo(currentLang)?.nativeName || currentLang,
-            status: 'Preparing voice...',
-            provider: 'browserTts',
-            debugLabel: 'BROWSER TTS',
-            debugTone: 'local',
-            speechLang
-          });
-          this.speakFromVignette(text, speechLang);
-        }
+        const selectionTopic = selectionElement?.closest('#detail-content') && this.detailPanel?.mode === 'detail'
+          ? this.detailPanel.currentPoint : null;
+        await this.openReadingPopup({
+          originalText: text, sourceLanguage, topic: selectionTopic,
+          translate: action !== 'read', autoRead: action !== 'translate'
+        });
 
         this.removeTTSButton();
       });
@@ -2039,6 +2009,56 @@ class TopicEarthApp {
     }
   }
 
+  openTopicReadPopup(topic) {
+    const selection = window.getSelection();
+    const content = document.getElementById('detail-content');
+    const selected = selection?.rangeCount && content?.contains(selection.anchorNode)
+      && content.contains(selection.focusNode) ? selection.toString().trim() : '';
+    const originalText = selected || plainTopicText([topic.title, topic.summary, topic.insight].filter(Boolean).join('. '));
+    return this.openReadingPopup({
+      originalText, topic, fullTopic: !selected,
+      sourceLanguage: selected ? content.dataset.contentLanguage || topic.language || 'en' : topic.language || 'en'
+    });
+  }
+
+  async openReadingPopup({ originalText, sourceLanguage = 'en', topic = null, fullTopic = false, translate = true, autoRead = true }) {
+    const settings = Settings.get();
+    const language = LanguageManager.normalizeLanguageCode(translate
+      ? settings.translationLanguage || this.getCurrentUiLanguage(settings) : sourceLanguage);
+    const languageLabel = LanguageManager.getLanguageInfo(language)?.nativeName || language;
+    this.showTTSVignette({
+      mode: translate ? (autoRead ? 'Translate + Read' : 'Translate') : 'Read',
+      originalText, translatedText: '', languageLabel, topic,
+      status: translate ? 'Preparing translation…' : 'Preparing text…',
+      speechLang: LanguageManager.getSpeechCode(language)
+    });
+    const id = this.ttsVignetteState.id;
+    try {
+      const saved = topic && TopicTranslations.selectionsForExport(topic).find(record =>
+        record.originalText === originalText && record.language === language
+        && record.sourceRevision === topicSourceRevision(topic));
+      let result;
+      if (saved) result = { text: saved.translatedText, provider: saved.provider || 'cache' };
+      else if (!translate) result = { text: originalText, provider: 'original' };
+      else if (fullTopic) {
+        const record = await TopicTranslations.translate(topic, language, ReadTranslationService);
+        result = { text: plainTopicText([record.title, record.summary, record.insight].filter(Boolean).join('. ')), provider: record.provider };
+      } else result = await ReadTranslationService.translateText(originalText, language, { sourceLanguage, allowFreeApi: true });
+      if (!this.isActiveTTSVignette(id)) return;
+      const unavailable = result.provider === 'original' && LanguageManager.normalizeLanguageCode(sourceLanguage) !== language;
+      const speechLang = LanguageManager.getSpeechCode(unavailable ? sourceLanguage : language);
+      this.updateTTSVignette({
+        translatedText: result.text, provider: result.provider, speechLang,
+        status: unavailable ? 'Translation unavailable. Original text is shown.' : saved ? 'Saved text loaded. You can edit it.' : 'Ready. You can edit the text before saving or reading.'
+      });
+      if (autoRead) this.speakFromVignette(result.text, speechLang);
+    } catch (error) {
+      if (!this.isActiveTTSVignette(id)) return;
+      this.updateTTSVignette({ translatedText: originalText, provider: 'original',
+        speechLang: LanguageManager.getSpeechCode(sourceLanguage), status: `Translation unavailable: ${error.message}` });
+    } finally { this.removeTTSButton(); }
+  }
+
   showTTSVignette({
     mode = 'Read',
     originalText = '',
@@ -2048,7 +2068,8 @@ class TopicEarthApp {
     provider = '',
     debugLabel = '',
     debugTone = '',
-    speechLang = 'en'
+    speechLang = 'en',
+    topic = null
   } = {}) {
     this.removeTTSVignette({ stopAudio: true });
 
@@ -2070,7 +2091,7 @@ class TopicEarthApp {
         <div class="tts-vignette-label">Original</div>
         <div class="tts-vignette-text" data-tts-vignette-original></div>
         <div class="tts-vignette-label" data-tts-vignette-translation-label>Read</div>
-        <div class="tts-vignette-text translated" data-tts-vignette-translated></div>
+        <div class="tts-vignette-text translated" data-tts-vignette-translated contenteditable="plaintext-only" role="textbox" aria-multiline="true" aria-label="Editable text to read" spellcheck="true"></div>
       </div>
       <div class="tts-vignette-actions">
         <button type="button" class="tts-vignette-btn" data-tts-vignette-action="replay">Read</button>
@@ -2079,6 +2100,21 @@ class TopicEarthApp {
         <button type="button" class="tts-vignette-btn" data-tts-vignette-action="save-mp3" aria-label="Save MP3" title="Download audio from the configured speech API" hidden>🎵 MP3</button>
       </div>
     `;
+
+    const editor = vignette.querySelector('[data-tts-vignette-translated]');
+    editor.addEventListener('input', () => {
+      this.ttsManager?.stop();
+      this.stopTTSHighlight();
+      this.updateTTSVignette({ editedText: editor.innerText, audioBlob: null, status: 'Edited. Save JSON to keep this text locally and in ZIP exports.' });
+    });
+    editor.addEventListener('blur', () => {
+      if (this.ttsVignetteState) this.updateTTSVignette({ translatedText: this.ttsVignetteState.translatedText });
+    });
+    editor.addEventListener('paste', event => {
+      event.preventDefault();
+      const text = event.clipboardData?.getData('text/plain') || '';
+      document.execCommand('insertText', false, text);
+    });
 
     vignette.addEventListener('click', (event) => {
       const action = event.target.closest('[data-tts-vignette-action]')?.dataset.ttsVignetteAction;
@@ -2118,7 +2154,7 @@ class TopicEarthApp {
       debugLabel,
       debugTone,
       speechLang,
-      topic: this.detailPanel?.mode === 'detail' ? this.detailPanel.currentPoint : null,
+      topic,
       audioBlob: null
     });
   }
@@ -2135,10 +2171,13 @@ class TopicEarthApp {
 
     this.ttsVignetteState = {
       ...(this.ttsVignetteState || {}),
-      ...update
+      ...update,
+      ...(Object.prototype.hasOwnProperty.call(update, 'editedText') ? { translatedText: update.editedText } : {})
     };
 
     const state = this.ttsVignetteState;
+    const editor = this.ttsVignette.querySelector('[data-tts-vignette-translated]');
+    if (editor) editor.contentEditable = state.translatedText ? 'plaintext-only' : 'false';
     const jsonButton = this.ttsVignette.querySelector('[data-tts-vignette-action="save-json"]');
     if (jsonButton) jsonButton.disabled = !state.translatedText;
     const mp3Button = this.ttsVignette.querySelector('[data-tts-vignette-action="save-mp3"]');
@@ -2268,7 +2307,7 @@ class TopicEarthApp {
     this.updateTTSVignette({ savingMP3: true, status: 'Preparing MP3 with configured speech API…' });
     try {
       const blob = state.audioBlob || await this.ttsManager.createMP3(state.translatedText);
-      if (this.ttsVignetteState?.id !== state.id) return;
+      if (this.ttsVignetteState?.id !== state.id || this.ttsVignetteState.translatedText !== state.translatedText) return;
       this.downloadVignetteFile(blob, 'mp3', state);
       this.updateTTSVignette({ audioBlob: blob, status: 'MP3 downloaded.' });
     } catch (error) {
@@ -2786,6 +2825,7 @@ class TopicEarthApp {
   initDetailPanel() {
     const container = document.getElementById('detail-panel');
     this.detailPanel = new DetailPanel(container, this.allLayers, {
+      onReadTopic: topic => this.openTopicReadPopup(topic),
       onShow: (point) => {
         if (this.currentLayerFilter === 'regional' && this.regionalMap?.visible && this.isRegionalTopic(point)) {
           const lat = Number(point?.lat);
@@ -2855,7 +2895,8 @@ class TopicEarthApp {
       minDistance: 1.3,
       maxDistance: isSmallScreen ? 7 : 6,
       initialDistance: isSmallScreen ? 3.15 : 2.5,
-      autoRotate: true
+      autoRotate: true,
+      rotationSpeed: Settings.get().rotationSpeed
     });
 
     if (isSmallScreen) {

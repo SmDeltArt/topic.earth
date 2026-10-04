@@ -213,7 +213,7 @@
     />
     <link
       rel="stylesheet"
-      href="styles.css?v=zip-scan-20261004-topic-earth-regional-drawing-20261004"
+      href="styles.css?v=mobile-toolbar-wrap-20261004"
     />
     <script src="./vendor/chart/chart.umd.min.js?v=4.4.0"></script>
   </head>
@@ -296,6 +296,7 @@
 
       <!-- Right Detail Panel -->
       <aside id="detail-panel" class="hidden" data-tutorial-id="detail-panel">
+        <div class="detail-toolbar" role="toolbar" aria-label="Topic controls">
         <button
           class="detail-nav-btn detail-nav-prev"
           data-action="navigate-topic"
@@ -344,6 +345,8 @@
             />
           </svg>
         </button>
+        <button type="button" class="detail-tool-btn detail-translate-btn" data-action="translate-topic" aria-label="Translate topic" title="Translate topic" hidden><span aria-hidden="true">🌐</span> <span data-topic-language-code>FR</span></button>
+        <button type="button" class="detail-tool-btn detail-read-btn" data-action="read-topic" aria-label="Translate and read selected text or topic" title="Translate and read selected text or topic" hidden><span aria-hidden="true">🔊</span></button>
         <button
           class="close-btn"
           id="close-detail"
@@ -374,6 +377,7 @@
             />
           </svg>
         </button>
+        </div>
         <div
           id="detail-compact-summary"
           class="detail-compact-summary"
@@ -645,7 +649,7 @@
 
     <script
       type="module"
-      src="./app.main.js?v=zip-scan-20261004"
+      src="./app.main.js?v=mobile-toolbar-wrap-20261004"
     ></script>
 
     <style>

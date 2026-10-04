@@ -23,6 +23,12 @@ export class TopBar {
     document.addEventListener('click', this.handleDocumentClick);
     window.addEventListener('settingsChanged', this.handleSettingsChanged);
     this.render();
+    this.layoutObserver = new ResizeObserver(() => {
+      const height = Math.ceil(this.container.getBoundingClientRect().height);
+      document.documentElement.style.setProperty('--top-bar-height', `${height}px`);
+      window.dispatchEvent(new CustomEvent('topBarLayoutChanged'));
+    });
+    this.layoutObserver.observe(this.container);
   }
 
   handleClick(e) {
