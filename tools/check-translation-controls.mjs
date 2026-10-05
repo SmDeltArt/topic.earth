@@ -123,18 +123,20 @@ assert.match(panel.getFeverNarrationText({ text: 'Fever message', language: 'en'
 panel.currentGlobe.feverSpeed = 1;
 assert.equal(panel.shouldAutoNarrateFeverMessages(), false);
 
-const globeContext = vm.createContext({ THREE: { MOUSE: { ROTATE: 0, PAN: 2 } }, DRACOLoader: class { setDecoderPath() {} } });
+const globeContext = vm.createContext({ THREE: { MOUSE: { ROTATE: 0, PAN: 2 }, TOUCH: { ROTATE: 0, PAN: 1 } }, DRACOLoader: class { setDecoderPath() {} } });
 vm.runInContext(strip(await read('lib/globe.js')) + '\nglobalThis.Globe = GlobeRenderer;', globeContext);
 const globe = Object.create(globeContext.Globe.prototype);
 globe.options = { autoRotate: true, rotationSpeed: 1 };
 globe.isFocused = true;
-globe.controls = { mouseButtons: { LEFT: 0, RIGHT: 2 } };
+globe.controls = { mouseButtons: { LEFT: 0, RIGHT: 2 }, touches: { ONE: 0 } };
 globe.setInteractionMode('interaction');
 assert.equal(globe.controls.mouseButtons.LEFT, 2);
 assert.equal(globe.controls.mouseButtons.RIGHT, 0);
+assert.equal(globe.controls.touches.ONE, 1, 'One-finger Drag pans the scene');
 assert.equal(globe.options.autoRotate, false, 'Drag mode pauses auto-rotation');
 globe.setInteractionMode('rotate');
 assert.equal(globe.controls.mouseButtons.LEFT, 0);
+assert.equal(globe.controls.touches.ONE, 0, 'One-finger Rotate rotates the scene');
 assert.equal(globe.options.autoRotate, true, 'Rotate mode resumes auto-rotation');
 assert.equal(globe.isFocused, false, 'Rotate mode releases the topic focus pause');
 globe.globePointerDragged = true;

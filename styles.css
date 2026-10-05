@@ -3335,8 +3335,8 @@ body.regional-map-search-open #layer-panel {
     }
 
     #app {
-        height: 90dvh;
-        max-height: 90dvh;
+        height: 100dvh;
+        max-height: 100dvh;
     }
 
     #globe-container {
@@ -9584,3 +9584,68 @@ body.text-selection-enabled #detail-content button, body.text-selection-enabled 
         max-height: calc(100dvh - var(--mobile-controls-bottom, calc(var(--top-bar-height) + 96px)) - 24px);
     }
 }
+
+/* The document stays anchored while the scene and individual panels handle gestures. */
+html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+body {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+#app {
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+}
+#globe-container > canvas {
+    display: block;
+    max-width: 100%;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+#detail-panel, #layer-panel, .regional-map-search, .tts-vignette {
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+}
+#loading {
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+.loading-intro, .loading-brand-lockup, .loading-brand-copy { min-width: 0; }
+@media (max-width: 600px), (pointer: coarse) {
+    .loading-intro { width: 100%; max-width: 420px; }
+    .loading-brand-lockup { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+    .loading-clock { width: min(140px, 40vw, 24dvh); justify-self: center; }
+    .loading-brand-copy { width: 100%; text-align: center; }
+    .loading-wordmark { font-size: clamp(22px, 7vw, 38px); white-space: normal; }
+}
+.text-selection-tool, .text-selection-tool.mobile-scene-selection { display: none; }
+@media (pointer: coarse) {
+    #scene-interaction-controls .text-selection-tool:not([hidden]) {
+        display: inline-flex;
+        position: static;
+        transform: none;
+        align-items: center;
+        justify-content: center;
+        padding: 5px 7px;
+        min-height: 34px;
+        font-size: 10px;
+        flex: 0 0 auto;
+        order: 0;
+    }
+}
+.text-selection-tool[hidden] { display: none !important; }
+body.text-selection-enabled #detail-content { touch-action: pan-y; }
