@@ -10,7 +10,7 @@ import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-short-2
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=touch-special-toggle-20261005';
+import { TopBar } from './components/TopBar.js?v=scene-controls-layer-order-20261005';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-regional-drawing-20261004';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-drawing-20261004';
 import { DetailPanel } from './components/DetailPanel.js?v=fever-mobile-monitor-20261005';

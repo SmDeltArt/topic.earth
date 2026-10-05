@@ -262,7 +262,8 @@ export class TopBar {
       this.sceneControls.addEventListener('click', this.handleClick);
       document.getElementById('globe-container').appendChild(this.sceneControls);
     }
-    this.sceneControls.hidden = !['main', 'regional'].includes(activeModeTab);
+    const touchSpecialMode = this.touchLayout.matches && ['space', 'fever'].includes(activeModeTab);
+    this.sceneControls.hidden = !['main', 'regional'].includes(activeModeTab) && !touchSpecialMode;
     this.sceneControls.innerHTML = `
       <button class="mode-toggle-btn ${this.interactionMode === 'interaction' ? 'active' : ''}" id="mode-toggle-btn" data-action="toggle-mode" data-tutorial-id="interaction-mode" title="${this.escapeHtml(interactionLabel)} · ${this.interactionMode === 'interaction' ? 'Left drag: pan; right drag: rotate' : 'Left drag: rotate; right drag: pan'}" aria-label="${this.escapeHtml(interactionLabel)}">
         ${this.interactionMode === 'rotate' && !isRegionalMode ? `
@@ -286,12 +287,12 @@ export class TopBar {
       ` : ''}
     `;
 
-    // Keep the special-mode gesture toggle in the mobile header, above full-screen panels.
-    if (this.touchLayout.matches && ['space', 'fever'].includes(activeModeTab)) {
+    // Keep touch gesture controls outside the header at the top right of the scene.
+    if (touchSpecialMode) {
       const modeButton = this.sceneControls.querySelector('#mode-toggle-btn');
       modeButton.classList.add('mobile-special-mode-toggle');
       modeButton.title = `${interactionLabel} · One finger: ${this.interactionMode === 'interaction' ? 'drag' : 'rotate'}; two fingers: zoom`;
-      this.container.querySelector('.top-actions').prepend(modeButton);
+
     }
 
     // Dispatch custom event after render so listeners can rebind

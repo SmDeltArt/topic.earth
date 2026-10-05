@@ -9678,7 +9678,7 @@ body {
 }
 
 @media (max-width: 768px), (pointer: coarse) {
-    #top-bar .mobile-special-mode-toggle {
+    #scene-interaction-controls .mobile-special-mode-toggle {
         position: static;
         width: auto;
         min-width: 66px;
@@ -9687,5 +9687,30 @@ body {
         padding: 0 6px;
         margin: 0;
     }
-    #top-bar .mobile-special-mode-toggle .header-label { display: inline; font-size: 10px; }
+    #scene-interaction-controls .mobile-special-mode-toggle .header-label { display: inline; font-size: 10px; }
+}
+
+/* Details cover the layer rail, while gesture controls remain accessible above them. */
+#detail-panel { z-index: 80; }
+#scene-interaction-controls { z-index: 95; }
+@media (max-width: 768px), (pointer: coarse) {
+    body.topic-mode-space #scene-interaction-controls,
+    body.topic-mode-fever #scene-interaction-controls { left: auto; right: 12px; }
+    body.topic-mode-space #detail-panel .detail-toolbar,
+    body.topic-mode-fever #detail-panel .detail-toolbar { padding-right: 96px; }
+    body.topic-mode-space #janus-layer-controls {
+        right: 92px;
+        max-width: calc(100vw - 104px);
+    }
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+    #layer-panel.collapsed .news-info-btn { display: none; }
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+    body.regional-mode #regional-map-search-panel {
+        top: calc(var(--mobile-controls-bottom, calc(var(--top-bar-height) + 54px)) - var(--top-bar-height));
+        max-height: calc(100dvh - var(--mobile-controls-bottom, calc(var(--top-bar-height) + 54px)) - 12px);
+    }
 }
