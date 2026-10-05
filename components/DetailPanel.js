@@ -1253,7 +1253,8 @@ export class DetailPanel {
     this.mode = 'fever-simulation';
     this.currentGlobe = globe;
     this.feverYears = this.getFeverYearsFromConfig();
-    this.setPanelSize(options.panelSize || 'compact');
+    const mobileMonitor = window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+    this.setPanelSize(options.panelSize || (mobileMonitor ? 'top' : 'compact'));
     this.renderFeverSimulation();
     this.container.classList.remove('hidden');
     this.container.classList.toggle('fever-monitor-intro', options.introduce === true);

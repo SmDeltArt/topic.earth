@@ -1,4 +1,4 @@
-import { GlobeRenderer } from './lib/globe.js?v=mobile-viewport-touch-20261005';
+import { GlobeRenderer } from './lib/globe.js?v=fever-mobile-monitor-20261005';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LAYERS } from './data/layers.js?v=topic-earth-regional-merged-20261003';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
@@ -10,10 +10,10 @@ import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-short-2
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=mobile-viewport-touch-20261005';
+import { TopBar } from './components/TopBar.js?v=touch-special-toggle-20261005';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-regional-drawing-20261004';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-drawing-20261004';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-toolbar-editor-20261004';
+import { DetailPanel } from './components/DetailPanel.js?v=fever-mobile-monitor-20261005';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=rotation-speed-20261004';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -973,8 +973,10 @@ class TopicEarthApp {
     });
     
     window.addEventListener('viewModeChanged', (e) => {
+      const expectedSpecialView = { space: 'solar-system', fever: 'earths-fever' }[this.currentLayerFilter];
+      if (expectedSpecialView && e.detail.mode !== expectedSpecialView) return;
       if (this.topBar) {
-        this.topBar.updateViewMode(e.detail.mode);
+        this.topBar.updateViewMode(e.detail.mode, { layerFilter: this.currentLayerFilter });
       }
       if (e.detail.mode === 'solar-system' && this.currentLayerFilter === 'space' && this.getActiveLayersForFilter('space').has('janus-system')) {
         this.globe.janusLayer.setVisible(true).catch(error => console.error('[Janus System]', error));
@@ -1086,6 +1088,17 @@ class TopicEarthApp {
   }
   
   async enterFeverMode(transitionToken = this.modeTransitionToken) {
+    if (this.feverModeEntry) return this.feverModeEntry;
+    if (this.globe.inFeverMode) {
+      this.showFeverSimulation();
+      return;
+    }
+    this.feverModeEntry = this.completeFeverModeEntry(transitionToken);
+    try { return await this.feverModeEntry; }
+    finally { this.feverModeEntry = null; }
+  }
+
+  async completeFeverModeEntry(transitionToken) {
     const wasAlreadyInFever = this.globe.inFeverMode;
     if (!wasAlreadyInFever && this.globe.getFeverSoundEnabled?.()) {
       this.detailPanel.primeFeverAudioFromGesture?.();
@@ -1101,10 +1114,6 @@ class TopicEarthApp {
       return;
     }
     
-    // Mobile: keep both panels available; CSS prevents overlap.
-    if (window.innerWidth <= 768) {
-      document.getElementById('layer-panel')?.classList.remove('mobile-hidden');
-    }
     
     // Always show fever simulation panel, even when restarting
     this.showFeverSimulation();
@@ -1832,7 +1841,9 @@ class TopicEarthApp {
   
   showFeverSimulation() {
     this.feverSimulationActive = true;
-    this.detailPanel.showFeverSimulation(this.globe);
+    const mobile = window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+    if (mobile) this.layerPanel?.setClosed(true);
+    this.detailPanel.showFeverSimulation(this.globe, { panelSize: mobile ? 'top' : 'compact' });
   }
   
   hideFeverSimulation() {
@@ -1841,60 +1852,19 @@ class TopicEarthApp {
   }
 
   setupTextSelection() {
-    const selectionTool = document.createElement('button');
-    selectionTool.type = 'button';
-    selectionTool.className = 'text-selection-tool';
-    selectionTool.textContent = '▧';
-    selectionTool.setAttribute('aria-label', 'Select text');
-    selectionTool.setAttribute('aria-pressed', 'false');
-    selectionTool.title = 'Enable text selection. Tap a paragraph, or long-press and adjust the selection handles.';
-    selectionTool.addEventListener('click', () => {
-      const active = document.body.classList.toggle('text-selection-enabled');
-      selectionTool.setAttribute('aria-pressed', String(active));
-      selectionTool.title = active ? 'Text selection enabled. Tap a paragraph to select it.' : 'Enable text selection. Tap a paragraph, or long-press and adjust the selection handles.';
-    });
     const sceneControls = document.getElementById('scene-interaction-controls');
-    const mobileSelection = window.matchMedia('(pointer: coarse)');
-    const placeSelectionTool = () => {
-      const touchScreen = mobileSelection.matches;
-      selectionTool.hidden = !touchScreen;
-      if (selectionTool.textContent !== 'Select text') selectionTool.textContent = 'Select text';
-      const modeButton = sceneControls?.querySelector('#mode-toggle-btn');
-      if (touchScreen && modeButton && modeButton.nextElementSibling !== selectionTool) {
-        modeButton.after(selectionTool);
-      } else if (!touchScreen && selectionTool.parentElement) {
-        selectionTool.remove();
-        document.body.classList.remove('text-selection-enabled');
-        selectionTool.setAttribute('aria-pressed', 'false');
-      }
+    const updateSceneSpace = () => {
       if (sceneControls && !sceneControls.hidden) {
-        const bottom = sceneControls.getBoundingClientRect().bottom;
-        document.documentElement.style.setProperty('--mobile-controls-bottom', `${bottom + 12}px`);
+        document.documentElement.style.setProperty('--mobile-controls-bottom', `${sceneControls.getBoundingClientRect().bottom + 12}px`);
       }
     };
-    placeSelectionTool();
-    mobileSelection.addEventListener('change', placeSelectionTool);
-    window.addEventListener('resize', placeSelectionTool);
-    window.addEventListener('topBarLayoutChanged', placeSelectionTool);
+    updateSceneSpace();
+    window.addEventListener('resize', updateSceneSpace);
+    window.addEventListener('topBarLayoutChanged', updateSceneSpace);
     if (sceneControls) {
-      new ResizeObserver(placeSelectionTool).observe(sceneControls);
-      new MutationObserver(placeSelectionTool).observe(sceneControls, { attributes: true, attributeFilter: ['hidden'], childList: true });
+      new ResizeObserver(updateSceneSpace).observe(sceneControls);
+      new MutationObserver(updateSceneSpace).observe(sceneControls, { attributes: true, attributeFilter: ['hidden'], childList: true });
     }
-    // In app selection mode, a tap selects prose; keep native long-press actions
-    // available whenever the user switches this mode off.
-    document.addEventListener('contextmenu', event => {
-      if (document.body.classList.contains('text-selection-enabled') && event.target.closest('#detail-content')) event.preventDefault();
-    });
-    document.addEventListener('click', event => {
-      if (!document.body.classList.contains('text-selection-enabled') || event.target.closest('button, a, input, textarea, select, .tts-vignette')) return;
-      const prose = event.target.closest('#detail-content .section-content, #detail-content .insight-content, #detail-content .detail-title, #warming-message, #fever-warning-content');
-      if (!prose) return;
-      const range = document.createRange();
-      range.selectNodeContents(prose);
-      const selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
-    });
     let selectionTimeout;
     let ttsButton = null;
     const escapeHtml = (value = '') => String(value)
@@ -1966,9 +1936,19 @@ class TopicEarthApp {
       
       document.body.appendChild(ttsButton);
       
+      const viewport = window.visualViewport;
+      const left = viewport?.offsetLeft || 0;
+      const top = viewport?.offsetTop || 0;
+      const width = viewport?.width || window.innerWidth;
+      const height = viewport?.height || window.innerHeight;
+      ttsButton.style.maxWidth = `${Math.max(0, width - 16)}px`;
       const bounds = ttsButton.getBoundingClientRect();
-      ttsButton.style.left = `${Math.max(bounds.width / 2 + 8, Math.min(x, window.innerWidth - bounds.width / 2 - 8))}px`;
-      ttsButton.style.top = `${Math.min(y, window.innerHeight - bounds.height - 8)}px`;
+      const safeTop = Math.max(top + 8, (document.getElementById('top-bar')?.getBoundingClientRect().bottom || 0) + 8);
+      ttsButton.style.left = `${Math.max(left + bounds.width / 2 + 8, Math.min(x, left + width - bounds.width / 2 - 8))}px`;
+      // Prefer below the selection. Near the screen bottom, use the top of the
+      // visible content rather than covering the selection or docking at the bottom.
+      const preferredTop = y + bounds.height <= top + height - 8 ? Math.max(safeTop, y) : safeTop;
+      ttsButton.style.top = `${Math.max(top + 8, Math.min(preferredTop, top + height - bounds.height - 8))}px`;
     };
 
     const updateSelection = () => {
@@ -1981,9 +1961,16 @@ class TopicEarthApp {
         
         if (text.length > 1) { // Only show for meaningful selections
           const range = selection.getRangeAt(0);
-          const rect = range.getBoundingClientRect();
-          
-          // Position button near selection
+          const viewport = window.visualViewport;
+          const viewportTop = viewport?.offsetTop || 0;
+          const viewportBottom = viewportTop + (viewport?.height || window.innerHeight);
+          const visibleRects = Array.from(range.getClientRects()).filter(rect => rect.width && rect.height && rect.bottom > viewportTop && rect.top < viewportBottom);
+          const rect = visibleRects.at(-1) || range.getBoundingClientRect();
+          if (!visibleRects.length && (rect.bottom <= viewportTop || rect.top >= viewportBottom)) {
+            this.removeTTSButton();
+            return;
+          }
+          // Position button near the last visible line of the selection
           const x = rect.left + (rect.width / 2);
           const y = rect.bottom + 8;
           
@@ -1996,6 +1983,10 @@ class TopicEarthApp {
     document.addEventListener('mouseup', updateSelection);
     document.addEventListener('touchend', updateSelection, { passive: true });
     document.addEventListener('selectionchange', updateSelection);
+    document.addEventListener('scroll', updateSelection, { capture: true, passive: true });
+    window.addEventListener('resize', updateSelection);
+    window.visualViewport?.addEventListener('resize', updateSelection);
+    window.visualViewport?.addEventListener('scroll', updateSelection);
     
     // Remove button when clicking elsewhere
     document.addEventListener('mousedown', (e) => {
@@ -2393,18 +2384,12 @@ class TopicEarthApp {
 
   }
 
-  openFeverMonitorPanel() {
+  async openFeverMonitorPanel() {
     if (this.currentLayerFilter !== 'fever') {
       this.topBar?.setLayerFilter?.('fever');
     }
-    window.setTimeout(() => {
-      if (!this.globe?.inFeverMode) {
-        this.currentLayerFilter = 'fever';
-        this.enterFeverMode(this.modeTransitionToken);
-      }
-      this.showFeverSimulation();
-      document.getElementById('layer-panel')?.classList.remove('mobile-hidden');
-    }, 80);
+    await this.enterFeverMode(this.modeTransitionToken);
+    if (this.currentLayerFilter === 'fever') this.showFeverSimulation();
   }
 
   startTTSHighlight() {
@@ -2560,11 +2545,17 @@ class TopicEarthApp {
       this.toggleFullscreenView();
     });
     
-    window.addEventListener('expandMobileTopic', () => this.layerPanel?.setCollapsed(true));
+    window.addEventListener('expandMobileTopic', () => {
+      if (this.currentLayerFilter === 'fever') this.layerPanel?.setClosed(true);
+      else this.layerPanel?.setCollapsed(true);
+    });
     window.addEventListener('expandMobileLayers', () => this.detailPanel?.setPanelSize('compact'));
     window.addEventListener('resize', () => {
       if (window.innerWidth <= 768 && this.detailPanel && !this.detailPanel.isCompact
-        && !this.detailPanel.container.classList.contains('hidden')) this.layerPanel?.setCollapsed(true);
+        && !this.detailPanel.container.classList.contains('hidden')) {
+        if (this.currentLayerFilter === 'fever') this.layerPanel?.setClosed(true);
+        else this.layerPanel?.setCollapsed(true);
+      }
     });
     window.addEventListener('topicReviewPackageImported', event => {
       if (!AppAccess.isAdminMode()) return;

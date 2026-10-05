@@ -148,3 +148,33 @@ vm.runInContext(strip(await read('lib/settings.js')) + '\nglobalThis.Settings = 
 assert.equal(settingsContext.Settings.sanitize({ rotationSpeed: 0 }).rotationSpeed, 0);
 assert.equal(settingsContext.Settings.sanitize({ rotationSpeed: 99 }).rotationSpeed, 3);
 assert.equal(settingsContext.Settings.sanitize({ rotationSpeed: 'bad' }).rotationSpeed, 1);
+
+{
+// Opening Monitor during texture loading must reuse the current Fever entry.
+const appContext = vm.createContext({ document: { readyState: 'loading', addEventListener() {} },
+  window: { matchMedia: () => ({ matches: true }) } });
+vm.runInContext(strip(await read('app.main.js')) + '\nglobalThis.App = TopicEarthApp;', appContext);
+const app = Object.create(appContext.App.prototype);
+let finishEntry;
+let entryCount = 0;
+let panelSize;
+let layersClosed = false;
+app.globe = { inFeverMode: false, toggleFeverMode: () => {
+  entryCount++;
+  return new Promise(resolve => { finishEntry = () => { app.globe.inFeverMode = true; resolve(); }; });
+} };
+app.currentLayerFilter = 'fever';
+app.modeTransitionToken = 1;
+app.isCurrentModeTransition = token => token === 1;
+app.layerPanel = { setClosed: closed => { layersClosed = closed; } };
+app.detailPanel = { showFeverSimulation: (_globe, options) => { panelSize = options.panelSize; } };
+const starting = app.enterFeverMode(1);
+const opening = app.openFeverMonitorPanel();
+assert.equal(entryCount, 1, 'Monitor must not start another texture load');
+finishEntry();
+await Promise.all([starting, opening]);
+assert.equal(app.feverModeEntry, null);
+assert.equal(panelSize, 'top', 'Mobile monitor opens fully expanded');
+assert.equal(layersClosed, true, 'Mobile monitor closes Data Layers');
+console.log('Fever loading re-entry, mobile monitor sizing and layer closure passed.');
+}

@@ -22,6 +22,8 @@ export class TopBar {
     this.container.addEventListener('click', this.handleClick);
     document.addEventListener('click', this.handleDocumentClick);
     window.addEventListener('settingsChanged', this.handleSettingsChanged);
+    this.touchLayout = window.matchMedia('(max-width: 768px), (pointer: coarse)');
+    this.touchLayout.addEventListener('change', () => this.render());
     this.render();
     this.layoutObserver = new ResizeObserver(() => {
       const height = Math.ceil(this.container.getBoundingClientRect().height);
@@ -250,6 +252,7 @@ export class TopBar {
             <path d="M2 6V2H6M10 2H14V6M14 10V14H10M6 14H2V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </button>
+        ${activeModeTab === 'fever' ? '<button type="button" class="settings-btn fever-monitor-header-btn" data-action="open-fever-monitor" aria-label="Open Fever monitor" title="Open Fever monitor">💓</button>' : ''}
       </div>
     `;
 
@@ -283,14 +286,22 @@ export class TopBar {
       ` : ''}
     `;
 
+    // Keep the special-mode gesture toggle in the mobile header, above full-screen panels.
+    if (this.touchLayout.matches && ['space', 'fever'].includes(activeModeTab)) {
+      const modeButton = this.sceneControls.querySelector('#mode-toggle-btn');
+      modeButton.classList.add('mobile-special-mode-toggle');
+      modeButton.title = `${interactionLabel} · One finger: ${this.interactionMode === 'interaction' ? 'drag' : 'rotate'}; two fingers: zoom`;
+      this.container.querySelector('.top-actions').prepend(modeButton);
+    }
+
     // Dispatch custom event after render so listeners can rebind
     this.startLogoClock();
     window.dispatchEvent(new CustomEvent('topBarRendered'));
   }
 
-  updateViewMode(mode) {
+  updateViewMode(mode, options = {}) {
     this.viewMode = mode;
-    const mappedFilter = this.mapViewModeToModeTab(mode);
+    const mappedFilter = options.layerFilter || this.mapViewModeToModeTab(mode);
     if (mappedFilter) {
       this.layerFilter = mappedFilter;
     }
