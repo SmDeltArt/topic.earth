@@ -25,8 +25,9 @@ The app is currently an advanced browser prototype deployed from this repository
   styles.css                 App styling
   fever-scenarios.json       Fever scenario data and texture references
   assets/
-    icons/                   topic.earth SVG icon source and favicon fallback
-    logo/                    Portable animated logo kit and metadata
+    icons/                   Shared interface icons
+    logo/local/              Strategic logo, favicon, PWA and social fallbacks
+    logo/social/             Cloudinary catalogues and localized previews
     models/                  GLB models and overlays
     textures/
       main/                  Main Earth material maps
@@ -88,7 +89,7 @@ As of 4 October 2026, BenDes selected `C:\Git\__actual_github\topic.earth`, incl
 
 A verified archive copy of the former `__actual_vs\topic.earth` folder is at `C:\Git\_archive\topic.earth-onedrive-20261004`, outside OneDrive and this repository. Windows blocked moving the original, which remains a retired copy. Neither copy is an active development source or runtime deployment input.
 
-Commit, push, deployment, and imports remain deliberate operations requiring user authorization. Before an import, list and exclude files over 5 MB, `build/`, `dist/`, `*.map`, `*.log`, and `node_modules/` unless inclusion is explicitly confirmed. Development documents, tools, editor settings, and Python caches are not new runtime sync inputs. Excluding an existing checkout file does not delete it. Local Codex guidance is supplied by a Git-excluded `AGENTS.override.md`.
+Commit, push, deployment, and imports remain deliberate operations requiring user authorization. Before an import, list and exclude files over 5 MB, `build/`, `dist/`, `*.map`, `*.log`, and `node_modules/` unless inclusion is explicitly confirmed. Development documents, tools, editor settings, and Python caches are not new runtime sync inputs. Excluding an existing checkout file does not delete it. Local agent notes are kept in the Git- and deployment-excluded `.local-agent/` folder. The obsolete root app-submission JSON has been removed; the working API integrations remain.
 
 ## AI Settings Routing
 
@@ -157,3 +158,27 @@ separately:
 - [TRADEMARKS.md](TRADEMARKS.md)
 - [ASSET-LICENSES.md](ASSET-LICENSES.md)
 - [GOVERNANCE.md](GOVERNANCE.md)
+
+
+Fever playback defaults to 2/3. At both 2/3 and 5/6, small local `fever-loop-*-message-*.mp3` excerpts play only the title/message portion of the original Fever recordings; no extra warning or metric speech runs at these speeds. At 1/3, metric narration remains available. These 168 clips cover the three scenarios, seven milestone years and eight recorded languages (1.92 MiB total). The audio manifest records each original filename and trim boundary. Missing fast recordings stay silent rather than invoking browser or paid speech. The collapsed monitor retains year, temperature, AMOC, risk and visible messages; toolbar buttons float above the scrolling panel content. Monitor opens the expanded panel at the top and hides its dock button until the monitor is collapsed or closed. A return-to-top button sits below the corner controls. Sea-level values and links have their own monitoring tab after AMOC Watch.
+
+Validate recording selection and fallback guards with `node tools/check-fever-audio.mjs`.
+
+
+### Fever sea-level scenario (2026-10-08)
+
+The live and compact monitors read `seaLevelCm` from `fever-scenarios.json`,
+interpolating linearly between milestones. The Objective scenario has a
+user-selected +65 cm anchor at 2075, relative to the app’s 1950 reference;
+2100 and 2125 continue illustratively to +80 and +95 cm. High 2075 is +70 cm
+so Best ≤ Objective ≤ High remains true. These values are provisional
+illustrative assumptions, not observations or an IPCC forecast.
+
+Scenario Logic includes a sea-level topic. Its Thwaites button opens the
+existing World/Climate Change topic in West Antarctica. Thwaites’ potential
+~65 cm contribution from complete loss over centuries is separate from the
+2075 total-rise scenario. Texture patches are visual illustrations and do
+not identify calculated coastal inundation.
+
+Timeline year buttons pause and publish the selected year immediately.
+Validate with `node tools/check-fever-sea-level.mjs`.

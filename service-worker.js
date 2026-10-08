@@ -1,10 +1,15 @@
-const CACHE_NAME = 'topic-earth-shell-v7';
+const CACHE_NAME = 'topic-earth-shell-v12-fever-monitor-tabs';
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
   './site.webmanifest',
-  './assets/icons/topic.earth_64x64.svg'
+  './assets/logo/local/favicon.svg',
+  './assets/logo/local/earth-128.svg',
+  './assets/logo/local/brand-header.svg',
+  './assets/logo/local/pwa-192.png',
+  './assets/logo/local/pwa-512.png',
+  './shared/topic-favicon.js?v=earth-clock-20261008'
 ];
 
 self.addEventListener('install', (event) => {

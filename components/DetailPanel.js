@@ -1,3 +1,4 @@
+import { getTopicStoryTheme, topicStoryThemeCss } from '../lib/topic-story-theme.mjs';
 import { scanTopicZip } from '../lib/topic-importer.mjs?v=zip-scan-20261004';
 import { Settings } from '../lib/settings.js?v=rotation-speed-20261004';
 import { buildCaptionEmbedUrl } from '../lib/video-captions.mjs?v=topic-earth-video-captions-20261003';
@@ -68,6 +69,11 @@ export class DetailPanel {
     this.installVisibilityObserver();
     installMediaFallbackHandler(this.container);
     this.setupCloseButton();
+    const scrollContent = this.container.querySelector('#detail-content');
+    const scrollTopButton = this.container.querySelector('[data-action="detail-scroll-top"]');
+    const syncScrollTop = () => { if (scrollTopButton) scrollTopButton.hidden = !scrollContent || scrollContent.scrollTop < 60; };
+    scrollContent?.addEventListener('scroll', syncScrollTop, { passive: true });
+    syncScrollTop();
     this.installFeverAudioUnlockHandlers();
     window.addEventListener('translationProviderChanged', () => {
       const status = this.container.querySelector('[data-translation-route]');
@@ -91,6 +97,7 @@ export class DetailPanel {
       document.body.classList.toggle('detail-panel-open', isOpen);
       document.body.classList.toggle('detail-panel-compact', isOpen && this.isCompact);
       document.body.classList.toggle('detail-panel-top', isOpen && this.panelSize === 'top');
+      document.body.classList.toggle('fever-monitor-expanded', isOpen && !this.isCompact && this.mode === 'fever-simulation');
       if (isOpen) this.updateCompactSummary();
       this.updateTopicLanguageControls();
       if (isOpen && !this.isCompact && window.innerWidth <= 768) {
@@ -324,7 +331,7 @@ export class DetailPanel {
 
   getFeverNarrationText({ year, scenario, title, text, language }) {
     const speed = Number(this.currentGlobe?.feverSpeed || 2 / 3);
-    if (speed > (1 / 3) + 0.001) return String(text || title || '').trim();
+    if (speed >= (2 / 3) - 0.001) return String(title || this.firstSentence(text) || '').trim();
     const milestone = this.getScenarioMilestoneData(year, scenario);
 
     return buildFeverAudioText({
@@ -337,7 +344,7 @@ export class DetailPanel {
   }
 
   shouldAutoNarrateFeverMessages() {
-    return Number(this.currentGlobe?.feverSpeed || 2 / 3) <= (2 / 3) + 0.001;
+    return Number(this.currentGlobe?.feverSpeed || 2 / 3) <= (5 / 6) + 0.001;
   }
 
   shouldAutoNarrateFeverValues() {
@@ -485,6 +492,16 @@ export class DetailPanel {
         return;
       }
 
+      const monitoringTab = e.target.closest('.monitoring-tab');
+      if (monitoringTab) {
+        this.activeMonitoringTab = monitoringTab.dataset.tab;
+        this.container.querySelectorAll('.monitoring-tab').forEach(tab => {
+          tab.classList.toggle('active', tab.dataset.tab === this.activeMonitoringTab);
+        });
+        this.updateMonitoringTabContent();
+        return;
+      }
+
       const target = e.target.closest('[data-action]');
       if (!target) return;
 
@@ -499,7 +516,13 @@ export class DetailPanel {
         return;
       }
       
-      if (action === 'toggle-fever-sound') {
+      if (action === 'detail-scroll-top') {
+        this.container.querySelector('#detail-content')?.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (action === 'open-sea-level-topic') {
+        this.callbacks.onOpenLinkedTopic?.('fever_sea_level');
+      } else if (action === 'open-thwaites-topic') {
+        this.callbacks.onOpenLinkedTopic?.('earth_thwaites_doomsday_glacier', 'main');
+      } else if (action === 'toggle-fever-sound') {
         this.toggleFeverSound();
       } else if (action === 'toggle-fever-voice') {
         this.toggleFeverVoice();
@@ -837,6 +860,7 @@ export class DetailPanel {
     document.body.classList.toggle('detail-panel-compact', !this.container.classList.contains('hidden') && this.isCompact);
     document.body.classList.toggle('detail-panel-top', !this.container.classList.contains('hidden') && this.panelSize === 'top');
 
+    document.body.classList.toggle('fever-monitor-expanded', !this.container.classList.contains('hidden') && !this.isCompact && this.mode === 'fever-simulation');
     this.updateCompactSummary();
   }
 
@@ -894,6 +918,7 @@ export class DetailPanel {
     const summary = this.container.querySelector('#detail-compact-summary');
     if (!summary) return;
 
+    this.container.classList.toggle('fever-compact-panel', this.mode === 'fever-simulation');
     summary.innerHTML = this.renderCompactSummary();
   }
 
@@ -905,17 +930,23 @@ export class DetailPanel {
       const title = this.container.querySelector('#warming-title')?.textContent || this.t('fever.climateBaseline');
       const message = this.container.querySelector('#warming-message')?.textContent || this.t('fever.industrialBaseline');
       const tempDelta = this.container.querySelector('#temp-delta')?.textContent || '+0.0\u00B0C';
+      const milestone = this.getScenarioMilestoneData(currentYear, scenario) || {};
+      const warning = this.container.querySelector('#fever-warning-display:not(.hidden) #fever-warning-content')?.textContent || '';
 
       return `
         <div class="compact-kicker">${this.escapeHtml(this.t('fever.earthsFever'))}</div>
         <div class="compact-title">${this.escapeHtml(title)}</div>
-        <div class="compact-message">${this.escapeHtml(message)}</div>
         <div class="compact-metrics">
           <span>${this.escapeHtml(this.t('fever.year'))}: ${this.escapeHtml(currentYear)}</span>
           <span>${this.escapeHtml(this.t('fever.progress'))}: ${progress}%</span>
           <span>${this.escapeHtml(tempDelta)}</span>
+          <span>${this.escapeHtml(this.t('fever.seaLevelDataset'))}: ${this.escapeHtml(this.formatFeverSeaLevel(currentYear, scenario))} · Δ1950 ≈</span>
+          ${Number.isFinite(Number(milestone.amocStrengthPct)) ? `<span>AMOC: ${Math.round(Number(milestone.amocStrengthPct))}%</span>` : ''}
+          ${Number.isFinite(Number(milestone.tippingRiskPct)) ? `<span>${this.escapeHtml(this.t('fever.riskLevel'))}: ${Math.round(Number(milestone.tippingRiskPct))}%</span>` : ''}
           <span>${this.escapeHtml(this.t('fever.scenario'))}: ${this.escapeHtml(this.t(`fever.${scenario}`))}</span>
         </div>
+        <div class="compact-message">${this.escapeHtml(message)}</div>
+        ${warning && warning !== message ? `<div class="compact-warning">${this.escapeHtml(warning)}</div>` : ''}
       `;
     }
 
@@ -1587,7 +1618,7 @@ export class DetailPanel {
             <span style="font-size: 10px; opacity: 0.7; margin-right: 6px;">${this.escapeHtml(this.t('fever.speedLabel'))}</span>
             <button class="speed-btn ${isFeverSpeedActive(1 / 3) ? 'active' : ''}" data-action="set-fever-speed" data-speed="0.3333333333">1/3</button>
             <button class="speed-btn ${isFeverSpeedActive(2 / 3) ? 'active' : ''}" data-action="set-fever-speed" data-speed="0.6666666667">2/3</button>
-            <button class="speed-btn ${isFeverSpeedActive(1) ? 'active' : ''}" data-action="set-fever-speed" data-speed="1">3/3</button>
+            <button class="speed-btn ${isFeverSpeedActive(5 / 6) ? 'active' : ''}" data-action="set-fever-speed" data-speed="0.8333333333">5/6</button>
           </div>
           <div class="fever-speed-audio-hint">${this.escapeHtml(this.t('fever.speedAudioHint'))}</div>
         </div>
@@ -1642,6 +1673,7 @@ export class DetailPanel {
           <div class="monitoring-tabs-header">
             <button class="monitoring-tab ${this.activeMonitoringTab === 'fever' ? 'active' : ''}" data-tab="fever">${this.escapeHtml(this.t('fever.earthsFever'))}</button>
             <button class="monitoring-tab ${this.activeMonitoringTab === 'amoc' ? 'active' : ''}" data-tab="amoc">${this.escapeHtml(this.t('fever.amocWatch'))}</button>
+            <button class="monitoring-tab ${this.activeMonitoringTab === 'sea-level' ? 'active' : ''}" data-tab="sea-level">${this.escapeHtml(this.t('fever.seaLevelTab'))}</button>
             <button class="monitoring-tab ${this.activeMonitoringTab === 'tipping' ? 'active' : ''}" data-tab="tipping">${this.escapeHtml(this.t('fever.tippingPoints'))}</button>
             <button class="monitoring-tab ${this.activeMonitoringTab === 'interactions' ? 'active' : ''}" data-tab="interactions">${this.escapeHtml(this.t('fever.interactions'))}</button>
           </div>
@@ -1655,14 +1687,14 @@ export class DetailPanel {
           <div class="timeline-bar">
             <div class="timeline-progress" id="timeline-progress" style="width: ${progress * 100}%"></div>
             <div class="timeline-markers">
-              <div class="timeline-marker" style="left: 0%"><span>1950</span></div>
-              <div class="timeline-marker" style="left: 14.3%"><span>1975</span></div>
-              <div class="timeline-marker" style="left: 28.6%"><span>2000</span></div>
-              <div class="timeline-marker" style="left: 42.9%"><span>2025</span></div>
-              <div class="timeline-marker" style="left: 57.1%"><span>2050</span></div>
-              <div class="timeline-marker" style="left: 71.4%"><span>2075</span></div>
-              <div class="timeline-marker" style="left: 85.7%"><span>2100</span></div>
-              <div class="timeline-marker" style="left: 100%"><span>2125</span></div>
+              <div class="timeline-marker" style="left: 0%"><button type="button" data-action="jump-to-year" data-year="1950" aria-label="1950"><span>1950</span></button></div>
+              <div class="timeline-marker" style="left: 14.3%"><button type="button" data-action="jump-to-year" data-year="1975" aria-label="1975"><span>1975</span></button></div>
+              <div class="timeline-marker" style="left: 28.6%"><button type="button" data-action="jump-to-year" data-year="2000" aria-label="2000"><span>2000</span></button></div>
+              <div class="timeline-marker" style="left: 42.9%"><button type="button" data-action="jump-to-year" data-year="2025" aria-label="2025"><span>2025</span></button></div>
+              <div class="timeline-marker" style="left: 57.1%"><button type="button" data-action="jump-to-year" data-year="2050" aria-label="2050"><span>2050</span></button></div>
+              <div class="timeline-marker" style="left: 71.4%"><button type="button" data-action="jump-to-year" data-year="2075" aria-label="2075"><span>2075</span></button></div>
+              <div class="timeline-marker" style="left: 85.7%"><button type="button" data-action="jump-to-year" data-year="2100" aria-label="2100"><span>2100</span></button></div>
+              <div class="timeline-marker" style="left: 100%"><button type="button" data-action="jump-to-year" data-year="2125" aria-label="2125"><span>2125</span></button></div>
             </div>
           </div>
         </div>
@@ -1679,6 +1711,7 @@ export class DetailPanel {
     
     // Start warning system
     this.startWarningSystem();
+    this.updateFeverDisplay(currentYear, currentYear, progress);
     
     // Listen for tipping threshold warnings
     this.tippingWarningListener = (e) => {
@@ -1688,24 +1721,7 @@ export class DetailPanel {
     
 
     
-    // Monitoring tab click handler (ensures tabs switch and content updates)
-    const monitoringHeader = this.container.querySelector('.monitoring-tabs-header');
-    if (monitoringHeader) {
-      monitoringHeader.addEventListener('click', (evt) => {
-        const btn = evt.target.closest('.monitoring-tab');
-        if (!btn) return;
-        const tab = btn.dataset.tab;
-        if (!tab) return;
-        // update active tab state
-        this.activeMonitoringTab = tab;
-        // update tab button active classes
-        this.container.querySelectorAll('.monitoring-tab').forEach(t => {
-          t.classList.toggle('active', t.dataset.tab === tab);
-        });
-        // refresh content for the newly selected tab
-        this.updateMonitoringTabContent();
-      });
-    }
+
   }
   
 
@@ -1735,6 +1751,28 @@ export class DetailPanel {
       return Math.abs(candidate - year) < Math.abs(closest - year) ? candidate : closest;
     }, years[0]);
     return milestones[String(closestYear)] || null;
+  }
+
+  getFeverSeaLevelCm(year, scenario) {
+    const points = Object.entries(this.getScenarioMilestones(scenario) || {})
+      .filter(([key, data]) => Number.isFinite(Number(key)) && Number.isFinite(data.seaLevelCm))
+      .map(([key, data]) => [Number(key), data.seaLevelCm]).sort((a, b) => a[0] - b[0]);
+    if (!points.length || !Number.isFinite(Number(year))) return null;
+    const currentYear = Number(year);
+    if (currentYear <= points[0][0]) return points[0][1];
+    for (let i = 1; i < points.length; i++) {
+      const [endYear, endValue] = points[i];
+      if (currentYear <= endYear) {
+        const [startYear, startValue] = points[i - 1];
+        return startValue + (endValue - startValue) * (currentYear - startYear) / (endYear - startYear);
+      }
+    }
+    return points.at(-1)[1];
+  }
+
+  formatFeverSeaLevel(year, scenario) {
+    const value = this.getFeverSeaLevelCm(year, scenario);
+    return value === null ? '—' : `${value >= 0 ? '+' : ''}${Number(value.toFixed(1))} cm`;
   }
 
   getWarningSeverity(level) {
@@ -2087,6 +2125,17 @@ export class DetailPanel {
           </div>
         `;
       
+      case 'sea-level':
+        return `<div class="tab-content-inner"><div>${this.escapeHtml(this.t('fever.year'))}: <span id="sea-level-year">${year}</span> · ${this.escapeHtml(this.t(`fever.${scenario}`))}</div>
+            <div class="stat-item fever-sea-level-stat">
+              <span class="stat-label">${this.escapeHtml(this.t('fever.seaLevelDataset'))}</span>
+              <span class="stat-value" id="sea-level-delta">${this.escapeHtml(this.formatFeverSeaLevel(year, scenario))}</span>
+              <small>${this.escapeHtml(this.t('fever.seaLevelReference'))}</small>
+              <button class="btn-secondary" data-action="open-sea-level-topic">${this.escapeHtml(this.t('fever.seaLevelDetails'))}</button>
+              <button class="btn-secondary" data-action="open-thwaites-topic">${this.escapeHtml(this.t('fever.thwaitesLink'))}</button>
+            </div>
+        </div>`;
+
       case 'tipping':
         if (selectedBoundary) {
           const boundaryData = window.TIPPING_BOUNDARIES?.[selectedBoundary];
@@ -2255,6 +2304,10 @@ export class DetailPanel {
     
     // Get scenario once at the top
     const scenario = this.currentGlobe ? this.currentGlobe.getFeverScenario() : 'objective';
+    const seaLevelYear = this.container.querySelector('#sea-level-year');
+    if (seaLevelYear) seaLevelYear.textContent = year;
+    const seaLevel = this.container.querySelector('#sea-level-delta');
+    if (seaLevel) seaLevel.textContent = this.formatFeverSeaLevel(year, scenario);
     
     // Update warming message block
     const warningData = this.getWarningData(year, scenario);
@@ -2321,7 +2374,7 @@ export class DetailPanel {
     }, 5000);
     
     // Speak warning if voice enabled
-    if (this.currentGlobe && this.currentGlobe.getFeverVoiceEnabled() && this.shouldAutoNarrateFeverMessages() && window.ttsManager) {
+    if (this.currentGlobe && this.currentGlobe.getFeverVoiceEnabled() && this.shouldAutoNarrateFeverValues() && window.ttsManager) {
       const spokenWarning = this.getFeverNarrationText({
         year,
         scenario,
@@ -2430,7 +2483,14 @@ export class DetailPanel {
         text: localizedWarning.full,
         language: localizedWarning.language
       });
-      this.speakFeverNarration(spokenWarning, localizedWarning.ttsLanguage);
+      const speed = Number(this.currentGlobe.feverSpeed);
+      const profile = speed >= (2 / 3) - 0.001 ? 'message' : 'full';
+      this.speakFeverNarration(spokenWarning, localizedWarning.ttsLanguage, {
+        cacheId: `fever-loop-${scenario}-${year}-${profile}-${localizedWarning.language.split(/[-_]/)[0]}`,
+        audioFormats: profile === 'message' ? ['mp3'] : ['webm', 'mp3'],
+        recordedOnly: speed > 0.6,
+        preserveFeverPlayback: true
+      });
     }
   }
   
@@ -3141,6 +3201,7 @@ Keep response concise (3-4 sentences).`;
           ${layer.icon} ${layer.name}
         </div>
         <h2 class="detail-title">${this.escapeHtml(this.getDetailTitle(point))}</h2>
+        ${point.linkedWorldTopicId === 'earth_thwaites_doomsday_glacier' ? `<button class="btn-secondary" data-action="open-thwaites-topic">${this.escapeHtml(this.t('fever.thwaitesLink'))}</button>` : ''}
         <div class="detail-meta">
           <span>&#128205; ${point.region}, ${point.country}</span>
           <span>&#128197; ${point.date}</span>
@@ -4194,9 +4255,8 @@ Return a brief summary (3-4 sentences) of the latest news, updates, or developme
     }
 
     // Stop the previous speed profile before the next milestone message.
-    if (speed > (1 / 3) + 0.001) {
-      window.ttsManager?.stop?.();
-    }
+    window.ttsManager?.stop?.();
+    this.lastWarningYear = null;
     
     // Update active button (only speed buttons)
     this.container.querySelectorAll('[data-action="set-fever-speed"]').forEach(b => b.classList.remove('active'));
@@ -6792,6 +6852,12 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     }
   }
 
+  getTopicStoryTheme() {
+    const category = this.topicFormState?.category || this.currentPoint?.category;
+    const layer = (this.layers || []).find(item => item.id === category) || {};
+    return getTopicStoryTheme(layer, this.currentLayerFilter || '');
+  }
+
   wrapTopicStoryHtml(html = '', story = {}) {
     const body = this.sanitizeStoryHtml(html || story.html || '');
     const title = story.title || this.topicFormState.title || 'topic.earth story';
@@ -6805,8 +6871,8 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
   <style>
     :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     body { margin: 0; padding: 18px; background: #07111f; color: #eef8ff; }
+    ${topicStoryThemeCss(this.getTopicStoryTheme())}
     img, svg, video { max-width: 100%; height: auto; }
-    a { color: #00d4ff; }
   </style>
 </head>
 <body>
@@ -7147,13 +7213,8 @@ ${body}
     const labels = Array.isArray(data.visualPlan?.labels) && data.visualPlan.labels.length > 0
       ? data.visualPlan.labels.slice(0, 5)
       : ['signal', 'place', 'evidence', 'action'];
-    const color = style === 'educational-scene'
-      ? '#9ad99d'
-      : style === 'interactive-croquis'
-        ? '#ffb020'
-        : style === 'micro-game'
-          ? '#b99cff'
-          : '#00d4ff';
+    const theme = this.getTopicStoryTheme();
+    const color = theme.accent;
     const caption = data.visualPlan?.caption || 'Topic sketch';
     const evidenceLinks = Array.isArray(data.evidenceLinks) ? data.evidenceLinks.slice(0, 5) : [];
     const assumptions = Array.isArray(data.assumptions) ? data.assumptions.slice(0, 4) : [];
@@ -7170,8 +7231,8 @@ ${body}
       `;
     }).join('');
 
-    return `<article class="topic-story-card topic-story-card-${this.escapeHtml(style)}" style="max-width:860px;margin:auto;padding:24px;border:1px solid ${color}66;border-radius:14px;background:#07111f;color:#eef8ff;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <p style="margin:0 0 10px;color:${color};font-weight:900;letter-spacing:.08em;text-transform:uppercase;">topic.earth live card</p>
+    return `<article class="topic-story-card topic-story-card-${this.escapeHtml(style)}" style="max-width:860px;margin:auto;padding:24px;border:1px solid ${color}66;border-radius:10px;background:${theme.background};color:${theme.text};font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <p class="topic-story-brand" style="margin:0 0 10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;">topic.earth live card</p>
   <h1 style="margin:0 0 12px;font-size:clamp(28px,6vw,54px);line-height:1.02;">${this.escapeHtml(title)}</h1>
   <p style="margin:0 0 20px;font-size:18px;line-height:1.55;color:#cfe9f6;">${this.escapeHtml(summary)}</p>
   <svg viewBox="0 0 440 230" role="img" aria-label="${this.escapeHtml(caption)}" style="display:block;width:100%;height:auto;margin:18px 0;border-radius:12px;background:#020814;border:1px solid ${color}33;">
@@ -7192,7 +7253,7 @@ ${body}
   </svg>
   <div style="display:grid;gap:12px;">
     ${sections.map(section => `
-      <section style="padding:14px;border:1px solid #ffffff18;border-radius:10px;background:#ffffff08;">
+      <section style="padding:14px;border:1px solid ${color}33;border-left:3px solid ${color};border-radius:4px;background:#ffffff08;">
         <h2 style="margin:0 0 6px;color:${color};font-size:14px;text-transform:uppercase;letter-spacing:.06em;">${this.escapeHtml(section.label || 'Note')}</h2>
         <p style="margin:0;color:#d8e8f2;line-height:1.55;">${this.escapeHtml(section.body || '')}</p>
       </section>
@@ -7291,15 +7352,7 @@ ${body}
       enabled: true,
       title,
       style: this.topicFormState.topicStory?.style || 'story-card',
-      html: `<article class="topic-story-card" style="max-width:760px;margin:auto;padding:24px;border:1px solid #00d4ff55;border-radius:14px;background:#07111f;color:#eef8ff;font-family:system-ui,sans-serif;">
-  <p style="margin:0 0 10px;color:#00d4ff;font-weight:800;letter-spacing:.08em;text-transform:uppercase;">topic.earth story</p>
-  <h1 style="margin:0 0 14px;font-size:clamp(28px,6vw,52px);line-height:1.02;">${this.escapeHtml(title)}</h1>
-  <p style="font-size:18px;line-height:1.55;color:#cfe9f6;">${this.escapeHtml(summary)}</p>
-  <div style="display:grid;gap:10px;margin-top:18px;">
-    <strong style="color:#9ad99d;">Evidence attached: ${sourceCount}</strong>
-    <span style="color:#a8b3c6;">Replace this starter with an SVG, croquis, lesson, or interactive card.</span>
-  </div>
-</article>`,
+      html: '',
       structuredStory: {
         title,
         style: this.topicFormState.topicStory?.style || 'story-card',
@@ -7314,6 +7367,7 @@ ${body}
         }
       }
     };
+    starterStory.html = this.renderTrustedTopicStoryHtml(starterStory.structuredStory);
     this.topicFormState.topicStory = starterStory;
     this.topicStoryDraft = this.topicFormState.topicStory;
     const form = this.container.querySelector('#topic-form');

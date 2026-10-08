@@ -86,6 +86,58 @@ export const FEVER_MONITORING_CONTENT = {
  */
 export const FEVER_TOPICS = [
   {
+    id: 'fever_amazon_deforestation',
+    title: 'Amazon · deforestation',
+    category: 'fever-scenarios',
+    date: '2026-10-08',
+    country: 'Brazil',
+    region: 'Southern Amazon · forest-loss frontier',
+    lat: -10,
+    lon: -55.5,
+    markerColor: '#a66a3f',
+    isFeverLandCover: true,
+    summary: 'Brown marks a regional example of Amazon deforestation. Forest clearing is a land-cover change, separate from the blue coastal sea-level exposure examples.',
+    source: 'NASA Earth Observatory · INPE satellite monitoring',
+    insight: `<p><strong>Brown — deforestation:</strong> this point represents the southern Amazon forest-loss frontier. Rondônia, Mato Grosso and Pará contain examples of forest clearing documented through satellite monitoring. The point is a regional reference, not an exact clearance polygon or a dated prediction.</p>
+      <p><strong>Blue — coastal exposure:</strong> blue markers describe sea-level exposure in low-lying coastal areas. Inland Amazon deforestation must retain its own brown colour.</p>
+      <p><strong>Different processes:</strong> deforestation removes forest cover; drought, heat and fires can degrade forests that remain standing. These processes should not all be labelled as deforestation. Use INPE PRODES for mapped forest clearing and DETER for monitoring alerts when adding measured boundaries.</p>`,
+    researchSources: [
+      { name: 'NASA · Amazon deforestation in Rondônia', url: 'https://science.nasa.gov/earth/earth-observatory/world-of-change/amazon-deforestation/', verified: true },
+      { name: 'NASA · Southeastern Amazon / Xingu', url: 'https://earthobservatory.nasa.gov/images/81293/fire-in-the-xingu-river-basin', verified: true },
+      { name: 'INPE · Satellite forest monitoring', url: 'https://www.obt.inpe.br/OBT/noticias-obt-inpe/inpe-esclarece-sobre-sistemas-de-monitoramento', verified: true }
+    ],
+    ttsText: 'Brown marks Amazon deforestation, separately from blue coastal sea-level exposure. This is a regional reference point, not a mapped forest-clearing boundary.'
+  },
+  {
+    id: 'fever_sea_level',
+    title: 'Sea-level rise · 2075 scenario',
+    category: 'fever-scenarios',
+    date: '2026-10-08',
+    country: 'Global',
+    region: 'Sea level · West Antarctica',
+    lat: -75.5,
+    lon: -106.75,
+    linkedWorldTopicId: 'earth_thwaites_doomsday_glacier',
+    summary: 'The Objective loop reaches +65 cm in 2075 relative to the app’s 1950 reference. This is a user-selected illustrative scenario; blue coastal markers represent illustrative exposure examples, not calculated flooded coastlines.',
+    source: 'User-selected scenario anchor · fever-scenarios.json',
+    insight: `<p><strong>Reading the loop:</strong> Objective milestones are +18 cm (2025), +31 cm (2050), +65 cm (2075), +80 cm (2100), and +95 cm (2125). Values between milestones are linearly interpolated. These are illustrative assumptions, not measured historical values or a reviewed forecast.</p>
+      <p><strong>Colour key:</strong> blue represents coastal sea-level exposure; brown represents Amazon deforestation. Inland forest-loss patches should stay brown. Any texture recolouring is illustrative. They do not identify places flooded by a 65 cm rise. Coastal flooding needs elevation, tides, vertical land motion and coastal protection data.</p>
+      <p><strong>Coastal examples to include:</strong> Netherlands — low-lying North Sea and delta areas; France — Camargue / Rhône delta and low-lying Atlantic, Channel and North Sea coasts; Italy — Venice lagoon and the Po delta; Bangladesh — Ganges–Brahmaputra–Meghna delta; Africa — Nile delta / Alexandria, Lagos, Cotonou / Porto-Novo and Dar es Salaam; China — Yangtze delta / Shanghai and Pearl River delta; low-lying islands — Maldives, Tuvalu, Kiribati and Marshall Islands.</p>
+      <p><strong>What these examples mean:</strong> exposure to rising seas, erosion, saltwater intrusion or more frequent extreme coastal flooding. They do not mean whole countries or islands will be submerged at +65 cm. Local relative sea level, terrain, storm surges, subsidence and flood defences determine the actual outcome. Blue exposure markers should be kept separate from an elevation-based inundation map.</p>
+      <p><strong>Thwaites Glacier:</strong> Thwaites is in West Antarctica, on the Amundsen Sea. Its complete loss could contribute roughly 65 cm to global sea level over centuries. This potential contribution is separate from the loop’s +65 cm total-rise anchor for 2075; it does not imply complete Thwaites loss by that date.</p>`,
+    researchSources: [
+      { name: 'Scenario values and reference', url: './fever-scenarios.json', verified: true },
+      { name: 'British Antarctic Survey · Thwaites and sea-level rise', url: 'https://www.bas.ac.uk/news/grim-outlook-for-antarcticas-thwaites-glacier/', verified: true },
+      { name: 'IPCC AR6 · Coastal cities, deltas and islands', url: 'https://www.ipcc.ch/report/ar6/wg2/chapter/technical-summary/', verified: true },
+      { name: 'IPCC AR6 · Venice sea-level rise and flooding', url: 'https://www.ipcc.ch/report/ar6/wg2/figures/chapter-13/figure-13-box-13-1-1/', verified: true },
+      { name: 'IPCC AR6 · African coastal exposure', url: 'https://www.ipcc.ch/report/ar6/wg2/chapter/chapter-9/', verified: true },
+      { name: 'Netherlands · Sea Level Rise Knowledge Programme', url: 'https://english.deltaprogramma.nl/delta-programme/knowledge-development/sea-level-rise-knowledge-programme', verified: true },
+      { name: 'Cerema · Low-lying coasts and Camargue', url: 'https://www.cerema.fr/fr/actualites/anticiper-phenomene-erosion-submersion-zones-littorales', verified: true },
+      { name: 'IPCC AR6 · Sea-level scenarios', url: 'https://www.ipcc.ch/report/ar6/syr/figures/figure-3-4/', verified: false }
+    ],
+    ttsText: 'This illustrative sea-level scenario reaches sixty-five centimetres in twenty seventy-five, relative to nineteen fifty. It is not a forecast of Thwaites Glacier collapse.'
+  },
+  {
     id: 'fever_scenario_logic',
     title: 'Fever Scenario Logic',
     category: 'fever-scenarios',

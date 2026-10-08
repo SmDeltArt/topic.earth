@@ -1,27 +1,11 @@
-# topic.earth Logo Kit
+# topic.earth branding
 
-This folder is the portable source area for the topic.earth animated logo modes.
+`local/` keeps three editable SVG masters in both clock modes, app Earth textures, live-clock fallback, PWA 192/512 icons, Apple touch icon, ICO, social-card PNG, and one 512px logo / one 64px favicon in PNG/WebP/WebM/GIF per clock mode.
 
-## Modes
+`social/` contains the Cloudinary URL catalog, size manifest, language dictionary and previews. Preview media prefers explicit Cloudinary URLs and uses strategic local fallbacks. Raster clocks contain the captured export time; native SVG/page clocks use live local time. Raster artwork is English; the preview UI and live SVGs support en/fr/nl/de/ru/zh/hi.
 
-- `main`: calm Earth intelligence signal.
-- `regional`: local/regional map signal.
-- `space`: orbital space signal.
-- `fever`: climate/tipping-point signal.
+Full exports and duplicate size-specific SVGs remain recoverable under the Git/deployment-excluded `local-asset-archive/`.
 
-## Source
+Import delivery URLs with `python tools/import-cloudinary-brand.py <export.csv> [<export.csv> ...]`. Additional individually supplied URLs are in `social/cloudinary-additional.json`. No guessed public IDs are used.
 
-- `topic-earth-logo-kit.html` renders the four animated logo modes together.
-- `topic-earth-vignette-animated.svg` is the English animated vignette used for loading and social motion exports.
-- `sujet-terre-vignette-animated.svg` is the French animated vignette variant for internationalization previews.
-- `../social/topic-earth-vignette-first-en.png` is the captured English first/resume frame used as a validation still before more language vignettes are exported.
-- `metadata.json` describes the logo URLs, colors, and preferred export formats.
-
-## Export Recommendations
-
-- Keep SVG/HTML/CSS as the editable source.
-- Export animated WebP for small reusable web graphics.
-- Export WebM for video or transparent motion use.
-- Export GIF only for compatibility previews such as README embeds.
-
-The current app uses Cloudinary first and local `assets/icons/` files as fallback.
+The two 512px local GIF fallbacks use 4 fps to stay below 5 MB each. Cloudinary and the archive retain the full-rate originals. Local fallback assets total approximately 13.5 MiB.

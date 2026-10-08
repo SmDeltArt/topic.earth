@@ -1,7 +1,7 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "provisional": true,
-  "updatedAt": "2026-04-08",
+  "updatedAt": "2026-10-08",
   "defaultScenario": "objective",
   "years": [
     1950,
@@ -666,7 +666,7 @@
           "warningLevel": "severe",
           "color": "#ff6f32",
           "temperatureDeltaC": 2.6,
-          "seaLevelCm": 46,
+          "seaLevelCm": 65,
           "arcticIceLossPct": 52,
           "vegetationStressPct": 40,
           "amocStrengthPct": 77,
@@ -712,7 +712,7 @@
           "warningLevel": "critical",
           "color": "#f5522f",
           "temperatureDeltaC": 3,
-          "seaLevelCm": 60,
+          "seaLevelCm": 80,
           "arcticIceLossPct": 63,
           "vegetationStressPct": 49,
           "amocStrengthPct": 70,
@@ -758,7 +758,7 @@
           "warningLevel": "critical",
           "color": "#e5432d",
           "temperatureDeltaC": 3.2,
-          "seaLevelCm": 73,
+          "seaLevelCm": 95,
           "arcticIceLossPct": 70,
           "vegetationStressPct": 55,
           "amocStrengthPct": 66,
@@ -1040,7 +1040,7 @@
           "warningLevel": "critical",
           "color": "#f85c2d",
           "temperatureDeltaC": 3.8,
-          "seaLevelCm": 61,
+          "seaLevelCm": 70,
           "arcticIceLossPct": 68,
           "vegetationStressPct": 56,
           "amocStrengthPct": 62,
@@ -1175,6 +1175,92 @@
           }
         }
       }
+    }
+  },
+  "seaLevelModel": {
+    "referenceYear": 1950,
+    "units": "cm",
+    "status": "illustrative",
+    "interpolation": "linear between milestones",
+    "anchor": {
+      "scenario": "objective",
+      "year": 2075,
+      "seaLevelCm": 65,
+      "source": "user-selected anchor"
+    },
+    "method": "Historical and 2050 starter values retained. Objective: user anchor at 2075, then illustrative continuation +0.6 cm/year to 2125. High 2075 adjusted to 70 cm to preserve scenario ordering. Other values remain starter placeholders.",
+    "limitations": "Not an IPCC projection or coastline inundation model; 1950 is the app reference, distinct from the IPCC 1995–2014 reference period.",
+    "sources": [
+      "https://www.ipcc.ch/report/ar6/syr/figures/figure-3-4/",
+      "https://www.ipcc.ch/report/ar6/wg1/chapter/chapter-9/"
+    ],
+    "linkedWorldTopicId": "earth_thwaites_doomsday_glacier",
+    "textureMeaning": "Use blue for illustrative coastal sea-level exposure, brown for Amazon deforestation. Original coloured patches do not provide calculated inundation or measured clearing boundaries.",
+    "exposureExamples": [
+      {
+        "region": "Netherlands",
+        "places": [
+          "Low-lying North Sea coast and delta areas"
+        ],
+        "note": "Exposure does not imply inundation behind functioning flood defences."
+      },
+      {
+        "region": "France",
+        "places": [
+          "Camargue / Rhône delta",
+          "Low-lying Atlantic, Channel and North Sea coasts"
+        ]
+      },
+      {
+        "region": "Italy",
+        "places": [
+          "Venice lagoon",
+          "Po delta / northern Adriatic lowlands"
+        ]
+      },
+      {
+        "region": "Bangladesh",
+        "places": [
+          "Ganges–Brahmaputra–Meghna delta"
+        ]
+      },
+      {
+        "region": "Africa",
+        "places": [
+          "Nile delta / Alexandria, Egypt",
+          "Lagos, Nigeria",
+          "Cotonou / Porto-Novo, Benin",
+          "Dar es Salaam, Tanzania"
+        ]
+      },
+      {
+        "region": "China",
+        "places": [
+          "Yangtze delta / Shanghai",
+          "Pearl River delta"
+        ]
+      },
+      {
+        "region": "Low-lying islands",
+        "places": [
+          "Maldives",
+          "Tuvalu",
+          "Kiribati",
+          "Marshall Islands"
+        ]
+      }
+    ],
+    "exposureExampleStatus": "Regional exposure examples only; not a +65 cm inundation footprint or a prediction of complete island loss."
+  },
+  "visualLegend": {
+    "seaLevelExposure": {
+      "color": "#42c6f5",
+      "meaning": "Low-lying coastal exposure examples; not a calculated inundation footprint"
+    },
+    "deforestation": {
+      "color": "#a66a3f",
+      "meaning": "Regional forest-clearing example; not a measured polygon",
+      "topicId": "fever_amazon_deforestation"
     }
   }
 }

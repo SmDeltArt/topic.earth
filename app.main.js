@@ -1,32 +1,32 @@
-import { GlobeRenderer } from './lib/globe.js?v=fever-mobile-monitor-20261005';
+import { GlobeRenderer } from './lib/globe.js?v=fever-monitor-tabs-20261008';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LAYERS } from './data/layers.js?v=topic-earth-regional-merged-20261003';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-climate-studies-watch-20260601';
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-thwaites-20261003';
-import { FEVER_TOPICS } from './data/fever-topics.js?v=topic-earth-embedded-story-20260521';
+import { FEVER_TOPICS } from './data/fever-topics.js?v=fever-land-cover-20261008-3';
 import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-thwaites-20261003';
 import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-short-20261003';
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=scene-controls-layer-order-20261005';
+import { TopBar } from './components/TopBar.js?v=cloudinary-fallback-20261008';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-regional-drawing-20261004';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-drawing-20261004';
-import { DetailPanel } from './components/DetailPanel.js?v=fever-mobile-monitor-20261005';
+import { DetailPanel } from './components/DetailPanel.js?v=fever-monitor-tabs-20261008';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=rotation-speed-20261004';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
 import { ReadTranslationService } from './lib/read-translation.js?v=translation-20261004';
 import { TopicTranslations, plainTopicText, topicSourceRevision } from './lib/topic-translations.mjs?v=reading-save-20261004';
-import { TTSManager } from './lib/tts.js?v=reading-save-20261004';
+import { TTSManager } from './lib/tts.js?v=fever-recorded-mp3-20261008';
 import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-meteo-draft-20260531';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
 import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-warning-panel-collapse-20260430';
 import { installAiApiBridge } from './lib/ai-api-bridge.js?v=topic-earth-bridge-cleanup-20260520';
 
-const TOPIC_EARTH_FAVICON_URL = 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1778010506/topic.earth_24x24_pivz9m.svg';
-const TOPIC_EARTH_FAVICON_FALLBACK_URL = './assets/icons/topic.earth_24x24.svg?v=topic-earth-icons-20260505';
+const TOPIC_EARTH_FAVICON_URL = './assets/logo/local/favicon.svg';
+const TOPIC_EARTH_FAVICON_FALLBACK_URL = './assets/logo/local/favicon.svg';
 const DEFAULT_BROWSER_TITLE = 'topic.earth | Global Intelligence Dashboard';
 const BROWSER_MODE_TITLES = {
   main: 'topic.earth | World',
@@ -857,7 +857,7 @@ class TopicEarthApp {
         };
         probe.src = TOPIC_EARTH_FAVICON_URL;
       }
-      if (!favicon.href.includes('topic.earth_24x24_pivz9m.svg') && !favicon.href.includes('topic.earth_24x24.svg')) {
+      if (favicon.href !== new URL(TOPIC_EARTH_FAVICON_URL, location.href).href) {
         favicon.href = TOPIC_EARTH_FAVICON_URL;
       }
     }
@@ -2389,7 +2389,11 @@ class TopicEarthApp {
       this.topBar?.setLayerFilter?.('fever');
     }
     await this.enterFeverMode(this.modeTransitionToken);
-    if (this.currentLayerFilter === 'fever') this.showFeverSimulation();
+    if (this.currentLayerFilter === 'fever') {
+      this.showFeverSimulation();
+      this.detailPanel.setPanelSize('top');
+      this.detailPanel.container.querySelector('#detail-content')?.scrollTo({ top: 0 });
+    }
   }
 
   startTTSHighlight() {
@@ -2870,6 +2874,12 @@ class TopicEarthApp {
       },
       getAdjacentTopic: (point, direction) => {
         return this.getAdjacentTopic(point, direction);
+      },
+      onOpenLinkedTopic: (id, mode) => {
+        const topic = this.allPoints.find(point => point.id === id);
+        if (!topic) return;
+        if (mode) this.switchLayerFilter(mode);
+        this.showPointDetail(topic);
       },
       onNavigateTopic: (topic) => {
         this.showPointDetail(topic);
@@ -3593,6 +3603,8 @@ class TopicEarthApp {
   }
 
   showPointDetail(point) {
+    // Keep the selected forest-loss example open while it is inspected.
+    if (point.isFeverLandCover && this.globe?.inFeverMode) this.globe.pauseFeverLoop();
     if (point.isSpaceTopic || point.solarSystemObject) {
       if (!this.globe) {
         this.detailPanel.show(point);

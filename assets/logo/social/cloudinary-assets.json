@@ -1,0 +1,254 @@
+{
+  "sources": [
+    {
+      "file": "export-2026-10-08T15_58_53.419Z.csv",
+      "rows": 55
+    },
+    {
+      "file": "export-2026-10-08T16_10_10.357Z.csv",
+      "rows": 56
+    }
+  ],
+  "assets": {
+    "topic-earth-favicon-32-local": {
+      "clock": "local",
+      "urls": {
+        "gif": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474189/topic-earth-favicon-32-local_uuhfvj.gif",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474190/topic-earth-favicon-32-local_ysuas8.png",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474192/topic-earth-favicon-32-local_tf9jvq.svg",
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474192/topic-earth-favicon-32-local_uakgcz.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474192/topic-earth-favicon-32-local_uhxugu.webm"
+      }
+    },
+    "topic-earth-social-1920x1080-local": {
+      "clock": "local",
+      "urls": {
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474253/topic-earth-social-1920x1080-local_anpyad.webp",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474252/topic-earth-social-1920x1080-local_gpqb6s.svg",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474252/topic-earth-social-1920x1080-local_n5ykll.webm",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474250/topic-earth-social-1920x1080-local_nwc00n.png"
+      }
+    },
+    "topic-earth-social-1500x500-local": {
+      "clock": "local",
+      "urls": {
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474250/topic-earth-social-1500x500-local_gvvnhs.svg",
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474249/topic-earth-social-1500x500-local_wrn2fd.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474248/topic-earth-social-1500x500-local_a97r7s.webm",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474247/topic-earth-social-1500x500-local_mgzrro.png"
+      }
+    },
+    "topic-earth-social-1200x630-local": {
+      "clock": "local",
+      "urls": {
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474247/topic-earth-social-1200x630-local_i6pfbn.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474246/topic-earth-social-1200x630-local_yoq39v.webm",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474244/topic-earth-social-1200x630-local_pnxmq7.svg",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474242/topic-earth-social-1200x630-local_f3prdc.png"
+      }
+    },
+    "topic-earth-social-1080x1920-local": {
+      "clock": "local",
+      "urls": {
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474247/topic-earth-social-1080x1920-local_jnrrrs.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474243/topic-earth-social-1080x1920-local_pxlmcs.webm",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474237/topic-earth-social-1080x1920-local_akyovm.svg",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474235/topic-earth-social-1080x1920-local_kxnbkx.png"
+      }
+    },
+    "topic-earth-social-512x512-local": {
+      "clock": "local",
+      "urls": {
+        "gif": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474245/topic-earth-social-512x512-local_ic6tsu.gif",
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474231/topic-earth-social-512x512-local_gku7in.webp",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474228/topic-earth-social-512x512-local_zeuso5.svg",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474226/topic-earth-social-512x512-local_tp4lmo.webm",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474225/topic-earth-social-512x512-local_uohu2e.png"
+      }
+    },
+    "topic-earth-social-1080x1080-local": {
+      "clock": "local",
+      "urls": {
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474243/topic-earth-social-1080x1080-local_ybrc3a.webp",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474236/topic-earth-social-1080x1080-local_ddgacd.svg",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474234/topic-earth-social-1080x1080-local_empljy.webm",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474229/topic-earth-social-1080x1080-local_vx2eud.png"
+      }
+    },
+    "topic-earth-social-256x256-local": {
+      "clock": "local",
+      "urls": {
+        "gif": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474225/topic-earth-social-256x256-local_rlx5x0.gif",
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474223/topic-earth-social-256x256-local_ixdklm.webp",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474222/topic-earth-social-256x256-local_bbellf.svg",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474221/topic-earth-social-256x256-local_jqct51.webm",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474219/topic-earth-social-256x256-local_gc1xmt.png"
+      }
+    },
+    "topic-earth-favicon-256-local": {
+      "clock": "local",
+      "urls": {
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474221/topic-earth-favicon-256-local_uvh7ep.webp",
+        "gif": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474217/topic-earth-favicon-256-local_igqdch.gif",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474210/topic-earth-favicon-256-local_gfb6vv.webm",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474204/topic-earth-favicon-256-local_b9huqo.svg",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474203/topic-earth-favicon-256-local_ifoaku.png"
+      }
+    },
+    "topic-earth-favicon-512-local": {
+      "clock": "local",
+      "urls": {
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474221/topic-earth-favicon-512-local_psr1ri.webm",
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474220/topic-earth-favicon-512-local_e83jh3.webp",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474208/topic-earth-favicon-512-local_f7e1sj.svg",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474206/topic-earth-favicon-512-local_us0cjq.png"
+      }
+    },
+    "topic-earth-favicon-128-local": {
+      "clock": "local",
+      "urls": {
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474203/topic-earth-favicon-128-local_vciqos.webp",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474200/topic-earth-favicon-128-local_z7xqxi.svg",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474200/topic-earth-favicon-128-local_t0dcjs.webm",
+        "gif": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474199/topic-earth-favicon-128-local_zsvjqn.gif",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474199/topic-earth-favicon-128-local_j2zn56.png"
+      }
+    },
+    "topic-earth-favicon-64-local": {
+      "clock": "local",
+      "urls": {
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474195/topic-earth-favicon-64-local_b6mlwm.svg",
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474195/topic-earth-favicon-64-local_kdjcur.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474195/topic-earth-favicon-64-local_vncsk7.webm",
+        "gif": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474194/topic-earth-favicon-64-local_jrga2c.gif",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474194/topic-earth-favicon-64-local_gu33ps.png"
+      }
+    },
+    "topic-earth-social-1920x1080-automatic": {
+      "clock": "automatic",
+      "urls": {
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474184/topic-earth-social-1920x1080-automatic_m7sbtl.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474183/topic-earth-social-1920x1080-automatic_ahripa.webm",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474181/topic-earth-social-1920x1080-automatic_tzk7ow.svg",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474180/topic-earth-social-1920x1080-automatic_hrqubv.png"
+      }
+    },
+    "topic-earth-favicon-32-automatic": {
+      "clock": "automatic",
+      "urls": {
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474121/topic-earth-favicon-32-automatic_bvkehv.png",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474123/topic-earth-favicon-32-automatic_u8awqq.svg",
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474123/topic-earth-favicon-32-automatic_pfp16v.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474122/topic-earth-favicon-32-automatic_fpyjmm.webm",
+        "gif": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474121/topic-earth-favicon-32-automatic_zems7q.gif"
+      }
+    },
+    "topic-earth-social-1500x500-automatic": {
+      "clock": "automatic",
+      "urls": {
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474180/topic-earth-social-1500x500-automatic_e9kcrd.svg",
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474180/topic-earth-social-1500x500-automatic_ymouff.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474179/topic-earth-social-1500x500-automatic_rsc9ho.webm",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474178/topic-earth-social-1500x500-automatic_iis3sx.png"
+      }
+    },
+    "topic-earth-social-512x512-automatic": {
+      "clock": "automatic",
+      "urls": {
+        "gif": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474178/topic-earth-social-512x512-automatic_blzi3c.gif",
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474158/topic-earth-social-512x512-automatic_kjj6h2.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474157/topic-earth-social-512x512-automatic_z0gbpg.webm",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474156/topic-earth-social-512x512-automatic_yka2ac.svg",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474154/topic-earth-social-512x512-automatic_hvokpm.png"
+      }
+    },
+    "topic-earth-social-1200x630-automatic": {
+      "clock": "automatic",
+      "urls": {
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474178/topic-earth-social-1200x630-automatic_mfj2iy.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474176/topic-earth-social-1200x630-automatic_qje8o3.webm",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474175/topic-earth-social-1200x630-automatic_hc10xr.svg",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474174/topic-earth-social-1200x630-automatic_vdzc2g.png"
+      }
+    },
+    "topic-earth-social-1080x1920-automatic": {
+      "clock": "automatic",
+      "urls": {
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474174/topic-earth-social-1080x1920-automatic_kyyn5c.svg",
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474173/topic-earth-social-1080x1920-automatic_cphtnh.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474171/topic-earth-social-1080x1920-automatic_xee8yo.webm",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474164/topic-earth-social-1080x1920-automatic_gbaxeg.png"
+      }
+    },
+    "topic-earth-social-1080x1080-automatic": {
+      "clock": "automatic",
+      "urls": {
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474170/topic-earth-social-1080x1080-automatic_fldqul.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474163/topic-earth-social-1080x1080-automatic_ny1rtj.webm",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474161/topic-earth-social-1080x1080-automatic_vn3ud0.png",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474160/topic-earth-social-1080x1080-automatic_zts0x5.svg"
+      }
+    },
+    "topic-earth-favicon-512-automatic": {
+      "clock": "automatic",
+      "urls": {
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474157/topic-earth-favicon-512-automatic_vgwhfe.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474140/topic-earth-favicon-512-automatic_ydg9le.webm",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474138/topic-earth-favicon-512-automatic_tcsgfh.svg",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474137/topic-earth-favicon-512-automatic_ekfors.png"
+      }
+    },
+    "topic-earth-favicon-256-automatic": {
+      "clock": "automatic",
+      "urls": {
+        "gif": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474153/topic-earth-favicon-256-automatic_f2tjvh.gif",
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474153/topic-earth-favicon-256-automatic_jvtik0.webp",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474136/topic-earth-favicon-256-automatic_bqely1.webm",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474134/topic-earth-favicon-256-automatic_shgrzp.svg",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474132/topic-earth-favicon-256-automatic_ys56hi.png"
+      }
+    },
+    "topic-earth-social-256x256-automatic": {
+      "clock": "automatic",
+      "urls": {
+        "gif": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474151/topic-earth-social-256x256-automatic_zdeqkt.gif",
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474150/topic-earth-social-256x256-automatic_mow1rv.webp",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474146/topic-earth-social-256x256-automatic_jlsgu7.svg",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474146/topic-earth-social-256x256-automatic_fnwg0u.webm",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474143/topic-earth-social-256x256-automatic_y2xbq9.png"
+      }
+    },
+    "topic-earth-favicon-128-automatic": {
+      "clock": "automatic",
+      "urls": {
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474134/topic-earth-favicon-128-automatic_addxtk.webp",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474132/topic-earth-favicon-128-automatic_ziysnz.svg",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474132/topic-earth-favicon-128-automatic_aisnsu.webm",
+        "gif": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474131/topic-earth-favicon-128-automatic_rvddlt.gif",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474129/topic-earth-favicon-128-automatic_kyso04.png"
+      }
+    },
+    "topic-earth-favicon-64-automatic": {
+      "clock": "automatic",
+      "urls": {
+        "webp": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474130/topic-earth-favicon-64-automatic_edvrjp.webp",
+        "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474128/topic-earth-favicon-64-automatic_iihbrk.svg",
+        "webm": "https://res.cloudinary.com/dsbfcgtdv/video/upload/v1791474128/topic-earth-favicon-64-automatic_irim2u.webm",
+        "gif": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474123/topic-earth-favicon-64-automatic_sqbz2d.gif",
+        "png": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474123/topic-earth-favicon-64-automatic_fettw9.png"
+      }
+    }
+  },
+  "standards": {
+    "logo": "social-512x512",
+    "favicon": "favicon-64"
+  },
+  "cloudClockModes": [
+    "automatic",
+    "local"
+  ],
+  "notes": [
+    "Raster local clocks show the captured export time. Live time requires the SVG/page clock.",
+    "Raster artwork is English; browser language selection translates the preview UI and live SVGs."
+  ]
+}

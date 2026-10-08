@@ -9714,3 +9714,54 @@ body {
         max-height: calc(100dvh - var(--mobile-controls-bottom, calc(var(--top-bar-height) + 54px)) - 12px);
     }
 }
+
+/* Canonical social palettes and live Earth-clock branding (2026-10-08). */
+body.topic-mode-main #top-bar .logo { --logo-topic:#00d4ff; --logo-earth:#9ff5ff; --logo-title-light:#f4feff; --logo-line-b:#7cffd6; }
+body.topic-mode-regional #top-bar .logo { --logo-topic:#39ff88; --logo-earth:#d8ff7a; --logo-title-light:#f6ffe6; --logo-line-b:#f9d85d; }
+body.topic-mode-space #top-bar .logo { --logo-topic:#7aa8ff; --logo-earth:#00d4ff; --logo-title-light:#f2f7ff; --logo-line-b:#f9d85d; }
+body.topic-mode-fever #top-bar .logo { --logo-topic:#ff3030; --logo-earth:#f9d85d; --logo-title-light:#fff0dc; --logo-line-b:#00d4ff; }
+.logo-clock-ring { fill:none; stroke:url(#topicClockRing); stroke-width:3; }
+.logo-clock-hand { vector-effect:none; }
+.logo-clock-word { gap:0; background:linear-gradient(90deg,var(--logo-topic),var(--logo-title-light,#f4feff) 42%,var(--logo-earth) 72%,var(--logo-line-b)); background-clip:text; -webkit-background-clip:text; color:transparent; }
+.logo-clock-word span:last-child { color:inherit; }
+
+/* Controls float over the scene and remain visible while panel content scrolls. */
+#detail-panel { padding: 0; display: flex; flex-direction: column; overflow: hidden; background: transparent; backdrop-filter: none; border: 0; }
+#detail-panel .detail-toolbar { position: absolute; top: 0; right: 0; z-index: 5; background: transparent; border: 0; pointer-events: none; }
+#detail-panel .detail-toolbar button { pointer-events: auto; }
+#detail-panel #detail-content { margin-top: 52px; overflow-y: auto; min-height: 0; background: rgba(26,31,46,.8); border: 1px solid var(--border); border-radius: 8px; }
+#detail-panel.compact .detail-compact-summary { margin-top: 52px; background: rgba(26,31,46,.8); border: 1px solid var(--border); border-radius: 8px; }
+#detail-panel.compact.fever-compact-panel { max-height: min(310px, 50dvh); }
+#detail-panel.compact.fever-compact-panel .detail-compact-summary { padding: 10px 12px; overflow-y: auto; min-height: 0; }
+.fever-compact-panel .compact-message, .fever-compact-panel .compact-warning { display: block; overflow: visible; white-space: normal; -webkit-line-clamp: unset; }
+.fever-compact-panel .compact-warning { color: #ffb74d; margin-top: 5px; font-size: 12px; }
+.fever-compact-panel .compact-metrics { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+@media (max-width: 768px), (pointer: coarse) {
+  body.topic-mode-fever:has(#layer-panel) #detail-panel:not(.hidden) { background: transparent; }
+  body.detail-panel-compact #detail-panel.fever-compact-panel { max-height: min(310px, 50dvh); }
+}
+
+/* Keep sea-level values readable beside the existing Fever metrics. */
+.heartbeat-stats { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+.fever-sea-level-stat { display: flex; flex-direction: column; gap: 5px; }
+.fever-sea-level-stat .stat-value { color: #42c6f5; }
+.fever-sea-level-stat small { color: var(--text-secondary); font-size: 11px; }
+.fever-sea-level-stat button { padding: 4px; font-size: 11px; }
+
+.timeline-marker button { border: 0; padding: 0; background: transparent; color: inherit; cursor: pointer; }
+.timeline-marker button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Monitor content scrolls below the fixed corner controls. */
+#detail-panel #detail-content { flex: 1 1 auto; overscroll-behavior: contain; }
+.detail-scroll-top { position: absolute; right: 12px; top: 56px; z-index: 6; width: 32px; height: 32px; border: 1px solid var(--accent); border-radius: 6px; background: var(--bg-card); color: var(--accent); cursor: pointer; }
+.detail-scroll-top[hidden], #detail-panel.compact .detail-scroll-top { display: none; }
+body.fever-monitor-expanded #fever-monitor-dock.fever-monitor-dock { display: none; }
+.monitoring-tabs-header { display: flex; flex-wrap: wrap; }
+.monitoring-tab { min-width: 0; flex: 1 1 90px; white-space: normal; }
+@media (max-width: 1200px), (pointer: coarse) {
+  #top-bar { padding-left: max(6px, env(safe-area-inset-left)); padding-right: max(6px, env(safe-area-inset-right)); }
+  #top-bar .logo.logo-image-brand { width: max-content; min-width: 0; padding: 2px 6px; }
+  #top-bar .logo-live-clock { width: max-content; justify-content: flex-start; gap: 4px; }
+}
+
+body.topic-mode-fever:not(.fever-monitor-expanded) #fever-monitor-dock.fever-monitor-dock { display: inline-flex; }

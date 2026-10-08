@@ -1,0 +1,513 @@
+{
+  "en": {
+    "name": "English",
+    "library": "social export library",
+    "set": "animated social SVG set",
+    "clock": "Clock",
+    "local": "Local time",
+    "automatic": "Automatic",
+    "speed": "1 minute / 600 ms",
+    "play": "Play WebM",
+    "live": "Live SVG",
+    "layouts": "Show all layouts together",
+    "favicons": "Transparent Earth-only favicons",
+    "localPackage": "Download local-time package",
+    "automaticPackage": "Download automatic package",
+    "original": "Original three-design preview",
+    "open": "Open SVG",
+    "banner": "Banner",
+    "square": "Square",
+    "earthClock": "Transparent Earth clock",
+    "allFormats": "Open all sizes and download formats",
+    "language": "Language",
+    "intro": "Seven social sizes and transparent Earth-only clocks. SVGs detect your browser language. Local time stays live; automatic time advances one minute every 600 ms.",
+    "embedded": "Embedded transparent WebM Earth loops. Open SVGs directly or in an object for local-time and automatic clock playback.",
+    "recorded": "Recorded local time",
+    "reset": "Animated recordings reset their clock when the loop repeats.",
+    "ico": "Download multiresolution ICO (16–256 px)",
+    "rasterLanguage": "Recorded exports: English.",
+    "chips": [
+      "Regional",
+      "World",
+      "Space",
+      "Fever Sim"
+    ],
+    "modes": {
+      "world": {
+        "title": "World Update",
+        "short": "World",
+        "label": "World update",
+        "a": "Live Earth signals, climate layers, topic intelligence.",
+        "b": "Worldwide context for weather, climate, and public data."
+      },
+      "regional": {
+        "title": "Regional Dashboard",
+        "short": "Regional",
+        "label": "Regional dashboard",
+        "a": "Local initiatives, evidence, and climate signals.",
+        "b": "Track places, compare updates, turn observations into topics."
+      },
+      "space": {
+        "title": "Space Watch",
+        "short": "Space",
+        "label": "Space watch",
+        "a": "Atmosphere missions, orbital context, Earth observation.",
+        "b": "Aura, OCO-2, PACE, ozone, and climate imagery."
+      },
+      "fever": {
+        "title": "Fever Simulation",
+        "short": "Fever scenario",
+        "label": "Fever simulation",
+        "a": "Tipping points, scenarios, planetary risk signals.",
+        "b": "Explore heat, feedback loops, and transition paths."
+      }
+    },
+    "format": "Format",
+    "cloud": "Cloudinary",
+    "fallback": "Local fallback",
+    "liveMaster": "Live SVG master",
+    "standardLogo": "Standard logo",
+    "standardFavicon": "Standard favicon",
+    "pending": "Cloud format unavailable",
+    "cloudIntro": "Cloud-hosted social assets, with strategic local fallbacks.",
+    "rasterNote": "Raster animations show recorded time and English artwork. The live SVG uses your current local time and selected language."
+  },
+  "fr": {
+    "name": "Français",
+    "library": "bibliothèque de formats sociaux",
+    "set": "ensemble de SVG sociaux animés",
+    "clock": "Horloge",
+    "local": "Heure locale",
+    "automatic": "Automatique",
+    "speed": "1 minute / 600 ms",
+    "play": "Lire le WebM",
+    "live": "SVG en direct",
+    "layouts": "Afficher tous les formats",
+    "favicons": "Favicons transparents : Terre et horloge",
+    "localPackage": "Télécharger le pack heure locale",
+    "automaticPackage": "Télécharger le pack automatique",
+    "original": "Aperçu des trois modèles initiaux",
+    "open": "Ouvrir le SVG",
+    "banner": "Bannière",
+    "square": "Carré",
+    "earthClock": "Horloge terrestre transparente",
+    "allFormats": "Voir tous les formats et téléchargements",
+    "language": "Langue",
+    "intro": "Sept formats sociaux et des horloges terrestres transparentes. Les SVG détectent la langue du navigateur. L’heure locale reste en direct ; l’horloge automatique avance d’une minute toutes les 600 ms.",
+    "embedded": "Animations de la Terre en WebM transparent intégré. Ouvrez les SVG directement ou dans un élément object pour lire l’horloge locale ou automatique.",
+    "recorded": "Heure locale enregistrée",
+    "reset": "L’horloge enregistrée revient au début à chaque répétition.",
+    "ico": "Télécharger l’ICO multirésolution (16–256 px)",
+    "rasterLanguage": "Exports enregistrés : anglais.",
+    "chips": [
+      "Régional",
+      "Monde",
+      "Espace",
+      "Simulation"
+    ],
+    "modes": {
+      "world": {
+        "title": "Actualités mondiales",
+        "short": "Monde",
+        "label": "Actualités mondiales",
+        "a": "Signaux terrestres en direct, couches climatiques et analyses.",
+        "b": "Contexte mondial : météo, climat et données publiques."
+      },
+      "regional": {
+        "title": "Tableau de bord régional",
+        "short": "Régional",
+        "label": "Tableau de bord régional",
+        "a": "Initiatives locales, données probantes et signaux climatiques.",
+        "b": "Suivez les lieux, comparez les mises à jour et les observations."
+      },
+      "space": {
+        "title": "Veille spatiale",
+        "short": "Espace",
+        "label": "Veille spatiale",
+        "a": "Missions atmosphériques, contexte orbital et observation terrestre.",
+        "b": "Aura, OCO-2, PACE, ozone et images du climat."
+      },
+      "fever": {
+        "title": "Simulation de fièvre",
+        "short": "Scénario de fièvre",
+        "label": "Simulation de fièvre",
+        "a": "Points de bascule, scénarios et signaux de risques planétaires.",
+        "b": "Explorez la chaleur, les rétroactions et les transitions."
+      }
+    },
+    "format": "Format",
+    "cloud": "Cloudinary",
+    "fallback": "Secours local",
+    "liveMaster": "SVG maître en direct",
+    "standardLogo": "Logo standard",
+    "standardFavicon": "Favicon standard",
+    "pending": "Format cloud indisponible",
+    "cloudIntro": "Visuels sociaux sur Cloudinary, avec des secours locaux essentiels.",
+    "rasterNote": "Les animations raster affichent une heure enregistrée et des textes anglais. Le SVG utilise votre heure locale actuelle et la langue choisie."
+  },
+  "nl": {
+    "name": "Nederlands",
+    "library": "bibliotheek voor sociale media",
+    "set": "set geanimeerde sociale SVG’s",
+    "clock": "Klok",
+    "local": "Lokale tijd",
+    "automatic": "Automatisch",
+    "speed": "1 minuut / 600 ms",
+    "play": "WebM afspelen",
+    "live": "Live SVG",
+    "layouts": "Alle formaten samen tonen",
+    "favicons": "Transparante favicons met aardeklok",
+    "localPackage": "Pakket met lokale tijd downloaden",
+    "automaticPackage": "Automatisch pakket downloaden",
+    "original": "Voorbeeld van de drie oorspronkelijke ontwerpen",
+    "open": "SVG openen",
+    "banner": "Banner",
+    "square": "Vierkant",
+    "earthClock": "Transparante aardeklok",
+    "allFormats": "Alle formaten en downloads bekijken",
+    "language": "Taal",
+    "intro": "Zeven sociale formaten en transparante aardeklokken. SVG’s detecteren de browsertaal. Lokale tijd blijft live; de automatische klok gaat elke 600 ms één minuut vooruit.",
+    "embedded": "Ingebouwde transparante WebM-animaties van de aarde. Open SVG’s rechtstreeks of in een object-element voor de lokale of automatische klok.",
+    "recorded": "Opgenomen lokale tijd",
+    "reset": "De opgenomen klok begint opnieuw wanneer de animatie wordt herhaald.",
+    "ico": "ICO met meerdere resoluties downloaden (16–256 px)",
+    "rasterLanguage": "Opgenomen exports: Engels.",
+    "chips": [
+      "Regionaal",
+      "Wereld",
+      "Ruimte",
+      "Simulatie"
+    ],
+    "modes": {
+      "world": {
+        "title": "Wereldnieuws",
+        "short": "Wereld",
+        "label": "Wereldnieuws",
+        "a": "Live aardesignalen, klimaatlagen en thematische analyses.",
+        "b": "Wereldwijde context voor weer, klimaat en openbare gegevens."
+      },
+      "regional": {
+        "title": "Regionaal dashboard",
+        "short": "Regionaal",
+        "label": "Regionaal dashboard",
+        "a": "Lokale initiatieven, onderbouwing en klimaatsignalen.",
+        "b": "Volg locaties, vergelijk updates en verwerk waarnemingen."
+      },
+      "space": {
+        "title": "Ruimtemonitor",
+        "short": "Ruimte",
+        "label": "Ruimtemonitor",
+        "a": "Atmosfeermissies, baaninformatie en aardobservatie.",
+        "b": "Aura, OCO-2, PACE, ozon en klimaatbeelden."
+      },
+      "fever": {
+        "title": "Koortssimulatie",
+        "short": "Koortsscenario",
+        "label": "Koortssimulatie",
+        "a": "Kantelpunten, scenario’s en signalen van planetaire risico’s.",
+        "b": "Verken hitte, terugkoppelingen en transitiepaden."
+      }
+    },
+    "format": "Formaat",
+    "cloud": "Cloudinary",
+    "fallback": "Lokale reserve",
+    "liveMaster": "Live SVG-master",
+    "standardLogo": "Standaardlogo",
+    "standardFavicon": "Standaardfavicon",
+    "pending": "Cloudformaat niet beschikbaar",
+    "cloudIntro": "Sociale beelden op Cloudinary, met essentiële lokale reserves.",
+    "rasterNote": "Rasteranimaties tonen een opgenomen tijd en Engelse tekst. De SVG gebruikt uw huidige lokale tijd en gekozen taal."
+  },
+  "de": {
+    "name": "Deutsch",
+    "library": "Bibliothek für Social-Media-Formate",
+    "set": "animierte Social-Media-SVGs",
+    "clock": "Uhr",
+    "local": "Ortszeit",
+    "automatic": "Automatisch",
+    "speed": "1 Minute / 600 ms",
+    "play": "WebM abspielen",
+    "live": "Live-SVG",
+    "layouts": "Alle Formate zusammen anzeigen",
+    "favicons": "Transparente Favicons mit Erduhr",
+    "localPackage": "Paket mit Ortszeit herunterladen",
+    "automaticPackage": "Automatikpaket herunterladen",
+    "original": "Vorschau der drei ursprünglichen Designs",
+    "open": "SVG öffnen",
+    "banner": "Banner",
+    "square": "Quadrat",
+    "earthClock": "Transparente Erduhr",
+    "allFormats": "Alle Formate und Downloads öffnen",
+    "language": "Sprache",
+    "intro": "Sieben Social-Media-Formate und transparente Erduhren. SVGs erkennen die Browsersprache. Die Ortszeit läuft live; die automatische Uhr geht alle 600 ms eine Minute weiter.",
+    "embedded": "Eingebettete transparente WebM-Erdanimationen. SVGs direkt oder in einem object-Element öffnen, um die Ortszeit- oder Automatik-Uhr abzuspielen.",
+    "recorded": "Aufgezeichnete Ortszeit",
+    "reset": "Die aufgezeichnete Uhr beginnt bei jeder Wiederholung neu.",
+    "ico": "ICO mit mehreren Auflösungen herunterladen (16–256 px)",
+    "rasterLanguage": "Aufgezeichnete Exporte: Englisch.",
+    "chips": [
+      "Regional",
+      "Welt",
+      "Weltraum",
+      "Simulation"
+    ],
+    "modes": {
+      "world": {
+        "title": "Weltweite Neuigkeiten",
+        "short": "Welt",
+        "label": "Weltweite Neuigkeiten",
+        "a": "Live-Erdsignale, Klimaebenen und thematische Analysen.",
+        "b": "Weltweiter Kontext für Wetter, Klima und öffentliche Daten."
+      },
+      "regional": {
+        "title": "Regionales Dashboard",
+        "short": "Regional",
+        "label": "Regionales Dashboard",
+        "a": "Lokale Initiativen, Belege und Klimasignale.",
+        "b": "Orte verfolgen, Updates vergleichen und Beobachtungen einordnen."
+      },
+      "space": {
+        "title": "Weltraumbeobachtung",
+        "short": "Weltraum",
+        "label": "Weltraumbeobachtung",
+        "a": "Atmosphärenmissionen, Umlaufbahnen und Erdbeobachtung.",
+        "b": "Aura, OCO-2, PACE, Ozon und Klimabilder."
+      },
+      "fever": {
+        "title": "Fiebersimulation",
+        "short": "Fieberszenario",
+        "label": "Fiebersimulation",
+        "a": "Kipppunkte, Szenarien und planetare Risikosignale.",
+        "b": "Hitze, Rückkopplungen und Übergangspfade erkunden."
+      }
+    },
+    "format": "Format",
+    "cloud": "Cloudinary",
+    "fallback": "Lokaler Ersatz",
+    "liveMaster": "Live-SVG-Vorlage",
+    "standardLogo": "Standardlogo",
+    "standardFavicon": "Standardfavicon",
+    "pending": "Cloud-Format nicht verfügbar",
+    "cloudIntro": "Social-Media-Grafiken auf Cloudinary mit wichtigen lokalen Ersatzdateien.",
+    "rasterNote": "Rasteranimationen zeigen aufgezeichnete Zeit und englische Texte. Die SVG verwendet Ihre aktuelle Ortszeit und gewählte Sprache."
+  },
+  "ru": {
+    "name": "Русский",
+    "library": "библиотека форматов для соцсетей",
+    "set": "набор анимированных SVG для соцсетей",
+    "clock": "Часы",
+    "local": "Местное время",
+    "automatic": "Автоматически",
+    "speed": "1 минута / 600 мс",
+    "play": "Воспроизвести WebM",
+    "live": "Живой SVG",
+    "layouts": "Показать все форматы",
+    "favicons": "Прозрачные значки с часами Земли",
+    "localPackage": "Скачать набор с местным временем",
+    "automaticPackage": "Скачать автоматический набор",
+    "original": "Предпросмотр трёх исходных дизайнов",
+    "open": "Открыть SVG",
+    "banner": "Баннер",
+    "square": "Квадрат",
+    "earthClock": "Прозрачные часы Земли",
+    "allFormats": "Открыть все форматы и загрузки",
+    "language": "Язык",
+    "intro": "Семь форматов для соцсетей и прозрачные часы Земли. SVG определяют язык браузера. Местное время остаётся текущим; автоматические часы проходят минуту за 600 мс.",
+    "embedded": "Встроенные прозрачные WebM-анимации Земли. Откройте SVG напрямую или в элементе object для часов с местным или автоматическим временем.",
+    "recorded": "Записанное местное время",
+    "reset": "При повторе анимации записанные часы возвращаются к началу.",
+    "ico": "Скачать ICO с несколькими разрешениями (16–256 пикс.)",
+    "rasterLanguage": "Язык записанных файлов: английский.",
+    "chips": [
+      "Регионы",
+      "Мир",
+      "Космос",
+      "Модель"
+    ],
+    "modes": {
+      "world": {
+        "title": "Новости мира",
+        "short": "Мир",
+        "label": "Новости мира",
+        "a": "Сигналы Земли, климатические слои и тематическая аналитика.",
+        "b": "Мировой контекст погоды, климата и открытых данных."
+      },
+      "regional": {
+        "title": "Региональная панель",
+        "short": "Регионы",
+        "label": "Региональная панель",
+        "a": "Местные инициативы, фактические данные и климатические сигналы.",
+        "b": "Следите за местами, сравнивайте обновления и наблюдения."
+      },
+      "space": {
+        "title": "Наблюдение за космосом",
+        "short": "Космос",
+        "label": "Наблюдение за космосом",
+        "a": "Атмосферные миссии, орбиты и наблюдение за Землёй.",
+        "b": "Aura, OCO-2, PACE, озон и климатические снимки."
+      },
+      "fever": {
+        "title": "Модель перегрева",
+        "short": "Сценарий перегрева",
+        "label": "Модель перегрева",
+        "a": "Переломные точки, сценарии и сигналы планетарных рисков.",
+        "b": "Изучайте нагрев, обратные связи и пути перехода."
+      }
+    },
+    "format": "Формат",
+    "cloud": "Cloudinary",
+    "fallback": "Локальный резерв",
+    "liveMaster": "Живой SVG-шаблон",
+    "standardLogo": "Стандартный логотип",
+    "standardFavicon": "Стандартный фавикон",
+    "pending": "Облачный формат недоступен",
+    "cloudIntro": "Материалы для соцсетей в Cloudinary с необходимыми локальными резервами.",
+    "rasterNote": "Растровые анимации показывают записанное время и английский текст. SVG использует текущее местное время и выбранный язык."
+  },
+  "zh": {
+    "name": "简体中文",
+    "library": "社交媒体格式库",
+    "set": "社交媒体动画 SVG 集",
+    "clock": "时钟",
+    "local": "本地时间",
+    "automatic": "自动",
+    "speed": "1 分钟 / 600 毫秒",
+    "play": "播放 WebM",
+    "live": "实时 SVG",
+    "layouts": "同时查看所有格式",
+    "favicons": "透明地球时钟图标",
+    "localPackage": "下载本地时间版本",
+    "automaticPackage": "下载自动时钟版本",
+    "original": "查看三个原始设计",
+    "open": "打开 SVG",
+    "banner": "横幅",
+    "square": "正方形",
+    "earthClock": "透明地球时钟",
+    "allFormats": "查看所有格式并下载",
+    "language": "语言",
+    "intro": "七种社交媒体尺寸和透明地球时钟。SVG 自动检测浏览器语言。本地时钟实时运行；自动时钟每 600 毫秒前进一分钟。",
+    "embedded": "内嵌透明 WebM 地球动画。直接打开 SVG，或使用 object 元素，播放本地时间或自动时钟。",
+    "recorded": "录制时的本地时间",
+    "reset": "动画循环播放时，录制的时钟会重置。",
+    "ico": "下载多分辨率 ICO（16–256 像素）",
+    "rasterLanguage": "录制文件的语言：英语。",
+    "chips": [
+      "区域",
+      "全球",
+      "太空",
+      "模拟"
+    ],
+    "modes": {
+      "world": {
+        "title": "全球动态",
+        "short": "全球",
+        "label": "全球动态",
+        "a": "实时地球信号、气候图层与专题分析。",
+        "b": "天气、气候和公共数据的全球背景。"
+      },
+      "regional": {
+        "title": "区域仪表板",
+        "short": "区域",
+        "label": "区域仪表板",
+        "a": "本地行动、事实依据与气候信号。",
+        "b": "跟踪地点、比较更新，并分析观测结果。"
+      },
+      "space": {
+        "title": "太空观测",
+        "short": "太空",
+        "label": "太空观测",
+        "a": "大气任务、轨道背景与地球观测。",
+        "b": "Aura、OCO-2、PACE、臭氧与气候影像。"
+      },
+      "fever": {
+        "title": "升温模拟",
+        "short": "升温情景",
+        "label": "升温模拟",
+        "a": "临界点、情景与全球风险信号。",
+        "b": "探索热量、反馈循环与转型路径。"
+      }
+    },
+    "format": "格式",
+    "cloud": "Cloudinary",
+    "fallback": "本地备用",
+    "liveMaster": "实时 SVG 模板",
+    "standardLogo": "标准标志",
+    "standardFavicon": "标准网站图标",
+    "pending": "云端格式不可用",
+    "cloudIntro": "Cloudinary 社交素材，保留必要的本地备用文件。",
+    "rasterNote": "动画文件显示录制时的时间和英文文字。实时 SVG 使用当前本地时间及所选语言。"
+  },
+  "hi": {
+    "name": "हिन्दी",
+    "library": "सोशल मीडिया प्रारूप संग्रह",
+    "set": "एनिमेटेड सोशल SVG संग्रह",
+    "clock": "घड़ी",
+    "local": "स्थानीय समय",
+    "automatic": "स्वचालित",
+    "speed": "1 मिनट / 600 मिलीसेकंड",
+    "play": "WebM चलाएँ",
+    "live": "लाइव SVG",
+    "layouts": "सभी प्रारूप एक साथ देखें",
+    "favicons": "पारदर्शी पृथ्वी-घड़ी के आइकन",
+    "localPackage": "स्थानीय समय वाला पैकेज डाउनलोड करें",
+    "automaticPackage": "स्वचालित घड़ी वाला पैकेज डाउनलोड करें",
+    "original": "तीन मूल डिज़ाइन देखें",
+    "open": "SVG खोलें",
+    "banner": "बैनर",
+    "square": "वर्ग",
+    "earthClock": "पारदर्शी पृथ्वी-घड़ी",
+    "allFormats": "सभी आकार और डाउनलोड देखें",
+    "language": "भाषा",
+    "intro": "सोशल मीडिया के सात आकार और पारदर्शी पृथ्वी-घड़ी। SVG ब्राउज़र की भाषा पहचानते हैं। स्थानीय घड़ी लाइव चलती है; स्वचालित घड़ी हर 600 मिलीसेकंड में एक मिनट आगे बढ़ती है।",
+    "embedded": "पारदर्शी WebM पृथ्वी एनिमेशन भीतर जोड़े गए हैं। स्थानीय या स्वचालित घड़ी चलाने के लिए SVG सीधे या object तत्व में खोलें।",
+    "recorded": "रिकॉर्ड किया गया स्थानीय समय",
+    "reset": "एनिमेशन दोहराने पर रिकॉर्ड की गई घड़ी फिर शुरुआत से चलती है।",
+    "ico": "कई रिज़ॉल्यूशन वाला ICO डाउनलोड करें (16–256 पिक्सेल)",
+    "rasterLanguage": "रिकॉर्ड किए गए निर्यात की भाषा: अंग्रेज़ी।",
+    "chips": [
+      "क्षेत्रीय",
+      "विश्व",
+      "अंतरिक्ष",
+      "सिमुलेशन"
+    ],
+    "modes": {
+      "world": {
+        "title": "विश्व की ताज़ा जानकारी",
+        "short": "विश्व",
+        "label": "विश्व की ताज़ा जानकारी",
+        "a": "पृथ्वी के लाइव संकेत, जलवायु परतें और विषयगत विश्लेषण।",
+        "b": "मौसम, जलवायु और सार्वजनिक डेटा का वैश्विक संदर्भ।"
+      },
+      "regional": {
+        "title": "क्षेत्रीय डैशबोर्ड",
+        "short": "क्षेत्रीय",
+        "label": "क्षेत्रीय डैशबोर्ड",
+        "a": "स्थानीय पहल, प्रमाण और जलवायु के संकेत।",
+        "b": "स्थानों पर नज़र रखें, अपडेट और अवलोकन की तुलना करें।"
+      },
+      "space": {
+        "title": "अंतरिक्ष निगरानी",
+        "short": "अंतरिक्ष",
+        "label": "अंतरिक्ष निगरानी",
+        "a": "वायुमंडलीय मिशन, कक्षाओं का संदर्भ और पृथ्वी का अवलोकन।",
+        "b": "Aura, OCO-2, PACE, ओज़ोन और जलवायु की तस्वीरें।"
+      },
+      "fever": {
+        "title": "ताप सिमुलेशन",
+        "short": "ताप का परिदृश्य",
+        "label": "ताप सिमुलेशन",
+        "a": "निर्णायक मोड़, परिदृश्य और ग्रह के जोखिमों के संकेत।",
+        "b": "ताप, प्रतिक्रिया चक्र और बदलाव के रास्ते खोजें।"
+      }
+    },
+    "format": "प्रारूप",
+    "cloud": "Cloudinary",
+    "fallback": "स्थानीय बैकअप",
+    "liveMaster": "लाइव SVG टेम्पलेट",
+    "standardLogo": "मानक लोगो",
+    "standardFavicon": "मानक फ़ेविकॉन",
+    "pending": "क्लाउड प्रारूप उपलब्ध नहीं",
+    "cloudIntro": "Cloudinary पर सोशल सामग्री और आवश्यक स्थानीय बैकअप।",
+    "rasterNote": "रास्टर एनीमेशन रिकॉर्ड किया गया समय और अंग्रेज़ी पाठ दिखाते हैं। लाइव SVG वर्तमान स्थानीय समय और चुनी गई भाषा का उपयोग करता है।"
+  }
+}

@@ -28,3 +28,12 @@ assets/models/_solar-system-archive-*/
 
 # Accidental command scratch file
 /bash
+
+# Recoverable local asset cleanup; never publish
+local-asset-archive/
+
+# Small prerecorded message-only Fever fallback clips.
+!assets/audio/read-messages/fever-loop-*-message-*.mp3
+
+# Private local agent notes
+.local-agent/

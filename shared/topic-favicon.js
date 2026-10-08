@@ -1,271 +1,35 @@
+// The page paints clock hands because SVG favicon images cannot run scripts.
 (() => {
-  const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
-  const STOP_DURATIONS_MS = [3000, 4000, 5000];
-  const FRAME_MS = 500;
-  const isLocal = LOCAL_HOSTS.has(location.hostname);
-  const FRAME_GROUP_IDS = ["g1", "g10", "g13", "g17", "g21", "g25"];
-  const BORDER_FAVICON_COLORS = ["#00d4ff", "#39ff88", "#7aa8ff", "#ff3030"];
-
-  const state = window.__topicLogoClockState || {
-    startTime: performance.now(),
-    stopAfterMs:
-      STOP_DURATIONS_MS[Math.floor(Math.random() * STOP_DURATIONS_MS.length)],
-    stopped: false,
-    managing: true,
-    tick: 0,
-    latestFrame: "",
-    frameUrls: [],
-    timer: null,
-  };
-  window.__topicLogoClockState = state;
-  state.managing = true;
-
-  function withCacheBust(href) {
-    const url = new URL(href, location.href);
-    if (isLocal) url.searchParams.set("dev_favicon", Date.now().toString());
-    return url.href;
+  const state={managing:true,timer:null,clock:'local',start:performance.now(),tick:0,latestFrame:'',initialized:false};
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=64;
+  const context=canvas.getContext('2d');const earth=new Image();let icon;
+  function hand(angle,length,width,color,tail){
+    context.save();context.translate(32,32);context.rotate(angle*Math.PI/180);context.strokeStyle=color;context.lineWidth=width;context.lineCap='round';
+    context.beginPath();context.moveTo(0,tail);context.lineTo(0,-length);context.stroke();context.restore();
   }
-
-  function getIcon() {
-    return (
-      document.querySelector("link[data-topic-favicon]") ||
-      document.getElementById("dynamicFavicon") ||
-      document.querySelector('link[rel~="icon"]')
-    );
+  function update(){
+    if(!context||!earth.complete||!earth.naturalWidth||!icon)return;
+    const now=state.clock==='automatic'?new Date((performance.now()-state.start)*100):new Date();
+    const seconds=state.clock==='automatic'?now.getUTCSeconds():now.getSeconds();
+    const minutes=(state.clock==='automatic'?now.getUTCMinutes():now.getMinutes())+seconds/60;
+    const hours=((state.clock==='automatic'?now.getUTCHours():now.getHours())%12)+minutes/60;
+    context.clearRect(0,0,64,64);context.save();context.beginPath();context.arc(32,32,30.25,0,Math.PI*2);context.clip();context.drawImage(earth,1.75,1.75,60.5,60.5);context.restore();
+    const gradient=context.createLinearGradient(0,0,64,64);gradient.addColorStop(0,'#00d4ff');gradient.addColorStop(.48,'#39ff88');gradient.addColorStop(1,'#ff3030');
+    context.strokeStyle=gradient;context.lineWidth=1.75;context.beginPath();context.arc(32,32,31.125,0,Math.PI*2);context.stroke();
+    hand(hours*30,14.5,2.25,'#39ff88',1);hand(minutes*6,22.75,1.25,'#00d4ff',1.75);hand(seconds*6,23.75,.75,'#ff3030',3);
+    context.fillStyle='#05070a';context.strokeStyle='#ffffffdb';context.lineWidth=.625;context.beginPath();context.arc(32,32,2.5,0,Math.PI*2);context.fill();context.stroke();
+    try{state.latestFrame=canvas.toDataURL('image/png');icon.type='image/png';icon.href=state.latestFrame;state.tick++;}catch(error){console.warn('[TopicFavicon] Keeping SVG fallback:',error);}
   }
-
-  function setPrimaryHref(icon) {
-    if (!icon) return "";
-
-    const cloudHref = icon.dataset.cloudHref || icon.href;
-    icon.href = cloudHref;
-
-    const probe = new Image();
-    probe.onerror = () => {
-      if (icon.dataset.localHref) {
-        icon.href = withCacheBust(icon.dataset.localHref);
-      }
-    };
-    probe.src = cloudHref;
-    return icon.href;
+  function resume(){
+    if(state.timer){clearInterval(state.timer);state.timer=null;}update();
+    if(!document.hidden)state.timer=setInterval(update,window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?30000:(state.clock==='automatic'?100:1000));
   }
-
-  function drawImageFrame(source, size) {
-    const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return "";
-
-    ctx.clearRect(0, 0, size, size);
-    ctx.drawImage(source, 0, 0, size, size);
-    return canvas.toDataURL("image/png");
+  function init(){
+    if(state.initialized)return;icon=document.querySelector('link[data-topic-favicon]');if(!icon||!context)return;
+    state.initialized=true;icon.dataset.topicClockManaged='true';earth.onload=resume;
+    earth.src=new URL(icon.dataset.earthSrc||'./assets/logo/local/earth-128.svg',location.href).href;
+    document.addEventListener('visibilitychange',resume);
   }
-
-  function stripInlineSvgAnimation(svgText) {
-    return svgText
-      .replace(/<animateTransform\b[^>]*>[\s\S]*?<\/animateTransform>/gi, "")
-      .replace(/<animate\b[^>]*>[\s\S]*?<\/animate>/gi, "")
-      .replace(/<animate(?:Transform)?\b[^>]*\/>/gi, "");
-  }
-
-  function setGroupOpacity(tag, opacity) {
-    if (/\sopacity="[^"]*"/i.test(tag)) {
-      return tag.replace(/\sopacity="[^"]*"/i, ` opacity="${opacity}"`);
-    }
-    return tag.replace(/>$/, ` opacity="${opacity}">`);
-  }
-
-  function makeGroupFrameSvg(svgText, activeIndex) {
-    let frameSvg = stripInlineSvgAnimation(svgText);
-    FRAME_GROUP_IDS.forEach((groupId, index) => {
-      const groupPattern = new RegExp(`<g\\b(?=[^>]*id="${groupId}")[^>]*>`, "i");
-      frameSvg = frameSvg.replace(groupPattern, (tag) =>
-        setGroupOpacity(tag, index === activeIndex ? "1" : "0"),
-      );
-    });
-    return frameSvg;
-  }
-
-  function isBorderFavicon(svgText) {
-    return /data-topic-border-favicon=["']true["']/i.test(svgText);
-  }
-
-  function makeBorderFrameSvg(svgText, activeIndex) {
-    return stripInlineSvgAnimation(svgText)
-      .replace(/--border-a:\s*#[0-9a-f]{3,8};/i, `--border-a: ${BORDER_FAVICON_COLORS[activeIndex]};`)
-      .replace(/animation:\s*borderMode\s+[^;]+;/gi, "");
-  }
-
-  function renderSvgFrame(svgText, activeIndex, size = 64) {
-    return new Promise((resolve) => {
-      const frameSvg = isBorderFavicon(svgText)
-        ? makeBorderFrameSvg(svgText, activeIndex)
-        : makeGroupFrameSvg(svgText, activeIndex);
-      const blobUrl = URL.createObjectURL(
-        new Blob([frameSvg], { type: "image/svg+xml" }),
-      );
-      const source = new Image();
-      source.decoding = "async";
-      source.onload = () => {
-        let frame = "";
-        try {
-          frame = drawImageFrame(source, size);
-        } catch (error) {
-          console.warn("[TopicFavicon] SVG frame render failed.", error);
-        }
-        URL.revokeObjectURL(blobUrl);
-        resolve(frame);
-      };
-      source.onerror = () => {
-        URL.revokeObjectURL(blobUrl);
-        resolve("");
-      };
-      source.src = blobUrl;
-    });
-  }
-
-  async function fetchSvgText(sourceHrefs) {
-    for (const sourceHref of sourceHrefs) {
-      try {
-        const response = await fetch(sourceHref, { cache: "force-cache" });
-        if (response.ok) return await response.text();
-      } catch (error) {
-        console.warn("[TopicFavicon] SVG source fetch failed.", error);
-      }
-    }
-    return "";
-  }
-
-  async function buildGroupFrames(sourceHrefs) {
-    if (state.frameUrls.length) return state.frameUrls;
-
-    const svgText = await fetchSvgText(sourceHrefs);
-    if (!svgText) return [];
-
-    const frameSource = isBorderFavicon(svgText) ? BORDER_FAVICON_COLORS : FRAME_GROUP_IDS;
-    const frames = await Promise.all(
-      frameSource.map((_, index) => renderSvgFrame(svgText, index)),
-    );
-    state.frameUrls = frames.filter(Boolean);
-    return state.frameUrls;
-  }
-
-  function getAnimationSources(primaryHref) {
-    const icon = getIcon();
-    const cloudHref = icon?.dataset.cloudHref || primaryHref || icon?.href || "";
-    const localHref = icon?.dataset.localHref
-      ? withCacheBust(icon.dataset.localHref)
-      : "";
-    const ordered = isLocal ? [localHref, cloudHref] : [cloudHref, localHref];
-    return ordered.filter(Boolean).filter((href, index, list) => {
-      return list.indexOf(href) === index;
-    });
-  }
-
-  function applyFrame(frameHref) {
-    if (!frameHref) return;
-    const icon = getIcon();
-    if (icon) {
-      icon.dataset.topicClockManaged = "true";
-      icon.href = frameHref;
-    }
-    state.latestFrame = frameHref;
-  }
-
-  function stopOnCurrentFrame(frameHref) {
-    state.stopped = true;
-    if (state.timer) {
-      clearInterval(state.timer);
-      state.timer = null;
-    }
-    applyFrame(frameHref || state.latestFrame);
-  }
-
-  function stopWithStaticFavicon() {
-    state.stopped = true;
-    if (state.timer) {
-      clearInterval(state.timer);
-      state.timer = null;
-    }
-    if (state.latestFrame) applyFrame(state.latestFrame);
-  }
-
-  function startSyncedAnimation(sourceHrefs) {
-    const sources = Array.isArray(sourceHrefs)
-      ? sourceHrefs.filter(Boolean)
-      : [sourceHrefs].filter(Boolean);
-    if (!sources.length) return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    if (state.timer || state.stopped) {
-      if (state.latestFrame) applyFrame(state.latestFrame);
-      return;
-    }
-
-    buildGroupFrames(sources).then((frames) => {
-      if (state.stopped || state.timer) return;
-      if (!frames.length) {
-        window.setTimeout(stopWithStaticFavicon, state.stopAfterMs);
-        return;
-      }
-
-      const startFrameLoop = () => {
-        const render = () => {
-          const elapsed = performance.now() - state.startTime;
-          const frame = frames[state.tick % frames.length];
-
-          applyFrame(frame);
-
-          if (elapsed >= state.stopAfterMs) {
-            stopOnCurrentFrame(frame);
-            return;
-          }
-
-          state.tick = (state.tick + 1) % 60;
-        };
-
-        render();
-        if (!state.stopped && !state.timer) {
-          state.timer = setInterval(render, FRAME_MS);
-        }
-      };
-
-      startFrameLoop();
-    });
-  }
-
-  function init() {
-    const icon = getIcon();
-    if (icon?.dataset.topicFaviconDirect === "true") {
-      icon.dataset.topicClockManaged = "true";
-      state.stopped = true;
-      state.managing = true;
-      if (icon.dataset.localHref) {
-        icon.href = icon.dataset.localHref;
-      }
-      return;
-    }
-    const href = setPrimaryHref(icon);
-    startSyncedAnimation(getAnimationSources(href));
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init, { once: true });
-  } else {
-    init();
-  }
-
-  window.TopicFavicon = {
-    init,
-    isManaging: () => state.managing === true,
-    getState: () => ({
-      startTime: state.startTime,
-      stopAfterMs: state.stopAfterMs,
-      stopped: state.stopped,
-      managing: state.managing,
-      tick: state.tick,
-      frameCount: state.frameUrls.length,
-      hasLatestFrame: Boolean(state.latestFrame),
-    }),
-  };
+  window.TopicFavicon={init,isManaging:()=>state.managing,getState:()=>({clock:state.clock,tick:state.tick,managing:state.managing,hasLatestFrame:!!state.latestFrame}),setClockMode(mode){state.clock=mode==='automatic'?'automatic':'local';state.start=performance.now();resume();}};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

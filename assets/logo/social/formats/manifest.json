@@ -1,0 +1,194 @@
+[
+  {
+    "name": "topic-earth-social-1920x1080-local",
+    "width": 1920,
+    "height": 1080,
+    "clock": "local",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474252/topic-earth-social-1920x1080-local_gpqb6s.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-1920x1080-automatic",
+    "width": 1920,
+    "height": 1080,
+    "clock": "automatic",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474181/topic-earth-social-1920x1080-automatic_tzk7ow.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-1500x500-local",
+    "width": 1500,
+    "height": 500,
+    "clock": "local",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474250/topic-earth-social-1500x500-local_gvvnhs.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-1500x500-automatic",
+    "width": 1500,
+    "height": 500,
+    "clock": "automatic",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474180/topic-earth-social-1500x500-automatic_e9kcrd.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-1200x630-local",
+    "width": 1200,
+    "height": 630,
+    "clock": "local",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474244/topic-earth-social-1200x630-local_pnxmq7.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-1200x630-automatic",
+    "width": 1200,
+    "height": 630,
+    "clock": "automatic",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474175/topic-earth-social-1200x630-automatic_hc10xr.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-1080x1920-local",
+    "width": 1080,
+    "height": 1920,
+    "clock": "local",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474237/topic-earth-social-1080x1920-local_akyovm.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-1080x1920-automatic",
+    "width": 1080,
+    "height": 1920,
+    "clock": "automatic",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474174/topic-earth-social-1080x1920-automatic_kyyn5c.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-1080x1080-local",
+    "width": 1080,
+    "height": 1080,
+    "clock": "local",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474236/topic-earth-social-1080x1080-local_ddgacd.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-1080x1080-automatic",
+    "width": 1080,
+    "height": 1080,
+    "clock": "automatic",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474160/topic-earth-social-1080x1080-automatic_zts0x5.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-512x512-local",
+    "width": 512,
+    "height": 512,
+    "clock": "local",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474228/topic-earth-social-512x512-local_zeuso5.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-512x512-automatic",
+    "width": 512,
+    "height": 512,
+    "clock": "automatic",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474156/topic-earth-social-512x512-automatic_yka2ac.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-256x256-local",
+    "width": 256,
+    "height": 256,
+    "clock": "local",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474222/topic-earth-social-256x256-local_bbellf.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-social-256x256-automatic",
+    "width": 256,
+    "height": 256,
+    "clock": "automatic",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474146/topic-earth-social-256x256-automatic_jlsgu7.svg",
+    "favicon": false
+  },
+  {
+    "name": "topic-earth-favicon-512-local",
+    "width": 512,
+    "height": 512,
+    "clock": "local",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474208/topic-earth-favicon-512-local_f7e1sj.svg",
+    "favicon": true
+  },
+  {
+    "name": "topic-earth-favicon-512-automatic",
+    "width": 512,
+    "height": 512,
+    "clock": "automatic",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474138/topic-earth-favicon-512-automatic_tcsgfh.svg",
+    "favicon": true
+  },
+  {
+    "name": "topic-earth-favicon-256-local",
+    "width": 256,
+    "height": 256,
+    "clock": "local",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474204/topic-earth-favicon-256-local_b9huqo.svg",
+    "favicon": true
+  },
+  {
+    "name": "topic-earth-favicon-256-automatic",
+    "width": 256,
+    "height": 256,
+    "clock": "automatic",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474134/topic-earth-favicon-256-automatic_shgrzp.svg",
+    "favicon": true
+  },
+  {
+    "name": "topic-earth-favicon-128-local",
+    "width": 128,
+    "height": 128,
+    "clock": "local",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474200/topic-earth-favicon-128-local_z7xqxi.svg",
+    "favicon": true
+  },
+  {
+    "name": "topic-earth-favicon-128-automatic",
+    "width": 128,
+    "height": 128,
+    "clock": "automatic",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474132/topic-earth-favicon-128-automatic_ziysnz.svg",
+    "favicon": true
+  },
+  {
+    "name": "topic-earth-favicon-64-local",
+    "width": 64,
+    "height": 64,
+    "clock": "local",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474195/topic-earth-favicon-64-local_b6mlwm.svg",
+    "favicon": true
+  },
+  {
+    "name": "topic-earth-favicon-64-automatic",
+    "width": 64,
+    "height": 64,
+    "clock": "automatic",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474128/topic-earth-favicon-64-automatic_iihbrk.svg",
+    "favicon": true
+  },
+  {
+    "name": "topic-earth-favicon-32-local",
+    "width": 32,
+    "height": 32,
+    "clock": "local",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474192/topic-earth-favicon-32-local_tf9jvq.svg",
+    "favicon": true
+  },
+  {
+    "name": "topic-earth-favicon-32-automatic",
+    "width": 32,
+    "height": 32,
+    "clock": "automatic",
+    "svg": "https://res.cloudinary.com/dsbfcgtdv/image/upload/v1791474123/topic-earth-favicon-32-automatic_u8awqq.svg",
+    "favicon": true
+  }
+]

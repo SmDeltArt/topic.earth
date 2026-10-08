@@ -6,27 +6,37 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["fullscreen", "standalone", "minimal-ui", "browser"],
+  "display_override": [
+    "fullscreen",
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
   "orientation": "any",
   "background_color": "#0a0e1a",
   "theme_color": "#0a0e1a",
-  "categories": ["education", "productivity", "science", "utilities"],
+  "categories": [
+    "education",
+    "productivity",
+    "science",
+    "utilities"
+  ],
   "lang": "en",
   "icons": [
     {
-      "src": "/assets/icons/topic.earth_24x24.svg",
-      "sizes": "24x24",
+      "src": "/assets/logo/local/favicon.svg",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/assets/icons/topic.earth_64x64.svg",
-      "sizes": "64x64",
-      "type": "image/svg+xml",
+      "src": "/assets/logo/local/pwa-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/social/topic-earth-vignette-resume.png",
+      "src": "/assets/logo/local/pwa-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -38,28 +48,52 @@
       "short_name": "Regional",
       "description": "Open the lightweight 2D regional map",
       "url": "/?mode=regional",
-      "icons": [{ "src": "/assets/icons/topic.earth_64x64.svg", "sizes": "64x64", "type": "image/svg+xml" }]
+      "icons": [
+        {
+          "src": "/assets/logo/local/pwa-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "World Globe",
       "short_name": "World",
       "description": "Open the Three.js world globe",
       "url": "/?mode=main",
-      "icons": [{ "src": "/assets/icons/topic.earth_64x64.svg", "sizes": "64x64", "type": "image/svg+xml" }]
+      "icons": [
+        {
+          "src": "/assets/logo/local/pwa-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Space",
       "short_name": "Space",
       "description": "Open the Three.js solar-system view",
       "url": "/?mode=space",
-      "icons": [{ "src": "/assets/icons/topic.earth_64x64.svg", "sizes": "64x64", "type": "image/svg+xml" }]
+      "icons": [
+        {
+          "src": "/assets/logo/local/pwa-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Fever Monitor",
       "short_name": "Fever",
       "description": "Open animated climate scenarios",
       "url": "/?mode=fever",
-      "icons": [{ "src": "/assets/icons/topic.earth_64x64.svg", "sizes": "64x64", "type": "image/svg+xml" }]
+      "icons": [
+        {
+          "src": "/assets/logo/local/pwa-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

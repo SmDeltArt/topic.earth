@@ -11,58 +11,292 @@
       "type": "fever-scenario-milestones",
       "source": "fever-scenarios.json",
       "voice": "shimmer",
-      "voiceByLanguage": { "de": "echo", "es": "nova", "hi": "nova", "ru": "onyx", "uk": "onyx", "zh": "nova" },
-      "tags": ["fever-loop", "fever-milestone"],
-      "languages": ["en", "fr", "nl", "de", "ru", "uk", "zh", "hi"],
-      "scenarios": ["best", "objective", "high"],
-      "years": [1975, 2000, 2025, 2050, 2075, 2100, 2125],
-      "speedProfiles": ["short", "normal", "full"]
+      "voiceByLanguage": {
+        "de": "echo",
+        "es": "nova",
+        "hi": "nova",
+        "ru": "onyx",
+        "uk": "onyx",
+        "zh": "nova"
+      },
+      "tags": [
+        "fever-loop",
+        "fever-milestone"
+      ],
+      "languages": [
+        "en",
+        "fr",
+        "nl",
+        "de",
+        "ru",
+        "uk",
+        "zh",
+        "hi"
+      ],
+      "scenarios": [
+        "best",
+        "objective",
+        "high"
+      ],
+      "years": [
+        1975,
+        2000,
+        2025,
+        2050,
+        2075,
+        2100,
+        2125
+      ],
+      "speedProfiles": [
+        "short",
+        "normal",
+        "full"
+      ]
     },
     {
       "id": "tutorial-step",
       "type": "tutorial-steps",
       "source": "lib/tutorial-guide.js",
       "voice": "alloy",
-      "voiceByLanguage": { "de": "echo", "es": "nova", "hi": "nova", "ru": "onyx", "uk": "onyx", "zh": "nova" },
-      "tags": ["tutorial-step"],
-      "languages": ["en", "fr", "nl", "de", "el", "ru", "uk", "zh", "hi"],
+      "voiceByLanguage": {
+        "de": "echo",
+        "es": "nova",
+        "hi": "nova",
+        "ru": "onyx",
+        "uk": "onyx",
+        "zh": "nova"
+      },
+      "tags": [
+        "tutorial-step"
+      ],
+      "languages": [
+        "en",
+        "fr",
+        "nl",
+        "de",
+        "el",
+        "ru",
+        "uk",
+        "zh",
+        "hi"
+      ],
       "steps": [
-        { "id": "globe-intro", "level": "essential", "titleKey": "tutorial.globe.title", "bodyKey": "tutorial.globe.body" },
-        { "id": "mode-tabs", "level": "essential", "titleKey": "tutorial.modes.title", "bodyKey": "tutorial.modes.body" },
-        { "id": "topic-detail", "level": "essential", "titleKey": "tutorial.topic.title", "bodyKey": "tutorial.topic.body" },
-        { "id": "topic-evidence", "level": "guided", "titleKey": "tutorial.evidence.title", "bodyKey": "tutorial.evidence.body" },
-        { "id": "topic-composer-input", "level": "guided", "titleKey": "tutorial.composer.title", "bodyKey": "tutorial.composer.body" },
-        { "id": "topic-composer-evidence-lane", "level": "guided", "titleKey": "tutorial.composerEvidence.title", "bodyKey": "tutorial.composerEvidence.body" },
-        { "id": "topic-evidence-editor", "level": "guided", "titleKey": "tutorial.evidenceEditor.title", "bodyKey": "tutorial.evidenceEditor.body" },
-        { "id": "topic-media-actions", "level": "guided", "titleKey": "tutorial.mediaActions.title", "bodyKey": "tutorial.mediaActions.body" },
-        { "id": "topic-media-url", "level": "guided", "titleKey": "tutorial.mediaUrl.title", "bodyKey": "tutorial.mediaUrl.body" },
-        { "id": "topic-review-save", "level": "guided", "titleKey": "tutorial.reviewSave.title", "bodyKey": "tutorial.reviewSave.body" },
-        { "id": "regional-search-toggle", "level": "guided", "titleKey": "tutorial.regional.title", "bodyKey": "tutorial.regional.body" },
-        { "id": "regional-search-panel", "level": "guided", "titleKey": "tutorial.regionalSearch.title", "bodyKey": "tutorial.regionalSearch.body" },
-        { "id": "regional-path-tool", "level": "guided", "titleKey": "tutorial.regionalPath.title", "bodyKey": "tutorial.regionalPath.body" },
-        { "id": "regional-path-finish", "level": "guided", "titleKey": "tutorial.regionalPathFinish.title", "bodyKey": "tutorial.regionalPathFinish.body" },
-        { "id": "regional-route-tool", "level": "guided", "titleKey": "tutorial.regionalRoute.title", "bodyKey": "tutorial.regionalRoute.body" },
-        { "id": "regional-route-options", "level": "guided", "titleKey": "tutorial.regionalRouteOptions.title", "bodyKey": "tutorial.regionalRouteOptions.body" },
-        { "id": "regional-route-destination", "level": "guided", "titleKey": "tutorial.regionalRouteDestination.title", "bodyKey": "tutorial.regionalRouteDestination.body" },
-        { "id": "settings-toggle", "level": "essential", "titleKey": "tutorial.settings.title", "bodyKey": "tutorial.settings.body" },
-        { "id": "settings-language", "level": "guided", "titleKey": "tutorial.settingsLanguage.title", "bodyKey": "tutorial.settingsLanguage.body" },
-        { "id": "settings-tutorial-level", "level": "guided", "titleKey": "tutorial.settingsGuideLevel.title", "bodyKey": "tutorial.settingsGuideLevel.body" },
-        { "id": "settings-main-texture", "level": "guided", "titleKey": "tutorial.settingsTexture.title", "bodyKey": "tutorial.settingsTexture.body" },
-        { "id": "settings-fever-loop", "level": "guided", "titleKey": "tutorial.settingsFeverLoop.title", "bodyKey": "tutorial.settingsFeverLoop.body" },
-        { "id": "settings-ai-api", "level": "guided", "titleKey": "tutorial.settingsAi.title", "bodyKey": "tutorial.settingsAi.body" },
-        { "id": "settings-regional", "level": "guided", "titleKey": "tutorial.settingsRegional.title", "bodyKey": "tutorial.settingsRegional.body" },
-        { "id": "settings-access-context", "level": "essential", "titleKey": "tutorial.settingsAccess.title", "bodyKey": "tutorial.settingsAccess.body" },
-        { "id": "settings-language-context", "level": "guided", "titleKey": "tutorial.settingsLanguage.title", "bodyKey": "tutorial.settingsLanguage.body" },
-        { "id": "settings-toggle-context", "level": "essential", "titleKey": "tutorial.settings.title", "bodyKey": "tutorial.settings.body" },
-        { "id": "settings-tutorial-level-context", "level": "guided", "titleKey": "tutorial.settingsGuideLevel.title", "bodyKey": "tutorial.settingsGuideLevel.body" },
-        { "id": "settings-tts-context", "level": "guided", "titleKey": "tutorial.settingsTts.title", "bodyKey": "tutorial.settingsTts.body" },
-        { "id": "settings-country-hover-context", "level": "guided", "titleKey": "tutorial.settingsCountry.title", "bodyKey": "tutorial.settingsCountry.body" },
-        { "id": "settings-main-texture-context", "level": "guided", "titleKey": "tutorial.settingsTexture.title", "bodyKey": "tutorial.settingsTexture.body" },
-        { "id": "settings-fever-loop-context", "level": "guided", "titleKey": "tutorial.settingsFeverLoop.title", "bodyKey": "tutorial.settingsFeverLoop.body" },
-        { "id": "settings-build-context", "level": "guided", "titleKey": "tutorial.settingsBuild.title", "bodyKey": "tutorial.settingsBuild.body" },
-        { "id": "settings-ai-api-context", "level": "guided", "titleKey": "tutorial.settingsAi.title", "bodyKey": "tutorial.settingsAi.body" },
-        { "id": "settings-regional-context", "level": "guided", "titleKey": "tutorial.settingsRegional.title", "bodyKey": "tutorial.settingsRegional.body" },
-        { "id": "admin-mode", "level": "expert", "titleKey": "tutorial.admin.title", "bodyKey": "tutorial.admin.body" }
+        {
+          "id": "globe-intro",
+          "level": "essential",
+          "titleKey": "tutorial.globe.title",
+          "bodyKey": "tutorial.globe.body"
+        },
+        {
+          "id": "mode-tabs",
+          "level": "essential",
+          "titleKey": "tutorial.modes.title",
+          "bodyKey": "tutorial.modes.body"
+        },
+        {
+          "id": "topic-detail",
+          "level": "essential",
+          "titleKey": "tutorial.topic.title",
+          "bodyKey": "tutorial.topic.body"
+        },
+        {
+          "id": "topic-evidence",
+          "level": "guided",
+          "titleKey": "tutorial.evidence.title",
+          "bodyKey": "tutorial.evidence.body"
+        },
+        {
+          "id": "topic-composer-input",
+          "level": "guided",
+          "titleKey": "tutorial.composer.title",
+          "bodyKey": "tutorial.composer.body"
+        },
+        {
+          "id": "topic-composer-evidence-lane",
+          "level": "guided",
+          "titleKey": "tutorial.composerEvidence.title",
+          "bodyKey": "tutorial.composerEvidence.body"
+        },
+        {
+          "id": "topic-evidence-editor",
+          "level": "guided",
+          "titleKey": "tutorial.evidenceEditor.title",
+          "bodyKey": "tutorial.evidenceEditor.body"
+        },
+        {
+          "id": "topic-media-actions",
+          "level": "guided",
+          "titleKey": "tutorial.mediaActions.title",
+          "bodyKey": "tutorial.mediaActions.body"
+        },
+        {
+          "id": "topic-media-url",
+          "level": "guided",
+          "titleKey": "tutorial.mediaUrl.title",
+          "bodyKey": "tutorial.mediaUrl.body"
+        },
+        {
+          "id": "topic-review-save",
+          "level": "guided",
+          "titleKey": "tutorial.reviewSave.title",
+          "bodyKey": "tutorial.reviewSave.body"
+        },
+        {
+          "id": "regional-search-toggle",
+          "level": "guided",
+          "titleKey": "tutorial.regional.title",
+          "bodyKey": "tutorial.regional.body"
+        },
+        {
+          "id": "regional-search-panel",
+          "level": "guided",
+          "titleKey": "tutorial.regionalSearch.title",
+          "bodyKey": "tutorial.regionalSearch.body"
+        },
+        {
+          "id": "regional-path-tool",
+          "level": "guided",
+          "titleKey": "tutorial.regionalPath.title",
+          "bodyKey": "tutorial.regionalPath.body"
+        },
+        {
+          "id": "regional-path-finish",
+          "level": "guided",
+          "titleKey": "tutorial.regionalPathFinish.title",
+          "bodyKey": "tutorial.regionalPathFinish.body"
+        },
+        {
+          "id": "regional-route-tool",
+          "level": "guided",
+          "titleKey": "tutorial.regionalRoute.title",
+          "bodyKey": "tutorial.regionalRoute.body"
+        },
+        {
+          "id": "regional-route-options",
+          "level": "guided",
+          "titleKey": "tutorial.regionalRouteOptions.title",
+          "bodyKey": "tutorial.regionalRouteOptions.body"
+        },
+        {
+          "id": "regional-route-destination",
+          "level": "guided",
+          "titleKey": "tutorial.regionalRouteDestination.title",
+          "bodyKey": "tutorial.regionalRouteDestination.body"
+        },
+        {
+          "id": "settings-toggle",
+          "level": "essential",
+          "titleKey": "tutorial.settings.title",
+          "bodyKey": "tutorial.settings.body"
+        },
+        {
+          "id": "settings-language",
+          "level": "guided",
+          "titleKey": "tutorial.settingsLanguage.title",
+          "bodyKey": "tutorial.settingsLanguage.body"
+        },
+        {
+          "id": "settings-tutorial-level",
+          "level": "guided",
+          "titleKey": "tutorial.settingsGuideLevel.title",
+          "bodyKey": "tutorial.settingsGuideLevel.body"
+        },
+        {
+          "id": "settings-main-texture",
+          "level": "guided",
+          "titleKey": "tutorial.settingsTexture.title",
+          "bodyKey": "tutorial.settingsTexture.body"
+        },
+        {
+          "id": "settings-fever-loop",
+          "level": "guided",
+          "titleKey": "tutorial.settingsFeverLoop.title",
+          "bodyKey": "tutorial.settingsFeverLoop.body"
+        },
+        {
+          "id": "settings-ai-api",
+          "level": "guided",
+          "titleKey": "tutorial.settingsAi.title",
+          "bodyKey": "tutorial.settingsAi.body"
+        },
+        {
+          "id": "settings-regional",
+          "level": "guided",
+          "titleKey": "tutorial.settingsRegional.title",
+          "bodyKey": "tutorial.settingsRegional.body"
+        },
+        {
+          "id": "settings-access-context",
+          "level": "essential",
+          "titleKey": "tutorial.settingsAccess.title",
+          "bodyKey": "tutorial.settingsAccess.body"
+        },
+        {
+          "id": "settings-language-context",
+          "level": "guided",
+          "titleKey": "tutorial.settingsLanguage.title",
+          "bodyKey": "tutorial.settingsLanguage.body"
+        },
+        {
+          "id": "settings-toggle-context",
+          "level": "essential",
+          "titleKey": "tutorial.settings.title",
+          "bodyKey": "tutorial.settings.body"
+        },
+        {
+          "id": "settings-tutorial-level-context",
+          "level": "guided",
+          "titleKey": "tutorial.settingsGuideLevel.title",
+          "bodyKey": "tutorial.settingsGuideLevel.body"
+        },
+        {
+          "id": "settings-tts-context",
+          "level": "guided",
+          "titleKey": "tutorial.settingsTts.title",
+          "bodyKey": "tutorial.settingsTts.body"
+        },
+        {
+          "id": "settings-country-hover-context",
+          "level": "guided",
+          "titleKey": "tutorial.settingsCountry.title",
+          "bodyKey": "tutorial.settingsCountry.body"
+        },
+        {
+          "id": "settings-main-texture-context",
+          "level": "guided",
+          "titleKey": "tutorial.settingsTexture.title",
+          "bodyKey": "tutorial.settingsTexture.body"
+        },
+        {
+          "id": "settings-fever-loop-context",
+          "level": "guided",
+          "titleKey": "tutorial.settingsFeverLoop.title",
+          "bodyKey": "tutorial.settingsFeverLoop.body"
+        },
+        {
+          "id": "settings-build-context",
+          "level": "guided",
+          "titleKey": "tutorial.settingsBuild.title",
+          "bodyKey": "tutorial.settingsBuild.body"
+        },
+        {
+          "id": "settings-ai-api-context",
+          "level": "guided",
+          "titleKey": "tutorial.settingsAi.title",
+          "bodyKey": "tutorial.settingsAi.body"
+        },
+        {
+          "id": "settings-regional-context",
+          "level": "guided",
+          "titleKey": "tutorial.settingsRegional.title",
+          "bodyKey": "tutorial.settingsRegional.body"
+        },
+        {
+          "id": "admin-mode",
+          "level": "expert",
+          "titleKey": "tutorial.admin.title",
+          "bodyKey": "tutorial.admin.body"
+        }
       ]
     },
     {
@@ -70,9 +304,28 @@
       "type": "ui-text",
       "source": "shared/topic-earth-ui.csv",
       "voice": "alloy",
-      "voiceByLanguage": { "de": "echo", "es": "nova", "hi": "nova", "ru": "onyx", "uk": "onyx", "zh": "nova" },
-      "tags": ["ui-text"],
-      "languages": ["en", "fr", "nl", "de", "el", "ru", "uk", "zh", "hi"],
+      "voiceByLanguage": {
+        "de": "echo",
+        "es": "nova",
+        "hi": "nova",
+        "ru": "onyx",
+        "uk": "onyx",
+        "zh": "nova"
+      },
+      "tags": [
+        "ui-text"
+      ],
+      "languages": [
+        "en",
+        "fr",
+        "nl",
+        "de",
+        "el",
+        "ru",
+        "uk",
+        "zh",
+        "hi"
+      ],
       "keys": [
         "common.admin",
         "common.cancel",
@@ -138,7 +391,10 @@
       "lang": "en-US",
       "lg": "en",
       "voice": "alloy",
-      "csvKeys": ["tutorial.globe.title", "tutorial.globe.body"],
+      "csvKeys": [
+        "tutorial.globe.title",
+        "tutorial.globe.body"
+      ],
       "text": "Explore Earth. Spin the globe or choose a mode. Glowing points open topic cards.",
       "mp3": "tutorial-explore-earth-en.mp3",
       "webm": "tutorial-explore-earth-en.webm"
@@ -172,7 +428,14 @@
       "lang": "en-US",
       "lg": "en",
       "voice": "alloy",
-      "csvKeys": ["tutorial.composer.title", "tutorial.composer.body", "tutorial.composerEvidence.title", "tutorial.composerEvidence.body", "tutorial.reviewSave.title", "tutorial.reviewSave.body"],
+      "csvKeys": [
+        "tutorial.composer.title",
+        "tutorial.composer.body",
+        "tutorial.composerEvidence.title",
+        "tutorial.composerEvidence.body",
+        "tutorial.reviewSave.title",
+        "tutorial.reviewSave.body"
+      ],
       "text": "Describe the idea, add evidence, review the preview, then save it on this device.",
       "mp3": "topic-composer-flow-en.mp3",
       "webm": "topic-composer-flow-en.webm"
@@ -182,7 +445,10 @@
       "lang": "fr-FR",
       "lg": "fr",
       "voice": "nova",
-      "csvKeys": ["tutorial.globe.title", "tutorial.globe.body"],
+      "csvKeys": [
+        "tutorial.globe.title",
+        "tutorial.globe.body"
+      ],
       "text": "Explore la Terre. Fais tourner le globe ou choisis un mode. Les points lumineux ouvrent les fiches de sujet.",
       "mp3": "tutorial-explore-earth-fr.mp3",
       "webm": "tutorial-explore-earth-fr.webm"
@@ -208,8 +474,14 @@
       "lang": "en-US",
       "lg": "en",
       "voice": "shimmer",
-      "tags": ["fever-loop"],
-      "csvKeys": ["fever.earthsFever", "fever.monitoringIntro", "fever.timelineLabel"],
+      "tags": [
+        "fever-loop"
+      ],
+      "csvKeys": [
+        "fever.earthsFever",
+        "fever.monitoringIntro",
+        "fever.timelineLabel"
+      ],
       "text": "Earth's Fever. Earth's Fever shows how our planet is warming over time, like checking Earth's temperature with a thermometer. 175-Year Simulation, 1950 to 2125.",
       "mp3": "fever-loop-intro-en.mp3",
       "webm": "fever-loop-intro-en.webm"
@@ -219,8 +491,14 @@
       "lang": "en-US",
       "lg": "en",
       "voice": "shimmer",
-      "tags": ["fever-loop"],
-      "csvKeys": ["fever.everythingConnected", "fever.feedbackLoop", "fever.watchTogether"],
+      "tags": [
+        "fever-loop"
+      ],
+      "csvKeys": [
+        "fever.everythingConnected",
+        "fever.feedbackLoop",
+        "fever.watchTogether"
+      ],
       "text": "Everything is connected. When Earth warms, ice melts; weakened AMOC changes rainfall; stressed forests release carbon; released carbon warms Earth more. This is why we watch all these systems together.",
       "mp3": "fever-loop-feedback-en.mp3",
       "webm": "fever-loop-feedback-en.webm"
@@ -230,8 +508,14 @@
       "lang": "en-US",
       "lg": "en",
       "voice": "shimmer",
-      "tags": ["fever-loop"],
-      "csvKeys": ["fever.tippingIntro", "fever.tippingRingLegend", "fever.highExplained"],
+      "tags": [
+        "fever-loop"
+      ],
+      "csvKeys": [
+        "fever.tippingIntro",
+        "fever.tippingRingLegend",
+        "fever.highExplained"
+      ],
       "text": "Tipping points are thresholds where Earth's systems can suddenly shift to a new state. The colored ring shows how close we are to each tipping point. High shows what could happen if we do not change trajectory soon.",
       "mp3": "fever-loop-tipping-en.mp3",
       "webm": "fever-loop-tipping-en.webm"
@@ -241,8 +525,14 @@
       "lang": "fr-FR",
       "lg": "fr",
       "voice": "shimmer",
-      "tags": ["fever-loop"],
-      "csvKeys": ["fever.earthsFever", "fever.monitoringIntro", "fever.timelineLabel"],
+      "tags": [
+        "fever-loop"
+      ],
+      "csvKeys": [
+        "fever.earthsFever",
+        "fever.monitoringIntro",
+        "fever.timelineLabel"
+      ],
       "text": "Fievre de la Terre. La Fievre de la Terre montre le rechauffement de la planete comme un thermometre climatique. Simulation de 175 ans, de 1950 a 2125.",
       "mp3": "fever-loop-intro-fr.mp3",
       "webm": "fever-loop-intro-fr.webm"
@@ -252,8 +542,14 @@
       "lang": "fr-FR",
       "lg": "fr",
       "voice": "shimmer",
-      "tags": ["fever-loop"],
-      "csvKeys": ["fever.everythingConnected", "fever.feedbackLoop", "fever.watchTogether"],
+      "tags": [
+        "fever-loop"
+      ],
+      "csvKeys": [
+        "fever.everythingConnected",
+        "fever.feedbackLoop",
+        "fever.watchTogether"
+      ],
       "text": "Tout est connecte. Quand la Terre chauffe, la glace fond; l AMOC faiblit; les pluies changent; les forets stressees relachent du carbone. Voila pourquoi nous surveillons ces systemes ensemble.",
       "mp3": "fever-loop-feedback-fr.mp3",
       "webm": "fever-loop-feedback-fr.webm"
@@ -263,11 +559,2369 @@
       "lang": "fr-FR",
       "lg": "fr",
       "voice": "shimmer",
-      "tags": ["fever-loop"],
-      "csvKeys": ["fever.tippingIntro", "fever.tippingRingLegend", "fever.highExplained"],
+      "tags": [
+        "fever-loop"
+      ],
+      "csvKeys": [
+        "fever.tippingIntro",
+        "fever.tippingRingLegend",
+        "fever.highExplained"
+      ],
       "text": "Les points de bascule sont des seuils ou les systemes terrestres peuvent changer brutalement d etat. L anneau colore indique la proximite des seuils. Haut montre ce qui peut arriver si la trajectoire ne change pas vite.",
       "mp3": "fever-loop-tipping-fr.mp3",
       "webm": "fever-loop-tipping-fr.webm"
+    },
+    {
+      "id": "fever-loop-best-1975-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Fruhes Erwarmungssignal.",
+      "mp3": "fever-loop-best-1975-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-1975-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.398687
+    },
+    {
+      "id": "fever-loop-best-1975-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Early warming signal.",
+      "mp3": "fever-loop-best-1975-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-1975-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.120833
+    },
+    {
+      "id": "fever-loop-best-1975-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Signal de rechauffement precoce.",
+      "mp3": "fever-loop-best-1975-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-1975-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.837021
+    },
+    {
+      "id": "fever-loop-best-1975-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "प्रारंभिक गर्माहट संकेत.",
+      "mp3": "fever-loop-best-1975-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-1975-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.188875
+    },
+    {
+      "id": "fever-loop-best-1975-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Vroeg opwarmingssignaal.",
+      "mp3": "fever-loop-best-1975-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-1975-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.422667
+    },
+    {
+      "id": "fever-loop-best-1975-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Ранний сигнал потепления.",
+      "mp3": "fever-loop-best-1975-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-1975-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.5636869999999998
+    },
+    {
+      "id": "fever-loop-best-1975-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Early warming signal.",
+      "mp3": "fever-loop-best-1975-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-1975-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.248208
+    },
+    {
+      "id": "fever-loop-best-1975-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "早期变暖信号.",
+      "mp3": "fever-loop-best-1975-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-1975-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.174687
+    },
+    {
+      "id": "fever-loop-best-2000-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Erwarmung wird sichtbar.",
+      "mp3": "fever-loop-best-2000-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2000-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 2.1860619999999997
+    },
+    {
+      "id": "fever-loop-best-2000-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Warming becoming visible.",
+      "mp3": "fever-loop-best-2000-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2000-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.323146
+    },
+    {
+      "id": "fever-loop-best-2000-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Le rechauffement devient visible.",
+      "mp3": "fever-loop-best-2000-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2000-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.539687
+    },
+    {
+      "id": "fever-loop-best-2000-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "गर्माहट दिखाई देने लगी.",
+      "mp3": "fever-loop-best-2000-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2000-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.394479
+    },
+    {
+      "id": "fever-loop-best-2000-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Opwarming wordt zichtbaar.",
+      "mp3": "fever-loop-best-2000-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2000-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 2.4012919999999998
+    },
+    {
+      "id": "fever-loop-best-2000-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Потепление становится видимым.",
+      "mp3": "fever-loop-best-2000-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2000-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.607604
+    },
+    {
+      "id": "fever-loop-best-2000-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Warming becoming visible.",
+      "mp3": "fever-loop-best-2000-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2000-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.35475
+    },
+    {
+      "id": "fever-loop-best-2000-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "变暖开始显现.",
+      "mp3": "fever-loop-best-2000-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2000-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.328771
+    },
+    {
+      "id": "fever-loop-best-2025-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Warnung der Gegenwart.",
+      "mp3": "fever-loop-best-2025-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2025-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.2825
+    },
+    {
+      "id": "fever-loop-best-2025-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Current era warning.",
+      "mp3": "fever-loop-best-2025-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2025-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.110312
+    },
+    {
+      "id": "fever-loop-best-2025-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Alerte de l ere actuelle.",
+      "mp3": "fever-loop-best-2025-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2025-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.25475
+    },
+    {
+      "id": "fever-loop-best-2025-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "वर्तमान युग की चेतावनी.",
+      "mp3": "fever-loop-best-2025-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2025-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.119062
+    },
+    {
+      "id": "fever-loop-best-2025-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Waarschuwing huidige tijd.",
+      "mp3": "fever-loop-best-2025-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2025-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.5281669999999998
+    },
+    {
+      "id": "fever-loop-best-2025-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Предупреждение текущей эпохи.",
+      "mp3": "fever-loop-best-2025-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2025-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.894167
+    },
+    {
+      "id": "fever-loop-best-2025-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Current era warning.",
+      "mp3": "fever-loop-best-2025-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2025-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.306292
+    },
+    {
+      "id": "fever-loop-best-2025-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "当前时代警告.",
+      "mp3": "fever-loop-best-2025-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2025-full-zh.webm",
+      "sourceProfile": "full",
+      "trimEndSeconds": 1.73925
+    },
+    {
+      "id": "fever-loop-best-2050-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Gesteuerter Belastungsgipfel.",
+      "mp3": "fever-loop-best-2050-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2050-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.347917
+    },
+    {
+      "id": "fever-loop-best-2050-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Managed peak pressure.",
+      "mp3": "fever-loop-best-2050-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2050-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.137208
+    },
+    {
+      "id": "fever-loop-best-2050-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Pic de pression gere.",
+      "mp3": "fever-loop-best-2050-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2050-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.534875
+    },
+    {
+      "id": "fever-loop-best-2050-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "संभाला गया चरम दबाव.",
+      "mp3": "fever-loop-best-2050-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2050-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.3308959999999999
+    },
+    {
+      "id": "fever-loop-best-2050-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Beheerde piekdruk.",
+      "mp3": "fever-loop-best-2050-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2050-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.0736459999999999
+    },
+    {
+      "id": "fever-loop-best-2050-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Управляемый пик нагрузки.",
+      "mp3": "fever-loop-best-2050-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2050-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.517625
+    },
+    {
+      "id": "fever-loop-best-2050-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Managed peak pressure.",
+      "mp3": "fever-loop-best-2050-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2050-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.4375
+    },
+    {
+      "id": "fever-loop-best-2050-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "受控峰值压力.",
+      "mp3": "fever-loop-best-2050-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2050-full-zh.webm",
+      "sourceProfile": "full",
+      "trimEndSeconds": 1.3959169999999999
+    },
+    {
+      "id": "fever-loop-best-2075-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Stabilisierungsphase.",
+      "mp3": "fever-loop-best-2075-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2075-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.196354
+    },
+    {
+      "id": "fever-loop-best-2075-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Stabilization phase.",
+      "mp3": "fever-loop-best-2075-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2075-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.2810629999999998
+    },
+    {
+      "id": "fever-loop-best-2075-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Phase de stabilisation.",
+      "mp3": "fever-loop-best-2075-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2075-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.315437
+    },
+    {
+      "id": "fever-loop-best-2075-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "स्थिरीकरण चरण.",
+      "mp3": "fever-loop-best-2075-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2075-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 0.9550620000000001
+    },
+    {
+      "id": "fever-loop-best-2075-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Stabilisatiefase.",
+      "mp3": "fever-loop-best-2075-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2075-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.24875
+    },
+    {
+      "id": "fever-loop-best-2075-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Фаза стабилизации.",
+      "mp3": "fever-loop-best-2075-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2075-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.8306669999999998
+    },
+    {
+      "id": "fever-loop-best-2075-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Stabilization phase.",
+      "mp3": "fever-loop-best-2075-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2075-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.125354
+    },
+    {
+      "id": "fever-loop-best-2075-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "稳定阶段.",
+      "mp3": "fever-loop-best-2075-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2075-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.5198749999999999
+    },
+    {
+      "id": "fever-loop-best-2100-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Langer Erholungshorizont.",
+      "mp3": "fever-loop-best-2100-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2100-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.5505829999999998
+    },
+    {
+      "id": "fever-loop-best-2100-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Long recovery horizon.",
+      "mp3": "fever-loop-best-2100-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2100-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.309083
+    },
+    {
+      "id": "fever-loop-best-2100-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Horizon de longue recuperation.",
+      "mp3": "fever-loop-best-2100-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2100-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.592458
+    },
+    {
+      "id": "fever-loop-best-2100-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "लंबा पुनर्प्राप्ति क्षितिज.",
+      "mp3": "fever-loop-best-2100-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2100-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.734604
+    },
+    {
+      "id": "fever-loop-best-2100-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Lange herstelhorizon.",
+      "mp3": "fever-loop-best-2100-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2100-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.462208
+    },
+    {
+      "id": "fever-loop-best-2100-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Долгий горизонт восстановления.",
+      "mp3": "fever-loop-best-2100-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2100-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.6376249999999999
+    },
+    {
+      "id": "fever-loop-best-2100-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Long recovery horizon.",
+      "mp3": "fever-loop-best-2100-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2100-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.400312
+    },
+    {
+      "id": "fever-loop-best-2100-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "长期恢复前景.",
+      "mp3": "fever-loop-best-2100-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2100-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.1577499999999998
+    },
+    {
+      "id": "fever-loop-best-2125-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Langsame Reparaturwelt.",
+      "mp3": "fever-loop-best-2125-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2125-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.4427079999999999
+    },
+    {
+      "id": "fever-loop-best-2125-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Slow repair world.",
+      "mp3": "fever-loop-best-2125-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2125-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.105937
+    },
+    {
+      "id": "fever-loop-best-2125-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Monde en lente reparation.",
+      "mp3": "fever-loop-best-2125-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2125-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.38575
+    },
+    {
+      "id": "fever-loop-best-2125-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "धीमी मरम्मत वाली दुनिया.",
+      "mp3": "fever-loop-best-2125-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2125-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.620458
+    },
+    {
+      "id": "fever-loop-best-2125-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Langzaam herstellende wereld.",
+      "mp3": "fever-loop-best-2125-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2125-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.643437
+    },
+    {
+      "id": "fever-loop-best-2125-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Мир медленного восстановления.",
+      "mp3": "fever-loop-best-2125-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2125-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.654604
+    },
+    {
+      "id": "fever-loop-best-2125-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Slow repair world.",
+      "mp3": "fever-loop-best-2125-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2125-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.210521
+    },
+    {
+      "id": "fever-loop-best-2125-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "缓慢修复的世界.",
+      "mp3": "fever-loop-best-2125-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-best-2125-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.687458
+    },
+    {
+      "id": "fever-loop-high-1975-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Erwarmungssignal beginnt.",
+      "mp3": "fever-loop-high-1975-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-1975-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 2.126896
+    },
+    {
+      "id": "fever-loop-high-1975-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Warming signal starting.",
+      "mp3": "fever-loop-high-1975-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-1975-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.339812
+    },
+    {
+      "id": "fever-loop-high-1975-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Debut du signal de rechauffement.",
+      "mp3": "fever-loop-high-1975-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-1975-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.6057919999999999
+    },
+    {
+      "id": "fever-loop-high-1975-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "गर्माहट संकेत शुरू.",
+      "mp3": "fever-loop-high-1975-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-1975-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.751417
+    },
+    {
+      "id": "fever-loop-high-1975-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Opwarmingssignaal begint.",
+      "mp3": "fever-loop-high-1975-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-1975-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.4968329999999999
+    },
+    {
+      "id": "fever-loop-high-1975-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Начало сигнала потепления.",
+      "mp3": "fever-loop-high-1975-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-1975-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.611646
+    },
+    {
+      "id": "fever-loop-high-1975-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Warming signal starting.",
+      "mp3": "fever-loop-high-1975-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-1975-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.4264169999999998
+    },
+    {
+      "id": "fever-loop-high-1975-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "变暖信号开始.",
+      "mp3": "fever-loop-high-1975-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-1975-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 2.814708
+    },
+    {
+      "id": "fever-loop-high-2000-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Beschleunigung beginnt.",
+      "mp3": "fever-loop-high-2000-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2000-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.144979
+    },
+    {
+      "id": "fever-loop-high-2000-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Acceleration beginning.",
+      "mp3": "fever-loop-high-2000-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2000-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.3335
+    },
+    {
+      "id": "fever-loop-high-2000-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Debut de l acceleration.",
+      "mp3": "fever-loop-high-2000-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2000-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.2758539999999998
+    },
+    {
+      "id": "fever-loop-high-2000-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "त्वरण शुरू.",
+      "mp3": "fever-loop-high-2000-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2000-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 0.9063960000000001
+    },
+    {
+      "id": "fever-loop-high-2000-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Versnelling begint.",
+      "mp3": "fever-loop-high-2000-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2000-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 0.984604
+    },
+    {
+      "id": "fever-loop-high-2000-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Начало ускорения.",
+      "mp3": "fever-loop-high-2000-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2000-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 2.173208
+    },
+    {
+      "id": "fever-loop-high-2000-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Acceleration beginning.",
+      "mp3": "fever-loop-high-2000-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2000-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.2883749999999998
+    },
+    {
+      "id": "fever-loop-high-2000-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "加速开始.",
+      "mp3": "fever-loop-high-2000-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2000-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 0.7675620000000001
+    },
+    {
+      "id": "fever-loop-high-2025-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Warnung der Gegenwart.",
+      "mp3": "fever-loop-high-2025-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2025-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.0839999999999999
+    },
+    {
+      "id": "fever-loop-high-2025-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Current era warning.",
+      "mp3": "fever-loop-high-2025-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2025-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.043937
+    },
+    {
+      "id": "fever-loop-high-2025-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Alerte de l ere actuelle.",
+      "mp3": "fever-loop-high-2025-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2025-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.211479
+    },
+    {
+      "id": "fever-loop-high-2025-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "वर्तमान युग की चेतावनी.",
+      "mp3": "fever-loop-high-2025-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2025-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 2.067687
+    },
+    {
+      "id": "fever-loop-high-2025-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Waarschuwing huidige tijd.",
+      "mp3": "fever-loop-high-2025-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2025-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.4736669999999998
+    },
+    {
+      "id": "fever-loop-high-2025-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Предупреждение текущей эпохи.",
+      "mp3": "fever-loop-high-2025-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2025-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 2.769292
+    },
+    {
+      "id": "fever-loop-high-2025-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Current era warning.",
+      "mp3": "fever-loop-high-2025-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2025-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.344083
+    },
+    {
+      "id": "fever-loop-high-2025-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "当前时代警告.",
+      "mp3": "fever-loop-high-2025-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2025-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.205479
+    },
+    {
+      "id": "fever-loop-high-2050-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Grosse Destabilisierung lauft.",
+      "mp3": "fever-loop-high-2050-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2050-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.70475
+    },
+    {
+      "id": "fever-loop-high-2050-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Major destabilization underway.",
+      "mp3": "fever-loop-high-2050-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2050-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.781958
+    },
+    {
+      "id": "fever-loop-high-2050-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Destabilisation majeure en cours.",
+      "mp3": "fever-loop-high-2050-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2050-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.6757499999999999
+    },
+    {
+      "id": "fever-loop-high-2050-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "बड़ी अस्थिरता जारी.",
+      "mp3": "fever-loop-high-2050-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2050-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.027479
+    },
+    {
+      "id": "fever-loop-high-2050-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Grote destabilisatie gaande.",
+      "mp3": "fever-loop-high-2050-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2050-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.698167
+    },
+    {
+      "id": "fever-loop-high-2050-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Крупная дестабилизация идет.",
+      "mp3": "fever-loop-high-2050-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2050-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.634854
+    },
+    {
+      "id": "fever-loop-high-2050-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Major destabilization underway.",
+      "mp3": "fever-loop-high-2050-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2050-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.847875
+    },
+    {
+      "id": "fever-loop-high-2050-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "重大失稳正在发生.",
+      "mp3": "fever-loop-high-2050-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2050-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.475771
+    },
+    {
+      "id": "fever-loop-high-2075-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Phase kaskadierender Risiken.",
+      "mp3": "fever-loop-high-2075-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2075-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.823021
+    },
+    {
+      "id": "fever-loop-high-2075-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Cascading risk phase.",
+      "mp3": "fever-loop-high-2075-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2075-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.4801879999999998
+    },
+    {
+      "id": "fever-loop-high-2075-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Phase de risque en cascade.",
+      "mp3": "fever-loop-high-2075-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2075-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.338833
+    },
+    {
+      "id": "fever-loop-high-2075-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "शृंखलाबद्ध जोखिम चरण.",
+      "mp3": "fever-loop-high-2075-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2075-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.395146
+    },
+    {
+      "id": "fever-loop-high-2075-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Cascaderisicofase.",
+      "mp3": "fever-loop-high-2075-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2075-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.249646
+    },
+    {
+      "id": "fever-loop-high-2075-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Фаза каскадного риска.",
+      "mp3": "fever-loop-high-2075-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2075-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.322083
+    },
+    {
+      "id": "fever-loop-high-2075-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Cascading risk phase.",
+      "mp3": "fever-loop-high-2075-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2075-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.3105419999999999
+    },
+    {
+      "id": "fever-loop-high-2075-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "级联风险阶段.",
+      "mp3": "fever-loop-high-2075-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2075-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 2.329063
+    },
+    {
+      "id": "fever-loop-high-2100-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Extreme Systemstorung.",
+      "mp3": "fever-loop-high-2100-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2100-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.3488959999999999
+    },
+    {
+      "id": "fever-loop-high-2100-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Extreme system disruption.",
+      "mp3": "fever-loop-high-2100-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2100-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.600917
+    },
+    {
+      "id": "fever-loop-high-2100-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Perturbation extreme du systeme.",
+      "mp3": "fever-loop-high-2100-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2100-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.733021
+    },
+    {
+      "id": "fever-loop-high-2100-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "अत्यधिक प्रणाली व्यवधान.",
+      "mp3": "fever-loop-high-2100-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2100-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.7042709999999999
+    },
+    {
+      "id": "fever-loop-high-2100-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Extreme systeemverstoring.",
+      "mp3": "fever-loop-high-2100-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2100-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.647479
+    },
+    {
+      "id": "fever-loop-high-2100-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Экстремальное нарушение системы.",
+      "mp3": "fever-loop-high-2100-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2100-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 2.130979
+    },
+    {
+      "id": "fever-loop-high-2100-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Extreme system disruption.",
+      "mp3": "fever-loop-high-2100-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2100-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.5384369999999998
+    },
+    {
+      "id": "fever-loop-high-2100-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "极端系统扰动.",
+      "mp3": "fever-loop-high-2100-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2100-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.111292
+    },
+    {
+      "id": "fever-loop-high-2125-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Verfestigte Hochrisikowelt.",
+      "mp3": "fever-loop-high-2125-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2125-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.222062
+    },
+    {
+      "id": "fever-loop-high-2125-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Entrenched high-risk world.",
+      "mp3": "fever-loop-high-2125-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2125-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.4074579999999999
+    },
+    {
+      "id": "fever-loop-high-2125-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Monde a haut risque installe.",
+      "mp3": "fever-loop-high-2125-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2125-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.2726879999999998
+    },
+    {
+      "id": "fever-loop-high-2125-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "स्थायी उच्च-जोखिम दुनिया.",
+      "mp3": "fever-loop-high-2125-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2125-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.373646
+    },
+    {
+      "id": "fever-loop-high-2125-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Verankerde hoogrisicowereld.",
+      "mp3": "fever-loop-high-2125-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2125-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.6943329999999999
+    },
+    {
+      "id": "fever-loop-high-2125-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Укоренившийся мир высокого риска.",
+      "mp3": "fever-loop-high-2125-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2125-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.971813
+    },
+    {
+      "id": "fever-loop-high-2125-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Entrenched high-risk world.",
+      "mp3": "fever-loop-high-2125-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2125-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.4135
+    },
+    {
+      "id": "fever-loop-high-2125-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "根深蒂固的高风险世界.",
+      "mp3": "fever-loop-high-2125-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-high-2125-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 2.3303119999999997
+    },
+    {
+      "id": "fever-loop-objective-1975-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Fruhes Erwarmungssignal.",
+      "mp3": "fever-loop-objective-1975-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-1975-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.350792
+    },
+    {
+      "id": "fever-loop-objective-1975-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Early warming signal.",
+      "mp3": "fever-loop-objective-1975-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-1975-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.081958
+    },
+    {
+      "id": "fever-loop-objective-1975-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Signal de rechauffement precoce.",
+      "mp3": "fever-loop-objective-1975-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-1975-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.642917
+    },
+    {
+      "id": "fever-loop-objective-1975-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "प्रारंभिक गर्माहट संकेत.",
+      "mp3": "fever-loop-objective-1975-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-1975-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.358042
+    },
+    {
+      "id": "fever-loop-objective-1975-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Vroeg opwarmingssignaal.",
+      "mp3": "fever-loop-objective-1975-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-1975-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.279563
+    },
+    {
+      "id": "fever-loop-objective-1975-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Ранний сигнал потепления.",
+      "mp3": "fever-loop-objective-1975-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-1975-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.5520829999999999
+    },
+    {
+      "id": "fever-loop-objective-1975-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Early warming signal.",
+      "mp3": "fever-loop-objective-1975-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-1975-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.215542
+    },
+    {
+      "id": "fever-loop-objective-1975-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "早期变暖信号.",
+      "mp3": "fever-loop-objective-1975-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-1975-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.104271
+    },
+    {
+      "id": "fever-loop-objective-2000-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Erwarmung klar sichtbar.",
+      "mp3": "fever-loop-objective-2000-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2000-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.223021
+    },
+    {
+      "id": "fever-loop-objective-2000-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Warming clearly visible.",
+      "mp3": "fever-loop-objective-2000-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2000-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.319812
+    },
+    {
+      "id": "fever-loop-objective-2000-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Rechauffement clairement visible.",
+      "mp3": "fever-loop-objective-2000-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2000-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.5416459999999998
+    },
+    {
+      "id": "fever-loop-objective-2000-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "गर्माहट साफ दिखाई देती है.",
+      "mp3": "fever-loop-objective-2000-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2000-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.9606249999999998
+    },
+    {
+      "id": "fever-loop-objective-2000-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Opwarming duidelijk zichtbaar.",
+      "mp3": "fever-loop-objective-2000-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2000-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.568646
+    },
+    {
+      "id": "fever-loop-objective-2000-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Потепление ясно видно.",
+      "mp3": "fever-loop-objective-2000-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2000-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.1434579999999999
+    },
+    {
+      "id": "fever-loop-objective-2000-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Warming clearly visible.",
+      "mp3": "fever-loop-objective-2000-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2000-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.388604
+    },
+    {
+      "id": "fever-loop-objective-2000-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "变暖清晰可见.",
+      "mp3": "fever-loop-objective-2000-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2000-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.1399789999999999
+    },
+    {
+      "id": "fever-loop-objective-2025-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Warnung der Gegenwart.",
+      "mp3": "fever-loop-objective-2025-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2025-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.162583
+    },
+    {
+      "id": "fever-loop-objective-2025-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Current era warning.",
+      "mp3": "fever-loop-objective-2025-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2025-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.1447079999999998
+    },
+    {
+      "id": "fever-loop-objective-2025-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Alerte de l ere actuelle.",
+      "mp3": "fever-loop-objective-2025-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2025-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.2113749999999999
+    },
+    {
+      "id": "fever-loop-objective-2025-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "वर्तमान युग की चेतावनी.",
+      "mp3": "fever-loop-objective-2025-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2025-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.235687
+    },
+    {
+      "id": "fever-loop-objective-2025-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Waarschuwing huidige tijd.",
+      "mp3": "fever-loop-objective-2025-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2025-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.340875
+    },
+    {
+      "id": "fever-loop-objective-2025-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Предупреждение текущей эпохи.",
+      "mp3": "fever-loop-objective-2025-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2025-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.496854
+    },
+    {
+      "id": "fever-loop-objective-2025-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Current era warning.",
+      "mp3": "fever-loop-objective-2025-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2025-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.1174169999999999
+    },
+    {
+      "id": "fever-loop-objective-2025-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "当前时代警告.",
+      "mp3": "fever-loop-objective-2025-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2025-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.1221459999999999
+    },
+    {
+      "id": "fever-loop-objective-2050-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Zunehmende Instabilitat.",
+      "mp3": "fever-loop-objective-2050-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2050-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.620417
+    },
+    {
+      "id": "fever-loop-objective-2050-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Escalating instability.",
+      "mp3": "fever-loop-objective-2050-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2050-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.3422079999999998
+    },
+    {
+      "id": "fever-loop-objective-2050-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Instabilite croissante.",
+      "mp3": "fever-loop-objective-2050-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2050-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.3350419999999998
+    },
+    {
+      "id": "fever-loop-objective-2050-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "बढ़ती अस्थिरता.",
+      "mp3": "fever-loop-objective-2050-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2050-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 0.921979
+    },
+    {
+      "id": "fever-loop-objective-2050-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Escalerende instabiliteit.",
+      "mp3": "fever-loop-objective-2050-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2050-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.558479
+    },
+    {
+      "id": "fever-loop-objective-2050-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Нарастающая нестабильность.",
+      "mp3": "fever-loop-objective-2050-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2050-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.756896
+    },
+    {
+      "id": "fever-loop-objective-2050-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Escalating instability.",
+      "mp3": "fever-loop-objective-2050-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2050-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.34675
+    },
+    {
+      "id": "fever-loop-objective-2050-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "不稳定性升级.",
+      "mp3": "fever-loop-objective-2050-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2050-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 0.8024370000000001
+    },
+    {
+      "id": "fever-loop-objective-2075-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Phase verstarkter Schaden.",
+      "mp3": "fever-loop-objective-2075-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2075-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.3405
+    },
+    {
+      "id": "fever-loop-objective-2075-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Compounding damage phase.",
+      "mp3": "fever-loop-objective-2075-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2075-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.371208
+    },
+    {
+      "id": "fever-loop-objective-2075-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Phase de dommages composes.",
+      "mp3": "fever-loop-objective-2075-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2075-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.3514789999999999
+    },
+    {
+      "id": "fever-loop-objective-2075-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "संयुक्त क्षति चरण.",
+      "mp3": "fever-loop-objective-2075-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2075-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.0775
+    },
+    {
+      "id": "fever-loop-objective-2075-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Fase van samengestelde schade.",
+      "mp3": "fever-loop-objective-2075-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2075-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.847292
+    },
+    {
+      "id": "fever-loop-objective-2075-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Фаза накапливающегося ущерба.",
+      "mp3": "fever-loop-objective-2075-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2075-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.7914789999999998
+    },
+    {
+      "id": "fever-loop-objective-2075-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Compounding damage phase.",
+      "mp3": "fever-loop-objective-2075-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2075-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.582562
+    },
+    {
+      "id": "fever-loop-objective-2075-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "复合损害阶段.",
+      "mp3": "fever-loop-objective-2075-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2075-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.019042
+    },
+    {
+      "id": "fever-loop-objective-2100-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Tiefe Systembelastung.",
+      "mp3": "fever-loop-objective-2100-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2100-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.3237079999999999
+    },
+    {
+      "id": "fever-loop-objective-2100-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Deep system stress.",
+      "mp3": "fever-loop-objective-2100-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2100-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.2872709999999998
+    },
+    {
+      "id": "fever-loop-objective-2100-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Stress profond du systeme.",
+      "mp3": "fever-loop-objective-2100-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2100-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.4446869999999998
+    },
+    {
+      "id": "fever-loop-objective-2100-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "गहरा प्रणाली तनाव.",
+      "mp3": "fever-loop-objective-2100-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2100-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.22575
+    },
+    {
+      "id": "fever-loop-objective-2100-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Diepe systeemstress.",
+      "mp3": "fever-loop-objective-2100-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2100-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.327667
+    },
+    {
+      "id": "fever-loop-objective-2100-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Глубокий стресс системы.",
+      "mp3": "fever-loop-objective-2100-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2100-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.5563749999999998
+    },
+    {
+      "id": "fever-loop-objective-2100-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Deep system stress.",
+      "mp3": "fever-loop-objective-2100-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2100-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.267854
+    },
+    {
+      "id": "fever-loop-objective-2100-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "深层系统压力.",
+      "mp3": "fever-loop-objective-2100-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2100-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.2379369999999998
+    },
+    {
+      "id": "fever-loop-objective-2125-message-de",
+      "lang": "de-DE",
+      "lg": "de",
+      "text": "Langzeitschaden.",
+      "mp3": "fever-loop-objective-2125-message-de.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2125-short-de.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 0.9438960000000001
+    },
+    {
+      "id": "fever-loop-objective-2125-message-en",
+      "lang": "en-US",
+      "lg": "en",
+      "text": "Long-tail damage.",
+      "mp3": "fever-loop-objective-2125-message-en.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2125-short-en.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.082396
+    },
+    {
+      "id": "fever-loop-objective-2125-message-fr",
+      "lang": "fr-FR",
+      "lg": "fr",
+      "text": "Dommages a longue traine.",
+      "mp3": "fever-loop-objective-2125-message-fr.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2125-short-fr.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 0.9599580000000001
+    },
+    {
+      "id": "fever-loop-objective-2125-message-hi",
+      "lang": "hi-IN",
+      "lg": "hi",
+      "text": "दीर्घकालिक क्षति.",
+      "mp3": "fever-loop-objective-2125-message-hi.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2125-short-hi.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.184437
+    },
+    {
+      "id": "fever-loop-objective-2125-message-nl",
+      "lang": "nl-NL",
+      "lg": "nl",
+      "text": "Langdurige schade.",
+      "mp3": "fever-loop-objective-2125-message-nl.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2125-short-nl.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.120708
+    },
+    {
+      "id": "fever-loop-objective-2125-message-ru",
+      "lang": "ru-RU",
+      "lg": "ru",
+      "text": "Долгий хвост ущерба.",
+      "mp3": "fever-loop-objective-2125-message-ru.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2125-short-ru.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.296333
+    },
+    {
+      "id": "fever-loop-objective-2125-message-uk",
+      "lang": "uk-UA",
+      "lg": "uk",
+      "text": "Long-tail damage.",
+      "mp3": "fever-loop-objective-2125-message-uk.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2125-short-uk.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.169208
+    },
+    {
+      "id": "fever-loop-objective-2125-message-zh",
+      "lang": "zh-CN",
+      "lg": "zh",
+      "text": "长尾损害.",
+      "mp3": "fever-loop-objective-2125-message-zh.mp3",
+      "tags": [
+        "fever-loop",
+        "fever-message-only"
+      ],
+      "sourceRecording": "fever-loop-objective-2125-short-zh.webm",
+      "sourceProfile": "short",
+      "trimEndSeconds": 1.386979
     }
   ]
 }

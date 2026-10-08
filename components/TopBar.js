@@ -5,8 +5,8 @@
 import { Settings } from '../lib/settings.js';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-tab-layers-20260507';
 
-const TOPIC_EARTH_MARK_FALLBACK_URL = './assets/icons/topic.earth_64x64.svg?v=topic-earth-icons-20260505';
-const TOPIC_EARTH_CLOCK_LOGO_URL = './assets/logo/generated/earth-rotate/topic-earth-logo-earth-rotate-128.webp?v=topic-earth-live-clock-logo-20260605';
+const TOPIC_EARTH_MARK_FALLBACK_URL = './assets/logo/local/favicon.svg';
+const TOPIC_EARTH_CLOCK_LOGO_URL = './assets/logo/local/earth-128.svg';
 
 export class TopBar {
   constructor(container) {
@@ -219,6 +219,8 @@ export class TopBar {
           <span class="logo-clock-face" aria-hidden="true">
             <img class="logo-clock-earth" src="${TOPIC_EARTH_CLOCK_LOGO_URL}" data-fallback-src="${TOPIC_EARTH_MARK_FALLBACK_URL}" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc;" alt="">
             <svg class="logo-clock-hands" viewBox="0 0 100 100" focusable="false" aria-hidden="true">
+              <defs><linearGradient id="topicClockRing"><stop offset="0%" stop-color="var(--logo-topic)"/><stop offset="48%" stop-color="var(--logo-line-b)"/><stop offset="100%" stop-color="var(--logo-earth)"/></linearGradient></defs>
+              <circle class="logo-clock-ring" cx="50" cy="50" r="48.5"></circle>
               <line class="logo-clock-hand logo-clock-hour" x1="50" y1="52" x2="50" y2="29"></line>
               <line class="logo-clock-hand logo-clock-minute" x1="50" y1="54" x2="50" y2="20"></line>
               <line class="logo-clock-hand logo-clock-second" x1="50" y1="57" x2="50" y2="14"></line>
@@ -226,7 +228,7 @@ export class TopBar {
             </svg>
           </span>
           <span class="logo-clock-word" aria-hidden="true">
-            <span>topic</span><span>earth</span>
+            <span>topic.</span><span>earth</span>
           </span>
         </div>
       </div>
