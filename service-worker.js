@@ -1,4 +1,4 @@
-const CACHE_NAME = 'topic-earth-shell-v14-fever-normal-disclosure';
+const CACHE_NAME = 'topic-earth-shell-v15-fever-texture-fallback';
 const APP_SHELL = [
   './',
   './index.html',
