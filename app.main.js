@@ -1,4 +1,4 @@
-import { GlobeRenderer } from './lib/globe.js?v=fever-texture-fallback-20261008';
+import { GlobeRenderer } from './lib/globe.js?v=fever-model-fallback-20261008';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LAYERS } from './data/layers.js?v=topic-earth-regional-merged-20261003';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
