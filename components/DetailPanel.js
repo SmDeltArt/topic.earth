@@ -6,7 +6,7 @@ import { AppAccess } from '../lib/capabilities.js?v=topic-earth-user-default-v2-
 import { LanguageManager } from '../lib/language.js?v=topic-earth-fever-scenario-layer-20260521';
 import { ReadTranslationService } from '../lib/read-translation.js?v=translation-20261004';
 import { TopicTranslations, plainTopicText } from '../lib/topic-translations.mjs?v=translation-20261004';
-import { buildFeverAudioText } from '../lib/fever-audio-manifest.mjs';
+import { buildFeverAudioText, getFeverSpeedProfile } from '../lib/fever-audio-manifest.mjs?v=normal-20261008';
 import { getFeverWarmingTranslation } from '../lib/fever-warming-translations.js?v=topic-earth-fever-json-i18n-20260422';
 import { LocalStorage } from '../lib/storage.js?v=topic-earth-meteo-draft-20260531';
 import { pwaInstallManager } from '../lib/pwa-install-manager.js?v=topic-earth-secure-install-20261001';
@@ -331,7 +331,7 @@ export class DetailPanel {
 
   getFeverNarrationText({ year, scenario, title, text, language }) {
     const speed = Number(this.currentGlobe?.feverSpeed || 2 / 3);
-    if (speed >= (2 / 3) - 0.001) return String(title || this.firstSentence(text) || '').trim();
+    if (speed >= (5 / 6) - 0.001) return String(title || this.firstSentence(text) || '').trim();
     const milestone = this.getScenarioMilestoneData(year, scenario);
 
     return buildFeverAudioText({
@@ -2205,9 +2205,24 @@ export class DetailPanel {
     const currentYear = this.currentGlobe ? this.currentGlobe.getFeverCurrentYear() : 1950;
     const scenario = this.currentGlobe ? this.currentGlobe.getFeverScenario() : 'objective';
     const selectedBoundary = this.currentGlobe ? this.currentGlobe.getSelectedBoundary() : null;
-    
+    const renderKey = JSON.stringify([this.activeMonitoringTab, currentYear, scenario, selectedBoundary, this.getCurrentLanguage()]);
+    if (tabContent.dataset.renderKey === renderKey) return;
+    tabContent.dataset.renderKey = renderKey;
+
+    const disclosures = Array.from(tabContent.querySelectorAll('details'));
+    const focusedDisclosure = disclosures.find(details => details.contains(document.activeElement));
+    const focusedElement = focusedDisclosure ? document.activeElement : null;
     tabContent.innerHTML = this.renderMonitoringTabContent(this.activeMonitoringTab, currentYear, scenario, selectedBoundary);
+    tabContent.querySelectorAll('details').forEach((details, index) => {
+      const previous = disclosures[index];
+      if (previous && previous.innerHTML === details.innerHTML) {
+        details.replaceWith(previous);
+      } else {
+        details.open = previous?.open === true;
+      }
+    });
     
+    if (focusedElement?.isConnected) focusedElement.focus({ preventScroll: true });
     console.log(`[Monitoring] ${this.activeMonitoringTab} tab content rendered`);
   }
   
@@ -2484,7 +2499,7 @@ export class DetailPanel {
         language: localizedWarning.language
       });
       const speed = Number(this.currentGlobe.feverSpeed);
-      const profile = speed >= (2 / 3) - 0.001 ? 'message' : 'full';
+      const profile = getFeverSpeedProfile(speed) === 'short' ? 'message' : getFeverSpeedProfile(speed);
       this.speakFeverNarration(spokenWarning, localizedWarning.ttsLanguage, {
         cacheId: `fever-loop-${scenario}-${year}-${profile}-${localizedWarning.language.split(/[-_]/)[0]}`,
         audioFormats: profile === 'message' ? ['mp3'] : ['webm', 'mp3'],

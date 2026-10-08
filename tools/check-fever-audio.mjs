@@ -13,6 +13,8 @@ tts.loadReadAudioManifest = async () => ({ messages: [
   ...manifest.messages
 ] });
 tts.findFirstReadableUrl = async urls => urls[0];
+// Exact recording IDs must not wait for unrelated remote CSV translations.
+tts.resolveManifestMessageText = async () => { throw Error('Exact recording lookup fetched unrelated text'); };
 const normal = await tts.findCachedAudio('Different live warning copy.', 'en-US', { cacheId: 'normal-en' });
 assert.equal(normal.id, 'normal-en');
 assert.equal(normal.format, 'webm');
@@ -21,7 +23,7 @@ const short = await tts.findCachedAudio('Title.', 'fr-FR', {
 });
 assert.equal(short.format, 'mp3');
 assert.ok(short.urls[0].startsWith('./assets/audio/'));
-assert.equal(getFeverSpeedProfile(2 / 3), 'short');
+assert.equal(getFeverSpeedProfile(2 / 3), 'normal');
 assert.equal(getFeverSpeedProfile(5 / 6), 'short');
 assert.equal(buildFeverAudioText({title:'Message only',text:'Long warning.',milestone:{temperatureDeltaC:2,tippingRiskPct:40},speed:5/6}), 'Message only.');
 assert.equal(manifest.messages.filter(m => m.tags?.includes('fever-message-only')).length, 168);

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'topic-earth-shell-v12-fever-monitor-tabs';
+const CACHE_NAME = 'topic-earth-shell-v14-fever-normal-disclosure';
 const APP_SHELL = [
   './',
   './index.html',

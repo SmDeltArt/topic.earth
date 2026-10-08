@@ -13,13 +13,13 @@ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js
 import { TopBar } from './components/TopBar.js?v=cloudinary-fallback-20261008';
 import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-regional-drawing-20261004';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-drawing-20261004';
-import { DetailPanel } from './components/DetailPanel.js?v=fever-monitor-tabs-20261008';
+import { DetailPanel } from './components/DetailPanel.js?v=fever-normal-disclosure-20261008-2';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=rotation-speed-20261004';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
 import { ReadTranslationService } from './lib/read-translation.js?v=translation-20261004';
 import { TopicTranslations, plainTopicText, topicSourceRevision } from './lib/topic-translations.mjs?v=reading-save-20261004';
-import { TTSManager } from './lib/tts.js?v=fever-recorded-mp3-20261008';
+import { TTSManager } from './lib/tts.js?v=fever-direct-recording-20261008-2';
 import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-meteo-draft-20260531';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
 import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-warning-panel-collapse-20260430';
