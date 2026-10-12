@@ -1,8 +1,14 @@
-const CACHE_NAME = 'topic-earth-shell-v21-story-reader-review';
+const CACHE_NAME = 'topic-earth-shell-v22-local-colour-picker';
 const APP_SHELL = [
   './',
+  './assets/widgets/color/smart-color-picker.html',
+  './assets/widgets/color/smart-color-picker.html?embed=overlay',
+  './assets/widgets/color/smart-colorset.json',
+  './assets/widgets/color/smart-color-picker.i18n.csv',
+  './lib/story-color-picker.mjs',
+  './lib/topic-story-content.mjs',
   './index.html',
-  './styles.css?v=story-reader-review-20261012',
+  './styles.css?v=local-colour-picker-20261012',
   './site.webmanifest?v=earth-clock-20261012',
   './assets/logo/local/favicon.svg?v=earth-clock-20261012',
   './assets/logo/local/earth-128.svg',
@@ -31,7 +37,7 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) return;
 
   if (event.request.mode === 'navigate') {
-    event.respondWith(fetch(event.request).catch(() => caches.match('./index.html')));
+    event.respondWith(fetch(event.request).catch(() => caches.match(event.request).then(cached => cached || caches.match('./index.html'))));
     return;
   }
 

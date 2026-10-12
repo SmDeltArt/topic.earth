@@ -26,9 +26,9 @@ The review is a model suggestion, not factual verification. It uses the existing
 
 ## Doc Forge package boundary
 
-The supplied `content-modification-settings.zip` contains only `index.html` (a redirect to `../widgets/html-manager/index.html`) and a README. The runtime is absent. The linked GitHub runtime path was unavailable through the connected account. See [the supplied integration reference](content-settings-reference.md).
+The supplied `content-modification-settings.zip` contains only `index.html` (a redirect to `../widgets/html-manager/index.html`) and a README. That initial package omitted the runtime, and its linked GitHub runtime path was unavailable through the connected account. A later full Content Forge ZIP supplied the standalone Modify module for analysis. See [the supplied integration reference](content-settings-reference.md).
 
-The local content controls above are implemented independently, with no dependency on a separate SmΔrt or SPRL hosting service. They are not advertised as the complete Doc Forge HTML Manager. To integrate that panel, provide the complete `widgets/html-manager/` runtime and dependencies, or its confirmed deployed URL and full field contract. The host must verify iframe source, exact origin, channel and version, validate field values, and apply only document-scoped CSS. Do not inject imported panel CSS into the topic.earth app.
+The local content controls above are implemented independently, with no dependency on a separate SmΔrt or SPRL hosting service. They are not advertised as the complete Doc Forge HTML Manager. A future fuller integration should adapt the supplied module’s settings schema to the topic.earth UI and validate its bridge. The host must verify iframe source, exact origin, channel and version, validate field values, and apply only document-scoped CSS. Do not inject imported panel CSS into the topic.earth app.
 
 ## Validation
 

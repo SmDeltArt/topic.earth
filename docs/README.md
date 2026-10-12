@@ -37,7 +37,7 @@ See [World textures, saved location and Regional examples](world-regional-contro
 
 ## Embedded content authoring
 
-See [Mobile reading, AI review and content-only styling](topic-story/mobile-and-ai-controls.md).
+See [Mobile reading, AI review and content-only styling](topic-story/mobile-and-ai-controls.md) and [Local document colours and gradients](topic-story/local-colour-picker.md).
 
 ## AI access and API Settings
 

@@ -87,3 +87,16 @@ await panel.generateTopicStoryFromAi();assert.ok(panel.topicFormState.topicStory
 assert.ok(panel.topicFormState.topicStory.html.includes('#ff3030'));
 assert.ok(panel.topicFormState.topicStory.html.includes('font-size:19px'));
 console.log('New-card generation, inactive direction and selected Fever palette passed.');
+// Settings panel commits picker paints to the story; originals remain present.
+context.StoryColorPickerManager=class { open(options){this.options=options;}close(){} };
+context.FormData=class { constructor(form){this.entries=Array.from(form.querySelectorAll('[name]')).filter(el=>el.getAttribute('type')!=='checkbox').map(el=>[el.getAttribute('name'),el.value||el.getAttribute('value')||'preserve']);} [Symbol.iterator](){return this.entries[Symbol.iterator]();} };
+panel.openStoryContentSettings();
+const settingsDialog=document.getElementById('topic-content-settings-dialog');
+settingsDialog.querySelector('[data-paint-field="backgroundPaint"]').click();
+const paint={kind:'gradient',type:'linear',angle:90,stops:[{hex:'#071019',alpha:1,pos:0},{hex:'#39ff88',alpha:1,pos:100}]};
+panel.storyColorPicker.options.onApply(paint);
+settingsDialog.querySelector('[data-content-apply]').click();
+assert.equal(panel.topicFormState.topicStory.contentSettings.backgroundPaint.kind,'gradient');
+assert.ok(panel.topicFormState.topicStory.html.includes('linear-gradient(90deg, #071019 0%, #39ff88 100%)'));
+assert.equal(panel.buildTopicStoryForSave().contentSettings.backgroundPaint.stops.length,2);
+console.log('Manual settings panel commits and exports structured background gradients.');

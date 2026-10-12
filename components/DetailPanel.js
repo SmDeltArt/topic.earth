@@ -1,7 +1,8 @@
 import { RegionalLocationManager } from '../lib/regional-location.mjs';
+import { StoryColorPickerManager } from '../lib/story-color-picker.mjs';
 import { TopicStoryContentManager } from '../lib/topic-story-content.mjs';
 import { topicStoryLabel } from '../lib/topic-story-labels.mjs';
-import { getTopicStoryTheme, topicStoryThemeCss } from '../lib/topic-story-theme.mjs?v=story-reader-review-20261012';
+import { getTopicStoryTheme, topicStoryThemeCss } from '../lib/topic-story-theme.mjs?v=local-colour-picker-20261012';
 import { scanTopicZip } from '../lib/topic-importer.mjs?v=zip-scan-20261004';
 import { Settings } from '../lib/settings.js?v=world-regional-location-20261012';
 import { buildCaptionEmbedUrl } from '../lib/video-captions.mjs?v=topic-earth-video-captions-20261003';
@@ -6875,19 +6876,37 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     document.getElementById('topic-content-settings-dialog')?.remove();
     const story = this.normalizeTopicStory(this.topicFormState.topicStory);
     const settings = story.contentSettings;
+    const paints = { backgroundPaint:settings.backgroundPaint, panelPaint:settings.panelPaint };
+    const theme = this.getTopicStoryTheme(story);
     const dialog = document.createElement('dialog');
     dialog.id = 'topic-content-settings-dialog';
     dialog.className = 'topic-content-settings-dialog';
     dialog.setAttribute('aria-label', this.t('topic.story.contentStyle'));
     dialog.innerHTML = `<h2>🎨 ${this.escapeHtml(this.t('topic.story.contentStyle'))}</h2><p>${this.escapeHtml(this.t('topic.story.styleScope'))}</p>
       <form method="dialog">
+        <div class="story-paint-controls">${[['backgroundPaint','background'],['panelPaint','panels']].map(([field,label]) => `<label>${this.escapeHtml(this.t('topic.story.'+label))}<button type="button" class="story-paint-button" data-paint-field="${field}"><span class="story-paint-swatch" data-paint-swatch="${field}"></span>🎨 ${this.escapeHtml(this.t('topic.story.pickColour'))}</button><button type="button" class="story-paint-clear" data-paint-clear="${field}">${this.escapeHtml(this.t('topic.story.keepOriginal'))}</button></label>`).join('')}</div>
         ${[['fontSize',14,24,.5],['margin',0,40,1],['lineHeight',1.3,2.2,.05],['width',320,1200,10]].map(([key,min,max,step]) => `<label>${this.escapeHtml(this.t('topic.story.'+key))}<input name="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${settings[key]}"></label>`).join('')}
         <label>${this.escapeHtml(this.t('topic.story.appearance'))}<select name="appearance">${['preserve','light','dark'].map(value => `<option value="${value}" ${settings.appearance === value ? 'selected' : ''}>${this.escapeHtml(this.t('topic.story.'+value))}</option>`).join('')}</select></label>
         <label class="setting-checkbox"><input name="mobileOptimized" type="checkbox" ${settings.mobileOptimized ? 'checked' : ''}>${this.escapeHtml(this.t('topic.story.mobileOptimized'))}</label>
         <div class="topic-story-actions"><button type="button" data-content-apply>${this.escapeHtml(this.t('topic.story.applyContentStyle'))}</button><button value="cancel">${this.escapeHtml(this.t('topic.story.closeView'))}</button></div>
       </form>`;
+    const updateSwatches = () => {
+      for (const field of ['backgroundPaint','panelPaint']) {
+        const swatch = dialog.querySelector(`[data-paint-swatch="${field}"]`);
+        swatch.style.background = TopicStoryContentManager.paintCss(paints[field]) || (field === 'backgroundPaint' ? theme.background : theme.panel);
+        swatch.title = TopicStoryContentManager.paintCss(paints[field]) || this.t('topic.story.keepOriginal');
+      }
+    };
+    updateSwatches();
+    this.storyColorPicker ||= new StoryColorPickerManager();
+    dialog.querySelectorAll('[data-paint-field]').forEach(button => button.addEventListener('click', () => {
+      const field = button.dataset.paintField;
+      this.storyColorPicker.open({ paint:paints[field], defaultColor:field === 'backgroundPaint' ? theme.background : theme.panel, labels:{title:this.t('topic.story.pickColour'),apply:this.t('topic.story.useColour'),cancel:this.t('topic.story.cancel')}, onApply:paint => { paints[field]=paint; updateSwatches(); } });
+    }));
+    dialog.querySelectorAll('[data-paint-clear]').forEach(button => button.addEventListener('click', () => { paints[button.dataset.paintClear]=null; updateSwatches(); }));
     dialog.querySelector('[data-content-apply]').addEventListener('click', () => {
       const values = Object.fromEntries(new FormData(dialog.querySelector('form')));
+      Object.assign(values, paints);
       values.mobileOptimized = dialog.querySelector('[name="mobileOptimized"]').checked;
       const contentSettings = TopicStoryContentManager.normalizeSettings(values);
       this.topicFormState.topicStory = { ...story, contentSettings, html: story.html ? TopicStoryContentManager.applySettings(story.html, contentSettings) : '' };
@@ -6896,7 +6915,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       dialog.close();
       this.renderCreateTopic({ preserveState: true });
     });
-    dialog.addEventListener('close', () => dialog.remove(), { once: true });
+    dialog.addEventListener('close', () => { this.storyColorPicker?.close(); dialog.remove(); }, { once: true });
     document.body.appendChild(dialog);
     dialog.showModal();
   }

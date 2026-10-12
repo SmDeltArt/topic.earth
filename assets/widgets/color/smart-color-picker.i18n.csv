@@ -1,0 +1,118 @@
+key,en,fr,nl,de,es,ar,zh,hi,ja,ru,uk
+# ═══════════════════════════════════════════════════════════════════
+# Smart Color Picker — UI translations
+# Edit in any spreadsheet. Empty cells fall back to English.
+# Columns: en=English, fr=Français, nl=Nederlands, de=Deutsch,
+#          es=Español, ar=العربية, zh=中文, hi=हिन्दी, ja=日本語,
+#          ru=Русский, uk=Українська
+# Use {n}, {name}, {hex} as placeholders.
+# ═══════════════════════════════════════════════════════════════════
+# ── App meta ───────────────────────────────────────────────────────
+app.title,Smart Color Picker,SmΔrt Sélecteur de couleur,,,,,,,,
+app.tagline,Color + gradient picker with presets,Sélecteur de couleur et dégradé avec préréglages,,,,,,,,
+app.brand.suffix,Color Picker,Sélecteur de couleur,,,,,,,,
+# ── Titlebar ───────────────────────────────────────────────────────
+tb.drag.tip,Drag to move,Glisser pour déplacer,,,,,,,,
+tb.info.tip,About / help,À propos / aide,,,,,,,,
+tb.close.tip,Close,Fermer,,,,,,,,
+tb.recenter,Recenter,Recentrer,,,,,,,,
+tb.recenter.tip,Bring panel back to the center,Recentrer le panneau,,,,,,,,
+# ── Wheel corner buttons ───────────────────────────────────────────
+corner.pipette,Eyedropper,Pipette,,,,,,,,
+corner.pipette.tip,Pick a color from the screen,Sélectionner une couleur à l'écran,,,,,,,,
+corner.pipette.unsupported,Not supported,Non pris en charge,,,,,,,,
+corner.add,Add to palette,Ajouter à la palette,,,,,,,,
+corner.add.tip,Save current color to the side palette,Enregistrer la couleur dans la palette,,,,,,,,
+corner.swap,Swap fg/bg,Permuter avant/arrière,,,,,,,,
+corner.swap.tip,Swap foreground and background colors,Permuter les couleurs avant et arrière-plan,,,,,,,,
+corner.random,Random color,Couleur aléatoire,,,,,,,,
+corner.random.tip,Pick a random color,Choisir une couleur au hasard,,,,,,,,
+# ── B/W dots ───────────────────────────────────────────────────────
+bw.black,Black,Noir,,,,,,,,
+bw.white,White,Blanc,,,,,,,,
+# ── Right column ───────────────────────────────────────────────────
+right.alpha,Alpha,Alpha,,,,,,,,
+right.alpha.tip,Opacity (0–100%),Opacité (0–100%),,,,,,,,
+right.preview,Preview,Aperçu,,,,,,,,
+# ── Saved palette (left column) ────────────────────────────────────
+saved.title,Saved colors,Couleurs enregistrées,,,,,,,,
+saved.add.tip,Add current color,Ajouter la couleur actuelle,,,,,,,,
+saved.remove.tip,Remove color,Supprimer la couleur,,,,,,,,
+saved.empty,No saved colors yet,Aucune couleur enregistrée,,,,,,,,
+# ── Gradient toggle ────────────────────────────────────────────────
+grad.off,Gradient Off,Dégradé désactivé,,,,,,,,
+grad.on,Gradient On,Dégradé activé,,,,,,,,
+grad.toggle.tip,Toggle gradient mode,Activer / désactiver le mode dégradé,,,,,,,,
+# ── Gradient bar ───────────────────────────────────────────────────
+grad.stops,{n} stops,{n} arrêts,,,,,,,,
+grad.stop.add.tip,Add a gradient stop,Ajouter un arrêt de dégradé,,,,,,,,
+grad.stop.remove.tip,Remove the active stop,Supprimer l'arrêt actif,,,,,,,,
+grad.type.lin,Lin,Lin,,,,,,,,
+grad.type.lin.tip,Linear gradient,Dégradé linéaire,,,,,,,,
+grad.type.rad,Rad,Rad,,,,,,,,
+grad.type.rad.tip,Radial gradient,Dégradé radial,,,,,,,,
+grad.angle,Angle,Angle,,,,,,,,
+grad.angle.tip,Linear gradient angle (0–360°),Angle du dégradé linéaire (0–360°),,,,,,,,
+# ── Presets / harmony ──────────────────────────────────────────────
+presets.label,Presets,Préréglages,,,,,,,,
+presets.add,+ Bar,+ Barre,,,,,,,,
+presets.add.tip,Save current gradient as a preset,Enregistrer le dégradé comme préréglage,,,,,,,,
+presets.scroll.tip,Scroll for more presets,Faire défiler pour plus de préréglages,,,,,,,,
+harmony.label,Harmony,Harmonie,,,,,,,,
+harmony.complement,Complement,Complémentaire,,,,,,,,
+harmony.analogous,Analogous,Analogues,,,,,,,,
+harmony.triadic,Triadic,Triadique,,,,,,,,
+harmony.split,Split,Divisée,,,,,,,,
+harmony.tetradic,Tetradic,Tétradique,,,,,,,,
+harmony.pentagon,Pentagon,Pentagone,,,,,,,,
+harmony.hexad,Hexad,Hexade,,,,,,,,
+harmony.mono,Mono,Mono,,,,,,,,
+# ── Actions ────────────────────────────────────────────────────────
+action.copyCss,Copy CSS,Copier CSS,,,,,,,,
+action.copyCss.tip,Copy CSS color / gradient string,Copier la chaîne CSS de couleur / dégradé,,,,,,,,
+action.save,Save,Sauvegarder,,,,,,,,
+action.save.tip,Save preset (browser storage or JSON),Enregistrer le préréglage (stockage ou JSON),,,,,,,,
+action.load,Load,Charger,,,,,,,,
+action.load.tip,Load a saved preset,Charger un préréglage,,,,,,,,
+action.copied,Copied!,Copié !,,,,,,,,
+# ── Format preview ─────────────────────────────────────────────────
+fmt.hex,HEX,HEX,,,,,,,,
+fmt.rgb,RGB,RVB,,,,,,,,
+fmt.rgba,RGBA,RVBA,,,,,,,,
+fmt.hsl,HSL,TSL,,,,,,,,
+fmt.hsla,HSLA,TSLA,,,,,,,,
+fmt.css,CSS,CSS,,,,,,,,
+# ── Help popover (?) ───────────────────────────────────────────────
+help.title,SmΔrt Color Picker,SmΔrt Sélecteur de couleur,,,,,,,,
+help.tagline,Pick a solid color or build a gradient — everything stays in the browser.,Choisissez une couleur unie ou construisez un dégradé — tout reste dans le navigateur.,,,,,,,,
+help.step1,Solid color with alpha — drag the wheel and the vertical alpha bar.,Couleur unie avec alpha — utilisez la roue et la barre d'alpha verticale.,,,,,,,,
+help.step2,Gradient with alpha per stop — toggle “Gradient On” to add stops.,Dégradé avec alpha par arrêt — activez « Dégradé activé » pour ajouter des arrêts.,,,,,,,,
+help.step3,Save / Load presets (browser storage or JSON file).,Enregistrer / charger des préréglages (stockage navigateur ou fichier JSON).,,,,,,,,
+help.opensource,Open source ↗,Code source ↗,,,,,,,,
+help.version,v{n},v{n},,,,,,,,
+# ── Tooltips / messages ────────────────────────────────────────────
+msg.copied,Copied {hex} to clipboard,{hex} copié dans le presse-papiers,,,,,,,,
+msg.saved,Preset saved,Préréglage enregistré,,,,,,,,
+msg.loaded,Preset loaded,Préréglage chargé,,,,,,,,
+msg.invalidColor,Invalid color,Couleur invalide,,,,,,,,
+msg.eyedropperCancelled,Eyedropper cancelled,Pipette annulée,,,,,,,,
+# ── Tutorial tips (hover-on-element guided help) ───────────────────
+# Each entry is "Title|Description" — the | splits heading from body.
+tut.toggle,Tutorial tips,Astuces du tutoriel,,,,,,,,
+tut.toggle.tip,Toggle hover tutorial tips,Activer / désactiver les astuces au survol,,,,,,,,
+tut.toggle.on,Tutorial: ON,Tutoriel : ACTIVÉ,,,,,,,,
+tut.wheel,Color wheel|Click or drag the ring to set hue. Drag inside the triangle to set saturation & value. The dots around the ring are quick-access standard hues, harmony picks and shade variants.,Roue chromatique|Cliquez ou faites glisser l'anneau pour la teinte. Faites glisser dans le triangle pour la saturation et la valeur. Les points autour de l'anneau sont des teintes standard, harmonies et nuances rapides.,,,,,,,,
+tut.alpha,Alpha (transparency)|Drag this vertical track to set the current color's transparency. Top = fully opaque, bottom = fully transparent. The checker shows through where alpha is below 100%.,Alpha (transparence)|Faites glisser cette barre verticale pour régler la transparence. Haut = opaque, bas = transparent. Le damier apparaît sous 100%.,,,,,,,,
+tut.savedPalette,Saved palette|Your saved colors and gradients. Click a swatch to load it. Right-click — or long-press on mobile — to remove. Use Save/Load below to export the whole set as JSON.,Palette enregistrée|Vos couleurs et dégradés sauvegardés. Cliquez sur un échantillon pour le charger. Clic droit — ou appui long sur mobile — pour supprimer. Utilisez Sauvegarder/Charger ci-dessous pour exporter en JSON.,,,,,,,,
+tut.pipette,Eyedropper|Click then sample any pixel on screen to capture its exact color. Requires a Chromium-based browser.,Pipette|Cliquez puis échantillonnez un pixel à l'écran pour capturer sa couleur exacte. Nécessite un navigateur basé sur Chromium.,,,,,,,,
+tut.add,Add to palette|Save the current color (or gradient) to the saved palette on the left for quick reuse.,Ajouter à la palette|Enregistre la couleur (ou le dégradé) actuel dans la palette de gauche pour un accès rapide.,,,,,,,,
+tut.swap,Swap fg / bg|Swap the active color with the previously-picked one — quick A↔B comparison.,Permuter avant / arrière|Permute la couleur active avec la précédente — comparaison rapide A↔B.,,,,,,,,
+tut.random,Random color|Roll a random hue + saturation + value combination — great for inspiration.,Couleur aléatoire|Tire au sort une combinaison teinte + saturation + valeur — idéal pour s'inspirer.,,,,,,,,
+tut.gradToggle,Gradient On/Off|Toggles gradient mode. When ON the picker emits a CSS gradient and exposes Linear/Radial type, angle, presets and harmonies. Each stop has its own color + alpha.,Dégradé Activé/Désactivé|Bascule le mode dégradé. Activé, le sélecteur émet un dégradé CSS et expose le type Linéaire/Radial, l'angle, les préréglages et les harmonies. Chaque arrêt a sa couleur + alpha.,,,,,,,,
+tut.gradBar,Gradient bar|Drag a stop to move it, click on the bar to add a new stop, click a stop to make it active and edit it on the wheel. Use + / − to add / remove the active stop.,Barre de dégradé|Glissez un arrêt pour le déplacer, cliquez sur la barre pour ajouter un arrêt, cliquez un arrêt pour l'activer et l'éditer sur la roue. Utilisez + / − pour ajouter / supprimer.,,,,,,,,
+tut.gradPresets,Gradient presets|Click any preset to load it into the gradient bar. Tap + Bar to save your current gradient to the palette on the left.,Préréglages de dégradé|Cliquez un préréglage pour le charger dans la barre. Touchez + Barre pour enregistrer le dégradé actuel dans la palette de gauche.,,,,,,,,
+tut.harmony,Color harmony|Generate a gradient from the active color using classical color-theory rules: Complement, Analogous, Triadic, Split, Tetradic, Pentagon, Hexad or Mono.,Harmonie chromatique|Génère un dégradé depuis la couleur active selon les règles classiques : Complémentaire, Analogues, Triadique, Divisée, Tétradique, Pentagone, Hexade ou Mono.,,,,,,,,
+tut.copyCss,Copy CSS|Copy a ready-to-paste CSS snippet for the current color (or full gradient) to your clipboard.,Copier CSS|Copie un extrait CSS prêt à coller pour la couleur (ou le dégradé) actuel vers le presse-papiers.,,,,,,,,
+tut.save,Save color set|Download the entire saved palette + current gradient as a JSON file you can share or back up.,Sauvegarder le jeu|Télécharge toute la palette enregistrée + le dégradé actuel comme fichier JSON à partager ou archiver.,,,,,,,,
+tut.load,Load color set|Import a previously-saved JSON color set — replaces the current palette with the loaded swatches + gradients.,Charger le jeu|Importe un jeu de couleurs JSON sauvegardé — remplace la palette actuelle par les échantillons + dégradés chargés.,,,,,,,,
+
