@@ -1,4 +1,5 @@
-import { Settings } from '../lib/settings.js';
+import { RegionalLocationManager } from '../lib/regional-location.mjs';
+import { Settings } from '../lib/settings.js?v=world-regional-location-20261012';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-meteo-draft-20260531';
 
 const EUROPE_BOUNDS = {
@@ -1707,6 +1708,7 @@ export class RegionalMap {
           >
           <button type="submit">${this.escapeHtml(this.t('auto.componentsRegionalmap.find'))}</button>
         </div>
+        <label class="regional-personal-location"><input type="checkbox" id="regional-set-personal-location"> ${this.escapeHtml(RegionalLocationManager.labels(this.getCurrentLanguage()).use)}</label>
         <datalist id="regional-topic-suggestions">${this.renderTopicSuggestionOptions()}</datalist>
         <div id="regional-map-search-feedback" class="regional-map-search-feedback" aria-live="polite"></div>
         ${this.renderAuthorToolbar()}
@@ -1815,6 +1817,17 @@ export class RegionalMap {
       return;
     }
 
+    if (form.querySelector('#regional-set-personal-location')?.checked) {
+      this.setSearchFeedback(RegionalLocationManager.labels(this.getCurrentLanguage()).checking);
+      try {
+        const context = await RegionalLocationManager.resolve(query);
+        const settings = Settings.set({ regionalHomeLocation: context });
+        if (!settings) throw new Error('Could not save the location on this device.');
+        window.dispatchEvent(new CustomEvent('personalLocationChanged', { detail: { context, settings } }));
+        this.setSearchFeedback(RegionalLocationManager.labels(this.getCurrentLanguage()).saved + context.label);
+      } catch (error) { this.setSearchFeedback(error.message); }
+      return;
+    }
     const topic = this.findTopicByQuery(query);
     if (topic) {
       this.focusTopic(topic, { zoom: 9 });
@@ -1860,45 +1873,14 @@ export class RegionalMap {
   }
 
   async searchAddress(query) {
-    this.setSearchFeedback('Searching OpenStreetMap...');
-
+    this.setSearchFeedback(RegionalLocationManager.labels(this.getCurrentLanguage()).checking);
     try {
-      const url = new URL(NOMINATIM_SEARCH_URL);
-      url.searchParams.set('format', 'jsonv2');
-      url.searchParams.set('limit', '1');
-      url.searchParams.set('addressdetails', '1');
-      url.searchParams.set('q', query);
-      const response = await fetch(url.toString(), {
-        headers: { Accept: 'application/json' }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const results = await response.json();
-      const result = Array.isArray(results) ? results[0] : null;
-      if (!result) {
-        this.setSearchFeedback('No address match found. Try a city, country, or coordinates.');
-        return;
-      }
-
-      const lat = Number(result.lat);
-      const lon = Number(result.lon);
-      if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-        this.setSearchFeedback('The address result did not include usable coordinates.');
-        return;
-      }
-
-      const label = result.display_name || query;
-      this.focusCoordinate(lat, lon, label, {
-        source: 'search',
-        precision: this.resolveSearchPrecision(result)
-      });
-      this.setSearchFeedback(`Moved map to ${label}.`);
+      const context = await RegionalLocationManager.resolve(query);
+      this.focusCoordinate(context.lat, context.lon, context.label, { ...context, source: 'search' });
+      this.setSearchFeedback(`Moved map to ${context.label}.`);
     } catch (error) {
       console.warn('[Regional Map] Address search failed:', error);
-      this.setSearchFeedback('Address search is unavailable. Try a topic name or coordinates.');
+      this.setSearchFeedback(error.message || 'Address search is unavailable. Try coordinates.');
     }
   }
 

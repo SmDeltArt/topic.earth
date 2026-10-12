@@ -1,8 +1,8 @@
-const CACHE_NAME = 'topic-earth-shell-v17-wallonia-ambassador';
+const CACHE_NAME = 'topic-earth-shell-v18-world-regional-location';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css',
+  './styles.css?v=world-regional-location-20261012',
   './site.webmanifest',
   './assets/logo/local/favicon.svg',
   './assets/logo/local/earth-128.svg',

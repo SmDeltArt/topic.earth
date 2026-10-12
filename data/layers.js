@@ -1,4 +1,5 @@
 export const LAYERS = [
+  { id: 'regional-examples', name: 'Examples · learning only', icon: '📚', color: '#94a3b8', enabled: false, modeTabs: ['main', 'regional'], sortByRegionalContext: true },
   {
     id: 'earths-fever',
     name: 'Earth\'s Fever',
@@ -87,7 +88,7 @@ export const LAYERS = [
   {
     id: 'country-news',
     name: 'Country News',
-    modeTabs: ['main', 'regional'],
+    modeTabs: ['main'],
     icon: '\uD83D\uDDDE\uFE0F',
     color: '#ffb74d',
     enabled: true
@@ -95,7 +96,7 @@ export const LAYERS = [
   {
     id: 'eu',
     name: 'EU',
-    modeTabs: ['main', 'regional'],
+    modeTabs: ['main'],
     icon: '\uD83C\uDDEA\uD83C\uDDFA',
     color: '#64b5f6',
     enabled: true
@@ -118,7 +119,7 @@ export const LAYERS = [
   {
     id: 'good-initiatives-eu',
     name: 'EU Good Initiatives',
-    modeTabs: ['main', 'regional'],
+    modeTabs: ['main'],
     icon: '\uD83C\uDDEA\uD83C\uDDFA',
     color: '#8bdc7f',
     enabled: true

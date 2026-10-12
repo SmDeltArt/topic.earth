@@ -1,6 +1,7 @@
+import { RegionalLocationManager } from '../lib/regional-location.mjs';
 import { getTopicStoryTheme, topicStoryThemeCss } from '../lib/topic-story-theme.mjs';
 import { scanTopicZip } from '../lib/topic-importer.mjs?v=zip-scan-20261004';
-import { Settings } from '../lib/settings.js?v=rotation-speed-20261004';
+import { Settings } from '../lib/settings.js?v=world-regional-location-20261012';
 import { buildCaptionEmbedUrl } from '../lib/video-captions.mjs?v=topic-earth-video-captions-20261003';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-fever-scenario-layer-20260521';
@@ -2967,6 +2968,7 @@ Keep response concise (3-4 sentences).`;
     this.renderDetail(point);
     this.container.classList.remove('hidden');
     this.updateTopicNavigation();
+    this.updateTopicLanguageControls();
 
     // Show pause notice after render
     if (point.isFeverWarning && this.currentGlobe && this.currentGlobe.inFeverMode) {
@@ -10996,6 +10998,41 @@ Rules:
     }
   }
 
+  renderPersonalLocationSettings(settings) {
+    const labels = RegionalLocationManager.labels(this.getCurrentLanguage());
+    return `<div class="personal-location-settings form-group">
+      <label for="personal-location-input">${this.escapeHtml(labels.heading)}</label>
+      <div class="personal-location-row"><input id="personal-location-input" type="search" maxlength="200" value="${this.escapeHtml(settings.regionalHomeLocation?.label || '')}" placeholder="${this.escapeHtml(labels.placeholder)}">
+      <button type="button" data-action="set-personal-location">${this.escapeHtml(labels.save)}</button></div>
+      <button type="button" data-action="clear-personal-location">${this.escapeHtml(labels.clear)}</button>
+      <p class="setting-hint">${this.escapeHtml(labels.hint)}</p>
+      <p data-personal-location-status role="status">${this.escapeHtml(settings.regionalHomeLocation?.label || '')}</p>
+      <label for="regional-radius">${this.escapeHtml(labels.radius)}</label>
+      <select id="regional-radius">${[0,25,50,100,250].map(km => `<option value="${km}" ${settings.regionalRadiusKm === km ? 'selected' : ''}>${km ? `${km} km` : this.escapeHtml(labels.all)}</option>`).join('')}</select>
+    </div>`;
+  }
+
+  async setPersonalLocation(content, button, clear = false) {
+    const labels = RegionalLocationManager.labels(this.getCurrentLanguage());
+    const status = content.querySelector('[data-personal-location-status]');
+    if (button) button.disabled = true;
+    if (status) status.textContent = labels.checking;
+    try {
+      const context = clear ? null : await RegionalLocationManager.resolve(content.querySelector('#personal-location-input')?.value);
+      const settings = Settings.set({ regionalHomeLocation: context, regionalAutoLocate: clear ? true : Settings.get().regionalAutoLocate });
+      if (!settings) throw new Error('Could not save the location on this device.');
+      content.querySelector('#personal-location-input').value = context?.label || '';
+      if (clear) {
+        const auto = content.querySelector('#regional-auto-locate');
+        if (auto) auto.checked = true;
+      }
+      if (status) status.textContent = context ? labels.saved + context.label : labels.automatic;
+      window.dispatchEvent(new CustomEvent('personalLocationChanged', { detail: { context, settings } }));
+    } catch (error) {
+      if (status) status.textContent = error.message;
+    } finally { if (button) button.disabled = false; }
+  }
+
   showSettings(ttsManager) {
     this.mode = 'settings';
     this.setPanelSize('top');
@@ -11231,6 +11268,7 @@ Rules:
       aiVoiceFallbackToBrowser: true,
       regionalAutoLocate: content.querySelector('#regional-auto-locate')?.checked ?? true,
       regionalLocationPrecision: content.querySelector('#regional-location-precision')?.value || 'region',
+      regionalRadiusKm: Number(content.querySelector('#regional-radius')?.value ?? currentSettings.regionalRadiusKm),
       detectedBrowserLanguage: LanguageManager.detectBrowserLanguage()
     };
 
@@ -11794,6 +11832,7 @@ Rules:
           <div class="setting-hint settings-tutorialized-hint">${this.escapeHtml(t('settings.regionalAutoLocateHint'))}</div>
         </div>
         <div class="form-group" style="margin-top: 12px;">
+          ${this.renderPersonalLocationSettings(settings)}
           <label for="regional-location-precision">${this.escapeHtml(t('settings.regionalLocationPrecision'))}</label>
           <select id="regional-location-precision">
             <option value="continent" ${settings.regionalLocationPrecision === 'continent' ? 'selected' : ''}>${this.escapeHtml(t('settings.regionalPrecisionContinent'))}</option>
@@ -11837,6 +11876,10 @@ Rules:
       if (!target) return;
       
       const action = target.dataset.action;
+      if (action === 'set-personal-location' || action === 'clear-personal-location') {
+        this.setPersonalLocation(content, target, action === 'clear-personal-location');
+        return;
+      }
       const adminOnlyAction = this.getAdminOnlyActionMessage(action);
       if (adminOnlyAction && !this.isAdminMode()) {
         e.preventDefault();
@@ -11950,7 +11993,8 @@ Rules:
         'ai-updates-use-linked-api',
         'ai-web-search-enabled',
         'regional-auto-locate',
-        'regional-location-precision'
+        'regional-location-precision',
+        'regional-radius'
       ].includes(e.target.id)) {
         this.applySettingsFormChange(content);
       }

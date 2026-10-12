@@ -4,7 +4,11 @@ import vm from 'node:vm';
 import { buildCaptionEmbedUrl, normalizeVideoLanguage } from '../lib/video-captions.mjs';
 
 const root = new URL('../', import.meta.url);
-const load = async path => import(`data:text/javascript;base64,${Buffer.from(await readFile(new URL(path, root), 'utf8')).toString('base64')}`);
+const load = async path => {
+  const url = new URL(path, root);
+  const source = (await readFile(url, 'utf8')).replace(/from (['"])(\.[^'"]+)\1/g, (_match, quote, relative) => `from ${quote}${new URL(relative, url).href}${quote}`);
+  return import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+};
 const { Settings } = await load('lib/settings.js');
 const media = await load('lib/media-utils.js');
 const stored = new Map();

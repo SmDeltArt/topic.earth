@@ -1,22 +1,23 @@
-import { GlobeRenderer } from './lib/globe.js?v=fever-model-fallback-20261008';
+import { RegionalLocationManager } from './lib/regional-location.mjs';
+import { GlobeRenderer } from './lib/globe.js?v=world-regional-location-20261012';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
-import { LAYERS } from './data/layers.js?v=topic-earth-regional-merged-20261003';
+import { LAYERS } from './data/layers.js?v=world-regional-location-20261012';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-climate-studies-watch-20260601';
 import { REGIONAL_AMBASSADOR_TOPICS } from './data/regional-ambassador-topics.js?v=wallonia-ambassador-20261012';
-import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-thwaites-20261003';
+import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=world-regional-location-20261012';
 import { FEVER_TOPICS } from './data/fever-topics.js?v=fever-land-cover-20261008-3';
-import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-thwaites-20261003';
+import { TIPPING_POINT_TOPICS } from './data/points.js?v=world-regional-location-20261012';
 import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-short-20261003';
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=cloudinary-fallback-20261008';
-import { RegionalMap } from './components/RegionalMap.js?v=topic-earth-regional-drawing-20261004';
-import { LayerPanel } from './components/LayerPanel.js?v=topic-earth-regional-drawing-20261004';
-import { DetailPanel } from './components/DetailPanel.js?v=fever-normal-disclosure-20261008-2';
+import { RegionalMap } from './components/RegionalMap.js?v=world-regional-location-20261012';
+import { LayerPanel } from './components/LayerPanel.js?v=world-regional-location-20261012';
+import { DetailPanel } from './components/DetailPanel.js?v=world-regional-location-20261012';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
-import { Settings } from './lib/settings.js?v=rotation-speed-20261004';
+import { Settings } from './lib/settings.js?v=world-regional-location-20261012';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
 import { ReadTranslationService } from './lib/read-translation.js?v=translation-20261004';
 import { TopicTranslations, plainTopicText, topicSourceRevision } from './lib/topic-translations.mjs?v=reading-save-20261004';
@@ -83,7 +84,7 @@ class TopicEarthApp {
     this.goodInitiativePoints = [];
     this.goodInitiativeStatus = null;
     this.goodInitiativeLastFetchTime = 0;
-    this.regionalContext = null;
+    this.regionalContext = RegionalLocationManager.normalize(Settings.get().regionalHomeLocation);
     this.regionalMobilityCheck = null;
     this.regionalAutoLocateRequested = false;
     this.regionalAutoLocatePending = null;
@@ -187,6 +188,10 @@ class TopicEarthApp {
     });
     this.initDetailPanel();
     this.initSettingsPanel();
+    if (this.regionalContext) {
+      this.layerPanel.regionalContext = this.regionalContext;
+      this.layerPanel.updateData(this.allLayers, this.allPoints);
+    }
     
     // Initialize globe
     this.initGlobe();
@@ -678,6 +683,20 @@ class TopicEarthApp {
   }
   
   setupSettingsListener() {
+    window.addEventListener('personalLocationChanged', event => {
+      this.regionalContext = null;
+      this.layerPanel.regionalContext = null;
+      if (event.detail.context) {
+        this.handleRegionalContextChange(event.detail.context);
+        if (this.currentLayerFilter === 'regional') {
+          this.refreshRegionalMap();
+          this.applyRegionalAutoLocation(event.detail.context);
+        }
+      } else {
+        this.layerPanel.updateData(this.allLayers, this.allPoints);
+        if (this.currentLayerFilter === 'regional') this.maybeAutoLocateRegionalMode(true);
+      }
+    });
     window.addEventListener('aiApiSettingsChanged', () => {
       const settings = Settings.get();
       this.ttsManager?.updateSettings?.(settings);
@@ -689,7 +708,10 @@ class TopicEarthApp {
       this.applyDocumentLanguage(settings);
       this.ttsManager?.updateSettings?.(settings);
       this.detailPanel?.updateTopicLanguageControls();
-      if (this.globe) this.globe.options.rotationSpeed = settings.rotationSpeed;
+      if (this.globe) {
+        this.globe.options.rotationSpeed = settings.rotationSpeed;
+        this.globe.refreshMainTextureQuality?.();
+      }
       LanguageManager.translateDom(document.body, this.getCurrentUiLanguage(settings));
       
       // If Fever loop resolution changed and we're in Fever mode, reload textures
@@ -1144,7 +1166,7 @@ class TopicEarthApp {
       this.globe.options.autoRotate = false;
     }
 
-    this.startRegionalLayerPreview(transitionToken);
+    this.applyRegionalLayerPreview(['community-projects'], 'community-projects');
     this.maybeAutoLocateRegionalMode();
     document.body.classList.add('regional-mode');
     window.dispatchEvent(new CustomEvent('viewModeChanged', { detail: { mode: 'regional-map' } }));
@@ -1155,7 +1177,9 @@ class TopicEarthApp {
     if (!force && (this.currentLayerFilter !== 'regional' || !this.regionalMap.visible)) return;
 
     const activeLayers = this.getActiveLayersForFilter('regional');
-    this.regionalMap.show(this.allPoints, this.allLayers, activeLayers, {
+    const radius = Settings.get().regionalRadiusKm || 0;
+    const points = radius && this.regionalContext ? this.allPoints.filter(point => RegionalLocationManager.distance(point, this.regionalContext) <= radius) : this.allPoints;
+    this.regionalMap.show(points, this.allLayers, activeLayers, {
       preserveView: !force && this.regionalMap.visible
     });
   }
@@ -1222,6 +1246,16 @@ class TopicEarthApp {
   handleRegionalContextChange(context = null) {
     if (!context) return;
 
+    const home = RegionalLocationManager.normalize(Settings.get().regionalHomeLocation);
+    if (home && !context.useAsLocation && context.source !== 'preferred-location') {
+      if (this.regionalContext?.lat === home.lat && this.regionalContext?.lon === home.lon) return;
+      context = home;
+    }
+    if (context.useAsLocation) {
+      const saved = Settings.set({ regionalHomeLocation: context });
+      if (!saved) return;
+      context = saved.regionalHomeLocation;
+    }
     const precision = context.precision || 'region';
     const availablePrecision = context.availablePrecision || precision;
     const zoom = Number.isFinite(Number(context.zoom))
@@ -1519,6 +1553,8 @@ class TopicEarthApp {
 
   maybeAutoLocateRegionalMode(force = false) {
     const settings = Settings.get();
+    const home = RegionalLocationManager.normalize(settings.regionalHomeLocation);
+    if (home) return this.applyRegionalAutoLocation(home);
     if (!settings.regionalAutoLocate) return Promise.resolve(false);
     if (!force && this.regionalContext) return Promise.resolve(false);
     if (!force && this.regionalAutoLocateRequested) return Promise.resolve(false);
@@ -1641,6 +1677,7 @@ class TopicEarthApp {
   }
 
   async applyRegionalAutoLocation(context = null) {
+    context = RegionalLocationManager.normalize(Settings.get().regionalHomeLocation) || context;
     if (!context || !this.regionalMap) return false;
 
     const lat = Number(context.lat);
@@ -1689,7 +1726,7 @@ class TopicEarthApp {
 
   isUserRegionalFocus(context = null) {
     const source = String(context?.source || '').trim();
-    return ['search', 'manual-coordinates', 'map-point', 'topic'].includes(source);
+    return ['preferred-location', 'search', 'manual-coordinates', 'map-point', 'topic'].includes(source);
   }
 
   isRegionalPrecisionLessThan(actualPrecision = 'region', desiredPrecision = 'region') {
@@ -2786,8 +2823,13 @@ class TopicEarthApp {
 
     return this.allPoints
       .filter(item => item && item.category === point.category && item.id && !item.isCluster && !item.isCountry)
+      .filter(item => this.currentLayerFilter !== 'regional' || !this.regionalContext || !Settings.get().regionalRadiusKm || RegionalLocationManager.distance(item, this.regionalContext) <= Settings.get().regionalRadiusKm)
       .slice()
       .sort((a, b) => {
+        if (this.currentLayerFilter === 'regional' && this.regionalContext) {
+          const da = RegionalLocationManager.distance(a, this.regionalContext), db = RegionalLocationManager.distance(b, this.regionalContext);
+          if (da !== db) return da < db ? -1 : 1;
+        }
         if (layer.id === 'space') {
           const orderDelta = (a.spaceOrder ?? Number.POSITIVE_INFINITY) - (b.spaceOrder ?? Number.POSITIVE_INFINITY);
           if (orderDelta !== 0) return orderDelta;

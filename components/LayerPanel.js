@@ -2,7 +2,8 @@
  * Layer control panel component
  * Manages data layer toggles and news items
  */
-import { Settings } from '../lib/settings.js';
+import { RegionalLocationManager } from '../lib/regional-location.mjs';
+import { Settings } from '../lib/settings.js?v=world-regional-location-20261012';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-shortcuts-20260517';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-tab-layers-20260507';
 import { getDirectImageUrl, getMediaTokensForPoint } from '../lib/media-utils.js';
@@ -181,7 +182,14 @@ export class LayerPanel {
 
   getFilteredLayers() {
     const topLevelLayers = this.layers.filter(layer => !layer.parentLayerId);
-    return topLevelLayers.filter(layer => this.layerBelongsToFilter(layer, this.layerFilter));
+    const layers = topLevelLayers.filter(layer => this.layerBelongsToFilter(layer, this.layerFilter));
+    if (this.layerFilter !== 'regional' || !this.regionalContext) return layers;
+    const nearest = layer => Math.min(...this.points.filter(point => point.category === layer.id).map(point => RegionalLocationManager.distance(point, this.regionalContext)));
+    return layers.sort((a, b) => {
+      if (a.id === 'regional-examples' || b.id === 'regional-examples') return Number(a.id === 'regional-examples') - Number(b.id === 'regional-examples');
+      const da = nearest(a), db = nearest(b);
+      return da === db ? 0 : da < db ? -1 : 1;
+    });
   }
 
   getLayerModeTabs(layer) {
@@ -402,6 +410,12 @@ export class LayerPanel {
         layerNews = layerNews.sort((a, b) => dateSortDirection * (new Date(a.date) - new Date(b.date)));
       }
 
+      if (this.layerFilter === 'regional' && this.regionalContext) {
+        const radius = Settings.get().regionalRadiusKm || 0;
+        layerNews = layerNews.map(point => ({ ...point, _regionalDistance: RegionalLocationManager.distance(point, this.regionalContext) }))
+          .filter(point => !radius || point._regionalDistance <= radius)
+          .sort((a, b) => a._regionalDistance === b._regionalDistance ? 0 : a._regionalDistance < b._regionalDistance ? -1 : 1);
+      }
       if (layer.id !== 'space') {
         const previewLimit = Number(layer.previewLimit);
         layerNews = layerNews.slice(0, Number.isFinite(previewLimit) && previewLimit > 0 ? previewLimit : 5);

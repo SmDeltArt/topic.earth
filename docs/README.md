@@ -30,6 +30,10 @@ for sandboxed previews and topic exports. When changing it, keep its embedded
 HTML consistent with `docs/regional-ambassador-wallonia.html`. The SVG thumbnail
 lives in `assets/social/wallonia-ambassador-vignette.svg`.
 
+## World and Regional controls
+
+See [World textures, saved location and Regional examples](world-regional-controls.md) for quality selection, the location checkbox, distance filters and verification.
+
 ## AI access and API Settings
 
 | Document | Audience | Purpose |

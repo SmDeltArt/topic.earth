@@ -597,7 +597,7 @@ export const TIPPING_POINT_TOPICS = [
   }
 ];
 
-export const MOCK_POINTS = [
+const SEED_POINTS = [
   {
     id: 'earth_thwaites_doomsday_glacier',
     lat: -75.5,
@@ -996,3 +996,8 @@ export const MOCK_POINTS = [
     communityStatus: 'active'
   }
 ];
+
+const REGIONAL_EXAMPLE_CATEGORIES = new Set(['regional-news', 'community-projects', 'bike-ways', 'ev-charging', 'hydrogen-charging']);
+export const MOCK_POINTS = SEED_POINTS.map(point => REGIONAL_EXAMPLE_CATEGORIES.has(point.category)
+  ? { ...point, originalCategory: point.category, category: 'regional-examples', reviewState: 'example', communityStatus: 'example', title: `Example · ${point.title}`, summary: `Illustrative sample; not verified as an active local initiative. ${point.summary}` }
+  : point);
