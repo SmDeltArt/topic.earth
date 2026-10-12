@@ -56,3 +56,22 @@ const serviceWorker=await readFile(new URL('../service-worker.js',import.meta.ur
 assert.ok(serviceWorker.includes("'./assets/widgets/color/smart-color-picker.html?embed=overlay'"));
 assert.ok(serviceWorker.includes('caches.match(event.request).then(cached => cached ||'));
 console.log('Local picker: solid/linear/radial/alpha, saved gradients, retained CSS, origin/source checks, cancel/confirm, gradient restoration, script syntax and offline asset cache passed.');
+// New document controls use validated CSS and remain reversible without text rewriting.
+const layout=Content.normalizeSettings({titlePaint:gradient,textPaint:{kind:'solid',hex:'#172032'},linkPaint:{kind:'solid',hex:'#00d4ff'},indent:2,headingNumbering:'decimal',listStyle:'lower-alpha'});
+assert.ok(Content.contentCss(layout).includes('background-clip:text'));
+assert.ok(Content.contentCss(layout).includes('text-indent:2em'));
+assert.ok(Content.contentCss(layout).includes('counter(story-section)'));
+assert.ok(Content.contentCss(layout).includes('list-style-type:lower-alpha'));
+assert.equal(Content.normalizeSettings({textPaint:gradient,linkPaint:gradient,listStyle:'url(bad)',indent:100}).textPaint,null);
+const numbered=Content.applySettings(html,layout);
+const restored=Content.applySettings(numbered,{headingNumbering:'none',listStyle:'preserve',indent:0});
+assert.ok(!restored.includes('counter(story-section)'));
+assert.ok(restored.includes('<p>Text</p>'));
+let live=[],cancelled=0;
+picker.open({solidOnly:true,onPreview:paint=>live.push(paint),onCancel:()=>cancelled++});
+let currentFrame=picker.dialog.querySelector('iframe');currentFrame.dispatchEvent(new document.defaultView.Event('load'));
+listener({...event,source:currentFrame.contentWindow});assert.equal(live.length,1);
+listener({...event,source:currentFrame.contentWindow,data:{type:'smart-widget',action:'scp:color',data:{gradientActive:true,gradientData:{type:'linear',angle:90,stops:[{hex:'#000000',a:1,pos:0},{hex:'#ffffff',a:1,pos:100}]}}}});
+assert.equal(picker.dialog.querySelectorAll('button')[1].disabled,true);
+assert.equal(live.length,1);picker.close();assert.equal(cancelled,1);
+console.log('Title/text/link paint validation, reversible heading/list/indent CSS and live-preview rollback passed.');

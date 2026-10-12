@@ -14,8 +14,8 @@ import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=cloudinary-fallback-20261008';
 import { RegionalMap } from './components/RegionalMap.js?v=local-colour-picker-20261012';
-import { LayerPanel } from './components/LayerPanel.js?v=local-colour-picker-20261012';
-import { DetailPanel } from './components/DetailPanel.js?v=local-colour-picker-20261012';
+import { LayerPanel } from './components/LayerPanel.js?v=story-style-preview-20261012';
+import { DetailPanel } from './components/DetailPanel.js?v=story-style-preview-20261012';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -2721,7 +2721,7 @@ class TopicEarthApp {
           this.layerPanel.updateData(this.allLayers, this.allPoints);
           return;
         }
-        this.detailPanel.showCreateTopic();
+        this.detailPanel.showCreateTopic({ ...request, mode:this.currentLayerFilter, defaultLayerId:request?.defaultLayerId, location:this.regionalContext });
       },
       onDeleteTopic: (topic) => {
         this.handleDeleteTopic(topic);

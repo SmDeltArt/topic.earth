@@ -48,7 +48,7 @@ panel.getCurrentLanguage=()=> 'fr';panel.t=key=>topicStoryLabel(key,'fr');panel.
 panel.saveFormState=()=>{panel.topicFormState.topicStory.updatedAt=new Date().toISOString()};
 panel.renderCreateTopic=()=>{panel.container.innerHTML='<form id="topic-form">'+panel.renderTopicStoryEditor()+'</form>'};
 panel.renderCreateTopic();
-assert.equal(panel.container.querySelectorAll('[data-action="set-story-theme"]').length,4);
+assert.equal(panel.container.querySelectorAll('[data-action="set-story-theme"]').length,0);
 assert.ok(panel.container.querySelector('[data-action="generate-topic-story"]').hasAttribute('disabled'));
 assert.ok(!panel.container.innerHTML.includes('topic.story.titlePlaceholder'));
 assert.ok(panel.container.querySelector('[data-action="full-topic-story"]'));
@@ -92,6 +92,9 @@ context.StoryColorPickerManager=class { open(options){this.options=options;}clos
 context.FormData=class { constructor(form){this.entries=Array.from(form.querySelectorAll('[name]')).filter(el=>el.getAttribute('type')!=='checkbox').map(el=>[el.getAttribute('name'),el.value||el.getAttribute('value')||'preserve']);} [Symbol.iterator](){return this.entries[Symbol.iterator]();} };
 panel.openStoryContentSettings();
 const settingsDialog=document.getElementById('topic-content-settings-dialog');
+assert.equal(settingsDialog.querySelectorAll('[data-style-preset]').length,4);
+assert.equal(settingsDialog.querySelector('iframe').getAttribute('sandbox'),'');
+assert.ok(panel.container.querySelector('.story-type-controls [data-action="content-story-settings"]'));
 settingsDialog.querySelector('[data-paint-field="backgroundPaint"]').click();
 const paint={kind:'gradient',type:'linear',angle:90,stops:[{hex:'#071019',alpha:1,pos:0},{hex:'#39ff88',alpha:1,pos:100}]};
 panel.storyColorPicker.options.onApply(paint);
@@ -100,3 +103,37 @@ assert.equal(panel.topicFormState.topicStory.contentSettings.backgroundPaint.kin
 assert.ok(panel.topicFormState.topicStory.html.includes('linear-gradient(90deg, #071019 0%, #39ff88 100%)'));
 assert.equal(panel.buildTopicStoryForSave().contentSettings.backgroundPaint.stops.length,2);
 console.log('Manual settings panel commits and exports structured background gradients.');
+// Live paint previews are temporary; Cancel and the outer Close preserve the story.
+panel.openStoryContentSettings();
+let format=document.getElementById('topic-content-settings-dialog');
+const beforeSettings=JSON.stringify(panel.topicFormState.topicStory);
+format.querySelector('[data-paint-field="panelPaint"]').click();
+const previewOptions=panel.storyColorPicker.options;
+previewOptions.onPreview({kind:'solid',hex:'#ff0000',alpha:1});
+assert.ok(format.querySelector('iframe').srcdoc.includes('#ff0000'));
+assert.equal(JSON.stringify(panel.topicFormState.topicStory),beforeSettings);
+previewOptions.onCancel();
+assert.ok(!format.querySelector('iframe').srcdoc.includes('background:#ff0000 !important'));
+format.querySelector('[data-preview-device="mobile"]').click();
+assert.ok(format.querySelector('.story-settings-preview').classList.contains('mobile-preview'));
+format.querySelector('[data-style-preset="space"]').click();
+assert.ok(format.querySelector('iframe').srcdoc.includes('#7aa8ff'));
+const savedPresets=new Map();
+window.localStorage={setItem:(key,value)=>savedPresets.set(key,value),getItem:key=>savedPresets.get(key)};
+format.querySelector('[data-preset-save]').click();
+assert.ok(savedPresets.has('topic-earth-story-preset-space'));
+assert.equal(JSON.stringify(panel.topicFormState.topicStory),beforeSettings);
+format.querySelector('[name="fontSize"]').value='23';
+// Linkedom's select.value is getter-only; browsers expose the normal setter.
+format.querySelectorAll('select[name]').forEach(select=>Object.defineProperty(select,'value',{value:select.value,writable:true}));
+format.querySelector('[data-preset-load]').click();
+assert.equal(Number(format.querySelector('[name="fontSize"]').value),JSON.parse(savedPresets.get('topic-earth-story-preset-space')).fontSize);
+format.remove();
+// The new draft freezes tab, layer and location without another mode selector.
+panel.isAdminMode=()=>true;panel.setCompactMode=()=>{};panel.setTopicDraftStatus=()=>{};panel.updateTopicNavigation=()=>{};panel.emitTutorialEvent=()=>{};
+panel.showCreateTopic({mode:'space',defaultLayerId:'ambassadors',location:{country:'Belgium',region:'Wallonia',lat:50.5,lon:5.5}});
+assert.equal(panel.topicFormState.category,'ambassadors');
+assert.equal(panel.topicFormState.topicStory.themeMode,'space');
+assert.equal(panel.topicFormState.region,'Wallonia');
+panel.currentLayerFilter='fever';assert.equal(panel.getTopicStoryTheme().mode,'space');
+console.log('Live preview/cancel, document isolation, mobile preview, per-tab saved presets and frozen composer context passed.');

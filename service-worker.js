@@ -1,4 +1,4 @@
-const CACHE_NAME = 'topic-earth-shell-v22-local-colour-picker';
+const CACHE_NAME = 'topic-earth-shell-v23-story-style-preview';
 const APP_SHELL = [
   './',
   './assets/widgets/color/smart-color-picker.html',
@@ -8,7 +8,7 @@ const APP_SHELL = [
   './lib/story-color-picker.mjs',
   './lib/topic-story-content.mjs',
   './index.html',
-  './styles.css?v=local-colour-picker-20261012',
+  './styles.css?v=story-style-preview-20261012',
   './site.webmanifest?v=earth-clock-20261012',
   './assets/logo/local/favicon.svg?v=earth-clock-20261012',
   './assets/logo/local/earth-128.svg',

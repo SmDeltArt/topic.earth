@@ -1097,6 +1097,13 @@
         outline-offset: 2px;
         border-radius: 3px;
       }
+      /* The host owns the small overlay; all controls remain reachable in short mobile frames. */
+      body.scp-iframe-mode .scp {
+        width:min(296px,calc(100vw - 8px));
+        max-height:calc(100dvh - 8px);
+        overflow-y:auto;
+      }
+      body.scp-iframe-mode .scp-lower-scroll { max-height:none; overflow:visible; }
     </style>
     <!-- Shared SmDeltArt controls library — currently provides
          <smart-angle-dial> used inside the gradient panel. Loaded as a

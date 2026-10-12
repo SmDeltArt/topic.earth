@@ -1044,7 +1044,7 @@ export class DetailPanel {
   }
 
   getRegionalProposalLayerOptions() {
-    const regionalLayers = this.layers.filter(layer => this.isRegionalResearchLayer(layer.id));
+    const regionalLayers = this.layers.filter(layer => !layer.isGroup && this.isRegionalResearchLayer(layer.id));
     return regionalLayers.length > 0 ? regionalLayers : this.layers;
   }
 
@@ -6350,7 +6350,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     }
   }
 
-  showCreateTopic() {
+  showCreateTopic(options = {}) {
     if (!this.isAdminMode()) {
       this.blockUserMutation('open the manual +Topic builder');
       return;
@@ -6360,9 +6360,13 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     this.setCompactMode(false);
     this.editingTopicId = null;
     this.topicBuilderTab = 'describe'; // Track active tab
-    this.topicFormState = {}; // Store form values
+    const requestedMode = options.mode || this.currentLayerFilter || 'main';
+    const mode = requestedMode === 'main' ? 'world' : requestedMode;
+    const layer = this.layers.find(layer => layer.id === options.defaultLayerId);
+    const location = options.location || {};
+    this.topicFormState = { category:layer?.id || '', country:location.country || '', region:location.region || location.city || '', lat:Number.isFinite(location.lat) ? String(location.lat) : '', lon:Number.isFinite(location.lon) ? String(location.lon) : '', topicStory:{themeMode:mode} }; // Freeze the draft's tab context.
     this.currentPoint = { media: [], mediaTokens: [] };
-    this.topicBuilderContext = null;
+    this.topicBuilderContext = { type:'manual-topic', mode, defaultLayerId:layer?.id };
     this.topicSources = [];
     this.showSourceEditor = false;
     this.setTopicDraftStatus({
@@ -6442,7 +6446,8 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       insight: '',
       searchHint: '',
       locationPrecision,
-      regionalLabel
+      regionalLabel,
+      topicStory: { themeMode:'regional' }
     };
     this.topicSources = [];
     this.showSourceEditor = false;
@@ -6873,51 +6878,113 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
 
   openStoryContentSettings() {
     this.saveFormState();
+    this.storyColorPicker?.close();
     document.getElementById('topic-content-settings-dialog')?.remove();
     const story = this.normalizeTopicStory(this.topicFormState.topicStory);
     const settings = story.contentSettings;
-    const paints = { backgroundPaint:settings.backgroundPaint, panelPaint:settings.panelPaint };
-    const theme = this.getTopicStoryTheme(story);
+    let theme = this.getTopicStoryTheme(story);
+    let themeMode = theme.mode;
+    const fields = [['backgroundPaint','background','▧'],['panelPaint','panels','▣'],['titlePaint','storyTitle','H'],['textPaint','textColour','Aa'],['linkPaint','links','↗']];
+    const paints = Object.fromEntries(fields.map(([field]) => [field,settings[field]]));
     const dialog = document.createElement('dialog');
     dialog.id = 'topic-content-settings-dialog';
     dialog.className = 'topic-content-settings-dialog';
+    const label = key => this.escapeHtml(this.t('topic.story.'+key));
     dialog.setAttribute('aria-label', this.t('topic.story.contentStyle'));
-    dialog.innerHTML = `<h2>🎨 ${this.escapeHtml(this.t('topic.story.contentStyle'))}</h2><p>${this.escapeHtml(this.t('topic.story.styleScope'))}</p>
-      <form method="dialog">
-        <div class="story-paint-controls">${[['backgroundPaint','background'],['panelPaint','panels']].map(([field,label]) => `<label>${this.escapeHtml(this.t('topic.story.'+label))}<button type="button" class="story-paint-button" data-paint-field="${field}"><span class="story-paint-swatch" data-paint-swatch="${field}"></span>🎨 ${this.escapeHtml(this.t('topic.story.pickColour'))}</button><button type="button" class="story-paint-clear" data-paint-clear="${field}">${this.escapeHtml(this.t('topic.story.keepOriginal'))}</button></label>`).join('')}</div>
-        ${[['fontSize',14,24,.5],['margin',0,40,1],['lineHeight',1.3,2.2,.05],['width',320,1200,10]].map(([key,min,max,step]) => `<label>${this.escapeHtml(this.t('topic.story.'+key))}<input name="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${settings[key]}"></label>`).join('')}
-        <label>${this.escapeHtml(this.t('topic.story.appearance'))}<select name="appearance">${['preserve','light','dark'].map(value => `<option value="${value}" ${settings.appearance === value ? 'selected' : ''}>${this.escapeHtml(this.t('topic.story.'+value))}</option>`).join('')}</select></label>
-        <label class="setting-checkbox"><input name="mobileOptimized" type="checkbox" ${settings.mobileOptimized ? 'checked' : ''}>${this.escapeHtml(this.t('topic.story.mobileOptimized'))}</label>
-        <div class="topic-story-actions"><button type="button" data-content-apply>${this.escapeHtml(this.t('topic.story.applyContentStyle'))}</button><button value="cancel">${this.escapeHtml(this.t('topic.story.closeView'))}</button></div>
-      </form>`;
-    const updateSwatches = () => {
-      for (const field of ['backgroundPaint','panelPaint']) {
+    dialog.innerHTML = `<header class="story-settings-header"><strong>🎨 ${label('contentStyle')}</strong><button type="button" data-settings-close aria-label="${label('closeView')}">✕</button></header>
+      <div class="story-settings-workspace"><aside class="story-settings-preview">
+        <div class="topic-story-actions"><button type="button" data-preview-device="desktop" aria-pressed="true" title="${label('desktopPreview')}">🖥</button><button type="button" data-preview-device="mobile" aria-pressed="false" title="${label('mobilePreview')}">📱</button><span class="setting-hint">${label('clickToStyle')}</span></div>
+        <div class="story-style-sample" data-paint-field="backgroundPaint" tabindex="0" role="button" aria-label="${label('background')}">
+          <button type="button" data-paint-field="titlePaint" class="story-sample-title">${label('storyTitle')}</button>
+          <div class="story-sample-panel" data-paint-field="panelPaint" tabindex="0" role="button" aria-label="${label('panels')}"><button type="button" data-paint-field="textPaint" class="story-sample-text">Aa · ${label('textColour')}</button><button type="button" data-paint-field="linkPaint" class="story-sample-link">↗ ${label('links')}</button></div>
+        </div><iframe class="story-style-live-preview" sandbox="" referrerpolicy="no-referrer" title="${label('sandboxPreview')}"></iframe>
+      </aside><form method="dialog">
+        <div class="topic-story-theme-tabs" role="group" aria-label="${label('presets')}">${[['world','🌍'],['regional','🌱'],['space','🌌'],['fever','🌡️']].map(([mode,emoji]) => `<button type="button" data-style-preset="${mode}" title="${mode}" aria-pressed="${themeMode === mode}">${emoji}</button>`).join('')}<button type="button" data-preset-save title="${label('savePreset')}">💾</button><button type="button" data-preset-load title="${label('loadPreset')}">↺</button><span data-preset-status class="setting-hint" role="status"></span></div>
+        <div class="story-paint-controls">${fields.map(([field,key,icon]) => `<div class="story-paint-control"><button type="button" class="story-paint-button" data-paint-field="${field}" title="${label(key)}"><span class="story-paint-swatch" data-paint-swatch="${field}"></span>${icon} ${label(key)}</button><button type="button" class="story-paint-clear" data-paint-clear="${field}" title="${label('keepOriginal')}">↺</button></div>`).join('')}</div>
+        <div class="story-layout-controls">${[['fontSize',14,24,.5,'Aa'],['margin',0,40,1,'↔'],['lineHeight',1.3,2.2,.05,'↕'],['width',320,1200,10,'▭'],['indent',0,4,.5,'⇥']].map(([key,min,max,step,icon]) => `<label><span>${icon} ${label(key)}</span><input name="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${settings[key]}"></label>`).join('')}
+        <label>${label('appearance')}<select name="appearance">${['preserve','light','dark'].map(value => `<option value="${value}" ${settings.appearance === value ? 'selected' : ''}>${label(value)}</option>`).join('')}</select></label>
+        <label>${label('numbering')}<select name="headingNumbering"><option value="none" ${settings.headingNumbering === 'none' ? 'selected' : ''}>—</option><option value="decimal" ${settings.headingNumbering === 'decimal' ? 'selected' : ''}>1. / 1.1</option></select></label>
+        <label>${label('lists')}<select name="listStyle">${[['preserve','—'],['disc','•'],['square','▪'],['decimal','1. 2.'],['lower-alpha','a. b.']].map(([value,text]) => `<option value="${value}" ${settings.listStyle === value ? 'selected' : ''}>${text}</option>`).join('')}</select></label></div>
+        <label class="setting-checkbox"><input name="mobileOptimized" type="checkbox" ${settings.mobileOptimized ? 'checked' : ''}>📱 ${label('mobileOptimized')}</label>
+        <div class="topic-story-actions"><button type="button" data-content-apply>${label('applyContentStyle')}</button></div>
+      </form></div>`;
+    const readSettings = () => TopicStoryContentManager.normalizeSettings({ ...Object.fromEntries(new FormData(dialog.querySelector('form'))), ...paints, mobileOptimized:dialog.querySelector('[name="mobileOptimized"]').checked });
+    const defaultColors = () => ({backgroundPaint:theme.background,panelPaint:theme.panel,titlePaint:theme.topic,textPaint:theme.text,linkPaint:theme.topic});
+    const refresh = () => {
+      const values = readSettings();
+      const defaults = defaultColors();
+      if (values.appearance === 'light') Object.assign(defaults,{backgroundPaint:'#ffffff',panelPaint:'#f1f5f9',textPaint:'#172032'});
+      for (const [field] of fields) {
+        const css = TopicStoryContentManager.paintCss(paints[field]) || defaults[field];
         const swatch = dialog.querySelector(`[data-paint-swatch="${field}"]`);
-        swatch.style.background = TopicStoryContentManager.paintCss(paints[field]) || (field === 'backgroundPaint' ? theme.background : theme.panel);
-        swatch.title = TopicStoryContentManager.paintCss(paints[field]) || this.t('topic.story.keepOriginal');
+        swatch.style.background = css; swatch.title = css;
       }
+      const sample = dialog.querySelector('.story-style-sample');
+      sample.style.background = TopicStoryContentManager.paintCss(paints.backgroundPaint) || defaults.backgroundPaint;
+      sample.style.padding = Math.min(values.margin,20)+'px';
+      sample.style.fontSize = values.fontSize+'px';
+      sample.style.lineHeight = values.lineHeight;
+      dialog.querySelector('.story-sample-panel').style.background = TopicStoryContentManager.paintCss(paints.panelPaint) || defaults.panelPaint;
+      for (const [field,selector] of [['titlePaint','.story-sample-title'],['textPaint','.story-sample-text'],['linkPaint','.story-sample-link']]) {
+        const node = dialog.querySelector(selector), css = TopicStoryContentManager.paintCss(paints[field]) || defaults[field];
+        node.style.background = paints[field]?.kind === 'gradient' ? css : 'transparent';
+        node.style.backgroundClip = paints[field]?.kind === 'gradient' ? 'text' : 'border-box';
+        node.style.color = paints[field]?.kind === 'gradient' ? 'transparent' : css;
+      }
+      const previewStory = { ...story, themeMode, contentSettings:values };
+      const example = `<article><h1>${label('storyTitle')}</h1><section><h2>${label('panels')}</h2><p>${label('previewText')}</p><ul><li>${label('previewAction')}</li><li>${label('previewShare')}</li></ul></section></article>`;
+      dialog.querySelector('iframe').srcdoc = this.wrapTopicStoryHtml(TopicStoryContentManager.applySettings(story.html || example,values), previewStory);
+      dialog.querySelectorAll('[data-style-preset]').forEach(button => button.setAttribute('aria-pressed',button.dataset.stylePreset === themeMode));
     };
-    updateSwatches();
+    const writeSettings = values => {
+      for (const [field] of fields) paints[field] = values[field];
+      dialog.querySelectorAll('[name]').forEach(input => { if (input.type === 'checkbox') input.checked = values[input.name]; else input.value = values[input.name]; });
+      refresh();
+    };
     this.storyColorPicker ||= new StoryColorPickerManager();
-    dialog.querySelectorAll('[data-paint-field]').forEach(button => button.addEventListener('click', () => {
-      const field = button.dataset.paintField;
-      this.storyColorPicker.open({ paint:paints[field], defaultColor:field === 'backgroundPaint' ? theme.background : theme.panel, labels:{title:this.t('topic.story.pickColour'),apply:this.t('topic.story.useColour'),cancel:this.t('topic.story.cancel')}, onApply:paint => { paints[field]=paint; updateSwatches(); } });
-    }));
-    dialog.querySelectorAll('[data-paint-clear]').forEach(button => button.addEventListener('click', () => { paints[button.dataset.paintClear]=null; updateSwatches(); }));
-    dialog.querySelector('[data-content-apply]').addEventListener('click', () => {
-      const values = Object.fromEntries(new FormData(dialog.querySelector('form')));
-      Object.assign(values, paints);
-      values.mobileOptimized = dialog.querySelector('[name="mobileOptimized"]').checked;
-      const contentSettings = TopicStoryContentManager.normalizeSettings(values);
-      this.topicFormState.topicStory = { ...story, contentSettings, html: story.html ? TopicStoryContentManager.applySettings(story.html, contentSettings) : '' };
-      this.topicFormState.topicStory.sanitizedHtml = this.sanitizeStoryHtml(this.topicFormState.topicStory.html);
-      this.invalidateStoryReview();
-      dialog.close();
-      this.renderCreateTopic({ preserveState: true });
+    dialog.querySelectorAll('[data-paint-field]').forEach(button => {
+      const open = event => {
+        if (event.type === 'keydown' && !['Enter',' '].includes(event.key)) return;
+        event.preventDefault(); event.stopPropagation();
+        this.storyColorPicker.close();
+        const field = button.dataset.paintField, previous = paints[field];
+        this.storyColorPicker.open({ paint:previous, defaultColor:defaultColors()[field], solidOnly:['textPaint','linkPaint'].includes(field), labels:{title:this.t('topic.story.'+fields.find(item=>item[0]===field)[1]),apply:this.t('topic.story.useColour'),cancel:this.t('topic.story.cancel')}, onPreview:paint => { paints[field]=paint; refresh(); }, onApply:paint => { paints[field]=paint; refresh(); }, onCancel:() => { paints[field]=previous; refresh(); } });
+      };
+      button.addEventListener('click',open);
+      if (button.tagName !== 'BUTTON') button.addEventListener('keydown',open);
     });
-    dialog.addEventListener('close', () => { this.storyColorPicker?.close(); dialog.remove(); }, { once: true });
-    document.body.appendChild(dialog);
-    dialog.showModal();
+    dialog.querySelectorAll('[data-paint-clear]').forEach(button => button.addEventListener('click', () => { this.storyColorPicker.close(); paints[button.dataset.paintClear]=null; refresh(); }));
+    dialog.querySelector('form').addEventListener('input',refresh);
+    dialog.querySelector('form').addEventListener('change',refresh);
+    dialog.querySelectorAll('[data-preview-device]').forEach(button => button.addEventListener('click', () => { dialog.querySelector('.story-settings-preview').classList.toggle('mobile-preview',button.dataset.previewDevice === 'mobile'); dialog.querySelectorAll('[data-preview-device]').forEach(item => item.setAttribute('aria-pressed',item === button)); }));
+    dialog.querySelectorAll('[data-style-preset]').forEach(button => button.addEventListener('click', () => {
+      this.storyColorPicker.close(); themeMode = button.dataset.stylePreset; theme = getTopicStoryTheme({},themeMode);
+      for (const [field,color] of Object.entries(defaultColors())) paints[field] = {kind:'solid',hex:color,alpha:1};
+      refresh();
+    }));
+    const status = dialog.querySelector('[data-preset-status]');
+    dialog.querySelector('[data-preset-save]').addEventListener('click', () => {
+      this.storyColorPicker.close();
+      try { window.localStorage.setItem('topic-earth-story-preset-'+themeMode,JSON.stringify(readSettings())); status.textContent=this.t('topic.story.presetSaved'); }
+      catch { status.textContent=this.t('topic.story.presetUnavailable'); }
+    });
+    dialog.querySelector('[data-preset-load]').addEventListener('click', () => {
+      this.storyColorPicker.close();
+      try { const saved=window.localStorage.getItem('topic-earth-story-preset-'+themeMode); if (saved) { writeSettings(TopicStoryContentManager.normalizeSettings(JSON.parse(saved))); status.textContent=this.t('topic.story.presetLoaded'); } else status.textContent=this.t('topic.story.noPreset'); }
+      catch { status.textContent=this.t('topic.story.presetUnavailable'); }
+    });
+    dialog.querySelector('[data-content-apply]').addEventListener('click', () => {
+      // Confirm a picker choice first; closing it restores any unconfirmed live paint.
+      this.storyColorPicker.close();
+      const contentSettings = readSettings();
+      this.topicFormState.topicStory = { ...story, themeMode, contentSettings, html: story.html ? TopicStoryContentManager.applySettings(story.html, contentSettings) : '' };
+      this.topicFormState.topicStory.sanitizedHtml = this.sanitizeStoryHtml(this.topicFormState.topicStory.html);
+      this.invalidateStoryReview(); dialog.close(); this.renderCreateTopic({ preserveState:true });
+    });
+    dialog.querySelector('[data-settings-close]').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('cancel',event => { if (this.storyColorPicker.dialog) { event.preventDefault(); this.storyColorPicker.close(); } });
+    dialog.addEventListener('close', () => { this.storyColorPicker.close(); dialog.remove(); }, { once:true });
+    document.body.appendChild(dialog); dialog.showModal(); refresh();
   }
 
   openTopicStoryViewer(target = null) {
@@ -7118,10 +7185,6 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
         </div>
 
         <div class="setting-hint" title="${this.escapeHtml(this.t('topic.story.mobileHint'))}">📱 ${this.escapeHtml(this.t('topic.story.mobileHint'))}</div>
-        <div class="topic-story-theme-tabs" role="group" aria-label="${this.escapeHtml(this.t('topic.story.contentStyle'))}">
-          ${[['world','🌍 World'],['regional','🌱 Regional'],['space','🌌 Space'],['fever','🌡️ Fever']].map(([mode,label]) => `<button type="button" class="btn-media-action" data-action="set-story-theme" data-story-theme="${mode}" aria-pressed="${this.getTopicStoryTheme().mode === mode}">${label}</button>`).join('')}
-          <button type="button" class="btn-media-action" data-action="content-story-settings">🎨 ${this.escapeHtml(this.t('topic.story.contentStyle'))}</button>
-        </div>
         <div class="topic-story-grid">
           <label>
             <span>${this.escapeHtml(this.t('topic.story.storyTitle'))}</span>
@@ -7129,10 +7192,10 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
           </label>
           <button type="button" class="story-orientation-toggle" data-action="toggle-story-orientation" aria-expanded="${story.orientationEnabled}" aria-controls="topic-story-orientation-group" title="${this.escapeHtml(this.t('topic.story.toggleOrientation'))}">${story.orientationEnabled ? '−' : '+'} 🧭</button>
           <label>
-            <span>🎨 ${this.escapeHtml(this.t('topic.story.type'))}</span>
-            <select id="topic-story-style">
+            <span>${this.escapeHtml(this.t('topic.story.type'))}</span>
+            <div class="story-type-controls"><select id="topic-story-style">
               ${storyTypeOptions.map(([value, label]) => `<option value="${value}" ${story.style === value ? 'selected' : ''}>${this.escapeHtml(label)}</option>`).join('')}
-            </select>
+            </select><button type="button" class="story-format-icon" data-action="content-story-settings" aria-label="${this.escapeHtml(this.t('topic.story.contentStyle'))}" title="${this.escapeHtml(this.t('topic.story.contentStyle'))}">🎨</button></div>
           </label>
         </div>
 
@@ -7759,7 +7822,12 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     const today = new Date().toISOString().split('T')[0];
     const isEditing = this.editingTopicId !== null;
     const isRegionalProposal = this.isRegionalProposalWorkspace();
-    const regionalLayerOptions = isRegionalProposal ? this.getRegionalProposalLayerOptions() : this.layers;
+    const regionalLayerOptions = isRegionalProposal ? this.getRegionalProposalLayerOptions() : this.layers.filter(layer => {
+      if (isEditing) return !layer.isGroup;
+      const mode = this.topicBuilderContext?.mode || this.currentLayerFilter || 'main';
+      const tabs = layer.modeTabs || (layer.feverOnly ? ['fever'] : layer.id === 'space' ? ['space'] : ['main']);
+      return !layer.isGroup && tabs.includes(mode === 'world' ? 'main' : mode);
+    });
     const regionalContext = this.getRegionalProposalContext() || {};
     const regionalLabel = this.topicFormState.regionalLabel || this.getRegionalProposalContextLabel(regionalContext);
     const regionalPrecision = this.topicFormState.locationPrecision || regionalContext.precision || regionalContext.scope || '';

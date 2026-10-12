@@ -806,6 +806,7 @@ export class LayerPanel {
     const layerId = icon.dataset.layerId;
     const layer = this.getLayerById(layerId);
     if (!layer) return;
+    this.composerLayerId = layerId;
 
     if (this.isLayerGroup(layer)) {
       const targetLayers = this.getDescendantLeafLayers(layer);
@@ -843,6 +844,7 @@ export class LayerPanel {
     if (!item) return;
 
     const layerId = item.dataset.layerId;
+    this.composerLayerId = layerId;
     const isExpanding = !item.classList.contains('expanded');
 
     item.classList.toggle('expanded');
@@ -857,6 +859,7 @@ export class LayerPanel {
 
   handleShowDetail(newsItem) {
     const pointId = newsItem.dataset.pointId;
+    this.composerLayerId = newsItem.closest('.layer-item')?.dataset.layerId || this.composerLayerId;
 
     let point = this.points.find(p => p.id === pointId);
 
@@ -905,16 +908,28 @@ export class LayerPanel {
     }
 
     if (this.callbacks.onNewTopic) {
+      const candidates = this.layers.filter(layer => !this.isLayerGroup(layer) && this.layerBelongsToFilter(layer, this.layerFilter));
+      const layer = candidates.find(layer => layer.id === this.composerLayerId && this.getLayerStateSet().has(layer.id))
+        || candidates.find(layer => this.expandedLayers.has(layer.id) && this.getLayerStateSet().has(layer.id))
+        || candidates.find(layer => this.getLayerStateSet().has(layer.id)) || candidates[0];
+      if (layer) {
+        this.composerLayerId = layer.id;
+        this.setLayerActive(layer.id,true);
+        this.expandedLayers.add(layer.id);
+        this.updateData(this.layers, this.points);
+        const item = Array.from(this.container.querySelectorAll('.layer-item')).find(item => item.dataset.layerId === layer.id);
+        item?.scrollIntoView?.({ block:'nearest', behavior:'smooth' });
+      }
       if (this.layerFilter === 'regional') {
         this.callbacks.onNewTopic({
           mode: 'regional-proposal',
           regionalContext: this.regionalContext,
-          defaultLayerId: this.getPreferredRegionalProposalLayerId()
+          defaultLayerId: layer?.id || this.getPreferredRegionalProposalLayerId()
         });
         return;
       }
 
-      this.callbacks.onNewTopic();
+      this.callbacks.onNewTopic({ mode:this.layerFilter, defaultLayerId:layer?.id });
     }
   }
 
