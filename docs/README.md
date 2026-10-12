@@ -35,6 +35,10 @@ All appointments, partnerships and governance mechanisms described are proposals
 
 See [World textures, saved location and Regional examples](world-regional-controls.md) for quality selection, the location checkbox, distance filters and verification.
 
+## Embedded content authoring
+
+See [Mobile reading, AI review and content-only styling](topic-story/mobile-and-ai-controls.md).
+
 ## AI access and API Settings
 
 | Document | Audience | Purpose |

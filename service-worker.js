@@ -1,8 +1,8 @@
-const CACHE_NAME = 'topic-earth-shell-v20-ambassador-install';
+const CACHE_NAME = 'topic-earth-shell-v21-story-reader-review';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=ambassador-install-20261012',
+  './styles.css?v=story-reader-review-20261012',
   './site.webmanifest?v=earth-clock-20261012',
   './assets/logo/local/favicon.svg?v=earth-clock-20261012',
   './assets/logo/local/earth-128.svg',
