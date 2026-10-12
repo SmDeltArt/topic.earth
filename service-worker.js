@@ -1,4 +1,4 @@
-const CACHE_NAME = 'topic-earth-shell-v16-fever-model-fallback';
+const CACHE_NAME = 'topic-earth-shell-v17-wallonia-ambassador';
 const APP_SHELL = [
   './',
   './index.html',

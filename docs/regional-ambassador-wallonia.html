@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Exemple citoyen : le rôle d’un ambassadeur régional topic.earth pour relier des habitants en Wallonie et accompagner des initiatives communales sociales et écologiques.">
+<title>Ambassadeur régional · Wallonie | topic.earth</title>
+<style>html{background:#071019;color-scheme:dark}body{margin:0;padding:clamp(10px,3vw,28px)}</style>
+</head>
+<body>
+<style>
+.ambassador { --topic:#39ff88; --earth:#d8ff7a; --accent:#f9d85d; --bg:#071019; --panel:#141824; --text:#e8eaed; --muted:#c1cdd0; color:var(--text); background:var(--bg); font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif; max-width:1080px; margin:auto; }
+.ambassador * { box-sizing:border-box; }
+.ambassador .hero { border:1px solid #74c69d55; border-radius:24px; overflow:hidden; }
+.ambassador .hero svg { display:block; width:100%; height:auto; }
+.ambassador .content { padding:clamp(18px,4vw,44px); }
+.ambassador .eyebrow { font-size:12px; letter-spacing:.13em; text-transform:uppercase; color:var(--earth); font-weight:700; }
+.ambassador h1 { font-size:clamp(28px,5vw,48px); line-height:1.15; margin:12px 0 22px; letter-spacing:-.025em; }
+.ambassador h2 { font-size:25px; line-height:1.3; margin:34px 0 16px; }
+.ambassador h3 { font-size:18px; margin:0 0 10px; color:var(--earth); }
+.ambassador p { margin:0 0 16px; }
+.ambassador .lead { color:var(--muted); font-size:19px; }
+.ambassador .notice { padding:18px 22px; background:#f9d85d0b; border-left:3px solid var(--accent); border-radius:0 12px 12px 0; }
+.ambassador .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.ambassador .card { padding:23px; border:1px solid #74c69d40; border-radius:16px; background:var(--panel); }
+.ambassador .number { display:block; margin-bottom:12px; color:var(--topic); font-weight:800; font-size:13px; letter-spacing:.1em; }
+.ambassador ul, .ambassador ol { padding-left:23px; }
+.ambassador li { margin-bottom:10px; }
+.ambassador a { color:var(--topic); text-underline-offset:3px; overflow-wrap:anywhere; }
+.ambassador .steps { counter-reset:steps; list-style:none; padding:0; }
+.ambassador .steps li { position:relative; padding:17px 20px 17px 64px; background:var(--panel); border-radius:12px; }
+.ambassador .steps li::before { counter-increment:steps; content:counter(steps); position:absolute; left:22px; color:var(--topic); font-weight:800; }
+.ambassador footer { margin-top:36px; padding-top:20px; border-top:1px solid #74c69d40; color:var(--muted); font-size:13px; }
+@media(max-width:600px) { .ambassador .grid { grid-template-columns:1fr; } .ambassador .lead { font-size:17px; } }
+@media(prefers-reduced-motion:reduce) { .ambassador * { scroll-behavior:auto; } }
+</style>
+<article class="ambassador" lang="fr">
+  <header class="hero"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">topic.earth — Wallonia.be, exemple de réseau citoyen régional</title>
+  <desc id="desc">Un globe relie trois groupes citoyens : jardin et compost, outils et réparation, trajets partagés. Schéma illustratif, sans frontières géographiques ni partenaires confirmés.</desc>
+  <defs>
+    <linearGradient id="brand" x2="1" y2="0"><stop stop-color="#39ff88"/><stop offset=".5" stop-color="#f6ffe6"/><stop offset="1" stop-color="#f9d85d"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#39ff88" stop-opacity=".16"/><stop offset="1" stop-color="#39ff88" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1200" height="630" rx="28" fill="#071019"/>
+  <rect x="18" y="18" width="1164" height="594" rx="20" fill="none" stroke="#74c69d" stroke-opacity=".4"/>
+  <circle cx="310" cy="380" r="230" fill="url(#glow)"/>
+  <g font-family="system-ui,Segoe UI,sans-serif">
+    <text x="64" y="86" font-size="30" font-weight="800" fill="url(#brand)">topic.earth</text>
+    <text x="1136" y="84" text-anchor="end" font-size="17" letter-spacing="2" fill="#d8ff7a">RÉGIONAL · EXEMPLE</text>
+    <text x="64" y="165" font-size="55" font-weight="800" fill="#f6ffe6">Wallonia.be</text>
+    <text x="64" y="204" font-size="22" fill="#c1cdd0">Relier les personnes. Faire naître des initiatives locales.</text>
+    <g fill="none" stroke="#74c69d" stroke-width="2">
+      <path d="M470 371 C545 371 548 296 603 296"/>
+      <path d="M470 385 H603"/>
+      <path d="M470 399 C545 399 548 485 603 485"/>
+    </g>
+    <g fill="none" stroke="#39ff88" stroke-width="2">
+      <circle cx="315" cy="385" r="141"/>
+      <ellipse cx="315" cy="385" rx="65" ry="141"/>
+      <ellipse cx="315" cy="385" rx="141" ry="58"/>
+      <path d="M174 385 H456 M315 244 V526"/>
+    </g>
+    <circle cx="315" cy="385" r="46" fill="#141824" stroke="#f9d85d" stroke-width="2"/>
+    <g fill="#f6ffe6"><circle cx="300" cy="375" r="8"/><circle cx="330" cy="375" r="8"/><path d="M284 402 Q300 377 314 402 M316 402 Q330 377 346 402" fill="none" stroke="#f6ffe6" stroke-width="4"/></g>
+    <text x="315" y="564" text-anchor="middle" font-size="18" fill="#c1cdd0">Un relais régional, des actions dans les communes</text>
+    <g fill="#141824" stroke="#74c69d" stroke-opacity=".6">
+      <rect x="603" y="250" width="514" height="84" rx="15"/>
+      <rect x="603" y="350" width="514" height="84" rx="15"/>
+      <rect x="603" y="450" width="514" height="84" rx="15"/>
+    </g>
+    <g font-size="24" font-weight="700" fill="#f6ffe6">
+      <text x="633" y="286">01</text><text x="685" y="286">Jardin &amp; compost</text>
+      <text x="633" y="386">02</text><text x="685" y="386">Outils &amp; réparation</text>
+      <text x="633" y="486">03</text><text x="685" y="486">Trajets partagés</text>
+    </g>
+    <g font-size="17" fill="#c1cdd0">
+      <text x="685" y="313">Partager un lieu, apprendre, cultiver ensemble</text>
+      <text x="685" y="413">Prêter, entretenir, transmettre un savoir-faire</text>
+      <text x="685" y="513">Coordonner les besoins et les possibilités</text>
+    </g>
+    <text x="1136" y="582" text-anchor="end" font-size="14" fill="#c1cdd0">PROPOSITION CITOYENNE · AUCUN MANDAT OFFICIEL</text>
+  </g>
+</svg>
+</header>
+  <div class="content">
+    <p class="eyebrow">Wallonie · Belgique · proposition de réseau citoyen</p>
+    <h1>Ambassadeur régional : relier les personnes pour agir près de chez elles.</h1>
+    <p class="lead">Commencer à l’échelle de la Wallonie pour rencontrer des personnes motivées, partager des méthodes et faire émerger des groupes dans les communes. Chacun contribue selon son temps, ses compétences et ses possibilités.</p>
+    <aside class="notice" aria-label="Statut de cet exemple"><strong>Exemple à discuter, pas un réseau déjà constitué.</strong> « Wallonia.be » est ici un nom fictif de regroupement citoyen. Il ne désigne ni un site officiel, ni un mandat du Gouvernement wallon, ni une commune partenaire. Aucun ambassadeur, lieu de rencontre ou projet local n’est confirmé par cette fiche. La constitution de l’ASBL reste à confirmer.</aside>
+    <h2>Un relais, quatre missions</h2>
+    <div class="grid">
+      <section class="card"><span class="number">01 · ACCUEILLIR</span><h3>Écouter les besoins et les envies</h3><p>Rencontrer les habitants, les associations et les porteurs d’idées. Identifier ce qui manque, ce qui existe et les contributions possibles : une heure, un outil, un terrain, un trajet ou un savoir-faire.</p></section>
+      <section class="card"><span class="number">02 · RELIER</span><h3>Faire naître des relais communaux</h3><p>Mettre en relation des personnes proches, puis aider un coordinateur local à former un groupe. Le relais régional partage les méthodes ; les participants décident de leurs activités locales.</p></section>
+      <section class="card"><span class="number">03 · ACCOMPAGNER</span><h3>Passer d’une idée à une action</h3><p>Clarifier l’objectif, les ressources, les autorisations, l’accessibilité et la prochaine étape. Préparer une rencontre organisée, sans promettre un résultat ou un soutien institutionnel non confirmé.</p></section>
+      <section class="card"><span class="number">04 · DOCUMENTER</span><h3>Partager les résultats et les limites</h3><p>Faire vérifier les informations, recueillir les retours et rendre les décisions lisibles. Partager ce qui fonctionne avec d’autres communes, mais aussi les difficultés et les erreurs à corriger.</p></section>
+    </div>
+    <h2>Trois exemples pour commencer</h2>
+    <ul>
+      <li><strong>Jardin partagé et compostage :</strong> relier un propriétaire de terrain, un coordinateur et des habitants. Convenir de l’entretien et d’un partage équitable des récoltes.</li>
+      <li><strong>Outils et réparation :</strong> constituer un petit inventaire de prêts, identifier les responsables et organiser une séance de réparation ou de transmission de compétences.</li>
+      <li><strong>Trajets partagés :</strong> rapprocher des besoins réguliers — marché, services ou activités — et des personnes pouvant proposer un trajet. Préserver les coordonnées privées.</li>
+    </ul>
+    <p>Ces idées sont des modèles de discussion, pas des initiatives actives. L’énergie solaire collective, le stockage et la géothermie commencent par une étude de faisabilité avec des partenaires compétents.</p>
+    <h2>Des rencontres volontaires et encadrées</h2>
+    <p>Chaque rencontre doit avoir un organisateur identifié, un objectif clair, un lieu convenu et des règles accessibles. Participation volontaire, partage des contacts avec consentement et possibilité de signaler un problème. L’ambassadeur facilite ; il ne décide pas à la place des habitants.</p>
+    <p><strong>Fonctionnement actuel :</strong> une proposition enregistrée dans le navigateur reste sur cet appareil. Pour une première expérimentation, désigner un destinataire et transmettre un dossier exporté par un canal convenu. Cette fiche ne crée ni inscription, ni messagerie, ni service de réservation.</p>
+    <h2>Une mission d’intérêt collectif</h2>
+    <p>Le projet vise une gestion à but non lucratif : les ressources servent la mission commune. Garder les activités et les finances de topic.earth distinctes de celles de CAD-AI-Support SPRL et de SmDeltArt. Aucun don ne doit acheter une place, un vote ou une mention « vérifié ».</p>
+    <p>Prévoir un mandat défini, un suppléant, des intérêts déclarés et une procédure de recours. Une personne ne valide pas seule son propre projet. Les décisions, les financements et les corrections doivent être compréhensibles sans exposer les données privées.</p>
+    <h2>Du réseau régional à la première commune</h2>
+    <ol class="steps">
+      <li><strong>Rencontrer :</strong> identifier quelques personnes intéressées dans plusieurs communes wallonnes.</li>
+      <li><strong>Choisir :</strong> retenir une commune, un coordinateur et une petite action réalisable.</li>
+      <li><strong>Organiser :</strong> publier une proposition clairement identifiée et convenir d’un premier rendez-vous accessible.</li>
+      <li><strong>Apprendre :</strong> documenter l’activité, recueillir les retours, puis proposer une méthode réutilisable à une commune voisine.</li>
+    </ol>
+    <aside class="notice"><strong>Vous souhaitez contribuer ?</strong> Dans topic.earth, ouvrez <strong>Régional → Propose Action</strong>, indiquez votre commune et ce que vous pouvez offrir. L’IA et les connaissances en programmation restent facultatives. Enregistrer un brouillon ne signifie pas l’avoir transmis.</aside>
+    <footer><p><strong>Repère cartographique indicatif :</strong> près de Spontin, commune d’Yvoir, au centre géographique de la Wallonie. Ce point situe l’exemple régional ; il n’est ni un siège, ni une adresse, ni un lieu de rendez-vous.</p><p>Source géographique : <a href="https://connaitrelawallonie.wallonie.be/g%C3%A9ographie/territoire">Connaître la Wallonie — Territoire</a>. Cette source confirme le contexte géographique, pas la proposition de réseau citoyen.</p><p>Proposition éditoriale pour revue · 12 octobre 2026 · illustration vectorielle originale, sans frontières cartographiques.</p></footer>
+  </div>
+</article>
+</body>
+</html>

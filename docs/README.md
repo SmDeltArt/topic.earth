@@ -11,6 +11,25 @@ These working documents describe a proposed path from climate education to local
 | [Lokale participatie en bescherming van jongeren (NL)](topic-earth-lokale-participatie-en-jongeren-nl.docx) | Citizens and prospective local partners | Dutch version of the civic note. |
 | [Lokale Beteiligung und Schutz junger Menschen (DE)](topic-earth-lokale-beteiligung-und-jugendschutz-de.docx) | Citizens and prospective local partners | German version of the civic note. |
 
+## Commune pilot and regional ambassador
+
+| Document | Purpose |
+| --- | --- |
+| [Next pilot steps (EN)](topic-earth-next-pilot-steps.md) | Checklist summarising the 9 October audit and the proposed 90-day commune pilot. |
+| [Prochaines étapes du projet pilote (FR)](topic-earth-prochaines-etapes-pilote-fr.md) | French version of the same pilot checklist. |
+| [Ambassadeur régional — exemple Wallonie (FR, HTML)](regional-ambassador-wallonia.html) | Regional story card explaining the proposed ambassador role, participation, safeguards and three local initiative examples. |
+
+The ambassador example appears under **Regional → Community Projects** as
+“Wallonie — Ambassadeur régional topic.earth (exemple)”. Open its **Embedded HTML**
+presentation for the full story. “Wallonia.be” is a fictional grouping label,
+not an official website, appointed ambassador, approved ASBL or partnership.
+Its indicative map anchor near Spontin/Yvoir does not identify an office or meeting venue.
+
+The checked-in story in `data/regional-ambassador-topics.js` is self-contained
+for sandboxed previews and topic exports. When changing it, keep its embedded
+HTML consistent with `docs/regional-ambassador-wallonia.html`. The SVG thumbnail
+lives in `assets/social/wallonia-ambassador-vignette.svg`.
+
 ## AI access and API Settings
 
 | Document | Audience | Purpose |

@@ -3,6 +3,7 @@ import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-2
 import { LAYERS } from './data/layers.js?v=topic-earth-regional-merged-20261003';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-climate-studies-watch-20260601';
+import { REGIONAL_AMBASSADOR_TOPICS } from './data/regional-ambassador-topics.js?v=wallonia-ambassador-20261012';
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=topic-earth-thwaites-20261003';
 import { FEVER_TOPICS } from './data/fever-topics.js?v=fever-land-cover-20261008-3';
 import { TIPPING_POINT_TOPICS } from './data/points.js?v=topic-earth-thwaites-20261003';
@@ -128,7 +129,7 @@ class TopicEarthApp {
         .filter(Boolean)
         .map(point => [String(point.id), point])
     );
-    const basePoints = [...MOCK_POINTS, ...SPACE_TOPICS, ...CARBON_HISTORY_TOPICS, ...FEVER_TOPICS, ...TIPPING_POINT_TOPICS];
+    const basePoints = [...MOCK_POINTS, ...REGIONAL_AMBASSADOR_TOPICS, ...SPACE_TOPICS, ...CARBON_HISTORY_TOPICS, ...FEVER_TOPICS, ...TIPPING_POINT_TOPICS];
 
     const mergedBasePoints = basePoints.map(point => {
       const customPoint = customPointById.get(String(point.id));

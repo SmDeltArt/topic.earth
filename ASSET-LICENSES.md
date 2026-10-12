@@ -27,6 +27,7 @@ third-party assets, externally sourced media, map data, or service-hosted files.
 | `assets/textures/main/*` | Main Earth material maps | Provenance to confirm | Source, author, and modification chain needed. |
 | `assets/textures/fever/*` | Earth's Fever milestone textures | Project-generated/provenance to confirm | Keep generation/source notes per file or batch. |
 | `data/*` | Topic and layer data | Mixed project and sourced data | Keep citations in topic records where available. |
+| `assets/social/wallonia-ambassador-vignette.svg` | Regional ambassador example thumbnail | Original project vector, EUPL-1.2-or-later | Created with code for BenDes on 2026-10-12; no third-party map or image. Diagram only; existing topic.earth identity remains subject to TRADEMARKS.md. |
 | OpenStreetMap tiles/geocoding | Regional map display and search | Third-party service/data terms | Preserve OSM attribution and usage limits. |
 
 ## Cloudinary Bridge
