@@ -9768,9 +9768,9 @@ body.topic-mode-fever:not(.fever-monitor-expanded) #fever-monitor-dock.fever-mon
 
 /* Regional topic actions stay above map panes and outside the scroll area. */
 body.regional-mode #detail-panel { z-index: 110; }
-body.regional-mode #detail-panel .detail-toolbar { position: relative; top: auto; right: auto; flex: 0 0 auto; pointer-events: auto; flex-wrap: wrap; background: var(--bg-card); }
+body.regional-mode #detail-panel .detail-toolbar { position: absolute; top: 0; right: 0; pointer-events: none; background: transparent; }
 body.regional-mode #detail-panel #detail-content,
-body.regional-mode #detail-panel.compact .detail-compact-summary { margin-top: 0; }
+body.regional-mode #detail-panel.compact .detail-compact-summary { margin-top: 52px; }
 .personal-location-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .personal-location-row input { flex: 1 1 180px; min-width: 0; }
 .personal-location-settings button { margin: 6px 0; }

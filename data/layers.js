@@ -1,4 +1,5 @@
 export const LAYERS = [
+  { id: 'ambassadors', name: 'Ambassadors · citizen pilot', icon: '🤝', color: '#39ff88', enabled: true, modeTabs: ['main', 'regional'], topicOrderField: 'ambassadorOrder', previewLimit: 7, ignoreRegionalRadius: true },
   { id: 'regional-examples', name: 'Examples · learning only', icon: '📚', color: '#94a3b8', enabled: false, modeTabs: ['main', 'regional'], sortByRegionalContext: true },
   {
     id: 'earths-fever',

@@ -87,10 +87,42 @@ const Detail=await loadClass('components/DetailPanel.js','DetailPanel',{Settings
 const detail=Object.create(Detail.prototype);detail.mode='detail';detail.currentPoint={id:'regional-topic'};detail.getCurrentLanguage=()=> 'fr';
 const read={hidden:true},translate={hidden:true,querySelector:()=>({}),setAttribute(){}};
 detail.container={querySelectorAll:()=>[read,translate],querySelector:()=>translate};detail.updateTopicLanguageControls();assert.equal(read.hidden,false);assert.equal(translate.hidden,false);
-const css=await readFile(new URL('../styles.css',import.meta.url),'utf8');assert.ok(css.includes('body.regional-mode #detail-panel .detail-toolbar { position: relative'));
+const css=await readFile(new URL('../styles.css',import.meta.url),'utf8');assert.ok(css.includes('body.regional-mode #detail-panel .detail-toolbar { position: absolute'));assert.ok(css.includes('#detail-panel .detail-toolbar button { pointer-events: auto; }'));
 const loadData=async path=>import('data:text/javascript;base64,'+Buffer.from(await readFile(new URL(`../${path}`,import.meta.url),'utf8')).toString('base64'));
 const {MOCK_POINTS}=await loadData('data/points.js');const {LAYERS}=await loadData('data/layers.js');
 assert.ok(MOCK_POINTS.filter(p=>p.originalCategory).every(p=>p.category==='regional-examples'&&p.reviewState==='example'));
 assert.equal(LAYERS.find(l=>l.id==='regional-examples').enabled,false);
 assert.deepEqual(LAYERS.find(l=>l.id==='country-news').modeTabs,['main']);
 console.log('Regional: read/translate availability, toolbar layout and isolated legacy examples passed.');
+
+const {REGIONAL_AMBASSADOR_TOPICS: ambassadors}=await loadData('data/regional-ambassador-topics.js');
+const ambassadorLayer=LAYERS.find(layer=>layer.id==='ambassadors');
+assert.equal(ambassadors.length,7);
+assert.deepEqual(ambassadors.map(point=>point.id),['eu','belgium','brussels','flanders','wallonia','german-community','anthisnes'].map(id=>'ambassador-pilot-'+id));
+assert.deepEqual(ambassadors.map(point=>point.language),['en','en','en','nl','fr','de','fr']);
+assert.equal(ambassadors[5].regionalScope,'community');
+assert.ok(!ambassadors.some(point=>point.id==='wallonia-regional-ambassador-example'));
+settings.regionalRadiusKm=1;
+panel.layers=[...panel.layers,ambassadorLayer];panel.points=[...panel.points,...ambassadors];
+assert.equal(panel.getFilteredLayers()[0].id,'ambassadors');
+assert.deepEqual(Array.from(panel.getLayerNews(ambassadorLayer),point=>point.id),ambassadors.map(point=>point.id));
+app.allLayers=LAYERS;app.allPoints=ambassadors;app.regionalContext={lat:50.63,lon:5.57};
+assert.deepEqual(Array.from(app.getLayerTopicsForNavigation(ambassadors[0]),point=>point.id),ambassadors.map(point=>point.id));
+assert.equal(app.getAdjacentTopic(ambassadors[4],'next').id,ambassadors[5].id);
+for(const point of ambassadors){
+  const slug=point.id.replace('ambassador-pilot-','');
+  const html=await readFile(new URL(`../docs/ambassadors/${slug}.html`,import.meta.url),'utf8');
+  assert.ok(html.includes(point.topicStory.html));
+  assert.ok(html.includes(`lang="${point.language}"`));
+  assert.equal((point.topicStory.html.match(/aria-current="page"/g)||[]).length,1);
+  assert.equal((point.topicStory.html.match(/https:\/\/www.topic.earth\/docs\/ambassadors\//g)||[]).length,7);
+  assert.equal((point.topicStory.html.match(/<svg /g)||[]).length,2);
+  assert.ok(!/<script|onload=|onclick=/i.test(html));
+  assert.ok(html.includes('class="mobile-flow"'));
+  assert.ok(html.includes('class="mobile-diversity"'));
+  assert.ok(html.includes('@media(max-width:620px)'));
+  assert.ok(html.includes('overflow-wrap:anywhere'));
+  for(const mailbox of ['support','info','bendes'])assert.ok(html.includes(`mailto:${mailbox}@topic.earth`));
+  assert.ok(point.topicStory.scriptsAllowed===false);
+}
+console.log('Ambassadors: seven languages/scopes, full ordered list and navigation within radius, linked script-free HTML and contacts passed.');

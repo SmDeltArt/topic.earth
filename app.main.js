@@ -1,23 +1,23 @@
 import { RegionalLocationManager } from './lib/regional-location.mjs';
-import { GlobeRenderer } from './lib/globe.js?v=world-regional-location-20261012';
+import { GlobeRenderer } from './lib/globe.js?v=ambassador-pilot-20261012';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
-import { LAYERS } from './data/layers.js?v=world-regional-location-20261012';
+import { LAYERS } from './data/layers.js?v=ambassador-pilot-20261012';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-climate-studies-watch-20260601';
-import { REGIONAL_AMBASSADOR_TOPICS } from './data/regional-ambassador-topics.js?v=wallonia-ambassador-20261012';
-import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=world-regional-location-20261012';
+import { REGIONAL_AMBASSADOR_TOPICS } from './data/regional-ambassador-topics.js?v=ambassador-pilot-20261012';
+import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=ambassador-pilot-20261012';
 import { FEVER_TOPICS } from './data/fever-topics.js?v=fever-land-cover-20261008-3';
-import { TIPPING_POINT_TOPICS } from './data/points.js?v=world-regional-location-20261012';
+import { TIPPING_POINT_TOPICS } from './data/points.js?v=ambassador-pilot-20261012';
 import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-short-20261003';
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=cloudinary-fallback-20261008';
-import { RegionalMap } from './components/RegionalMap.js?v=world-regional-location-20261012';
-import { LayerPanel } from './components/LayerPanel.js?v=world-regional-location-20261012';
-import { DetailPanel } from './components/DetailPanel.js?v=world-regional-location-20261012';
+import { RegionalMap } from './components/RegionalMap.js?v=ambassador-pilot-20261012';
+import { LayerPanel } from './components/LayerPanel.js?v=ambassador-pilot-20261012';
+import { DetailPanel } from './components/DetailPanel.js?v=ambassador-pilot-20261012';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
-import { Settings } from './lib/settings.js?v=world-regional-location-20261012';
+import { Settings } from './lib/settings.js?v=ambassador-pilot-20261012';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
 import { ReadTranslationService } from './lib/read-translation.js?v=translation-20261004';
 import { TopicTranslations, plainTopicText, topicSourceRevision } from './lib/topic-translations.mjs?v=reading-save-20261004';
@@ -1166,7 +1166,7 @@ class TopicEarthApp {
       this.globe.options.autoRotate = false;
     }
 
-    this.applyRegionalLayerPreview(['community-projects'], 'community-projects');
+    this.applyRegionalLayerPreview(['ambassadors'], 'ambassadors');
     this.maybeAutoLocateRegionalMode();
     document.body.classList.add('regional-mode');
     window.dispatchEvent(new CustomEvent('viewModeChanged', { detail: { mode: 'regional-map' } }));
@@ -1178,7 +1178,7 @@ class TopicEarthApp {
 
     const activeLayers = this.getActiveLayersForFilter('regional');
     const radius = Settings.get().regionalRadiusKm || 0;
-    const points = radius && this.regionalContext ? this.allPoints.filter(point => RegionalLocationManager.distance(point, this.regionalContext) <= radius) : this.allPoints;
+    const points = radius && this.regionalContext ? this.allPoints.filter(point => this.allLayers.find(layer => layer.id === point.category)?.ignoreRegionalRadius || RegionalLocationManager.distance(point, this.regionalContext) <= radius) : this.allPoints;
     this.regionalMap.show(points, this.allLayers, activeLayers, {
       preserveView: !force && this.regionalMap.visible
     });
@@ -2823,9 +2823,10 @@ class TopicEarthApp {
 
     return this.allPoints
       .filter(item => item && item.category === point.category && item.id && !item.isCluster && !item.isCountry)
-      .filter(item => this.currentLayerFilter !== 'regional' || !this.regionalContext || !Settings.get().regionalRadiusKm || RegionalLocationManager.distance(item, this.regionalContext) <= Settings.get().regionalRadiusKm)
+      .filter(item => layer.ignoreRegionalRadius || this.currentLayerFilter !== 'regional' || !this.regionalContext || !Settings.get().regionalRadiusKm || RegionalLocationManager.distance(item, this.regionalContext) <= Settings.get().regionalRadiusKm)
       .slice()
       .sort((a, b) => {
+        if (layer.topicOrderField) return (a[layer.topicOrderField] ?? Infinity) - (b[layer.topicOrderField] ?? Infinity);
         if (this.currentLayerFilter === 'regional' && this.regionalContext) {
           const da = RegionalLocationManager.distance(a, this.regionalContext), db = RegionalLocationManager.distance(b, this.regionalContext);
           if (da !== db) return da < db ? -1 : 1;

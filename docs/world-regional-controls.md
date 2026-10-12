@@ -18,10 +18,14 @@ Regional topic previews, map pins and previous/next navigation use the optional 
 
 ## Regional pilot and examples
 
-Regional opens on **Community Projects**, including the Wallonia ambassador proposal. The old static Regional news, community, cycling, charging and hydrogen samples move to **Examples · learning only**, disabled by default. Country/EU news and the EU source-watch layer remain in World. Samples are retained with stable IDs and labelled as illustrative, not verified active initiatives.
+Regional opens on **Ambassadors · citizen pilot**, with seven linked educational examples. Community Projects remains the layer for future local initiatives. The old static Regional news, community, cycling, charging and hydrogen samples move to **Examples · learning only**, disabled by default. Country/EU news and the EU source-watch layer remain in World. Samples are retained with stable IDs and labelled as illustrative, not verified active initiatives.
 
 The Regional topic toolbar stays outside scrolling content, above map panes, with previous/next, translate, read and close controls. Previous/next is disabled when there is no adjacent topic.
 
 ## Verification
 
 Run `node tools/check-world-regional.mjs` for mocked texture failures, Firefox Auto/GPU bounds, saved-location persistence rules, proximity/radius navigation, toolbar action availability and example isolation. The actual Firefox rendering must still be checked on a WebGL-capable browser; the cloud browser available for this work does not provide WebGL.
+
+## Ambassador pilot exception
+
+The Ambassador layer is an educational path with seven numbered examples. It stays first in Regional, keeps its EU-to-commune list order and is exempt from distance filters so the full explanation remains accessible. This is display order only: authority comes from the participating local groups. Its actions remain a transparent overlay above scrolling panel content.

@@ -186,6 +186,7 @@ export class LayerPanel {
     if (this.layerFilter !== 'regional' || !this.regionalContext) return layers;
     const nearest = layer => Math.min(...this.points.filter(point => point.category === layer.id).map(point => RegionalLocationManager.distance(point, this.regionalContext)));
     return layers.sort((a, b) => {
+      if (a.id === 'ambassadors' || b.id === 'ambassadors') return Number(b.id === 'ambassadors') - Number(a.id === 'ambassadors');
       if (a.id === 'regional-examples' || b.id === 'regional-examples') return Number(a.id === 'regional-examples') - Number(b.id === 'regional-examples');
       const da = nearest(a), db = nearest(b);
       return da === db ? 0 : da < db ? -1 : 1;
@@ -367,7 +368,9 @@ export class LayerPanel {
     } else {
       layerNews = this.points.filter(point => point.category === layer.id);
 
-      if (layer.id === 'space') {
+      if (layer.topicOrderField) {
+        layerNews.sort((a, b) => (a[layer.topicOrderField] ?? Infinity) - (b[layer.topicOrderField] ?? Infinity));
+      } else if (layer.id === 'space') {
         layerNews = layerNews.sort((a, b) => {
           const orderDelta = (a.spaceOrder ?? Number.POSITIVE_INFINITY) - (b.spaceOrder ?? Number.POSITIVE_INFINITY);
           if (orderDelta !== 0) return orderDelta;
@@ -410,7 +413,7 @@ export class LayerPanel {
         layerNews = layerNews.sort((a, b) => dateSortDirection * (new Date(a.date) - new Date(b.date)));
       }
 
-      if (this.layerFilter === 'regional' && this.regionalContext) {
+      if (this.layerFilter === 'regional' && this.regionalContext && !layer.ignoreRegionalRadius) {
         const radius = Settings.get().regionalRadiusKm || 0;
         layerNews = layerNews.map(point => ({ ...point, _regionalDistance: RegionalLocationManager.distance(point, this.regionalContext) }))
           .filter(point => !radius || point._regionalDistance <= radius)

@@ -1,8 +1,8 @@
-const CACHE_NAME = 'topic-earth-shell-v18-world-regional-location';
+const CACHE_NAME = 'topic-earth-shell-v19-ambassador-pilot';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=world-regional-location-20261012',
+  './styles.css?v=ambassador-pilot-20261012',
   './site.webmanifest',
   './assets/logo/local/favicon.svg',
   './assets/logo/local/earth-128.svg',

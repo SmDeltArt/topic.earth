@@ -17,18 +17,19 @@ These working documents describe a proposed path from climate education to local
 | --- | --- |
 | [Next pilot steps (EN)](topic-earth-next-pilot-steps.md) | Checklist summarising the 9 October audit and the proposed 90-day commune pilot. |
 | [Prochaines étapes du projet pilote (FR)](topic-earth-prochaines-etapes-pilote-fr.md) | French version of the same pilot checklist. |
-| [Ambassadeur régional — exemple Wallonie (FR, HTML)](regional-ambassador-wallonia.html) | Regional story card explaining the proposed ambassador role, participation, safeguards and three local initiative examples. |
+| [Ambassadors — seven pilot circles](ambassadors/eu.html) | Linked HTML examples: EU, Belgium, Brussels (EN), Flanders (NL), Wallonia (FR), German-speaking Community (DE) and Anthisnes (FR). |
+| [Ambassador pilot governance](ambassadors/pilot-governance.md) | Bottom-up mandates, privacy, independent accounting, barter and basic operating funds; current capabilities and next decisions. |
 
-The ambassador example appears under **Regional → Community Projects** as
-“Wallonie — Ambassadeur régional topic.earth (exemple)”. Open its **Embedded HTML**
-presentation for the full story. “Wallonia.be” is a fictional grouping label,
-not an official website, appointed ambassador, approved ASBL or partnership.
-Its indicative map anchor near Spontin/Yvoir does not identify an office or meeting venue.
+Open **Regional → Ambassadors · citizen pilot** (also available in World).
+All seven examples remain visible in their numbered learning order, even with a distance filter.
+Other Regional initiatives continue to use distance ordering and filtering.
+The old standalone Wallonia topic has been replaced. Its previously shared HTML URL now shows the new Wallonia page.
 
-The checked-in story in `data/regional-ambassador-topics.js` is self-contained
-for sandboxed previews and topic exports. When changing it, keep its embedded
-HTML consistent with `docs/regional-ambassador-wallonia.html`. The SVG thumbnail
-lives in `assets/social/wallonia-ambassador-vignette.svg`.
+Each topic has a self-contained, script-free **Embedded HTML** presentation,
+local-language diagrams and links to all seven standalone pages. Below 620px, diagrams become readable stacked cards and content/navigation use one column. Source data:
+`data/regional-ambassador-topics.js`; pages: `docs/ambassadors/`; SVGs:
+`assets/social/ambassadors-*.svg`. Keep the HTML and embedded story consistent.
+All appointments, partnerships and governance mechanisms described are proposals.
 
 ## World and Regional controls
 
