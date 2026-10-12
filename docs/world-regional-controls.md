@@ -29,3 +29,7 @@ Run `node tools/check-world-regional.mjs` for mocked texture failures, Firefox A
 ## Ambassador pilot exception
 
 The Ambassador layer is an educational path with seven numbered examples. It stays first in Regional, keeps its EU-to-commune list order and is exempt from distance filters so the full explanation remains accessible. This is display order only: authority comes from the participating local groups. Its actions remain a transparent overlay above scrolling panel content.
+
+## Installation icons and Firefox
+
+Installation displays the current Earth-clock icon. The manifest, shortcuts, favicon/ICO and Apple touch icon use versioned URLs. An existing OS shortcut may retain its cached icon and need to be recreated. Firefox guidance allows a short texture-loading delay and points to the browser’s own installation controls; there is no forced browser switch. Firefox Windows web apps use the address-bar button when available, rather than the Chromium install-prompt API. See [Mozilla’s current guidance](https://support.mozilla.org/en-US/kb/web-apps-firefox-windows).

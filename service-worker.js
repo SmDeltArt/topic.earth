@@ -1,14 +1,16 @@
-const CACHE_NAME = 'topic-earth-shell-v19-ambassador-pilot';
+const CACHE_NAME = 'topic-earth-shell-v20-ambassador-install';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=ambassador-pilot-20261012',
-  './site.webmanifest',
-  './assets/logo/local/favicon.svg',
+  './styles.css?v=ambassador-install-20261012',
+  './site.webmanifest?v=earth-clock-20261012',
+  './assets/logo/local/favicon.svg?v=earth-clock-20261012',
   './assets/logo/local/earth-128.svg',
+  './assets/logo/local/favicon.ico?v=earth-clock-20261012',
+  './assets/logo/local/apple-touch-180.png?v=earth-clock-20261012',
   './assets/logo/local/brand-header.svg',
-  './assets/logo/local/pwa-192.png',
-  './assets/logo/local/pwa-512.png',
+  './assets/logo/local/pwa-192.png?v=earth-clock-20261012',
+  './assets/logo/local/pwa-512.png?v=earth-clock-20261012',
   './shared/topic-favicon.js?v=earth-clock-20261008'
 ];
 

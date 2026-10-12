@@ -24,19 +24,19 @@
   "lang": "en",
   "icons": [
     {
-      "src": "/assets/logo/local/favicon.svg",
+      "src": "/assets/logo/local/favicon.svg?v=earth-clock-20261012",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/assets/logo/local/pwa-192.png",
+      "src": "/assets/logo/local/pwa-192.png?v=earth-clock-20261012",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/logo/local/pwa-512.png",
+      "src": "/assets/logo/local/pwa-512.png?v=earth-clock-20261012",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -50,7 +50,7 @@
       "url": "/?mode=regional",
       "icons": [
         {
-          "src": "/assets/logo/local/pwa-192.png",
+          "src": "/assets/logo/local/pwa-192.png?v=earth-clock-20261012",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -63,7 +63,7 @@
       "url": "/?mode=main",
       "icons": [
         {
-          "src": "/assets/logo/local/pwa-192.png",
+          "src": "/assets/logo/local/pwa-192.png?v=earth-clock-20261012",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -76,7 +76,7 @@
       "url": "/?mode=space",
       "icons": [
         {
-          "src": "/assets/logo/local/pwa-192.png",
+          "src": "/assets/logo/local/pwa-192.png?v=earth-clock-20261012",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -89,7 +89,7 @@
       "url": "/?mode=fever",
       "icons": [
         {
-          "src": "/assets/logo/local/pwa-192.png",
+          "src": "/assets/logo/local/pwa-192.png?v=earth-clock-20261012",
           "sizes": "192x192",
           "type": "image/png"
         }

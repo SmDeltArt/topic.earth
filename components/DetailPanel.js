@@ -10,7 +10,7 @@ import { TopicTranslations, plainTopicText } from '../lib/topic-translations.mjs
 import { buildFeverAudioText, getFeverSpeedProfile } from '../lib/fever-audio-manifest.mjs?v=normal-20261008';
 import { getFeverWarmingTranslation } from '../lib/fever-warming-translations.js?v=topic-earth-fever-json-i18n-20260422';
 import { LocalStorage } from '../lib/storage.js?v=topic-earth-meteo-draft-20260531';
-import { pwaInstallManager } from '../lib/pwa-install-manager.js?v=topic-earth-secure-install-20261001';
+import { pwaInstallManager } from '../lib/pwa-install-manager.js?v=earth-clock-install-20261012';
 import { renderResponsiveMediaImage, installMediaFallbackHandler } from '../lib/responsive-media.mjs';
 import {
   createMediaToken as createTopicMediaToken,
@@ -11414,6 +11414,7 @@ Rules:
     const pwaCopy = frenchUi
       ? {
           label: 'Installer l application',
+          icon: 'Les nouveaux raccourcis utilisent l’icône Terre-horloge. Recréez un ancien raccourci si son icône ne se met pas à jour.',
           intro: 'Choisissez une vue, puis laissez le navigateur creer et proteger l application installee.',
           install: pwaState.installed ? 'Gerer l application installee' : 'Installer topic.earth',
           confirm: 'Continuer l installation',
@@ -11432,6 +11433,7 @@ Rules:
         }
       : {
           label: 'Install app',
+          icon: 'New shortcuts use the Earth-clock icon. Recreate an old shortcut if its icon does not update.',
           intro: 'Choose a view, then let the browser create and protect the installed app.',
           install: pwaState.installed ? 'Manage installed app' : 'Install topic.earth',
           confirm: 'Continue installation',
@@ -11448,6 +11450,9 @@ Rules:
             fever: ['Fever', 'Animated climate scenarios. WebGL2 required.']
           }
         };
+    const browserInstallAdvice = pwaState.browser.id === 'firefox' && frenchUi
+      ? 'Les textures peuvent prendre quelques secondes à apparaître. Sous Windows, utilisez le bouton d’application web de la barre d’adresse s’il est disponible ; sous Android, Ajouter à l’écran d’accueil.'
+      : pwaState.browser.advice;
     const accessCopy = frenchUi
       ? {
           label: 'Mode d acces',
@@ -11626,6 +11631,7 @@ Rules:
         <div class="section-label">${this.escapeHtml(pwaCopy.label)}</div>
         <p class="setting-hint pwa-install-intro">${this.escapeHtml(pwaCopy.intro)}</p>
         <div class="pwa-install-toolbar">
+          <img src="./assets/logo/local/pwa-192.png?v=earth-clock-20261012" width="40" height="40" alt="topic.earth Earth-clock icon" />
           <button class="btn-primary" data-action="open-install-dialog">
             ${this.escapeHtml(pwaCopy.install)}
           </button>
@@ -11633,7 +11639,8 @@ Rules:
             ${this.escapeHtml(pwaState.webgl2Supported ? pwaCopy.compatible : pwaCopy.incompatible)}
           </span>
         </div>
-        <div class="setting-hint">${this.escapeHtml(`${pwaState.browser.label}: ${pwaState.browser.advice}`)}</div>
+        <div class="setting-hint">${this.escapeHtml(`${pwaState.browser.label}: ${browserInstallAdvice}`)}</div>
+        <div class="setting-hint">${this.escapeHtml(pwaCopy.icon)}</div>
         <div id="pwa-action-status" class="pwa-action-status" role="status" aria-live="polite"></div>
         <dialog id="pwa-install-dialog" class="pwa-install-dialog" aria-labelledby="pwa-install-title">
           <div class="pwa-install-dialog-content">
@@ -11641,7 +11648,7 @@ Rules:
               <strong id="pwa-install-title">${this.escapeHtml(pwaCopy.label)}</strong>
               <button class="icon-btn" data-action="close-install-dialog" aria-label="${this.escapeHtml(pwaCopy.close)}">&times;</button>
             </div>
-            <p>${this.escapeHtml(`${pwaState.browser.label}: ${pwaState.browser.advice}`)}</p>
+            <p>${this.escapeHtml(`${pwaState.browser.label}: ${browserInstallAdvice}`)}</p>
             <div class="pwa-install-choice-label">${this.escapeHtml(pwaCopy.choose)}</div>
             <div class="pwa-install-mode-tabs" role="group" aria-label="${this.escapeHtml(pwaCopy.choose)}">
               ${Object.entries(pwaCopy.modes).map(([mode, details]) => {
