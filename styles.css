@@ -9813,16 +9813,8 @@ body.regional-mode #detail-panel.compact .detail-compact-summary { margin-top: 5
 .story-paint-button { display:flex; align-items:center; gap:8px; min-height:44px; padding:8px; background:var(--bg-card); border:1px solid var(--accent); color:var(--text-primary); border-radius:8px; cursor:pointer; }
 .story-paint-swatch { display:inline-block; width:36px; height:28px; border:1px solid var(--border); border-radius:6px; }
 .story-paint-clear { border:0; background:transparent; color:var(--text-secondary); text-align:left; cursor:pointer; padding:6px 0; }
-.story-color-picker-dialog { position:fixed; inset:0; width:100vw; height:100dvh; max-width:none; max-height:none; padding:0; margin:0; border:0; background:var(--bg-card); color:var(--text-primary); }
-.story-color-picker-dialog::backdrop { background:#000b; }
-.story-color-picker-toolbar { height:auto; min-height:56px; display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:8px max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left)); border-bottom:1px solid var(--border); }
-.story-color-picker-toolbar button { min-height:40px; padding:8px 12px; border:1px solid var(--accent); border-radius:8px; background:transparent; color:var(--text-primary); cursor:pointer; }
-.story-color-picker-toolbar a { margin-left:auto; color:var(--accent); font-size:12px; }
-.story-color-picker-dialog { display:none; flex-direction:column; }
-.story-color-picker-dialog[open] { display:flex; }
-.story-color-picker-dialog iframe { flex:1; min-height:0; width:100%; border:0; background:transparent; }
 @media(max-width:620px) { .story-paint-controls { grid-template-columns:1fr; } }
-.story-paint-button, .story-color-picker-toolbar button { font:inherit; }
+.story-paint-button { font:inherit; }
 
 /* Regional icons remain readable over pale map tiles; the header stays clear. */
 body.regional-mode #detail-panel .detail-toolbar button { background:rgba(16,24,36,.93); border-color:rgba(0,212,255,.6); backdrop-filter:blur(4px); }
@@ -9847,13 +9839,10 @@ body.regional-mode #detail-panel .detail-toolbar button:hover { background:rgba(
 .story-paint-control { display:flex; gap:4px; min-width:0; }
 .story-paint-button { flex:1; min-width:0; font-size:12px; }
 .story-paint-clear { padding:6px; min-width:32px; }
-.story-color-picker-dialog { position:fixed; inset:12px 12px auto auto; width:340px; height:min(740px,calc(100dvh - 24px)); max-height:calc(100dvh - 24px); margin:0; border:1px solid var(--accent); border-radius:12px; box-shadow:0 12px 45px #0009; }
-.story-color-picker-toolbar { min-height:44px; padding:6px; gap:4px; }
-.story-color-picker-toolbar a { width:100%; margin:0; text-align:center; font-size:10px; }
+.story-color-picker-frame { position:fixed; z-index:20; border:0; padding:0; margin:0; background:transparent; color-scheme:normal; }
 @media(max-width:620px) {
   .story-settings-workspace { grid-template-columns:1fr; gap:10px; }
   .story-settings-preview { position:relative; }
   .story-style-live-preview { height:180px; }
   .story-style-sample { min-height:100px; }
-  .story-color-picker-dialog { inset:auto 8px 8px auto; width:min(340px,calc(100vw - 16px)); height:58dvh; max-height:58dvh; }
 }

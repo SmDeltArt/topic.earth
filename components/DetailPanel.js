@@ -6974,7 +6974,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
       catch { status.textContent=this.t('topic.story.presetUnavailable'); }
     });
     dialog.querySelector('[data-content-apply]').addEventListener('click', () => {
-      // Confirm a picker choice first; closing it restores any unconfirmed live paint.
+      // The picker owns its controls; keep the latest valid live choice.
       this.storyColorPicker.close();
       const contentSettings = readSettings();
       this.topicFormState.topicStory = { ...story, themeMode, contentSettings, html: story.html ? TopicStoryContentManager.applySettings(story.html, contentSettings) : '' };

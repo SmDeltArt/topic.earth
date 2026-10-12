@@ -4263,16 +4263,15 @@
           if (!window.parent || window.parent === window) return;
           const r = scpEl.getBoundingClientRect();
           if (!r.width || !r.height) return;
-          // .scp no longer has overflow-y:auto so r.height is the true
-          // rendered height — the lower-scroll section caps itself at 315px
-          // so no feedback loop can occur.
+          // Report natural scroll height too: a short embedded viewport must
+          // be able to grow when its gradient controls are expanded.
           window.parent.postMessage(
             {
               type: "smart-widget",
               action: "scp:size",
               data: {
                 width: Math.ceil(r.width),
-                height: Math.ceil(r.height),
+                height: Math.ceil(Math.max(r.height, scpEl.scrollHeight + 2)),
               },
             },
             requestOrigin || window.location.origin,

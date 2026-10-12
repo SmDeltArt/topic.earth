@@ -2,7 +2,7 @@
 
 Open the admin Topic Story editor → 🎨 Content layout and theme. **Document background** and **Document panels** open the locally hosted Smart Color Picker.
 
-Choose a solid colour, transparency, or a linear/radial gradient. **Use this colour** confirms the picker choice in the settings draft; **Apply to HTML only** commits the settings to the story draft. Cancel does not change the story. **Keep original styling** removes that paint override.
+Choose a solid colour, transparency, or a linear/radial gradient. The picker’s own close button keeps the latest valid choice in the settings draft; **Apply to HTML only** commits those settings to the story draft. Closing the settings popup does not change the story. **Keep original styling** removes that paint override.
 
 Original HTML/CSS is retained. Validated background/panel overrides and structured gradient stops are stored in `topicStory.contentSettings`; CSS is included in the HTML so it follows save and topic exports. Subsequent AI text updates preserve it. The palette defaults still come from World, Regional, Space or Fever. These controls do not recolour the app interface.
 
@@ -15,7 +15,7 @@ The picker assets are added to the PWA cache. This makes the picker available of
 Open **🎨 beside the story type** (Carte narrative in French). These controls only style the story HTML. The app and map retain their own theme.
 
 - Click the miniature background, panel, title, text or link to choose that paint. The supplied document appears below in a script-free iframe; desktop/mobile buttons change its preview width.
-- The local Smart Color Picker stays in a small overlay. Changes appear immediately in the sample, swatch and document. **Use this colour** confirms the choice; Cancel restores it. Text and links accept solid colours; backgrounds, panels and headings also accept gradients.
+- The local Smart Color Picker stays in a small overlay. Changes appear immediately in the sample, swatch and document. The picker’s own close button retains the latest valid choice in the temporary document settings. No duplicate host buttons, frame or GitHub link are added. Its own drag handle moves the iframe, and its size messages resize the iframe when the gradient section opens. Closing the document-settings popup still discards those temporary document changes. Text and links accept solid colours; backgrounds, panels and headings also accept gradients.
 - Change text size, margins, line spacing, width and paragraph indentation without AI. List markers and h2/h3 numbering use reversible CSS. Supplied text, links, media and original styles remain in the HTML. An author can exclude a heading using `class="no-numbering"`; existing handwritten numbers remain, so leave automatic numbering off for already numbered documents.
 - Four palette buttons offer World, Regional, Space and Fever document defaults. 💾 saves one manual preset per palette on this browser/device; ↺ loads it. Presets do not change the app theme or apply silently to other documents.
 - **Apply to HTML only** saves the document settings and CSS into the draft. Closing the formatting popup leaves the draft unchanged. Saving a preset is a separate explicit local action.
