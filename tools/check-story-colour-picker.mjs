@@ -44,12 +44,11 @@ listener({...event,source:{}});assert.equal(previews.length,0);
 listener(event);assert.equal(previews.length,1);assert.equal(confirmed.length,0);
 listener({...event,data:{...event.data,data:{hex:'bad'}}});assert.equal(previews.length,1);
 const message=(action,data)=>listener({...event,data:{type:'smart-widget',action,data}});
-message('scp:size',{width:296,height:400});assert.equal(frame.style.width,'304px');assert.equal(frame.style.height,'408px');
-message('scp:size',{width:296,height:650});assert.equal(frame.style.height,'658px');
-const oldLeft=parseFloat(frame.style.left);
-message('scp:dragDelta',{dx:-100,dy:20});assert.equal(parseFloat(frame.style.left),oldLeft);
-message('scp:dragStart',{});message('scp:dragDelta',{dx:-100,dy:20});assert.equal(parseFloat(frame.style.left),oldLeft-100);
-message('scp:dragEnd',{});message('scp:close',event.data.data);
+const beforeGeometry=frame.getAttribute('style');
+message('scp:size',{width:296,height:400});
+message('scp:dragStart',{});message('scp:dragDelta',{dx:-100,dy:20});message('scp:dragEnd',{});
+assert.equal(frame.getAttribute('style'),beforeGeometry,'Overlay geometry belongs to the picker, not host messages');
+message('scp:close',event.data.data);
 assert.equal(confirmed.length,1);assert.equal(confirmed[0].hex,'#ffffff');assert.equal(picker.dialog,null);assert.equal(listener,null);assert.equal(cancelled,0);
 picker.open({onApply:paint=>confirmed.push(paint),onCancel:()=>cancelled++});
 const frame2=picker.dialog;frame2.dispatchEvent(new document.defaultView.Event('load'));
@@ -62,7 +61,7 @@ for(const match of local.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))new v
 const serviceWorker=await readFile(new URL('../service-worker.js',import.meta.url),'utf8');
 assert.ok(serviceWorker.includes("'./assets/widgets/color/smart-color-picker.html?embed=overlay'"));
 assert.ok(serviceWorker.includes('caches.match(event.request).then(cached => cached ||'));
-console.log('Local picker: solid/linear/radial/alpha, saved gradients, retained CSS, origin/source checks, native close/drag/resize, gradient restoration, script syntax and offline asset cache passed.');
+console.log('Local picker: solid/linear/radial/alpha, saved gradients, retained CSS, origin/source checks, full-screen overlay/native close, gradient restoration, script syntax and offline asset cache passed.');
 // New document controls use validated CSS and remain reversible without text rewriting.
 const layout=Content.normalizeSettings({titlePaint:gradient,textPaint:{kind:'solid',hex:'#172032'},linkPaint:{kind:'solid',hex:'#00d4ff'},indent:2,headingNumbering:'decimal',listStyle:'lower-alpha'});
 assert.ok(Content.contentCss(layout).includes('background-clip:text'));
@@ -82,3 +81,10 @@ listener({...event,source:currentFrame.contentWindow,data:{type:'smart-widget',a
 assert.equal(live.length,1);
 assert.equal(live.length,1);picker.close({cancel:true});assert.equal(cancelled,beforeCancelled+1);
 console.log('Title/text/link paint validation, reversible heading/list/indent CSS and live-preview rollback passed.');
+
+const styles=await readFile(new URL('../styles.css',import.meta.url),'utf8');
+assert.match(styles,/\.story-color-picker-frame \{[^}]*inset:0;[^}]*width:100vw;[^}]*height:100dvh;/);
+assert.ok(styles.includes('@media(max-width:900px)'));
+assert.ok(styles.includes('@media(max-width:480px)'));
+assert.ok(local.includes('!isOverlayMode &&'),'The picker handles dragging locally in overlay mode');
+console.log('Full-viewport transparent overlay, ignored host drag/size messages and responsive settings breakpoints passed.');

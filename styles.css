@@ -9839,10 +9839,38 @@ body.regional-mode #detail-panel .detail-toolbar button:hover { background:rgba(
 .story-paint-control { display:flex; gap:4px; min-width:0; }
 .story-paint-button { flex:1; min-width:0; font-size:12px; }
 .story-paint-clear { padding:6px; min-width:32px; }
-.story-color-picker-frame { position:fixed; z-index:20; border:0; padding:0; margin:0; background:transparent; color-scheme:normal; }
+.story-color-picker-frame { position:fixed; inset:0; width:100vw; height:100dvh; max-width:none; max-height:none; z-index:20; border:0; padding:0; margin:0; background:transparent; color-scheme:normal; }
 @media(max-width:620px) {
   .story-settings-workspace { grid-template-columns:1fr; gap:10px; }
   .story-settings-preview { position:relative; }
   .story-style-live-preview { height:180px; }
   .story-style-sample { min-height:100px; }
+}
+
+/* Document settings fit narrow desktops, landscape phones and mobile keyboards. */
+.topic-content-settings-dialog { max-height:calc(100dvh - 24px); overflow:auto; overscroll-behavior:contain; }
+.story-settings-workspace > form,.story-layout-controls > label { min-width:0; }
+.topic-content-settings-dialog input:not([type="checkbox"]),.topic-content-settings-dialog select { width:100%; min-width:0; box-sizing:border-box; font-size:16px; }
+.story-settings-header strong { min-width:0; overflow-wrap:anywhere; font-size:16px; }
+.story-settings-header button { flex-shrink:0; }
+.story-paint-swatch { flex-shrink:0; }
+.story-paint-button { white-space:normal; overflow-wrap:anywhere; text-align:left; }
+.topic-content-settings-dialog .topic-story-actions { flex-wrap:wrap; }
+@media(max-width:900px) {
+  .story-settings-workspace { grid-template-columns:minmax(0,1fr); gap:10px; }
+  .story-settings-preview { position:relative; }
+  .story-style-live-preview { height:180px; }
+}
+@media(max-width:480px) {
+  .topic-content-settings-dialog { width:calc(100vw - 12px); max-height:calc(100dvh - 12px); padding:10px; margin:auto; }
+  .story-paint-controls { grid-template-columns:minmax(0,1fr); }
+  .story-paint-button { font-size:14px; }
+  .story-layout-controls { gap:8px; }
+  .story-layout-controls label { font-size:12px; overflow-wrap:anywhere; }
+  .story-paint-clear,.topic-content-settings-dialog .topic-story-theme-tabs button { min-width:44px; min-height:44px; }
+}
+@media(max-height:500px) {
+  .story-settings-workspace { grid-template-columns:minmax(0,1fr); }
+  .story-settings-preview { position:relative; }
+  .story-style-live-preview { height:120px; }
 }
