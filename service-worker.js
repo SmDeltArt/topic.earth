@@ -1,4 +1,4 @@
-const CACHE_NAME = 'topic-earth-shell-v29-story-media';
+const CACHE_NAME = 'topic-earth-shell-v30-story-media-ui';
 const APP_SHELL = [
   './',
   './assets/widgets/color/smart-color-picker.html',
@@ -11,7 +11,7 @@ const APP_SHELL = [
   './lib/topic-story-labels.mjs?v=story-media-20261013',
   './lib/zip-content-scan.mjs?v=story-media-20261013',
   './index.html',
-  './styles.css?v=story-media-20261013',
+  './styles.css?v=story-media-ui-20261013',
   './site.webmanifest?v=earth-clock-20261012',
   './assets/logo/local/favicon.svg?v=earth-clock-20261012',
   './assets/logo/local/earth-128.svg',

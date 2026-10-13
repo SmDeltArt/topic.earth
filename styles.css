@@ -9824,6 +9824,10 @@ body.regional-mode #detail-panel .detail-toolbar button:hover { background:rgba(
 .story-format-icon { min-width:44px; min-height:44px; border:1px solid var(--accent); border-radius:8px; background:var(--bg-card); color:var(--text-primary); font-size:20px; cursor:pointer; }
 .topic-content-settings-dialog { width:min(960px,calc(100vw - 24px)); box-sizing:border-box; padding:12px; }
 .story-settings-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+.story-settings-header { position:sticky; top:-12px; z-index:5; padding:12px 0; background:var(--bg-card); border-bottom:1px solid var(--border); }
+.topic-content-settings-dialog :is(button,input:not([type="checkbox"]),select) { background:var(--bg-card); color:var(--text-primary); border:1px solid var(--accent); border-radius:8px; font:inherit; min-height:44px; }
+.topic-content-settings-dialog input[type="checkbox"] { accent-color:var(--accent); }
+.topic-content-settings-dialog button { cursor:pointer; }
 .story-settings-header button { min-width:44px; min-height:44px; }
 .story-settings-workspace { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; }
 .story-settings-preview { min-width:0; position:sticky; top:0; align-self:start; }
