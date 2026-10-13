@@ -35,7 +35,8 @@ const picker=new StoryColorPickerManager();picker.url=new URL('https://www.topic
 let confirmed=[],previews=[],cancelled=0;
 picker.open({paint:gradient,onApply:paint=>confirmed.push(paint),onPreview:paint=>previews.push(paint),onCancel:()=>cancelled++});
 const frame=picker.dialog;frame.dispatchEvent(new document.defaultView.Event('load'));
-assert.equal(frame.tagName,'IFRAME');assert.equal(frame.parentElement.id,'topic-content-settings-dialog');
+assert.equal(frame.tagName,'IFRAME');assert.equal(frame.parentElement.className,'story-color-picker-surface');
+assert.equal(frame.parentElement.parentElement,document.body);assert.equal(frame.parentElement.open,true);
 assert.equal(frame.querySelectorAll('button,a').length,0);
 assert.equal(sent[0].origin,'https://www.topic.earth');assert.equal(sent[1].msg.action,'scp:setGradient');assert.equal(sent[1].msg.data.stops.length,2);
 const event={origin:'https://www.topic.earth',source:frame.contentWindow,data:{type:'smart-widget',action:'scp:color',data:{hex:'#ffffff',rgba:{a:1},gradientActive:false}}};
@@ -59,7 +60,7 @@ assert.ok(local.includes('requestOrigin || window.location.origin'));
 assert.ok(local.includes('Array.isArray(d.stops)'));
 for(const match of local.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))new vm.Script(match[1]);
 const serviceWorker=await readFile(new URL('../service-worker.js',import.meta.url),'utf8');
-assert.ok(serviceWorker.includes("'./assets/widgets/color/smart-color-picker.html?embed=overlay&v=picker-world-20261013'"));
+assert.ok(serviceWorker.includes("'./assets/widgets/color/smart-color-picker.html?embed=overlay&v=story-media-20261013'"));
 assert.ok(serviceWorker.includes('caches.match(event.request).then(cached => cached ||'));
 console.log('Local picker: solid/linear/radial/alpha, saved gradients, retained CSS, origin/source checks, full-screen overlay/native close, gradient restoration, script syntax and offline asset cache passed.');
 // New document controls use validated CSS and remain reversible without text rewriting.

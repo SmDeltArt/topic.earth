@@ -1,5 +1,6 @@
 import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=topic-proxy-bridge-20261013';
 import { RegionalLocationManager } from './lib/regional-location.mjs';
+import { TopicStoryMedia } from './lib/topic-story-media.mjs?v=story-media-20261013';
 import { GlobeRenderer } from './lib/globe.js?v=local-colour-picker-20261012';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LAYERS } from './data/layers.js?v=local-colour-picker-20261012';
@@ -16,7 +17,7 @@ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js
 import { TopBar } from './components/TopBar.js?v=cloudinary-fallback-20261008';
 import { RegionalMap } from './components/RegionalMap.js?v=local-colour-picker-20261012';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-proxy-bridge-20261013';
-import { DetailPanel } from './components/DetailPanel.js?v=topic-proxy-bridge-20261013';
+import { DetailPanel } from './components/DetailPanel.js?v=story-media-20261013';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -2047,11 +2048,38 @@ class TopicEarthApp {
     const content = document.getElementById('detail-content');
     const selected = selection?.rangeCount && content?.contains(selection.anchorNode)
       && content.contains(selection.focusNode) ? selection.toString().trim() : '';
+    if (!selected && topic.topicStory?.html && topic.topicStory.enabled !== false) return this.openStoryReadingPopup(topic, topic.topicStory);
     const originalText = selected || plainTopicText([topic.title, topic.summary, topic.insight].filter(Boolean).join('. '));
     return this.openReadingPopup({
       originalText, topic, fullTopic: !selected,
       sourceLanguage: selected ? content.dataset.contentLanguage || topic.language || 'en' : topic.language || 'en'
     });
+  }
+
+  async openStoryReadingPopup(topic, story) {
+    const settings = Settings.get();
+    const sourceLanguage = LanguageManager.normalizeLanguageCode(topic?.language || 'en');
+    const language = LanguageManager.normalizeLanguageCode(settings.translationLanguage || this.getCurrentUiLanguage(settings));
+    const html = this.detailPanel.wrapTopicStoryHtml(story.html, {...story,language:sourceLanguage});
+    this.showTTSVignette({mode:'HTML · Translate + Read', topic, originalText:TopicStoryMedia.readingText(html),
+      languageLabel:LanguageManager.getLanguageInfo(language)?.nativeName || language,
+      speechLang:LanguageManager.getSpeechCode(language), status:'Preparing story translation…'});
+    const id = this.ttsVignetteState.id;
+    this.updateTTSVignette({storySourceHtml:html,storyHtml:null,storyLanguage:language});
+    try {
+      let result = {html,text:TopicStoryMedia.readingText(html)};
+      if (language !== sourceLanguage) result = await TopicStoryMedia.translate(html,language,
+        text=>ReadTranslationService.translateText(text,language,{sourceLanguage,detectSource:false,allowFreeApi:true}),
+        {isActive:()=>this.isActiveTTSVignette(id),onProgress:(done,total)=>{ if (this.isActiveTTSVignette(id)) this.updateTTSVignette({status:`Translating story ${done}/${total}…`}); }});
+      if (!this.isActiveTTSVignette(id)) return;
+      this.updateTTSVignette({translatedText:result.text,storyHtml:result.html,provider:language === sourceLanguage ? 'original' : 'story',
+        status:result.untranslated ? `${result.untranslated} fragment(s) kept in the original language. Review the HTML preview before saving.` : 'Story ready. HTML keeps document layout and media. Read, save HTML, JSON or MP3.'});
+      this.speakFromVignette(result.text,LanguageManager.getSpeechCode(language));
+    } catch (error) {
+      if (!this.isActiveTTSVignette(id)) return;
+      this.updateTTSVignette({translatedText:TopicStoryMedia.readingText(html),storyHtml:html,storyLanguage:sourceLanguage,
+        speechLang:LanguageManager.getSpeechCode(sourceLanguage),provider:'original',status:`Original HTML kept: ${error.message}`});
+    }
   }
 
   async openReadingPopup({ originalText, sourceLanguage = 'en', topic = null, fullTopic = false, translate = true, autoRead = true }) {
@@ -2130,6 +2158,7 @@ class TopicEarthApp {
         <button type="button" class="tts-vignette-btn" data-tts-vignette-action="replay">Read</button>
         <button type="button" class="tts-vignette-btn stop" data-tts-vignette-action="stop">Stop</button>
         <button type="button" class="tts-vignette-btn" data-tts-vignette-action="save-json" aria-label="Save JSON locally" title="Save this text in the topic JSON and future ZIP exports">💾 JSON</button>
+        <button type="button" class="tts-vignette-btn" data-tts-vignette-action="save-html" title="Save story layout, translated text and media" hidden>💾 HTML</button>
         <button type="button" class="tts-vignette-btn" data-tts-vignette-action="save-mp3" aria-label="Save MP3" title="Download audio from the configured speech API" hidden>🎵 MP3</button>
       </div>
     `;
@@ -2155,6 +2184,8 @@ class TopicEarthApp {
 
       if (action === 'save-json') {
         this.saveVignetteJSON();
+      } else if (action === 'save-html') {
+        this.saveVignetteHTML();
       } else if (action === 'save-mp3') {
         this.saveVignetteMP3();
       } else if (action === 'close') {
@@ -2210,7 +2241,14 @@ class TopicEarthApp {
 
     const state = this.ttsVignetteState;
     const editor = this.ttsVignette.querySelector('[data-tts-vignette-translated]');
-    if (editor) editor.contentEditable = state.translatedText ? 'plaintext-only' : 'false';
+    if (editor) editor.contentEditable = state.translatedText && !state.storySourceHtml ? 'plaintext-only' : 'false';
+    const htmlButton = this.ttsVignette.querySelector('[data-tts-vignette-action="save-html"]');
+    if (htmlButton) { htmlButton.hidden = !state.storySourceHtml; htmlButton.disabled = !state.storyHtml; }
+    if (Object.prototype.hasOwnProperty.call(update,'storyHtml') && state.storyHtml) {
+      let preview = this.ttsVignette.querySelector('.tts-vignette-html-preview');
+      if (!preview) { preview = document.createElement('iframe'); preview.className = 'tts-vignette-html-preview'; preview.setAttribute('sandbox',''); preview.setAttribute('referrerpolicy','no-referrer'); preview.title = 'Translated story preview'; this.ttsVignette.querySelector('.tts-vignette-body').appendChild(preview); }
+      preview.srcdoc = state.storyHtml;
+    }
     const jsonButton = this.ttsVignette.querySelector('[data-tts-vignette-action="save-json"]');
     if (jsonButton) jsonButton.disabled = !state.translatedText;
     const mp3Button = this.ttsVignette.querySelector('[data-tts-vignette-action="save-mp3"]');
@@ -2219,6 +2257,7 @@ class TopicEarthApp {
       mp3Button.disabled = !state.translatedText || Boolean(state.savingMP3);
     }
     const providerLabels = {
+      story: 'Translated story document',
       ai: 'Configured AI translation',
       csv: 'Saved UI translation',
       mymemory: 'MyMemory free translation',
@@ -2332,6 +2371,15 @@ class TopicEarthApp {
         ? 'JSON saved locally. Included when this topic is exported to ZIP for Admin upload.'
         : 'JSON saved locally. Select text from a topic to include it in a topic ZIP.' });
     } catch (error) { this.updateTTSVignette({ status: `JSON save failed: ${error.message}` }); }
+  }
+
+  saveVignetteHTML() {
+    const state = this.ttsVignetteState;
+    if (!state?.storyHtml) return;
+    // Make site-local media portable; imported ZIP media are already embedded.
+    const html = TopicStoryMedia.resolve(state.storyHtml,[],(path)=>path.startsWith('/assets/') ? new URL(path,window.location.origin).href : path);
+    this.downloadVignetteFile(new Blob([html],{type:'text/html;charset=utf-8'}),'html', {...state,speechLang:state.storyLanguage || state.speechLang});
+    this.updateTTSVignette({status:'HTML downloaded. Imported assets are embedded; remote media keep their URLs.'});
   }
 
   async saveVignetteMP3() {
@@ -2869,6 +2917,7 @@ class TopicEarthApp {
     const container = document.getElementById('detail-panel');
     this.detailPanel = new DetailPanel(container, this.allLayers, {
       onReadTopic: topic => this.openTopicReadPopup(topic),
+      onReadStory: (topic,story) => this.openStoryReadingPopup(topic,story),
       onShow: (point) => {
         if (this.currentLayerFilter === 'regional' && this.regionalMap?.visible && this.isRegionalTopic(point)) {
           const lat = Number(point?.lat);

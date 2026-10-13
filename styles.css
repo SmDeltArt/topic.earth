@@ -9840,6 +9840,16 @@ body.regional-mode #detail-panel .detail-toolbar button:hover { background:rgba(
 .story-paint-button { flex:1; min-width:0; font-size:12px; }
 .story-paint-clear { padding:6px; min-width:32px; }
 .story-color-picker-frame { position:fixed; inset:0; width:100vw; height:100dvh; max-width:none; max-height:none; z-index:20; border:0; padding:0; margin:0; background:transparent; color-scheme:normal; }
+.story-color-picker-surface { position:fixed; inset:0; width:100vw; height:100dvh; max-width:none; max-height:none; margin:0; padding:0; border:0; outline:0; background:transparent; box-shadow:none; overflow:hidden; }
+.story-color-picker-surface::backdrop { background:transparent; backdrop-filter:none; }
+.story-media-controls { min-width:0; border:1px solid var(--accent); border-radius:10px; padding:10px; }
+.story-media-controls .story-layout-controls { margin-block:10px; }
+.story-media-controls input:not([type="checkbox"]),.story-media-controls select { width:100%; min-width:0; box-sizing:border-box; }
+.story-media-controls .story-media-checks { display:flex; flex-wrap:wrap; gap:12px; }
+.story-media-controls .story-media-checks label { display:flex; align-items:center; gap:5px; }
+.story-media-controls [role="status"] { overflow-wrap:anywhere; }
+.topic-story-read-controls { position:absolute; z-index:2; top:8px; left:8px; min-height:44px; border:1px solid var(--accent); border-radius:10px; background:#071019e8; color:#e8eaed; cursor:pointer; }
+.tts-vignette-html-preview { width:100%; height:240px; border:0; background:transparent; }
 @media(max-width:620px) {
   .story-settings-workspace { grid-template-columns:1fr; gap:10px; }
   .story-settings-preview { position:relative; }

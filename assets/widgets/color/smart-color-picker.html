@@ -1097,7 +1097,7 @@
         outline-offset: 2px;
         border-radius: 3px;
       }
-      /* The host owns the small overlay; all controls remain reachable in short mobile frames. */
+      /* In the full-screen transparent overlay, keep native controls reachable on short screens. */
       body.scp-iframe-mode .scp {
         width:min(296px,calc(100vw - 8px));
         max-height:calc(100dvh - 8px);

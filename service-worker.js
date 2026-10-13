@@ -1,14 +1,17 @@
-const CACHE_NAME = 'topic-earth-shell-v28-topic-proxy-bridge';
+const CACHE_NAME = 'topic-earth-shell-v29-story-media';
 const APP_SHELL = [
   './',
   './assets/widgets/color/smart-color-picker.html',
-  './assets/widgets/color/smart-color-picker.html?embed=overlay&v=picker-world-20261013',
+  './assets/widgets/color/smart-color-picker.html?embed=overlay&v=story-media-20261013',
   './assets/widgets/color/smart-colorset.json',
   './assets/widgets/color/smart-color-picker.i18n.csv',
-  './lib/story-color-picker.mjs?v=picker-world-20261013',
-  './lib/topic-story-content.mjs?v=picker-world-20261013',
+  './lib/story-color-picker.mjs?v=story-media-20261013',
+  './lib/topic-story-content.mjs?v=story-media-20261013',
+  './lib/topic-story-media.mjs?v=story-media-20261013',
+  './lib/topic-story-labels.mjs?v=story-media-20261013',
+  './lib/zip-content-scan.mjs?v=story-media-20261013',
   './index.html',
-  './styles.css?v=topic-proxy-bridge-20261013',
+  './styles.css?v=story-media-20261013',
   './site.webmanifest?v=earth-clock-20261012',
   './assets/logo/local/favicon.svg?v=earth-clock-20261012',
   './assets/logo/local/earth-128.svg',
