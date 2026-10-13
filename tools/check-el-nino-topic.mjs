@@ -6,6 +6,7 @@ assert.ok(topic.topicStory.html.includes('80% of 13 seasonal models'));
 assert.equal((topic.topicStory.html.match(/<tr>/g)||[]).length,24);
 assert.equal((topic.topicStory.html.match(/class="fact(?: safe)?"/g)||[]).length,9);
 assert.ok(!/<script\b/i.test(topic.topicStory.html));
+assert.ok(!/href=["'](?:#|\/)/i.test(topic.topicStory.html),'Embedded story must not navigate to the parent app');
 assert.ok(topic.topicStory.html.includes('2025 assessment'));
 for(const path of topic.mediaImages){const data=await readFile(new URL('..'+path,import.meta.url));assert.equal(data.subarray(1,4).toString(),'PNG');}
 assert.ok(topic.researchSources.some(s=>s.url.includes('noaa.gov')&&s.verified));

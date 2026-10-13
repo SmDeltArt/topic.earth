@@ -1,4 +1,4 @@
-const CACHE_NAME = 'topic-earth-shell-v26-picker-world';
+const CACHE_NAME = 'topic-earth-shell-v27-el-nino-no-app-links';
 const APP_SHELL = [
   './',
   './assets/widgets/color/smart-color-picker.html',
@@ -8,7 +8,7 @@ const APP_SHELL = [
   './lib/story-color-picker.mjs?v=picker-world-20261013',
   './lib/topic-story-content.mjs?v=picker-world-20261013',
   './index.html',
-  './styles.css?v=picker-world-20261013',
+  './styles.css?v=el-nino-no-app-links-20261013',
   './site.webmanifest?v=earth-clock-20261012',
   './assets/logo/local/favicon.svg?v=earth-clock-20261012',
   './assets/logo/local/earth-128.svg',

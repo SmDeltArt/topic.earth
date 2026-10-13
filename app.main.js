@@ -1,4 +1,4 @@
-import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=picker-world-20261013';
+import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=el-nino-no-app-links-20261013';
 import { RegionalLocationManager } from './lib/regional-location.mjs';
 import { GlobeRenderer } from './lib/globe.js?v=local-colour-picker-20261012';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
