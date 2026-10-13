@@ -643,6 +643,10 @@ export class DetailPanel {
         this.submitTopic('save');
       } else if (action === 'manage-sources') {
         this.manageSources();
+      } else if (action === 'open-cyclone-enso') {
+        this.callbacks.onRelatedTopic?.('world-godzilla-el-nino-2026');
+      } else if (action === 'refresh-cyclones') {
+        this.refreshCycloneData(target);
       } else if (action === 'translate-topic') {
         this.translateCurrentTopic(target);
       } else if (action === 'read-topic') {
@@ -3050,6 +3054,14 @@ Keep response concise (3-4 sentences).`;
     this.callbacks.onReadTopic?.(topic);
   }
 
+  async refreshCycloneData(button) {
+    if (!this.callbacks.onRefreshCyclones || button.disabled) return;
+    const label=button.textContent; button.disabled=true;
+    button.textContent=this.getCurrentLanguage().startsWith('fr') ? 'Vérification des sources…' : 'Checking sources…';
+    try { await this.callbacks.onRefreshCyclones(); }
+    finally { if(button.isConnected) {button.textContent=label;button.disabled=false;} }
+  }
+
   renderDetail(point) {
     this.updateTopicLanguageControls();
     const originalPoint = point;
@@ -3232,6 +3244,7 @@ Keep response concise (3-4 sentences).`;
     const topicStoryHtml = this.renderTopicStoryBadge(point.topicStory);
 
     content.innerHTML = `
+      ${point.category === 'tropical-cyclones' ? `<div class="topic-story-actions"><button type="button" class="btn-media-action" data-action="open-cyclone-enso">🌍 El Niño 2026–2027</button><button type="button" class="btn-media-action" data-action="refresh-cyclones">↻ ${this.getCurrentLanguage().startsWith('fr') ? 'Actualiser les cyclones' : 'Refresh cyclone data'}</button></div>` : ''}
       <div class="detail-header" data-tutorial-id="topic-detail">
         <div class="detail-category" style="background: ${layer.color}33; color: ${layer.color}">
           ${layer.icon} ${layer.name}

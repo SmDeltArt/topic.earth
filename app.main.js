@@ -1,9 +1,10 @@
 import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=topic-proxy-bridge-20261013';
 import { RegionalLocationManager } from './lib/regional-location.mjs';
+import { CYCLONE_LAYER_ID, fetchLiveCyclones, buildCycloneTopics, validateCycloneSnapshot } from './lib/tropical-cyclones.mjs?v=cyclones-20261013';
 import { TopicStoryMedia } from './lib/topic-story-media.mjs?v=story-media-20261013';
-import { GlobeRenderer } from './lib/globe.js?v=local-colour-picker-20261012';
+import { GlobeRenderer } from './lib/globe.js?v=cyclones-20261013';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
-import { LAYERS } from './data/layers.js?v=local-colour-picker-20261012';
+import { LAYERS } from './data/layers.js?v=cyclones-20261013';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
 import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-climate-studies-watch-20260601';
 import { REGIONAL_AMBASSADOR_TOPICS } from './data/regional-ambassador-topics.js?v=local-colour-picker-20261012';
@@ -17,7 +18,7 @@ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js
 import { TopBar } from './components/TopBar.js?v=cloudinary-fallback-20261008';
 import { RegionalMap } from './components/RegionalMap.js?v=local-colour-picker-20261012';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-proxy-bridge-20261013';
-import { DetailPanel } from './components/DetailPanel.js?v=story-media-20261013';
+import { DetailPanel } from './components/DetailPanel.js?v=cyclones-20261013';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -76,6 +77,10 @@ class TopicEarthApp {
     this.feverDebugBar = null;
     this.tippingDraftState = null;
     this.realtimeMeteoPoints = [];
+    this.cyclonePoints = buildCycloneTopics({pending:true,fetchedAt:new Date().toISOString(),storms:[],sources:{nhc:{ok:false},jma:{ok:false},jtwc:{ok:false}},coverage:'Worldwide agency watch: Atlantic, Pacific, Indian Ocean and Australian region.'});
+    this.cycloneSnapshot = null;
+    this.cycloneRefreshPromise = null;
+    this.cycloneLastFetchTime = 0;
     this.meteoRealtimeStatus = null;
     this.meteoRefreshPromise = null;
     this.meteoLastFetchTime = 0;
@@ -141,7 +146,7 @@ class TopicEarthApp {
     const baseIds = new Set(basePoints.map(point => String(point.id)));
     const customOnlyPoints = this.customPoints.filter(point => point && !baseIds.has(String(point.id)));
 
-    this.allPoints = [...mergedBasePoints, ...customOnlyPoints, ...this.realtimeMeteoPoints, ...this.climateIndicatorPoints, ...this.goodInitiativePoints];
+    this.allPoints = [...mergedBasePoints, ...customOnlyPoints, ...this.realtimeMeteoPoints, ...(this.cyclonePoints || []), ...this.climateIndicatorPoints, ...this.goodInitiativePoints];
     return this.allPoints;
   }
 
@@ -205,6 +210,7 @@ class TopicEarthApp {
     this.refreshRealtimeMeteo({ launchAuto: true });
     this.refreshClimateIndicators({ launchAuto: true });
     this.refreshGoodInitiatives({ launchAuto: true });
+    this.startCycloneRefresh();
 
     // Setup news update button
     this.setupNewsUpdate();
@@ -2717,6 +2723,11 @@ class TopicEarthApp {
           });
           return;
         }
+        if (layerId === CYCLONE_LAYER_ID) {
+          if (visible) this.refreshTropicalCyclones({force:!this.cycloneSnapshot});
+          this.updateMarkersByFilter(this.currentLayerFilter);
+          return;
+        }
         if (this.handleRealtimeMeteoLayerToggle(layerId, visible)) {
           return;
         }
@@ -2859,6 +2870,7 @@ class TopicEarthApp {
   }
 
   focusGlobePoint(point = {}) {
+    if (point.hideGlobeMarker) return false;
     const lat = Number(point?.lat);
     const lon = Number(point?.lon);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
@@ -2918,6 +2930,8 @@ class TopicEarthApp {
     this.detailPanel = new DetailPanel(container, this.allLayers, {
       onReadTopic: topic => this.openTopicReadPopup(topic),
       onReadStory: (topic,story) => this.openStoryReadingPopup(topic,story),
+      onRelatedTopic: id => { const point=this.allPoints.find(item=>String(item.id)===String(id)); if(point) this.selectPointFromPanel(point); },
+      onRefreshCyclones: () => this.refreshTropicalCyclones({force:true}),
       onShow: (point) => {
         if (this.currentLayerFilter === 'regional' && this.regionalMap?.visible && this.isRegionalTopic(point)) {
           const lat = Number(point?.lat);
@@ -3073,6 +3087,7 @@ class TopicEarthApp {
     this.globe.removeAllMarkers();
     
     const markerPoints = this.allPoints.filter(point =>
+      !point.hideGlobeMarker &&
       !point.isSpaceTopic &&
       Number.isFinite(Number(point.lat)) &&
       Number.isFinite(Number(point.lon))
@@ -3144,6 +3159,7 @@ class TopicEarthApp {
       }
     });
 
+    this.globe.updateMarkerVisibility(CYCLONE_LAYER_ID, filter === 'main' && activeLayers.has(CYCLONE_LAYER_ID));
     this.syncRealtimeMeteoLayers(filter, activeLayers);
   }
   
@@ -3220,6 +3236,41 @@ class TopicEarthApp {
 
     this.globe.setCloudLayerVisible(showClouds, cloudLayer?.renderer || {});
     this.globe.updateMarkerVisibility(METEO_REALTIME_LAYER_ID, showLiveMeteo);
+  }
+
+  startCycloneRefresh() {
+    try {
+      const saved=window.localStorage.getItem('topicEarthCyclonesV1');
+      if (saved) { this.cycloneSnapshot=validateCycloneSnapshot(JSON.parse(saved)); this.cycloneSnapshot.storms=this.cycloneSnapshot.storms.map(storm=>({...storm,sourceUnavailable:true})); }
+    } catch { this.cycloneSnapshot=null; }
+    this.refreshTropicalCyclones({force:true});
+    if (this.cycloneRefreshTimer) window.clearInterval(this.cycloneRefreshTimer);
+    this.cycloneRefreshTimer=window.setInterval(()=>{
+      if (!document.hidden && this.currentLayerFilter === 'main' && this.getActiveLayersForFilter('main').has(CYCLONE_LAYER_ID)) this.refreshTropicalCyclones();
+    },10*60*1000);
+    document.addEventListener('visibilitychange',()=>{
+      if (!document.hidden && this.currentLayerFilter === 'main' && this.getActiveLayersForFilter('main').has(CYCLONE_LAYER_ID)) this.refreshTropicalCyclones();
+    });
+  }
+
+  async refreshTropicalCyclones({force=false}={}) {
+    if (this.cycloneRefreshPromise) return this.cycloneRefreshPromise;
+    if (!force && this.cycloneSnapshot && Date.now()-this.cycloneLastFetchTime < 10*60*1000) return this.cycloneSnapshot;
+    this.cycloneRefreshPromise=fetchLiveCyclones({previous:this.cycloneSnapshot}).then(snapshot=>{
+      this.cycloneSnapshot=snapshot; this.cycloneLastFetchTime=Date.now();
+      this.cyclonePoints=buildCycloneTopics(snapshot);
+      window.topicEarthCycloneSnapshot=snapshot;
+      try { window.localStorage.setItem('topicEarthCyclonesV1',JSON.stringify(snapshot)); } catch { /* Public last-good cache is optional. */ }
+      this.rebuildAllPoints(); this.layerPanel?.updateData(this.allLayers,this.allPoints); this.detailPanel?.updateLayers?.(this.allLayers);
+      this.updateMarkers();
+      if (this.detailPanel?.mode === 'detail' && this.detailPanel.currentPoint?.category === CYCLONE_LAYER_ID) {
+        const current=this.cyclonePoints.find(point=>point.id===this.detailPanel.currentPoint.id);
+        if (current) this.detailPanel.show(current);
+        else this.detailPanel.show({...this.detailPanel.currentPoint,cyclone:{...this.detailPanel.currentPoint.cyclone,stale:true},summary:'This system is no longer present in the latest active feed. Last report retained for this open topic.',topicStory:{enabled:true,title:'Tracking ended',themeMode:'world',html:'<article><h1>Tracking ended</h1><p>This system is no longer in the current agency feed. Its previous location must not be treated as a current position. Open the Cyclone watch sources topic for current systems.</p></article>'}});
+      }
+      return snapshot;
+    }).catch(error=>{ console.error('[Cyclones] Refresh failed:',error); return null; }).finally(()=>{this.cycloneRefreshPromise=null;});
+    return this.cycloneRefreshPromise;
   }
 
   async refreshRealtimeMeteo(options = {}) {
@@ -3372,6 +3423,7 @@ class TopicEarthApp {
     
     points.forEach((point, i) => {
       if (processed.has(i)) return;
+      if (point.isTropicalCyclone) { clusters.push(point); processed.add(i); return; }
       
       // Find nearby points
       const nearby = [point];

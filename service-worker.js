@@ -1,4 +1,4 @@
-const CACHE_NAME = 'topic-earth-shell-v30-story-media-ui';
+const CACHE_NAME = 'topic-earth-shell-v31-world-cyclones';
 const APP_SHELL = [
   './',
   './assets/widgets/color/smart-color-picker.html',
@@ -10,6 +10,9 @@ const APP_SHELL = [
   './lib/topic-story-media.mjs?v=story-media-20261013',
   './lib/topic-story-labels.mjs?v=story-media-20261013',
   './lib/zip-content-scan.mjs?v=story-media-20261013',
+  './lib/cyclone-data.mjs?v=cyclones-20261013',
+  './lib/tropical-cyclones.mjs?v=cyclones-20261013',
+  './lib/cyclone-visuals.mjs?v=cyclones-20261013',
   './index.html',
   './styles.css?v=story-media-ui-20261013',
   './site.webmanifest?v=earth-clock-20261012',
