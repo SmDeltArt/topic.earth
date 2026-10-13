@@ -10957,7 +10957,7 @@ Rules:
     statusPill.textContent = summary.linked ? 'Linked' : 'Not linked';
 
     const textProvider = summary.textProviderName || summary.textProvider || 'No text provider selected';
-    const textModel = summary.textModel || 'No model selected';
+    const textModel = summary.textModelDisplay || summary.textModel || 'No model selected';
     const imageProvider = summary.imageProviderName || summary.imageProvider || 'No image provider selected';
     const ttsProvider = summary.ttsProviderName || summary.ttsProvider || 'Browser TTS';
     const ttsVoice = summary.ttsActiveMode === 'external'
@@ -10986,14 +10986,14 @@ Rules:
   }
 
   async refreshAiApiSettingsStatus(button = null) {
-    const summary = window.ourEarthAI?.syncFromStorage
-      ? window.ourEarthAI.syncFromStorage('settings-refresh')
-      : this.getAiApiSummary();
+    let summary;
+    try { summary = window.ourEarthAI?.refreshLinkedSettings ? await window.ourEarthAI.refreshLinkedSettings() : window.ourEarthAI?.syncFromStorage ? window.ourEarthAI.syncFromStorage('settings-refresh') : this.getAiApiSummary(); }
+    catch (error) { if (button) button.textContent=error.message; console.warn('[Settings] API iframe refresh failed:',error.message); return; }
 
     this.updateAiApiStatus(summary);
 
     let detectedMaxModel = false;
-    if (window.ourEarthAI?.detectOpenAiTextModelCeiling) {
+    if (summary.providerMode !== 'proxy' && window.ourEarthAI?.detectOpenAiTextModelCeiling) {
       try {
         const status = await window.ourEarthAI.detectOpenAiTextModelCeiling();
         detectedMaxModel = Boolean(status?.openaiTextMaxModel);
@@ -11677,7 +11677,7 @@ Rules:
     content.dir = LanguageManager.getTextDirection(currentLang);
     const aiSummary = this.getAiApiSummary();
     const aiTextProvider = aiSummary.textProviderName || aiSummary.textProvider || t('settings.noTextProvider');
-    const aiTextModel = aiSummary.textModel || t('settings.noModelSelected');
+    const aiTextModel = aiSummary.textModelDisplay || aiSummary.textModel || t('settings.noModelSelected');
     const aiModelBadges = this.renderAiApiModelBadges(aiSummary);
     const aiImageProvider = aiSummary.imageProviderName || aiSummary.imageProvider || t('settings.noImageProvider');
     const aiTtsProvider = aiSummary.ttsProviderName || aiSummary.ttsProvider || 'Browser TTS';

@@ -1,4 +1,4 @@
-import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=el-nino-no-app-links-20261013';
+import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=topic-proxy-bridge-20261013';
 import { RegionalLocationManager } from './lib/regional-location.mjs';
 import { GlobeRenderer } from './lib/globe.js?v=local-colour-picker-20261012';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
@@ -15,18 +15,18 @@ import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=cloudinary-fallback-20261008';
 import { RegionalMap } from './components/RegionalMap.js?v=local-colour-picker-20261012';
-import { LayerPanel } from './components/LayerPanel.js?v=picker-world-20261013';
-import { DetailPanel } from './components/DetailPanel.js?v=picker-world-20261013';
+import { LayerPanel } from './components/LayerPanel.js?v=topic-proxy-bridge-20261013';
+import { DetailPanel } from './components/DetailPanel.js?v=topic-proxy-bridge-20261013';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
 import { ReadTranslationService } from './lib/read-translation.js?v=translation-20261004';
 import { TopicTranslations, plainTopicText, topicSourceRevision } from './lib/topic-translations.mjs?v=reading-save-20261004';
-import { TTSManager } from './lib/tts.js?v=fever-direct-recording-20261008-2';
+import { TTSManager } from './lib/tts.js?v=topic-proxy-bridge-20261013';
 import { TutorialGuide } from './lib/tutorial-guide.js?v=topic-earth-meteo-draft-20260531';
 import { FeverDebugAdapter, TippingTopicDraftState } from './lib/fever-debug.js';
 import { FeverDebugBar } from './components/FeverDebugBar.js?v=topic-earth-warning-panel-collapse-20260430';
-import { installAiApiBridge } from './lib/ai-api-bridge.js?v=topic-earth-bridge-cleanup-20260520';
+import { installAiApiBridge } from './lib/ai-api-bridge.js?v=topic-proxy-bridge-20261013';
 
 const TOPIC_EARTH_FAVICON_URL = './assets/logo/local/favicon.svg';
 const TOPIC_EARTH_FAVICON_FALLBACK_URL = './assets/logo/local/favicon.svg';

@@ -21,6 +21,7 @@
     "https://images.smdeltart.com",
     "https://widgets.smdeltart.com",
     // Centralized api-settings host (CAD-AI product, serves ALL apps)
+    "https://api.caddeltai.com",
     "https://api-caddeltai.vercel.app",
     "https://topic.earth",
     "https://www.topic.earth",
@@ -413,6 +414,12 @@
       this.eventName = options.eventName || "smartAiApiSettingsChanged";
       this.syncChannel = null;
       this.lastSummary = null;
+      this.proxySession = null;
+      try {
+        const saved = JSON.parse(global.sessionStorage?.getItem('topicEarthProxySessionV1') || 'null');
+        if (saved && this.validProxyBase(saved.proxyBaseUrl)) this.proxySession = saved;
+      } catch (_) {}
+      this.pendingSettingsRequest = null;
 
       this.initBroadcastSync();
       this.syncFromStorage("init");
@@ -459,6 +466,23 @@
         if (!this.isAllowedMessageOrigin(event.origin)) return;
 
         const { type, action, widgetId } = event.data || {};
+        const frame = global.document?.getElementById?.('api-settings-overlay-iframe');
+        let matchesFrame = false;
+        try { matchesFrame = Boolean(frame && event.source === frame.contentWindow && event.origin === new URL(frame.src, global.location.href).origin); } catch (_) {}
+        if (event.origin === 'https://api.caddeltai.com' && !matchesFrame) return;
+        if (type === 'smart-widget' && ['proxy-session','proxy-session-clear'].includes(action)) {
+          if (!matchesFrame) return;
+          const incoming = event.data?.data || {};
+          if (action === 'proxy-session-clear') this.proxySession = null;
+          else if (this.validProxyBase(incoming.proxyBaseUrl) && typeof incoming.smrtProxyToken === 'string' && incoming.smrtProxyToken.trim()) {
+            this.proxySession = { ...this.stripSecretSettings(incoming), smrtProxyToken:incoming.smrtProxyToken.trim() };
+          } else return;
+          try {
+            if (this.proxySession) global.sessionStorage?.setItem('topicEarthProxySessionV1',JSON.stringify(this.proxySession));
+            else global.sessionStorage?.removeItem('topicEarthProxySessionV1');
+          } catch (_) {}
+          this.syncFromStorage('proxy-session'); return;
+        }
         const isApiSettingsWidget =
           widgetId === "api-settings" ||
           event.data?.data?.widgetId === "api-settings" ||
@@ -466,7 +490,7 @@
           type === "smdeltart-widget-sync";
 
         if (
-          (type === "smart-widget" && action === "settings-saved") ||
+          (type === "smart-widget" && ["settings-saved","settings-response"].includes(action)) ||
           (isApiSettingsWidget &&
             [
               "settings-updated",
@@ -482,8 +506,30 @@
             event.origin,
           );
           this.syncFromStorage("message");
+          if (matchesFrame && this.pendingSettingsRequest && event.data?.requestId === this.pendingSettingsRequest.id) {
+            const pending=this.pendingSettingsRequest; this.pendingSettingsRequest=null;
+            global.clearTimeout(pending.timer); pending.resolve(this.getSummary());
+          }
         }
       });
+    }
+
+    validProxyBase(value) {
+      try { const url=new URL(value); return ['https://api.caddeltai.com','https://api-caddeltai.vercel.app'].includes(url.origin) && url.pathname === '/' && !url.username && !url.password && !url.search && !url.hash; } catch (_) { return false; }
+    }
+
+    async refreshLinkedSettings() {
+      const frame=global.document?.getElementById?.('api-settings-overlay-iframe');
+      if (!frame?.contentWindow) return this.syncFromStorage('settings-refresh-no-frame');
+      const origin=new URL(frame.src,global.location.href).origin;
+      if (!this.isAllowedMessageOrigin(origin)) throw new Error('API Settings origin is not trusted.');
+      if (this.pendingSettingsRequest) return this.pendingSettingsRequest.promise;
+      const id='topic-settings-'+Date.now();
+      const pending={id};
+      pending.promise=new Promise((resolve,reject)=>{pending.resolve=resolve;pending.timer=global.setTimeout(()=>{this.pendingSettingsRequest=null;reject(new Error('API Settings did not respond. Unlock its vault and try again.'));},4000);});
+      this.pendingSettingsRequest=pending;
+      frame.contentWindow.postMessage({type:'smart-widget',action:'request-settings',data:{requestId:id}},origin);
+      return pending.promise;
     }
 
     isAllowedMessageOrigin(origin) {
@@ -506,7 +552,7 @@
 
     stripSecretSettings(settings = {}) {
       return Object.fromEntries(
-        Object.entries(settings || {}).filter(([key]) => !/ApiKey$/i.test(key)),
+        Object.entries(settings || {}).filter(([key]) => !/(ApiKey$|^smrtProxyToken$|^elevenlabsVoice(?:Id)?$|^elevenlabsCustomVoiceId$)/i.test(key)),
       );
     }
 
@@ -530,9 +576,10 @@
           : "smdeltartApiSettings";
 
       try {
+        global.localStorage?.setItem("topicEarthLinkedApiPreferences",JSON.stringify(this.stripSecretSettings(parsedSettings)));
         global.localStorage?.setItem(
           storageKey,
-          JSON.stringify(settingsToImport),
+          JSON.stringify(this.stripSecretSettings(settingsToImport)),
         );
         if (storageKey === "smdeltartApiSettings") {
           global.localStorage?.setItem(
@@ -561,6 +608,7 @@
 
     readApiSettings() {
       const preferences = getStorageObject("smdeltartPreferences") || {};
+      const linkedPreferences = getStorageObject("topicEarthLinkedApiPreferences") || {};
       const smdeltartSettings = getStorageObject("smdeltartApiSettings") || {};
       const cadSettings = getStorageObject("cadAiApiSettings") || {};
       const smartSettings = getStorageObject("smartApiSettings") || {};
@@ -569,7 +617,7 @@
         cadSettings,
         smartSettings,
       );
-      const merged = mergeApiSettings(preferences, plain);
+      const merged = mergeApiSettings(preferences, plain, linkedPreferences);
 
       return {
         ...merged,
@@ -580,7 +628,7 @@
           cadSettings.source ||
           smdeltartSettings.source ||
           null,
-        hasSavedSettings: Boolean(preferences.lastSaved || plain.lastSaved),
+        hasSavedSettings: Boolean(preferences.lastSaved || plain.lastSaved || linkedPreferences.lastSaved || linkedPreferences.timestamp || this.proxySession),
       };
     }
 
@@ -597,15 +645,15 @@
       );
       const imageReady = Boolean(
         imageConfig.provider &&
-        (imageConfig.apiKey || imageConfig.provider === "pollinations"),
+        (imageConfig.apiKey || (imageConfig.proxy && this.proxySession?.smrtProxyToken) || imageConfig.provider === "pollinations"),
       );
       const sttReady = Boolean(
         sttConfig.provider && (sttConfig.apiKey || sttConfig.config?.noKey),
       );
       const ttsReady = Boolean(
         ttsConfig.activeMode === "external" &&
-        ttsConfig.provider === "openai-tts" &&
-        ttsConfig.apiKey,
+        ["openai-tts","elevenlabs"].includes(ttsConfig.provider) &&
+        (ttsConfig.apiKey || (ttsConfig.proxy && this.proxySession?.smrtProxyToken)),
       );
       const providerConfigured = Boolean(
         textConfig.provider ||
@@ -621,22 +669,25 @@
 
       const summary = {
         linked,
+        providerMode:apiSettings.providerMode || apiSettings.normalized?.providerMode || "byok",
+        proxyReady:Boolean(this.proxySession?.smrtProxyToken),
         providerConfigured,
         source,
         lastSyncedAt: now,
         textProvider: textConfig.provider,
         textProviderName: textConfig.providerName,
         textModel: textConfig.model,
+        textModelDisplay: textConfig.proxy && apiSettings.openaiTextModel && apiSettings.openaiTextModel !== textConfig.model ? apiSettings.openaiTextModel+" → "+textConfig.model : textConfig.model,
         textMaxModel:
           getStorageObject("smdeltartApiModelStatus")?.openaiTextMaxModel || "",
         textMaxDetectedAt:
           getStorageObject("smdeltartApiModelStatus")
             ?.openaiTextMaxDetectedAt || null,
-        textHasKey: Boolean(textConfig.apiKey),
+        textHasKey: Boolean(textConfig.apiKey || (textConfig.proxy && this.proxySession?.smrtProxyToken)),
         imageProvider: imageConfig.provider,
         imageProviderName: imageConfig.providerName,
         imageModel: imageConfig.model,
-        imageHasKey: Boolean(imageConfig.apiKey),
+        imageHasKey: Boolean(imageConfig.apiKey || (imageConfig.proxy && this.proxySession?.smrtProxyToken)),
         sttActiveMode: sttConfig.activeMode,
         sttProvider: sttConfig.provider,
         sttProviderName: sttConfig.providerName,
@@ -647,7 +698,7 @@
         ttsProviderName: ttsConfig.providerName,
         ttsModel: ttsConfig.model,
         ttsVoice: ttsConfig.voice,
-        ttsHasKey: Boolean(ttsConfig.apiKey),
+        ttsHasKey: Boolean(ttsConfig.apiKey || (ttsConfig.proxy && this.proxySession?.smrtProxyToken)),
         webSearchCapable: textConfig.provider === "perplexity",
       };
 
@@ -702,6 +753,15 @@
     }
 
     getTextConfig(apiSettings = this.readApiSettings()) {
+      if ((apiSettings.providerMode || apiSettings.normalized?.providerMode) === 'proxy') {
+        const provider=apiSettings.paidTextApi || 'openai';
+        const base=this.proxySession?.proxyBaseUrl || apiSettings.proxyBaseUrl || apiSettings.normalized?.proxyBaseUrl || 'https://api.caddeltai.com';
+        if (!this.validProxyBase(base)) throw new Error('Proxy URL is not trusted.');
+        const raw=provider === 'openai' ? apiSettings.openaiTextModel || 'gpt-5.4' : apiSettings.kimiTextModel || 'kimi-k2.5';
+        const model=/^gpt-5\.6[ -](sol|luna)$/.test(raw) ? 'gpt-5.5' : raw;
+        const endpoint=provider === 'openai' ? 'openai-chat' : ['kimi','moonshot'].includes(provider) ? 'moonshot-chat' : '';
+        return {provider,providerName:provider === 'openai' ? 'OpenAI (proxy)' : 'Moonshot Kimi (proxy)',apiKey:'',model,proxy:true,config:{endpoint:endpoint ? base.replace(/\/$/,'')+'/api/'+endpoint : '',noKey:true}};
+      }
       const activeTier =
         apiSettings.activeTextProvider ||
         (apiSettings.paidTextApiRadio
@@ -793,14 +853,18 @@
               apiSettings.freeImageApiKey,
             );
 
+      const proxy=provider === 'openai-dalle' && (apiSettings.providerMode || apiSettings.normalized?.providerMode) === 'proxy';
+      const base=this.proxySession?.proxyBaseUrl || apiSettings.proxyBaseUrl || apiSettings.normalized?.proxyBaseUrl || 'https://api.caddeltai.com';
+      if (proxy && !this.validProxyBase(base)) throw new Error('Proxy URL is not trusted.');
       return {
+        proxy,
         activeTier,
         provider,
         providerName: providerConfig?.name || rawProvider || "",
-        apiKey,
+        apiKey:proxy ? "" : apiKey,
         model:
           apiSettings.openaiImageModel || providerConfig?.defaultModel || "",
-        config: providerConfig,
+        config:proxy ? {...providerConfig,endpoint:base.replace(/\/$/,'')+'/api/openai-image'} : providerConfig,
       };
     }
 
@@ -838,6 +902,11 @@
     }
 
     getTtsConfig(apiSettings = this.readApiSettings()) {
+      if ((apiSettings.providerMode || apiSettings.normalized?.providerMode) === 'proxy') {
+        const speech=apiSettings.normalized?.tts || {};
+        const provider=['elevenlabs','elevenlabs-tts'].includes(speech.provider || apiSettings.externalTtsApi) ? 'elevenlabs' : 'openai-tts';
+        return {activeMode:'external',provider,providerName:provider === 'elevenlabs' ? 'ElevenLabs (proxy)' : 'OpenAI TTS (proxy)',apiKey:'',proxy:true,model:speech.model || (provider === 'elevenlabs' ? apiSettings.elevenlabsTtsModelId || 'eleven_v3' : apiSettings.openaiTtsModel || 'gpt-4o-mini-tts'),voice:provider === 'elevenlabs' ? 'server-default' : apiSettings.openaiTtsVoice || 'alloy'};
+      }
       const activeMode =
         apiSettings.activeTtsProvider ||
         (apiSettings.externalTtsApiRadio ? "external" : "browser");
@@ -967,9 +1036,11 @@
     }
 
     async callOpenAICompatibleText(request, textConfig) {
+      if (textConfig.proxy && !this.proxySession?.smrtProxyToken) throw new Error('Unlock the API Settings vault to activate the proxy session.');
       const response = await fetch(textConfig.config.endpoint, {
         method: "POST",
         headers: {
+          ...(textConfig.proxy ? { "x-smrt-token":this.proxySession.smrtProxyToken } : {}),
           ...(textConfig.apiKey
             ? { Authorization: `Bearer ${textConfig.apiKey}` }
             : {}),
@@ -1199,10 +1270,11 @@
       const apiSettings = this.readApiSettings();
       const imageConfig = this.getImageConfig(apiSettings);
 
-      if (imageConfig.provider === "openai-dalle" && imageConfig.apiKey) {
+      if (imageConfig.provider === "openai-dalle" && (imageConfig.apiKey || imageConfig.proxy)) {
         try {
           return await this.callOpenAIImage(request, imageConfig);
         } catch (error) {
+          if (imageConfig.proxy) throw error;
           console.warn(
             "[Smart AI API] OpenAI image generation failed, using fallback:",
             error,
@@ -1217,10 +1289,11 @@
     }
 
     async callOpenAIImage(request, imageConfig) {
+      if (imageConfig.proxy && !this.proxySession?.smrtProxyToken) throw new Error('Unlock the API Settings vault to activate proxy images.');
       const response = await fetch(imageConfig.config.endpoint, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${imageConfig.apiKey}`,
+          ...(imageConfig.proxy ? {"x-smrt-token":this.proxySession.smrtProxyToken} : {Authorization:`Bearer ${imageConfig.apiKey}`}),
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
