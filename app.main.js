@@ -1,3 +1,4 @@
+import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=picker-world-20261013';
 import { RegionalLocationManager } from './lib/regional-location.mjs';
 import { GlobeRenderer } from './lib/globe.js?v=local-colour-picker-20261012';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
@@ -14,8 +15,8 @@ import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=cloudinary-fallback-20261008';
 import { RegionalMap } from './components/RegionalMap.js?v=local-colour-picker-20261012';
-import { LayerPanel } from './components/LayerPanel.js?v=fullscreen-picker-responsive-20261013';
-import { DetailPanel } from './components/DetailPanel.js?v=fullscreen-picker-responsive-20261013';
+import { LayerPanel } from './components/LayerPanel.js?v=picker-world-20261013';
+import { DetailPanel } from './components/DetailPanel.js?v=picker-world-20261013';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -130,7 +131,7 @@ class TopicEarthApp {
         .filter(Boolean)
         .map(point => [String(point.id), point])
     );
-    const basePoints = [...MOCK_POINTS, ...REGIONAL_AMBASSADOR_TOPICS, ...SPACE_TOPICS, ...CARBON_HISTORY_TOPICS, ...FEVER_TOPICS, ...TIPPING_POINT_TOPICS];
+    const basePoints = [...EL_NINO_TOPICS, ...MOCK_POINTS, ...REGIONAL_AMBASSADOR_TOPICS, ...SPACE_TOPICS, ...CARBON_HISTORY_TOPICS, ...FEVER_TOPICS, ...TIPPING_POINT_TOPICS];
 
     const mergedBasePoints = basePoints.map(point => {
       const customPoint = customPointById.get(String(point.id));

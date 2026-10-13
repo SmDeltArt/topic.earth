@@ -59,7 +59,7 @@ assert.ok(local.includes('requestOrigin || window.location.origin'));
 assert.ok(local.includes('Array.isArray(d.stops)'));
 for(const match of local.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))new vm.Script(match[1]);
 const serviceWorker=await readFile(new URL('../service-worker.js',import.meta.url),'utf8');
-assert.ok(serviceWorker.includes("'./assets/widgets/color/smart-color-picker.html?embed=overlay'"));
+assert.ok(serviceWorker.includes("'./assets/widgets/color/smart-color-picker.html?embed=overlay&v=picker-world-20261013'"));
 assert.ok(serviceWorker.includes('caches.match(event.request).then(cached => cached ||'));
 console.log('Local picker: solid/linear/radial/alpha, saved gradients, retained CSS, origin/source checks, full-screen overlay/native close, gradient restoration, script syntax and offline asset cache passed.');
 // New document controls use validated CSS and remain reversible without text rewriting.

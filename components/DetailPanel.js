@@ -1,7 +1,7 @@
 import { RegionalLocationManager } from '../lib/regional-location.mjs';
-import { StoryColorPickerManager } from '../lib/story-color-picker.mjs';
-import { TopicStoryContentManager } from '../lib/topic-story-content.mjs';
-import { topicStoryLabel } from '../lib/topic-story-labels.mjs';
+import { StoryColorPickerManager } from '../lib/story-color-picker.mjs?v=picker-world-20261013';
+import { TopicStoryContentManager } from '../lib/topic-story-content.mjs?v=picker-world-20261013';
+import { topicStoryLabel } from '../lib/topic-story-labels.mjs?v=picker-world-20261013';
 import { getTopicStoryTheme, topicStoryThemeCss } from '../lib/topic-story-theme.mjs?v=local-colour-picker-20261012';
 import { scanTopicZip } from '../lib/topic-importer.mjs?v=zip-scan-20261004';
 import { Settings } from '../lib/settings.js?v=world-regional-location-20261012';

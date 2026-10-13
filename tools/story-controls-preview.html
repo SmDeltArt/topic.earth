@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Story controls · regression preview</title><link rel="stylesheet" href="../styles.css?v=picker-world-20261013"><style>body{margin:0;padding:12px;background:#071019;color:#e8eaed;font:16px system-ui}nav{display:flex;gap:10px;margin-bottom:10px}button{font:inherit;padding:8px}#test-screen{display:block;width:100%;height:calc(100dvh - 85px);border:1px solid #00d4ff;margin:auto;box-sizing:border-box}#test-screen.phone{width:min(375px,100%)}</style>
+<body><nav><button id="desktop">Desktop</button><button id="mobile">Mobile · 375px</button></nav><iframe id="test-screen" title="Document settings test viewport"></iframe><script type="module">
+if(!new URLSearchParams(location.search).has('inner')) {
+ const frame=document.getElementById('test-screen');frame.src='./story-controls-preview.html?inner=1';
+ document.getElementById('desktop').onclick=()=>frame.classList.remove('phone');
+ document.getElementById('mobile').onclick=()=>frame.classList.add('phone');
+} else {
+ document.querySelector('nav').remove();document.getElementById('test-screen').remove();
+ const {DetailPanel}=await import('../components/DetailPanel.js?v=picker-world-20261013');
+ const panel=Object.create(DetailPanel.prototype);
+ Object.assign(panel,{mode:'create-topic',layers:[],currentLayerFilter:'main',topicFormState:{title:'Preview',topicStory:{themeMode:'world',html:'<article><h1>Local action</h1><section><h2>Share and repair</h2><p>Bring people together around a practical initiative.</p></section></article>'}},saveFormState(){},invalidateStoryReview(){},renderCreateTopic(){},t(key){return key.replace('topic.story.','')},container:document.body});
+ const open=document.createElement('button');open.textContent='Open document settings';open.onclick=()=>panel.openStoryContentSettings();document.body.append(open);
+}
+</script></body></html>
