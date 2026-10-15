@@ -60,7 +60,7 @@ assert.ok(local.includes('requestOrigin || window.location.origin'));
 assert.ok(local.includes('Array.isArray(d.stops)'));
 for(const match of local.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))new vm.Script(match[1]);
 const serviceWorker=await readFile(new URL('../service-worker.js',import.meta.url),'utf8');
-assert.ok(serviceWorker.includes("'./assets/widgets/color/smart-color-picker.html?embed=overlay&v=story-media-20261013'"));
+assert.ok(serviceWorker.includes("'./assets/widgets/color/smart-color-picker.html?embed=overlay&v=transparent-overlay-20261015'"));
 assert.ok(serviceWorker.includes('caches.match(event.request).then(cached => cached ||'));
 console.log('Local picker: solid/linear/radial/alpha, saved gradients, retained CSS, origin/source checks, full-screen overlay/native close, gradient restoration, script syntax and offline asset cache passed.');
 // New document controls use validated CSS and remain reversible without text rewriting.
@@ -89,3 +89,17 @@ assert.ok(styles.includes('@media(max-width:900px)'));
 assert.ok(styles.includes('@media(max-width:480px)'));
 assert.ok(local.includes('!isOverlayMode &&'),'The picker handles dragging locally in overlay mode');
 console.log('Full-viewport transparent overlay, ignored host drag/size messages and responsive settings breakpoints passed.');
+
+
+assert.ok(local.includes("body.scp-overlay-mode .scp-overlay"));
+assert.ok(local.includes('document.body.classList.add("scp-overlay-mode")'));
+
+picker.open({onApply:paint=>confirmed.push(paint),onPreview:paint=>previews.push(paint)});
+const native=picker.surface.querySelector('input[type="color"]');
+assert.ok(native,'Basic colour fallback is available before iframe load');
+native.value='#123456';
+native.dispatchEvent(new document.defaultView.Event('change'));
+assert.equal(confirmed.at(-1).hex,'#123456');
+assert.equal(confirmed.at(-1).alpha,1);
+assert.equal(picker.dialog,null);
+console.log('Native solid fallback works before iframe load and cleans up on selection.');

@@ -1,8 +1,8 @@
-const CACHE_NAME = 'topic-earth-shell-v31-world-cyclones';
+const CACHE_NAME = 'topic-earth-shell-v32-transparent-picker';
 const APP_SHELL = [
   './',
   './assets/widgets/color/smart-color-picker.html',
-  './assets/widgets/color/smart-color-picker.html?embed=overlay&v=story-media-20261013',
+  './assets/widgets/color/smart-color-picker.html?embed=overlay&v=transparent-overlay-20261015',
   './assets/widgets/color/smart-colorset.json',
   './assets/widgets/color/smart-color-picker.i18n.csv',
   './lib/story-color-picker.mjs?v=story-media-20261013',
@@ -51,3 +51,4 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then(cached => cached || fetch(event.request))
   );
 });
+

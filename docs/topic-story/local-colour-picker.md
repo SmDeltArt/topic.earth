@@ -25,3 +25,10 @@ New topics inherit the current app tab and the most recently used active layer i
 Forge's preview concept was adapted from `src/modifySettings` and its host styling engine. The whole Forge application, AI CSS completion and its unchecked message bridge were not imported. Manual formatting needs no AI call.
 
 The settings grid stacks below 900px and on short landscape screens; colour controls become one column below 480px. Inputs fit their columns and use 16px type on phones. The popup scrolls within the available viewport.
+
+
+## Transparent overlay maintenance (15 October 2026)
+
+The bundled picker explicitly clears its html background and uses a transparent click-outside backdrop in overlay mode. The host dialog, its ::backdrop and the iframe must also remain transparent. Panel colour and selected colour alpha are independent. The service-worker cache is bumped with this change. See [the upstream integration contract and LLM prompt](https://github.com/SmDeltArt/color/blob/main/EMBEDDING.md). Browser visual confirmation is still required; source checks alone cannot establish rendered transparency.
+
+A **Basic colour** native input and **Close** button remain available above the iframe, including if the custom picker fails to load. Choosing a native colour previews it and commits it to the temporary settings on change. This fallback uses opaque solid colours; gradients and alpha require the SmΔrt picker. Studio was inspected read-only; its local Codex working copy was not accessible in this session.

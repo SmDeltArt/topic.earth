@@ -43,6 +43,13 @@
         padding: 0;
         box-sizing: border-box;
       }
+      html {
+        background: transparent;
+        color-scheme: normal;
+      }
+      body.scp-overlay-mode .scp-overlay {
+        background: transparent;
+      }
       body {
         font-family: "Segoe UI", system-ui, sans-serif;
         font-size: 12px;
@@ -4538,6 +4545,7 @@
         // fullscreen overlay iframe (?embed=overlay) where we behave
         // standalone for centering + drag.
         const _overlayMode = /[?&]embed=overlay\b/.test(location.search);
+        if (_overlayMode) document.body.classList.add("scp-overlay-mode");
         if (window.parent === window) {
           if (runtimeConfig.autoOpen !== false) {
             openPanel(runtimeConfig.openOptions || {});
@@ -4578,4 +4586,5 @@
     </script>
   </body>
 </html>
+
 
