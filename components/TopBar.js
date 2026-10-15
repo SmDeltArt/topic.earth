@@ -3,6 +3,7 @@
  * Displays app branding and live status indicator
  */
 import { Settings } from '../lib/settings.js';
+import { GitHubAuth } from '../lib/github-auth.mjs';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-tab-layers-20260507';
 
 const TOPIC_EARTH_MARK_FALLBACK_URL = './assets/logo/local/favicon.svg';
@@ -22,6 +23,13 @@ export class TopBar {
     this.container.addEventListener('click', this.handleClick);
     document.addEventListener('click', this.handleDocumentClick);
     window.addEventListener('settingsChanged', this.handleSettingsChanged);
+    window.addEventListener('topicIdentityChanged', () => this.render());
+    window.addEventListener('pageshow', () => GitHubAuth.refresh());
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) GitHubAuth.refresh();
+    });
+    GitHubAuth.refresh();
+    this.identityTimer = setInterval(() => { if (!document.hidden) GitHubAuth.refresh(); }, 60000);
     this.touchLayout = window.matchMedia('(max-width: 768px), (pointer: coarse)');
     this.touchLayout.addEventListener('change', () => this.render());
     this.render();
@@ -37,6 +45,11 @@ export class TopBar {
     const target = e.target.closest('[data-action], [data-filter], #settings-btn');
     if (!target) return;
 
+    if (target.dataset.action === 'github-auth') {
+      const action = GitHubAuth.user ? GitHubAuth.signOut() : GitHubAuth.signIn();
+      action.catch(error => window.alert(error.message));
+      return;
+    }
     if (target.dataset.action === 'toggle-mode') {
       if (this.layerFilter === 'regional') {
         window.dispatchEvent(new CustomEvent('regionalMoveTopicRequested'));
@@ -236,6 +249,7 @@ export class TopBar {
         ${modeTabs}
       </div>
       <div class="top-actions">
+        <button type="button" class="settings-btn" data-action="github-auth" title="${GitHubAuth.user ? this.escapeHtml(`${GitHubAuth.user.login} (${GitHubAuth.user.role})`) : 'Sign in with GitHub'}">${GitHubAuth.user ? 'Sign out' : 'GitHub login'}</button>
         <button id="settings-btn" class="settings-btn" data-tutorial-id="settings-button" title="${this.escapeHtml(this.t('common.settings'))}">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>

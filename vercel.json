@@ -1,4 +1,5 @@
 {
+  "proxy": { "entrypoint": "middleware.mjs" },
   "rewrites": [
     {
       "source": "/api/api-settings.html",
