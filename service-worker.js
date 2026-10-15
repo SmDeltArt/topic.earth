@@ -1,5 +1,7 @@
-const CACHE_NAME = 'topic-earth-shell-v34-weather-terrain';
+const CACHE_NAME = 'topic-earth-shell-v35-weather-mesh';
 const APP_SHELL = [
+  './lib/weather-models.mjs?v=weather-mesh-20261015',
+  './assets/models/weather-symbols.glb?v=weather-mesh-20261015',
   './lib/weather-visuals.mjs?v=weather-terrain-20261015',
   './lib/terrain-measure.mjs?v=weather-terrain-20261015',
   './lib/meteo-realtime.js?v=weather-terrain-20261015',

@@ -25,3 +25,15 @@ Relief labels display centimetres above sea level. Only the text changes colour 
 Selecting a topic or placing a drawing point fetches its estimated terrain elevation. A new path vertex or route endpoint shows A/B heights, height difference, horizontal distance, signed angle in degrees and signed rise per 100 horizontal units (percent grade). This is the straight segment's endpoint grade, not the maximum slope along a routed path. Coincident endpoints have no defined grade. Undo/clear/hide or newer selections invalidate old results.
 
 Open-Meteo elevation uses Copernicus DEM GLO-90 (90 m grid). Displaying cm does not imply cm accuracy. Heights near a 65 cm threshold and short-segment grades are particularly uncertain. Missing heights remain unavailable; they are never replaced by zero. Elevation results and concurrent requests are cached by coordinates, with timeout and a bounded cache.
+
+## 3D weather meshes — later 15 October
+
+The globe now uses `assets/models/weather-symbols.glb` (glTF 2 binary, about 273 KB), with named cloud, rain, storm, wind, snow, fog, sun and heat groups. SVG is retained for flat previews and Regional map symbols. Globe symbols are real meshes, oriented with north up and local Z outward from the Earth; they rotate with the globe, not with the camera.
+
+`WeatherModelManager` loads the pack once. Each marker gets independent geometry/material clones, with severity colours on accent parts and subtle tint on cloud surfaces. Removing a marker before loading finishes prevents late attachment. Nested resources are disposed when globe markers are rebuilt. A failed GLB load retains the existing selectable point marker. No model-specific texture or remote CDN is required.
+
+The Cloud shell default opacity is reduced from 0.78 to 0.28, its texture patches have smaller footprints/lower alpha, and normal alpha blending replaces additive wash. The cloud overlay remains independent of the 3D weather symbols.
+
+`tools/build-weather-models.mjs` rebuilds the GLB using Three.js/GLTFExporter (built with Three 0.128.0; tested with the app's vendored 0.170 loader). Build dependencies are only needed by the authoring script, not by the shipped app. It accepts optional module URL arguments for Three and GLTFExporter. `tools/check-weather-models.mjs` checks all eight GLB groups, one cached load, true mesh contents, radial orientation, independent marker colours/resources and detached-marker handling. All eight models were visually inspected in an actual WebGL render using the app's vendored Three and GLTFLoader.
+
+The shared SmDeltArt/color repo was already updated at de51012420f89e731c73fd51297bf66d5c8e6045; this weather change does not require another picker change. Studio remains untouched.

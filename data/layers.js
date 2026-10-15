@@ -46,7 +46,7 @@ export const LAYERS = [
     layerKind: 'shell-texture',
     renderer: {
       radius: 1.032,
-      opacity: 0.78,
+      opacity: 0.28,
       rotationSpeed: 0.00012
     }
   },
