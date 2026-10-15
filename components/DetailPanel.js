@@ -11659,6 +11659,7 @@ Rules:
       speechPitch: parseFloat(content.querySelector('#speech-pitch')?.value || currentSettings.speechPitch || 1),
       autoShowTranscript: content.querySelector('#auto-show-transcript')?.checked ?? currentSettings.autoShowTranscript ?? false,
       showCountryHover: content.querySelector('#show-country-hover')?.checked ?? false,
+      liveWeatherOnClick: content.querySelector('#live-weather-on-click')?.checked ?? true,
       rotationSpeed: Number(content.querySelector('#rotation-speed')?.value ?? currentSettings.rotationSpeed),
       baseTextureQuality: content.querySelector('#base-texture-quality')?.value || 'auto',
       feverLoopResolution: nextFeverLoopResolution === '8k' ? '4k' : nextFeverLoopResolution,
@@ -12068,6 +12069,10 @@ Rules:
 
       <div class="detail-section">
         <div class="section-label">${this.escapeHtml(t('settings.globeSettings'))}</div>
+        <div class="form-group">
+          <label><input type="checkbox" id="live-weather-on-click" ${settings.liveWeatherOnClick !== false ? 'checked' : ''}> <span>Live weather at the clicked globe point</span></label>
+          <div class="setting-hint">Shows a weather action after a globe click in Interaction mode. Hover does not fetch weather.</div>
+        </div>
         <div class="form-group" data-tutorial-id="settings-country-hover">
           <label>
             <input 
@@ -12395,6 +12400,7 @@ Rules:
         'tutorial-level',
         'auto-show-transcript',
         'show-country-hover',
+        'live-weather-on-click',
         'base-texture-quality',
         'fever-loop-resolution',
         'ai-updates-use-linked-api',
@@ -12574,3 +12580,4 @@ Rules:
     return !this.container.classList.contains('hidden');
   }
 }
+

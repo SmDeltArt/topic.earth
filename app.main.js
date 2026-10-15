@@ -2,10 +2,10 @@ import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=topic-proxy-bridge-20
 import { RegionalLocationManager } from './lib/regional-location.mjs';
 import { CYCLONE_LAYER_ID, fetchLiveCyclones, buildCycloneTopics, validateCycloneSnapshot } from './lib/tropical-cyclones.mjs?v=cyclones-20261013';
 import { TopicStoryMedia } from './lib/topic-story-media.mjs?v=story-media-20261013';
-import { GlobeRenderer } from './lib/globe.js?v=cyclones-20261013';
+import { GlobeRenderer } from './lib/globe.js?v=point-weather-20261015';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LAYERS } from './data/layers.js?v=cyclones-20261013';
-import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=topic-earth-meteo-cloud-severity-20260601';
+import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchMeteoAtPoint, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=point-weather-20261015';
 import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-climate-studies-watch-20260601';
 import { REGIONAL_AMBASSADOR_TOPICS } from './data/regional-ambassador-topics.js?v=local-colour-picker-20261012';
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=local-colour-picker-20261012';
@@ -18,7 +18,7 @@ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js
 import { TopBar } from './components/TopBar.js?v=cloudinary-fallback-20261008';
 import { RegionalMap } from './components/RegionalMap.js?v=local-colour-picker-20261012';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-proxy-bridge-20261013';
-import { DetailPanel } from './components/DetailPanel.js?v=cyclones-20261013';
+import { DetailPanel } from './components/DetailPanel.js?v=point-weather-20261015';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -954,6 +954,8 @@ class TopicEarthApp {
       const transitionToken = this.beginModeTransition(filter, previous);
       
       // Store current filter
+      this.pointWeatherController?.abort();
+      this.pointWeatherAction?.remove();
       this.currentLayerFilter = filter;
       this.updateBrowserTabState(filter);
       
@@ -3027,6 +3029,7 @@ class TopicEarthApp {
     };
     
     this.globe.countryClickCallback = (latLon) => {
+      this.offerPointWeather(latLon);
       const country = getCountryFromCoordinates(latLon.lat, latLon.lon);
       if (country) {
         this.showCountryDetail(country);
@@ -3954,6 +3957,45 @@ class TopicEarthApp {
     this.detailPanel.show(countryInfo);
   }
   
+  offerPointWeather({lat, lon}) {
+    this.pointWeatherController?.abort();
+    this.pointWeatherAction?.remove();
+    if (Settings.get().liveWeatherOnClick === false) return;
+    const panel = document.createElement('div');
+    panel.className = 'globe-weather-action';
+    const status = document.createElement('span');
+    status.setAttribute('role','status');
+    status.textContent = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+    const button = document.createElement('button');
+    button.textContent = '🌦️ Live weather here';
+    const close = document.createElement('button');
+    close.textContent = '×'; close.setAttribute('aria-label','Close weather action');
+    close.onclick = () => { this.pointWeatherController?.abort(); panel.remove(); };
+    button.onclick = async () => {
+      button.disabled = true; status.textContent = 'Loading weather…';
+      const controller = new AbortController();
+      this.pointWeatherController = controller;
+      const timer = setTimeout(() => controller.abort(),15000);
+      try {
+        this.pointWeatherCache ||= new Map();
+        const key = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+        const cached = this.pointWeatherCache.get(key);
+        const point = cached && Date.now()-cached.time < 900000 ? cached.point : await fetchMeteoAtPoint(lat,lon,{signal:controller.signal});
+        if (!panel.isConnected || controller.signal.aborted) return;
+        if (this.pointWeatherCache.size >= 24) this.pointWeatherCache.delete(this.pointWeatherCache.keys().next().value);
+        this.pointWeatherCache.set(key,{point,time:Date.now()});
+        this.realtimeMeteoPoints = [...this.realtimeMeteoPoints.filter(item=>!item.id.startsWith('meteo_live_clicked-')),point];
+        this.rebuildAllPoints(); this.updateMarkers();
+        this.showPointDetail(point);
+        status.textContent = 'Open-Meteo model · updated '+point.meteo.time;
+      } catch (error) {
+        if (panel.isConnected) status.textContent = 'Weather unavailable. Try again.';
+      } finally { clearTimeout(timer); button.disabled = false; }
+    };
+    panel.append(status,button,close); document.body.append(panel);
+    this.pointWeatherAction = panel;
+  }
+
   showCountryHover(latLon, x, y) {
     // Check if country hover is enabled
     const settings = Settings.get();
@@ -4144,4 +4186,5 @@ if (document.readyState === 'loading') {
 } else {
   new TopicEarthApp();
 }
+
 

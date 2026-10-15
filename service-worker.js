@@ -1,4 +1,4 @@
-const CACHE_NAME = 'topic-earth-shell-v32-transparent-picker';
+const CACHE_NAME = 'topic-earth-shell-v33-restored-weather';
 const APP_SHELL = [
   './',
   './assets/widgets/color/smart-color-picker.html',
@@ -14,14 +14,14 @@ const APP_SHELL = [
   './lib/tropical-cyclones.mjs?v=cyclones-20261013',
   './lib/cyclone-visuals.mjs?v=cyclones-20261013',
   './index.html',
-  './styles.css?v=story-media-ui-20261013',
-  './site.webmanifest?v=earth-clock-20261012',
+  './styles.css?v=restored-weather-20261015',
+  './site.webmanifest?v=transparent-20261015',
   './assets/logo/local/favicon.svg?v=earth-clock-20261012',
   './assets/logo/local/earth-128.svg',
   './assets/logo/local/favicon.ico?v=earth-clock-20261012',
   './assets/logo/local/apple-touch-180.png?v=earth-clock-20261012',
   './assets/logo/local/brand-header.svg',
-  './assets/logo/local/pwa-192.png?v=earth-clock-20261012',
+  './assets/logo/local/pwa-192.png?v=transparent-20261015',
   './assets/logo/local/pwa-512.png?v=earth-clock-20261012',
   './shared/topic-favicon.js?v=earth-clock-20261008'
 ];
@@ -51,4 +51,5 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then(cached => cached || fetch(event.request))
   );
 });
+
 

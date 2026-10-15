@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {fetchMeteoAtPoint,getMeteoBadge} from '../lib/meteo-realtime.js';
+let requested;
+const current={time:'2026-10-15T16:00',temperature_2m:12,weather_code:65,precipitation:8,wind_speed_10m:22,wind_gusts_10m:35};
+const point=await fetchMeteoAtPoint(50.5,5.5,{fetchImpl:async(url)=>{requested=new URL(url);return {ok:true,json:async()=>({current,hourly:{}})}}});
+assert.equal(requested.searchParams.get('latitude'),'50.5');
+assert.equal(requested.searchParams.get('longitude'),'5.5');
+assert.equal(point.lat,50.5);assert.equal(point.isLive,true);
+assert.equal(getMeteoBadge(point).label,'Heavy rain');
+assert.equal(getMeteoBadge({severity:'warning',eventType:'wind'}).level,'Elevated signal');
+assert.equal(getMeteoBadge({meteo:{weatherCode:0}}).label,'Clear');
+assert.equal(getMeteoBadge({meteo:{weatherCode:95}}).icon,'⛈️');
+assert.equal(getMeteoBadge({meteo:{weatherCode:75}}).icon,'❄️');
+for(const coords of [[NaN,0],[91,0],[0,181]]) await assert.rejects(fetchMeteoAtPoint(...coords));
+await assert.rejects(fetchMeteoAtPoint(0,0,{fetchImpl:async()=>({ok:false,status:503})}));
+await assert.rejects(fetchMeteoAtPoint(0,0,{fetchImpl:async()=>({ok:true,json:async()=>({})})}));
+console.log('Point weather: coordinates, model payload, WMO condition badges, signal labels and failure handling passed.');
