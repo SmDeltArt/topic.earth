@@ -1,11 +1,14 @@
-const CACHE_NAME = 'topic-earth-shell-v33-restored-weather';
+const CACHE_NAME = 'topic-earth-shell-v34-weather-terrain';
 const APP_SHELL = [
+  './lib/weather-visuals.mjs?v=weather-terrain-20261015',
+  './lib/terrain-measure.mjs?v=weather-terrain-20261015',
+  './lib/meteo-realtime.js?v=weather-terrain-20261015',
   './',
   './assets/widgets/color/smart-color-picker.html',
-  './assets/widgets/color/smart-color-picker.html?embed=overlay&v=transparent-overlay-20261015',
+  './assets/widgets/color/smart-color-picker.html?embed=overlay&v=scheme-20261015',
   './assets/widgets/color/smart-colorset.json',
   './assets/widgets/color/smart-color-picker.i18n.csv',
-  './lib/story-color-picker.mjs?v=story-media-20261013',
+  './lib/story-color-picker.mjs?v=scheme-20261015',
   './lib/topic-story-content.mjs?v=story-media-20261013',
   './lib/topic-story-media.mjs?v=story-media-20261013',
   './lib/topic-story-labels.mjs?v=story-media-20261013',
@@ -14,7 +17,7 @@ const APP_SHELL = [
   './lib/tropical-cyclones.mjs?v=cyclones-20261013',
   './lib/cyclone-visuals.mjs?v=cyclones-20261013',
   './index.html',
-  './styles.css?v=restored-weather-20261015',
+  './styles.css?v=weather-terrain-20261015',
   './site.webmanifest?v=transparent-20261015',
   './assets/logo/local/favicon.svg?v=earth-clock-20261012',
   './assets/logo/local/earth-128.svg',

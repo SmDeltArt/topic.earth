@@ -1,3 +1,6 @@
+import {weatherSymbolSvg,weatherPreviewHtml} from '../lib/weather-visuals.mjs?v=weather-terrain-20261015';
+import {meteoMetricLines} from '../lib/meteo-realtime.js?v=weather-terrain-20261015';
+import {TerrainMeasureManager,elevationLabel,segmentSlope} from '../lib/terrain-measure.mjs?v=weather-terrain-20261015';
 import { RegionalLocationManager } from '../lib/regional-location.mjs';
 import { Settings } from '../lib/settings.js?v=world-regional-location-20261012';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -169,6 +172,7 @@ export class RegionalMap {
     this.destroyLeafletMap();
     this.container.classList.remove('regional-map-active');
     this.visible = false;
+    this.terrainReadoutVersion = (this.terrainReadoutVersion || 0)+1;
     this.syncDrawingToolbar();
   }
 
@@ -193,6 +197,7 @@ export class RegionalMap {
           ${this.renderMeteoDigest()}
           <div id="regional-leaflet-map" class="regional-leaflet-map"></div>
           <div id="regional-map-status" class="regional-map-status" aria-live="polite"></div>
+          <output id="regional-terrain-readout" class="regional-terrain-readout" aria-live="polite" hidden></output>
           <div id="regional-map-fallback" class="regional-map-fallback hidden" role="img" aria-label="Fallback schematic Europe map with topic pins">
             ${this.renderEuropeSvg()}
             <div class="regional-map-pins">
@@ -678,6 +683,7 @@ export class RegionalMap {
       </div>
     `).openPopup();
 
+    this.updateTerrainReadout([[lat,lon]]);
     this.notifyLocationFocus(this.draftPointContext);
     this.setStatus(this.t('regional.pointReady', { lat: lat.toFixed(4), lon: lon.toFixed(4) }), 'ready');
     if (record) {
@@ -694,6 +700,7 @@ export class RegionalMap {
       this.draftPointMarker = null;
     }
     this.draftPointContext = null;
+    this.updateTerrainReadout([]);
     if (!silent) {
       this.setStatus(this.t('regional.pointCleared'), 'ready');
     }
@@ -705,6 +712,7 @@ export class RegionalMap {
     const { record = true, silent = false } = options;
 
     this.pathPoints.push([lat, lon]);
+    if (!silent) this.updateTerrainReadout(this.pathPoints.slice(-2));
     const marker = this.L.circleMarker([lat, lon], {
       radius: 5,
       color: '#0a0e1a',
@@ -729,6 +737,7 @@ export class RegionalMap {
     const marker = this.pathPointMarkers.pop();
     marker?.remove?.();
     const point = this.pathPoints.pop();
+    this.updateTerrainReadout(this.pathPoints.slice(-2));
     this.renderPathLayer();
     if (!silent) {
       const message = point
@@ -793,6 +802,7 @@ export class RegionalMap {
     this.pathPointMarkers.forEach(marker => marker.remove?.());
     this.pathPointMarkers = [];
     this.pathPoints = [];
+    this.updateTerrainReadout([]);
     if (record && previousPoints.length) {
       this.recordAction({ type: 'clear-path', points: previousPoints });
     }
@@ -812,6 +822,7 @@ export class RegionalMap {
 
     const index = this.routePoints.length;
     this.routePoints.push([lat, lon]);
+    if (!silent) this.updateTerrainReadout(this.routePoints.slice(-2));
     const isStart = index === 0;
     const marker = this.L.circleMarker([lat, lon], {
       radius: 8,
@@ -850,6 +861,7 @@ export class RegionalMap {
     const marker = this.routeMarkers.pop();
     marker?.remove?.();
     const point = this.routePoints.pop();
+    this.updateTerrainReadout(this.routePoints.slice(-2));
     this.clearRouteLayer();
 
     if (!silent) {
@@ -868,6 +880,7 @@ export class RegionalMap {
     this.routeMarkers.forEach(marker => marker.remove?.());
     this.routeMarkers = [];
     this.routePoints = [];
+    this.updateTerrainReadout([]);
 
     if (record && previousPoints.length) {
       this.recordAction({ type: 'clear-route', points: previousPoints });
@@ -1059,7 +1072,7 @@ export class RegionalMap {
     if (Number.isFinite(Number(meteo.windGustMaxKmh ?? meteo.windGust))) {
       parts.push(`${Number(meteo.windGustMaxKmh ?? meteo.windGust).toFixed(0)} km/h gust`);
     }
-    return parts.join(' | ') || 'Live meteo';
+    return meteoMetricLines(point).join(' | ') || parts.join(' | ') || 'Live meteo';
   }
 
   getMeteoSurfaceStateLabel(cloudSurfaceActive = false, warningSurfaceActive = false) {
@@ -1085,6 +1098,7 @@ export class RegionalMap {
     });
 
     marker.bindTooltip(`
+      ${isRealtimeMeteo ? weatherPreviewHtml(point,value=>this.escapeHtml(value)) : ''}
       <strong>${this.escapeHtml(title)}</strong><br>
       <span>${this.escapeHtml(location)}</span>
       ${isRealtimeMeteo ? `<br><span>${this.escapeHtml(this.getMeteoTooltipLine(point))}</span>` : ''}
@@ -1095,6 +1109,7 @@ export class RegionalMap {
     });
 
     marker.on('click', () => {
+      this.updateTerrainReadout([[point.lat,point.lon]],[this.getPointElevation(point)]);
       if (this.callbacks.onTopicSelect) {
         this.callbacks.onTopicSelect(point);
       }
@@ -1109,7 +1124,32 @@ export class RegionalMap {
     marker.__baseWeight = isMeteoWarning ? 3 : (isRealtimeMeteo ? 2.25 : 1.5);
     this.markerByTopicId.set(topicId, marker);
     this.styleLeafletMarker(marker, topicId === this.activeTopicId);
+    if (isRealtimeMeteo) {
+      const symbol=L.marker([point.lat,point.lon],{icon:L.divIcon({className:'regional-weather-symbol',iconSize:[46,40],iconAnchor:[23,20],html:weatherSymbolSvg(point)}),interactive:false,keyboard:false});
+      symbol.addTo(this.markerLayer);
+      marker.setStyle({fillOpacity:.08,opacity:.25});
+    }
     this.addReliefHeightMarker(L, point);
+  }
+
+  async updateTerrainReadout(points=[],explicit=[]) {
+    const version=this.terrainReadoutVersion=(this.terrainReadoutVersion || 0)+1;
+    const output=this.element?.querySelector('#regional-terrain-readout');
+    if (!output) return;
+    output.hidden=!points.length;
+    if (!points.length) return;
+    output.textContent='Loading terrain elevation…';
+    this.terrainMeasure ||= new TerrainMeasureManager();
+    try {
+      const heights=await Promise.all(points.map((pair,index)=>Number.isFinite(explicit[index])?explicit[index]:this.terrainMeasure.elevation(pair)));
+      if (version!==this.terrainReadoutVersion || !this.visible) return;
+      const slope=points.length===2?segmentSlope(points[0],points[1],heights[0],heights[1]):null;
+      output.textContent=heights.map((height,index)=>`${points.length===2?(index?'B: ':'A: '):''}~${elevationLabel(height)}`).join(' → ')
+        +(slope?` · Δh ${(slope.riseM*100).toFixed(0)} cm · ${slope.degrees.toFixed(2)}° · ${slope.percent.toFixed(2)}/100 (${slope.percent.toFixed(2)}%) · horizontal ${slope.distanceM.toFixed(0)} m`:points.length===2?' · Slope undefined at coincident points':'')
+        +' · Open-Meteo / Copernicus DEM (90 m grid); cm display does not imply cm accuracy. Segment endpoint grade, not a route profile.';
+    } catch {
+      if(version===this.terrainReadoutVersion)output.textContent='Terrain elevation unavailable. No height or slope assumed.';
+    }
   }
 
   isReliefActive() {
@@ -1162,7 +1202,7 @@ export class RegionalMap {
       className: 'regional-relief-height-icon',
       iconSize: [42, Math.ceil(height + 18)],
       iconAnchor: [21, Math.ceil(height + 9)],
-      html: `<span class="regional-relief-height-label">${this.escapeHtml(`${Math.round(elevation)} m`)}</span><i style="height:${height.toFixed(1)}px"></i>`
+      html: `<span class="regional-relief-height-label ${elevation*100<65?'below-scenario':''}" title="Terrain model estimate; 65 cm scenario comparison is not a flood prediction">${this.escapeHtml(elevationLabel(elevation))}</span><i style="height:${height.toFixed(1)}px"></i>`
     });
     L.marker([point.lat, point.lon], {
       icon,
@@ -1489,6 +1529,7 @@ export class RegionalMap {
 
     const topicId = this.getTopicKey(target);
     this.activeTopicId = topicId;
+    this.updateTerrainReadout([[target.lat,target.lon]],[this.getPointElevation(target)]);
     this.updateFallbackPinFocus();
     this.setActiveLeafletMarker(topicId);
 
@@ -2285,3 +2326,4 @@ export class RegionalMap {
     }[char]));
   }
 }
+

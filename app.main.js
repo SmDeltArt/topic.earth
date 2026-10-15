@@ -2,10 +2,10 @@ import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=topic-proxy-bridge-20
 import { RegionalLocationManager } from './lib/regional-location.mjs';
 import { CYCLONE_LAYER_ID, fetchLiveCyclones, buildCycloneTopics, validateCycloneSnapshot } from './lib/tropical-cyclones.mjs?v=cyclones-20261013';
 import { TopicStoryMedia } from './lib/topic-story-media.mjs?v=story-media-20261013';
-import { GlobeRenderer } from './lib/globe.js?v=point-weather-20261015';
+import { GlobeRenderer } from './lib/globe.js?v=weather-terrain-20261015';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
-import { LAYERS } from './data/layers.js?v=cyclones-20261013';
-import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchMeteoAtPoint, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=point-weather-20261015';
+import { LAYERS } from './data/layers.js?v=weather-terrain-20261015';
+import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchMeteoAtPoint, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=weather-terrain-20261015';
 import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-climate-studies-watch-20260601';
 import { REGIONAL_AMBASSADOR_TOPICS } from './data/regional-ambassador-topics.js?v=local-colour-picker-20261012';
 import { MOCK_POINTS, TIPPING_BOUNDARIES } from './data/points.js?v=local-colour-picker-20261012';
@@ -16,9 +16,9 @@ import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-e
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=cloudinary-fallback-20261008';
-import { RegionalMap } from './components/RegionalMap.js?v=local-colour-picker-20261012';
+import { RegionalMap } from './components/RegionalMap.js?v=weather-terrain-20261015';
 import { LayerPanel } from './components/LayerPanel.js?v=topic-proxy-bridge-20261013';
-import { DetailPanel } from './components/DetailPanel.js?v=point-weather-20261015';
+import { DetailPanel } from './components/DetailPanel.js?v=weather-terrain-20261015';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -208,6 +208,7 @@ class TopicEarthApp {
     this.updateMarkers();
     this.syncRealtimeMeteoLayers();
     this.refreshRealtimeMeteo({ launchAuto: true });
+    this.startMeteoRefresh();
     this.refreshClimateIndicators({ launchAuto: true });
     this.refreshGoodInitiatives({ launchAuto: true });
     this.startCycloneRefresh();
@@ -1224,7 +1225,7 @@ class TopicEarthApp {
     const steps = [
       { delay: 260, layers: [METEO_CLOUD_LAYER_ID], expanded: METEO_CLOUD_LAYER_ID },
       { delay: 1660, layers: [METEO_REALTIME_LAYER_ID], expanded: METEO_REALTIME_LAYER_ID },
-      { delay: 3060, layers: ['regional-news'], expanded: 'regional-news', final: true }
+      { delay: 3060, layers: ['regional-news', METEO_REALTIME_LAYER_ID], expanded: METEO_REALTIME_LAYER_ID, final: true }
     ];
 
     steps.forEach(step => {
@@ -3276,6 +3277,15 @@ class TopicEarthApp {
     return this.cycloneRefreshPromise;
   }
 
+  startMeteoRefresh() {
+    clearInterval(this.meteoRefreshTimer);
+    this.meteoRefreshTimer=setInterval(()=>{
+      if(document.hidden)return;
+      const active=this.getActiveLayersForFilter(this.currentLayerFilter);
+      if(active.has(METEO_REALTIME_LAYER_ID)||active.has(METEO_CLOUD_LAYER_ID)) this.refreshRealtimeMeteo({reason:'scheduled-screening'});
+    },15*60*1000);
+  }
+
   async refreshRealtimeMeteo(options = {}) {
     const active = this.layerPanel?.getActiveLayers?.() || new Set();
     const wantsMeteo = active.has(METEO_CLOUD_LAYER_ID) || active.has(METEO_REALTIME_LAYER_ID);
@@ -3320,6 +3330,7 @@ class TopicEarthApp {
         this.detailPanel?.updateLayers?.(this.allLayers);
         this.updateMarkers();
         this.syncRealtimeMeteoLayers();
+        if (this.currentLayerFilter === 'regional') this.refreshRegionalMap();
 
         console.log(`[Meteo] Loaded ${snapshot.livePoints?.length || 0} ${snapshot.live ? 'realtime' : 'fallback'} meteo samples and ${snapshot.eventPoints?.length || 0} auto event(s)`);
         return snapshot;
@@ -3426,7 +3437,7 @@ class TopicEarthApp {
     
     points.forEach((point, i) => {
       if (processed.has(i)) return;
-      if (point.isTropicalCyclone) { clusters.push(point); processed.add(i); return; }
+      if (point.isTropicalCyclone || point.isRealtimeMeteo) { clusters.push(point); processed.add(i); return; }
       
       // Find nearby points
       const nearby = [point];

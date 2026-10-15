@@ -1,7 +1,7 @@
 import { TopicStoryMedia } from '../lib/topic-story-media.mjs?v=story-media-20261013';
 import { scanZipContents } from '../lib/zip-content-scan.mjs?v=story-media-20261013';
 import { RegionalLocationManager } from '../lib/regional-location.mjs';
-import { StoryColorPickerManager } from '../lib/story-color-picker.mjs?v=story-media-20261013';
+import { StoryColorPickerManager } from '../lib/story-color-picker.mjs?v=scheme-20261015';
 import { TopicStoryContentManager } from '../lib/topic-story-content.mjs?v=story-media-20261013';
 import { topicStoryLabel } from '../lib/topic-story-labels.mjs?v=story-media-20261013';
 import { getTopicStoryTheme, topicStoryThemeCss } from '../lib/topic-story-theme.mjs?v=local-colour-picker-20261012';
