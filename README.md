@@ -1,5 +1,7 @@
 # topic.earth
 
+GitHub sign-in and server role foundations: [setup, permissions and validation](docs/github-auth.md).
+
 Interactive climate globe and topic workspace for exploring global systems, climate pressure, regional initiatives, and AI-assisted topic research.
 
 The app is currently an advanced browser prototype deployed from this repository to Vercel, with `topic.earth` pointed at the Vercel deployment. The frontend is static; the optional MCP endpoint runs as a Vercel serverless function.

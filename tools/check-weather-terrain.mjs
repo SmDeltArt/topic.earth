@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
-import {buildMeteoWatchLocations,fetchRealtimeMeteoSnapshot,meteoMetricLines} from '../lib/meteo-realtime.js';
-import {weatherSymbolSvg,weatherPreviewHtml} from '../lib/weather-visuals.mjs';
+import {readFile} from 'node:fs/promises';
+// Browser .js modules are ESM even though the root Node package is CommonJS.
+const moduleUrl = text => `data:text/javascript;base64,${Buffer.from(text).toString('base64')}`;
+const meteoUrl = moduleUrl(await readFile(new URL('../lib/meteo-realtime.js', import.meta.url), 'utf8'));
+const {buildMeteoWatchLocations,fetchRealtimeMeteoSnapshot,meteoMetricLines} = await import(meteoUrl);
+const weatherSource = (await readFile(new URL('../lib/weather-visuals.mjs', import.meta.url), 'utf8'))
+  .replace(/'\.\/meteo-realtime\.js\?[^']*'/, JSON.stringify(meteoUrl));
+const {weatherSymbolSvg,weatherPreviewHtml} = await import(moduleUrl(weatherSource));
 import {horizontalDistance,segmentSlope,elevationLabel,TerrainMeasureManager} from '../lib/terrain-measure.mjs';
 const locations=buildMeteoWatchLocations({now:0,regionalContext:{lat:50,lon:4,label:'Regional test'}});
 assert.ok(locations.length<=32);
@@ -30,7 +36,7 @@ await assert.rejects(manager.elevation([95,4]));
 const missing=new TerrainMeasureManager(async()=>({ok:true,json:async()=>({elevation:[null]})}));await assert.rejects(missing.elevation([0,0]));
 console.log('Coverage cap, city anchors, regional samples, rotating cells, warning values, transparent symbols, elevations, signed slopes and missing-data handling passed.');
 
-const {readFile}=await import('node:fs/promises'),{default:vm}=await import('node:vm');
+const {default:vm}=await import('node:vm');
 let regionalSource=await readFile(new URL('../components/RegionalMap.js',import.meta.url),'utf8');
 regionalSource=regionalSource.replace(/^import[^\r\n]*;\r?\n/gm,'').replace('export class RegionalMap','class RegionalMap');
 const context=vm.createContext({console,TerrainMeasureManager,elevationLabel,segmentSlope});

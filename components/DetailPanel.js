@@ -7,6 +7,7 @@ import { topicStoryLabel } from '../lib/topic-story-labels.mjs?v=story-media-202
 import { getTopicStoryTheme, topicStoryThemeCss } from '../lib/topic-story-theme.mjs?v=local-colour-picker-20261012';
 import { scanTopicZip } from '../lib/topic-importer.mjs?v=story-media-20261013';
 import { Settings } from '../lib/settings.js?v=world-regional-location-20261012';
+import { GitHubAuth } from '../lib/github-auth.mjs';
 import { buildCaptionEmbedUrl } from '../lib/video-captions.mjs?v=topic-earth-video-captions-20261003';
 import { AppAccess } from '../lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-fever-scenario-layer-20260521';
@@ -11743,6 +11744,15 @@ Rules:
     this.container.scrollTop = scrollTop;
   }
 
+  revealGitHubAccess(content) {
+    const menu = content?.querySelector('[data-github-access]');
+    if (!menu) return;
+    menu.hidden = false;
+    const user = GitHubAuth.user;
+    menu.querySelector('[data-action="github-auth"]').textContent = user ? 'Sign out of GitHub' : 'GitHub login';
+    menu.querySelector('[data-github-status]').textContent = user ? `${user.login} · ${user.role}` : 'Sign in to verify your topic.earth access.';
+  }
+
   setPwaActionStatus(content, message, state = 'info') {
     const status = content?.querySelector('#pwa-action-status');
     if (!status) return;
@@ -12191,6 +12201,10 @@ Rules:
           aria-expanded="${this.settingsAccessExpanded ? 'true' : 'false'}"
           title="${this.escapeHtml(canToggleAdmin ? accessCopy.label : 'Access mode')}"
         >&#916;</button>
+        <div data-github-access hidden class="settings-github-access">
+          <button type="button" class="btn-secondary" data-action="github-auth">GitHub login</button>
+          <p class="setting-hint" data-github-status role="status"></p>
+        </div>
         ${this.settingsAccessExpanded ? `
           <div class="section-label">${this.escapeHtml(accessCopy.label)}</div>
           <div class="settings-mode-switch" role="radiogroup" aria-label="${this.escapeHtml(accessCopy.label)}">
@@ -12321,7 +12335,16 @@ Rules:
         this.applySettingsFormChange(content);
       } else if (action === 'set-settings-access-mode') {
         this.setSettingsAccessMode(target.dataset.mode, content);
+      } else if (action === 'github-auth') {
+        target.disabled = true;
+        const authAction = GitHubAuth.user ? GitHubAuth.signOut() : GitHubAuth.signIn();
+        authAction.catch(error => {
+          const status = content.querySelector('[data-github-status]');
+          if (status) status.textContent = error.message;
+          target.disabled = false;
+        });
       } else if (action === 'unlock-settings-access') {
+        if (Date.now() < (this.suppressDeltaClickUntil || 0)) return;
         this.unlockSettingsAccess();
       } else if (action === 'save-settings') {
         this.saveSettings();
@@ -12376,6 +12399,30 @@ Rules:
     }, settingsEventOptions);
     
     // Auto-detect toggle
+    let deltaHoldTimer;
+    const cancelDeltaHold = () => { clearTimeout(deltaHoldTimer); deltaHoldTimer = null; };
+    this.settingsEvents.signal.addEventListener('abort', cancelDeltaHold, { once: true });
+    content.addEventListener('contextmenu', event => {
+      if (!event.target.closest('[data-action="unlock-settings-access"]')) return;
+      event.preventDefault(); cancelDeltaHold();
+      this.suppressDeltaClickUntil = Date.now() + 1000;
+      this.revealGitHubAccess(content);
+    }, settingsEventOptions);
+    let deltaHoldStart;
+    content.addEventListener('pointerdown', event => {
+      if (event.pointerType === 'mouse' || !event.target.closest('[data-action="unlock-settings-access"]')) return;
+      cancelDeltaHold();
+      deltaHoldStart = { x: event.clientX, y: event.clientY };
+      deltaHoldTimer = setTimeout(() => {
+        this.suppressDeltaClickUntil = Date.now() + 1000;
+        this.revealGitHubAccess(content);
+      }, 600);
+    }, settingsEventOptions);
+    content.addEventListener('pointermove', event => {
+      if (deltaHoldStart && Math.hypot(event.clientX - deltaHoldStart.x, event.clientY - deltaHoldStart.y) > 10) cancelDeltaHold();
+    }, settingsEventOptions);
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(type => content.addEventListener(type, cancelDeltaHold, settingsEventOptions));
+
     content.addEventListener('change', (e) => {
       if (e.target.id === 'topic-review-upload') {
         this.importTopicZip(e.target);

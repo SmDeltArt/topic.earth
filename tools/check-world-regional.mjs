@@ -113,7 +113,7 @@ assert.deepEqual(Array.from(app.getLayerTopicsForNavigation(ambassadors[0]),poin
 assert.equal(app.getAdjacentTopic(ambassadors[4],'next').id,ambassadors[5].id);
 for(const point of ambassadors){
   const slug=point.id.replace('ambassador-pilot-','');
-  const html=await readFile(new URL(`../docs/ambassadors/${slug}.html`,import.meta.url),'utf8');
+  const html=(await readFile(new URL(`../docs/ambassadors/${slug}.html`,import.meta.url),'utf8')).replace(/\r\n/g,'\n');
   assert.ok(html.includes(point.topicStory.html));
   assert.ok(html.includes(`lang="${point.language}"`));
   assert.equal((point.topicStory.html.match(/aria-current="page"/g)||[]).length,1);

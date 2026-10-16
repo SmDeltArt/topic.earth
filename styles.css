@@ -9802,6 +9802,7 @@ body.regional-mode #detail-panel.compact .detail-compact-summary { margin-top: 5
     outline-offset: 3px;
 }
 .personal-location-settings button:disabled { opacity: .55; cursor: wait; }
+.settings-github-access { margin: 10px 0; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); }
 .personal-location-row { align-items: center; }
 .personal-location-row input { min-height: 44px; }
 .regional-personal-location { display: flex; gap: 8px; align-items: center; font-size: 12px; padding: 8px 0; }
