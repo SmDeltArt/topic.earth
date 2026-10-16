@@ -22,6 +22,9 @@
     }
   ],
   "functions": {
+    "api/nasa-gistemp.mjs": {
+      "maxDuration": 15
+    },
     "api/tropical-cyclones.js": {
       "maxDuration": 30
     },
