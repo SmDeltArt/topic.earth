@@ -19,13 +19,14 @@ export class TopBar {
     this.handleDocumentClick = this.handleDocumentClick.bind(this);
     this.handleSettingsChanged = this.handleSettingsChanged.bind(this);
     this.updateLogoClock = this.updateLogoClock.bind(this);
-    this.logoClockFrame = null;
+    this.logoClockTimer = null;
     this.container.addEventListener('click', this.handleClick);
     document.addEventListener('click', this.handleDocumentClick);
     window.addEventListener('settingsChanged', this.handleSettingsChanged);
     window.addEventListener('topicIdentityChanged', () => this.render());
     window.addEventListener('pageshow', () => GitHubAuth.refresh());
     document.addEventListener('visibilitychange', () => {
+      this.startLogoClock();
       if (!document.hidden) GitHubAuth.refresh();
     });
     GitHubAuth.refresh();
@@ -77,14 +78,14 @@ export class TopBar {
   }
 
   startLogoClock() {
-    if (this.logoClockFrame) {
-      cancelAnimationFrame(this.logoClockFrame);
-      this.logoClockFrame = null;
-    }
+    clearTimeout(this.logoClockTimer);
+    this.logoClockTimer = null;
     this.updateLogoClock();
   }
 
   updateLogoClock() {
+    this.logoClockTimer = null;
+    if (document.hidden) return;
     const clock = this.container.querySelector('[data-logo-clock]');
     if (!clock) return;
 
@@ -101,7 +102,7 @@ export class TopBar {
     clock.setAttribute('aria-label', `topic.earth local time ${label}`);
     clock.title = label;
 
-    this.logoClockFrame = requestAnimationFrame(this.updateLogoClock);
+    this.logoClockTimer = setTimeout(this.updateLogoClock, 1000 - now.getMilliseconds());
   }
 
   getCurrentLanguage() {

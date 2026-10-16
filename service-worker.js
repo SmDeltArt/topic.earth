@@ -1,4 +1,4 @@
-const CACHE_NAME = 'topic-earth-shell-v44-story-links';
+const CACHE_NAME = 'topic-earth-shell-v45-cyclone-hover';
 const APP_SHELL = [
   './lib/weather-models.mjs?v=weather-mesh-20261015',
   './assets/models/weather-symbols.glb?v=weather-mesh-20261015',

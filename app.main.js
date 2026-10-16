@@ -4,7 +4,7 @@ import { LocalWorkspace } from './lib/local-workspace.mjs';
 import { GitHubAuth } from './lib/github-auth.mjs';
 import { CYCLONE_LAYER_ID, fetchLiveCyclones, buildCycloneTopics, validateCycloneSnapshot } from './lib/tropical-cyclones.mjs?v=cyclones-20261013';
 import { TopicStoryMedia } from './lib/topic-story-media.mjs?v=story-media-20261013';
-import { GlobeRenderer } from './lib/globe.js?v=meteo-hover-20261016';
+import { GlobeRenderer } from './lib/globe.js?v=cyclone-hover-20261016';
 import { AppAccess } from './lib/capabilities.js?v=local-admin-20261016';
 import { LAYERS } from './data/layers.js?v=regional-ambassadors-20261016';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchMeteoAtPoint, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=weather-terrain-20261015';
@@ -17,7 +17,7 @@ import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-short-2
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=github-delta-20261016';
+import { TopBar } from './components/TopBar.js?v=idle-clock-20261016';
 import { RegionalMap } from './components/RegionalMap.js?v=metres-20261016';
 import { LayerPanel } from './components/LayerPanel.js?v=local-admin-20261016';
 import { DetailPanel } from './components/DetailPanel.js?v=story-links-20261016';
@@ -3368,7 +3368,7 @@ class TopicEarthApp {
         this.syncRealtimeMeteoLayers();
         if (this.currentLayerFilter === 'regional') this.refreshRegionalMap();
 
-        console.debug(`[Meteo] Loaded ${snapshot.livePoints?.length || 0} ${snapshot.live ? 'realtime' : 'fallback'} meteo samples and ${snapshot.eventPoints?.length || 0} auto event(s)`);
+        if (window.TOPIC_EARTH_DEBUG === true) console.debug(`[Meteo] Loaded ${snapshot.livePoints?.length || 0} ${snapshot.live ? 'realtime' : 'fallback'} meteo samples and ${snapshot.eventPoints?.length || 0} auto event(s)`);
         return snapshot;
       })
       .catch(error => {
@@ -3410,7 +3410,7 @@ class TopicEarthApp {
         this.detailPanel?.updateLayers?.(this.allLayers);
         this.updateMarkers();
 
-        console.debug(`[Climate Indicators] Loaded ${snapshot.points?.length || 0} ${snapshot.sourceStatus || 'runtime'} climate signal(s)`);
+        if (window.TOPIC_EARTH_DEBUG === true) console.debug(`[Climate Indicators] Loaded ${snapshot.points?.length || 0} ${snapshot.sourceStatus || 'runtime'} climate signal(s)`);
         if (Array.isArray(snapshot.errors) && snapshot.errors.length) {
           console.warn('[Climate Indicators] Source warnings:', snapshot.errors);
         }
