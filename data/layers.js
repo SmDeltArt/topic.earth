@@ -1,7 +1,7 @@
 export const LAYERS = [
   {id:'bike-tools',name:'Bike Ways',modeTabs:['regional'],isGroup:true,icon:'🚲',color:'#66bb6a',enabled:true,defaultExpanded:true},
   { id:'tropical-cyclones', name:'Tropical cyclones · world live', icon:'🌀', color:'#00d4ff', enabled:true, modeTabs:['main'], defaultExpanded:true, previewLimit:12 },
-  { id: 'ambassadors', name: 'Ambassadors · citizen pilot', icon: '🤝', color: '#39ff88', enabled: true, modeTabs: ['main', 'regional'], topicOrderField: 'ambassadorOrder', previewLimit: 7, ignoreRegionalRadius: true },
+  { id: 'ambassadors', name: 'Ambassadors · citizen pilot', icon: '🤝', color: '#39ff88', enabled: true, modeTabs: ['regional'], topicOrderField: 'ambassadorOrder', previewLimit: 7, ignoreRegionalRadius: true },
   { id: 'regional-examples', name: 'Examples · learning only', icon: '📚', color: '#94a3b8', enabled: false, modeTabs: ['main', 'regional'], sortByRegionalContext: true },
   {
     id: 'earths-fever',

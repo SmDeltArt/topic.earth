@@ -1,6 +1,6 @@
 import {weatherSymbolSvg,weatherPreviewHtml} from '../lib/weather-visuals.mjs?v=weather-terrain-20261015';
 import {meteoMetricLines} from '../lib/meteo-realtime.js?v=weather-terrain-20261015';
-import {TerrainMeasureManager,elevationLabel,segmentSlope} from '../lib/terrain-measure.mjs?v=weather-terrain-20261015';
+import {TerrainMeasureManager,elevationLabel,segmentSlope} from '../lib/terrain-measure.mjs?v=height-labels-20261016';
 import { RegionalLocationManager } from '../lib/regional-location.mjs';
 import { Settings } from '../lib/settings.js?v=world-regional-location-20261012';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -393,6 +393,7 @@ export class RegionalMap {
       this.L = L;
       this.map.on('click', (event) => this.handleMapAuthorClick(event));
       this.map.on('moveend', () => this.loadVisiblePointElevations());
+      this.map.on('zoomend', () => this.updateReliefLabelScale());
 
       L.tileLayer(OSM_TILE_URL, {
         maxZoom: 18,
@@ -1156,8 +1157,15 @@ export class RegionalMap {
     return !!this.activeLayers?.has(REGIONAL_RELIEF_LAYER_ID);
   }
 
+  updateReliefLabelScale() {
+    const zoom = this.map?.getZoom?.() ?? 4;
+    const size = zoom >= 12 ? 16 : zoom >= 9 ? 12 : 8;
+    this.element?.style.setProperty('--regional-relief-label-size', `${size}px`);
+  }
+
   syncReliefLayer(L = this.L) {
     if (!this.map || !L) return;
+    this.updateReliefLabelScale();
 
     if (!this.isReliefActive()) {
       if (this.reliefTileLayer) this.map.removeLayer(this.reliefTileLayer);
@@ -1202,7 +1210,7 @@ export class RegionalMap {
       className: 'regional-relief-height-icon',
       iconSize: [42, Math.ceil(height + 18)],
       iconAnchor: [21, Math.ceil(height + 9)],
-      html: `<span class="regional-relief-height-label ${elevation*100<65?'below-scenario':''}" title="Terrain model estimate; 65 cm scenario comparison is not a flood prediction">${this.escapeHtml(elevationLabel(elevation))}</span><i style="height:${height.toFixed(1)}px"></i>`
+      html: `<span class="regional-relief-height-label ${elevation*100<65?'below-scenario':''}" title="Terrain model estimate above sea level; 65 cm scenario comparison is not a flood prediction">${this.escapeHtml(elevationLabel(elevation))}</span><i style="height:${height.toFixed(1)}px"></i>`
     });
     L.marker([point.lat, point.lon], {
       icon,

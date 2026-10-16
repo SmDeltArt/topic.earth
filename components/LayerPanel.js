@@ -96,6 +96,11 @@ export class LayerPanel {
   }
 
   render() {
+    const scrollPositions = [this.container,
+      this.container.querySelector('#layer-controls-wrapper'),
+      this.container.querySelector('#layer-controls')]
+      .filter(Boolean).map(element => ({ id: element.id, top: element.scrollTop, left: element.scrollLeft }));
+    this.hideTopicPreview();
     this.container.innerHTML = '';
     const collapseBtn = this.createCollapseButton();
     const header = this.createHeader();
@@ -108,6 +113,10 @@ export class LayerPanel {
     this.container.appendChild(header);
     this.container.appendChild(feverMessageDiv);
     this.container.appendChild(controls);
+    scrollPositions.forEach(({ id, top, left }) => {
+      const element = id === this.container.id ? this.container : this.container.querySelector(`#${id}`);
+      if (element) { element.scrollTop = top; element.scrollLeft = left; }
+    });
   }
 
   createFeverMessageDiv() {

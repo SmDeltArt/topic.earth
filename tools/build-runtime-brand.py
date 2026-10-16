@@ -33,6 +33,9 @@ if (formats / 'topic-earth-social-1200x630-local.png').exists():
 if (formats / 'topic-earth-favicon-512-local.png').exists():
     mark=Image.open(formats / 'topic-earth-favicon-512-local.png').convert('RGBA')
     for size in [192,512,180]:
+        # Preserve the curated transparent PWA icons supplied for the app.
+        if size in [192,512] and (runtime / f'pwa-{size}.png').exists():
+            continue
         canvas=Image.new('RGBA',(size,size),'#071019')
         icon=mark.resize((round(size*.78),round(size*.78)),Image.Resampling.LANCZOS)
         offset=(size-icon.width)//2;canvas.alpha_composite(icon,(offset,offset))

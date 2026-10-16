@@ -1,9 +1,9 @@
-const CACHE_NAME = 'topic-earth-shell-v35-weather-mesh';
+const CACHE_NAME = 'topic-earth-shell-v40-transparent-512';
 const APP_SHELL = [
   './lib/weather-models.mjs?v=weather-mesh-20261015',
   './assets/models/weather-symbols.glb?v=weather-mesh-20261015',
   './lib/weather-visuals.mjs?v=weather-terrain-20261015',
-  './lib/terrain-measure.mjs?v=weather-terrain-20261015',
+  './lib/terrain-measure.mjs?v=height-labels-20261016',
   './lib/meteo-realtime.js?v=weather-terrain-20261015',
   './',
   './assets/widgets/color/smart-color-picker.html',
@@ -19,15 +19,15 @@ const APP_SHELL = [
   './lib/tropical-cyclones.mjs?v=cyclones-20261013',
   './lib/cyclone-visuals.mjs?v=cyclones-20261013',
   './index.html',
-  './styles.css?v=weather-terrain-20261015',
-  './site.webmanifest?v=transparent-20261015',
+  './styles.css?v=settings-language-row-20261016',
+  './site.webmanifest?v=transparent-20261016',
   './assets/logo/local/favicon.svg?v=earth-clock-20261012',
   './assets/logo/local/earth-128.svg',
   './assets/logo/local/favicon.ico?v=earth-clock-20261012',
   './assets/logo/local/apple-touch-180.png?v=earth-clock-20261012',
   './assets/logo/local/brand-header.svg',
   './assets/logo/local/pwa-192.png?v=transparent-20261015',
-  './assets/logo/local/pwa-512.png?v=earth-clock-20261012',
+  './assets/logo/local/pwa-512.png?v=transparent-20261016',
   './shared/topic-favicon.js?v=earth-clock-20261008'
 ];
 

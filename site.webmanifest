@@ -36,10 +36,10 @@
       "purpose": "any"
     },
     {
-      "src": "/assets/logo/local/pwa-512.png?v=earth-clock-20261012",
+      "src": "/assets/logo/local/pwa-512.png?v=transparent-20261016",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "shortcuts": [

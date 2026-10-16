@@ -33,6 +33,8 @@ const methods=methodNames.map(name=>globeSource.match(new RegExp(`  ${name}\\([^
 let preference='auto';const requests=[];
 const context={console:{log(){},error(){}},window:{Settings:{get:()=>({baseTextureQuality:preference})}},MAIN_TEXTURE_ASSET_BASE:'./assets/textures/main',assetPath:(_b,f)=>`https://cdn.example/${f}`,
  THREE:{...Three,TextureLoader:class{load(path,success,_p,failure){requests.push(path);queueMicrotask(()=>path.includes('_1k.jpeg')&&!path.startsWith('https:')?success(new Three.Texture({src:path})):failure(Error('Unavailable')))}}}};
+context.Settings=context.window.Settings;
+delete context.window.Settings;
 const world=vm.runInNewContext(`({${methods.join(',')}})`,context);
 world.renderer={capabilities:{maxTextureSize:4096}};world.getTextureQualitySignals=()=>({browserFamily:'firefox'});
 assert.equal(world.detectPreferredQuality(),'1k');preference='8k';assert.equal(world.detectPreferredQuality(),'4k');

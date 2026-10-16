@@ -2,9 +2,9 @@ import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=topic-proxy-bridge-20
 import { RegionalLocationManager } from './lib/regional-location.mjs';
 import { CYCLONE_LAYER_ID, fetchLiveCyclones, buildCycloneTopics, validateCycloneSnapshot } from './lib/tropical-cyclones.mjs?v=cyclones-20261013';
 import { TopicStoryMedia } from './lib/topic-story-media.mjs?v=story-media-20261013';
-import { GlobeRenderer } from './lib/globe.js?v=weather-mesh-20261015';
+import { GlobeRenderer } from './lib/globe.js?v=texture-settings-20261016';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
-import { LAYERS } from './data/layers.js?v=weather-mesh-20261015';
+import { LAYERS } from './data/layers.js?v=regional-ambassadors-20261016';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchMeteoAtPoint, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=weather-terrain-20261015';
 import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-nasa-proxy-20261016';
 import { REGIONAL_AMBASSADOR_TOPICS } from './data/regional-ambassador-topics.js?v=local-colour-picker-20261012';
@@ -16,8 +16,8 @@ import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-e
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=cloudinary-fallback-20261008';
-import { RegionalMap } from './components/RegionalMap.js?v=weather-terrain-20261015';
-import { LayerPanel } from './components/LayerPanel.js?v=topic-proxy-bridge-20261013';
+import { RegionalMap } from './components/RegionalMap.js?v=height-labels-20261016';
+import { LayerPanel } from './components/LayerPanel.js?v=preserve-layer-scroll-20261016';
 import { DetailPanel } from './components/DetailPanel.js?v=weather-terrain-20261015';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';
@@ -3332,7 +3332,7 @@ class TopicEarthApp {
         this.syncRealtimeMeteoLayers();
         if (this.currentLayerFilter === 'regional') this.refreshRegionalMap();
 
-        console.log(`[Meteo] Loaded ${snapshot.livePoints?.length || 0} ${snapshot.live ? 'realtime' : 'fallback'} meteo samples and ${snapshot.eventPoints?.length || 0} auto event(s)`);
+        console.debug(`[Meteo] Loaded ${snapshot.livePoints?.length || 0} ${snapshot.live ? 'realtime' : 'fallback'} meteo samples and ${snapshot.eventPoints?.length || 0} auto event(s)`);
         return snapshot;
       })
       .catch(error => {
@@ -3374,7 +3374,7 @@ class TopicEarthApp {
         this.detailPanel?.updateLayers?.(this.allLayers);
         this.updateMarkers();
 
-        console.log(`[Climate Indicators] Loaded ${snapshot.points?.length || 0} ${snapshot.sourceStatus || 'runtime'} climate signal(s)`);
+        console.debug(`[Climate Indicators] Loaded ${snapshot.points?.length || 0} ${snapshot.sourceStatus || 'runtime'} climate signal(s)`);
         if (Array.isArray(snapshot.errors) && snapshot.errors.length) {
           console.warn('[Climate Indicators] Source warnings:', snapshot.errors);
         }

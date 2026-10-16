@@ -22,7 +22,7 @@ const slope=segmentSlope([0,0],[0,.001],0,1);
 assert.ok(Math.abs(slope.percent-.8993)<.001);assert.ok(slope.degrees>0);
 assert.equal(segmentSlope([0,0],[0,0],0,1),null);
 assert.equal(segmentSlope([0,0],[0,1],null,1),null);
-assert.equal(elevationLabel(.64),'64 cm ASL');assert.equal(elevationLabel(-1),'-100 cm ASL');
+assert.equal(elevationLabel(.64),'64 cm');assert.equal(elevationLabel(-1),'-100 cm');
 let calls=0;const manager=new TerrainMeasureManager(async()=>{calls++;return {ok:true,json:async()=>({elevation:[12.5]})}});
 assert.deepEqual(await Promise.all([manager.elevation([50,4]),manager.elevation([50,4])]),[12.5,12.5]);assert.equal(calls,1);
 await manager.elevation([50,4]);assert.equal(calls,1);
