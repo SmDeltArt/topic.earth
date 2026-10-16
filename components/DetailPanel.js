@@ -11710,12 +11710,32 @@ Rules:
     }));
   }
 
-  setSettingsAccessMode(mode = 'user', content = this.container.querySelector('#detail-content')) {
+  async setSettingsAccessMode(mode = 'user', content = this.container.querySelector('#detail-content')) {
+    const attempt = this.settingsModeAttempt = (this.settingsModeAttempt || 0) + 1;
     const nextMode = mode === 'admin' ? 'admin' : 'user';
-    if (nextMode === 'admin' && !AppAccess.can('admin:ui-toggle')) AppAccess.unlockAdminAccess(true);
+    if (nextMode === 'admin') {
+      const local = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+      if (!local) await GitHubAuth.refresh();
+      if (attempt !== this.settingsModeAttempt) return AppAccess.getState();
+      if (!AppAccess.can('admin:ui-toggle')) {
+        if (local) AppAccess.unlockAdminAccess(true);
+        else {
+          this.revealGitHubAccess(content);
+          const status = content?.querySelector('[data-github-status]');
+          if (status) status.textContent = GitHubAuth.user
+            ? 'Your GitHub account has ordinary user access. Admin mode requires an authorized owner or editor role.'
+            : 'Sign in with GitHub first, then select Admin. Access is verified by the server.';
+          return AppAccess.getState();
+        }
+      }
+    }
 
+    const scrollTop = content?.scrollTop || 0;
     const state = AppAccess.setMode(nextMode);
     window.dispatchEvent(new CustomEvent('adminModeChanged', { detail: state }));
+    // The event redraws Settings synchronously; update the current content.
+    content = this.container?.querySelector('#detail-content') || content;
+    if (content) content.scrollTop = scrollTop;
 
     content?.querySelectorAll('[data-action="set-settings-access-mode"]').forEach(button => {
       const active = button.dataset.mode === state.mode;
@@ -11732,16 +11752,19 @@ Rules:
     const status = content?.querySelector('#settings-access-status');
     if (status) {
       const activeLabel = state.isAdminMode ? 'Admin mode active' : 'User mode active';
-      status.textContent = `${activeLabel}. ${state.isAdminMode ? 'Layer and topic editing are unlocked.' : 'Published content stays protected; local drafts remain available.'}`;
+      status.textContent = `${activeLabel}. ${state.isAdminMode ? 'Available editing tools follow your verified permissions.' : 'Published content stays protected; local drafts remain available.'}`;
     }
-
+    return state;
   }
 
   unlockSettingsAccess() {
     const scrollTop = this.container.scrollTop;
+    const contentScrollTop = this.container.querySelector('#detail-content')?.scrollTop || 0;
     this.settingsAccessExpanded = !this.settingsAccessExpanded;
     this.renderSettings();
     this.container.scrollTop = scrollTop;
+    const content = this.container.querySelector('#detail-content');
+    if (content) content.scrollTop = contentScrollTop;
   }
 
   revealGitHubAccess(content) {
@@ -11867,15 +11890,15 @@ Rules:
     const accessCopy = frenchUi
       ? {
           label: 'Mode d acces',
-          hint: 'Le mode utilisateur protege reste actif au chargement. Admin local passe par le raccourci volontaire.',
+          hint: 'Explorez et enregistrez des brouillons locaux. Les modifications publiees necessitent un acces autorise.',
           userHint: 'Explorer et enregistrer des brouillons locaux sans modifier les donnees publiees.',
-          adminHint: 'Creer des couches et des sujets, modifier les brouillons et importer les ZIP de sujets pour validation.'
+          adminHint: 'Utiliser les outils de modification autorises par votre role.'
         }
       : {
           label: 'Access mode',
-          hint: 'Protected user mode stays active on load. Local admin is available only through the deliberate shortcut.',
+          hint: 'Explore and save local drafts. Published changes require authorized access.',
           userHint: 'Explore and save local drafts without changing published data.',
-          adminHint: 'Create layers, create topics, edit saved drafts, and upload topic ZIPs for review.'
+          adminHint: 'Use the editing tools permitted by your role.'
         };
 
     content.innerHTML = `
@@ -12193,14 +12216,16 @@ Rules:
       </div>
 
       <div class="detail-section settings-access-section">
+        <div class="settings-access-caption">
         <button
           type="button"
           class="settings-access-unlock ${canToggleAdmin ? 'unlocked' : ''}"
           data-action="unlock-settings-access"
           aria-label="${this.escapeHtml('Access mode')}"
           aria-expanded="${this.settingsAccessExpanded ? 'true' : 'false'}"
-          title="${this.escapeHtml(canToggleAdmin ? accessCopy.label : 'Access mode')}"
         >&#916;</button>
+          <span class="setting-hint">${this.escapeHtml(accessCopy.hint)}</span>
+        </div>
         <div data-github-access hidden class="settings-github-access">
           <button type="button" class="btn-secondary" data-action="github-auth">GitHub login</button>
           <p class="setting-hint" data-github-status role="status"></p>
@@ -12238,7 +12263,6 @@ Rules:
             </button>
           </div>
           <div id="settings-access-status" class="setting-hint">
-            ${this.escapeHtml(accessCopy.hint)}
             <span class="settings-access-profile">${this.escapeHtml(accessState.profile)}</span>
           </div>
         ` : ''}

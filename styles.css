@@ -9373,7 +9373,10 @@ body.topic-mode-space #layer-panel { top: calc(var(--top-bar-height) + 84px); ma
 .scene-map-btn { min-width: 34px; min-height: 34px; padding: 5px 9px; border: 1px solid rgba(0,212,255,.35); border-radius: 6px; background: rgba(20,24,36,.92); color: var(--accent); font: inherit; font-size: 11px; cursor: pointer; }
 .settings-access-section { border: 0; background: none; padding: 4px 0; }
 .settings-access-unlock, .settings-access-unlock.unlocked { margin: 0; border: 0; border-radius: 0; color: var(--text-secondary); background: none; transform: none; cursor: default; transition: none; }
-.settings-access-unlock:hover { color: var(--text-primary); border: 0; }
+.settings-access-unlock:hover, .settings-access-unlock.unlocked:hover { color: var(--text-secondary); background: none; border: 0; transform: none; box-shadow: none; }
+.settings-access-caption { display: flex; align-items: baseline; gap: 6px; }
+.settings-access-caption .settings-access-unlock { flex: 0 0 28px; }
+.settings-access-caption .setting-hint { margin: 0; }
 .settings-access-unlock:focus-visible { outline: 1px solid var(--accent); }
 @media (max-width: 420px) {
  #scene-interaction-controls { left: 12px; right: 52px; gap: 4px; justify-content: flex-end; }

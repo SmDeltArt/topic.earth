@@ -18,7 +18,7 @@ import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js
 import { TopBar } from './components/TopBar.js?v=github-delta-20261016';
 import { RegionalMap } from './components/RegionalMap.js?v=height-labels-20261016';
 import { LayerPanel } from './components/LayerPanel.js?v=hover-preview-20261016';
-import { DetailPanel } from './components/DetailPanel.js?v=github-delta-20261016';
+import { DetailPanel } from './components/DetailPanel.js?v=delta-access-20261016';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';

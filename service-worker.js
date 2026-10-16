@@ -1,4 +1,4 @@
-const CACHE_NAME = 'topic-earth-shell-v41-hover-preview';
+const CACHE_NAME = 'topic-earth-shell-v42-delta-access';
 const APP_SHELL = [
   './lib/weather-models.mjs?v=weather-mesh-20261015',
   './assets/models/weather-symbols.glb?v=weather-mesh-20261015',

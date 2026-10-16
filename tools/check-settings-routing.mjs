@@ -10,10 +10,11 @@ const context = vm.createContext({
   AppAccess: {
     isAdminMode: () => mode === 'admin',
     can: () => true,
-    setMode: value => { mode = value; return { mode, isAdminMode: mode === 'admin' }; }
+    setMode: value => { mode = value; return { mode, isAdminMode: mode === 'admin' }; },
+    getState: () => ({ mode, isAdminMode: mode === 'admin' })
   },
   CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } },
-  window: { dispatchEvent() {} }
+  window: { location: { hostname: 'localhost' }, dispatchEvent() {} }
 });
 const source = (await readFile(new URL('../components/DetailPanel.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*?;\r?\n/gm, '')
@@ -22,14 +23,14 @@ vm.runInContext(`${source}\nglobalThis.Panel = DetailPanel;`, context);
 const panel = Object.create(context.Panel.prototype);
 panel.openApiSettingsWindow = () => { opened++; };
 assert.equal(panel.getApiSettingsWidgetUrl(), './ollama-install-guide.html');
-panel.setSettingsAccessMode('admin', null);
+await panel.setSettingsAccessMode('admin', null);
 assert.equal(opened, 0, 'Selecting Admin must not launch API Settings');
 assert.equal(panel.getApiSettingsWidgetUrl(), 'https://api.caddeltai.com/api-settings');
 context.navigator.onLine = false;
 assert.equal(panel.getApiSettingsWidgetUrl(), './ollama-install-guide.html');
-panel.setSettingsAccessMode('user', null);
+await panel.setSettingsAccessMode('user', null);
 assert.equal(opened, 0);
-panel.container = { scrollTop: 480 };
+panel.container = { scrollTop: 480, querySelector: () => null };
 panel.renderSettings = () => { panel.container.scrollTop = 0; };
 panel.unlockSettingsAccess();
 assert.equal(panel.settingsAccessExpanded, true);
@@ -60,6 +61,32 @@ context.AppAccess.can = () => false;
 context.AppAccess.unlockAdminAccess = () => { unlockCount++; };
 panel.unlockSettingsAccess();
 assert.equal(unlockCount, 0, 'Delta disclosure must not unlock Admin access');
-panel.setSettingsAccessMode('admin', null);
+await panel.setSettingsAccessMode('admin', null);
 assert.equal(unlockCount, 1, 'Only selecting Admin unlocks local editing access');
 console.log('Delta disclosure leaves access permissions unchanged.');
+
+// Production cannot use the local shortcut. Refresh identity before choosing Admin.
+mode = 'user';
+context.window.location.hostname = 'www.topic.earth';
+let refreshCount = 0; let revealed = 0;
+context.GitHubAuth = { user: null, async refresh() { refreshCount++; } };
+panel.revealGitHubAccess = () => { revealed++; };
+const status = { textContent: '' };
+const content = { scrollTop: 250, querySelector: () => status, querySelectorAll: () => [] };
+await panel.setSettingsAccessMode('admin', content);
+assert.equal(mode, 'user');
+assert.equal(unlockCount, 1, 'Production must never use the local unlock');
+assert.match(status.textContent, /Sign in with GitHub first/);
+context.GitHubAuth.user = { role: 'user' };
+await panel.setSettingsAccessMode('admin', content);
+assert.equal(mode, 'user');
+assert.match(status.textContent, /ordinary user access/);
+assert.equal(revealed, 2);
+context.GitHubAuth.user = { role: 'super-admin' };
+context.AppAccess.can = () => true;
+await panel.setSettingsAccessMode('admin', null);
+assert.equal(mode, 'admin');
+await panel.setSettingsAccessMode('user', null);
+assert.equal(mode, 'user');
+assert.equal(refreshCount, 3);
+console.log('Production refreshes identity; signed-out/ordinary users get an explanation; authorized Admin can return to User.');
