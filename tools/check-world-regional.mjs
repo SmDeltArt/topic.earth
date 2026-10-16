@@ -2,13 +2,14 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { RegionalLocationManager } from '../lib/regional-location.mjs';
+import { LocalWorkspace } from '../lib/local-workspace.mjs';
 import * as Three from '../vendor/three/three.mjs';
 
 const loadClass = async (path, name, globals = {}) => {
   let source = await readFile(new URL(`../${path}`, import.meta.url), 'utf8');
   source = source.replace(/^import[\s\S]*?;\r?\n/gm, '').replace(`export class ${name}`, `class ${name}`);
   source = source.split('// Initialize application when DOM is ready')[0];
-  const context = vm.createContext({ console, RegionalLocationManager, ...globals });
+  const context = vm.createContext({ console, RegionalLocationManager, LocalWorkspace, ...globals });
   vm.runInContext(`${source}\nthis.TestClass = ${name};`, context);
   return context.TestClass;
 };

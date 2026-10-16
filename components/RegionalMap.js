@@ -1,6 +1,6 @@
 import {weatherSymbolSvg,weatherPreviewHtml} from '../lib/weather-visuals.mjs?v=weather-terrain-20261015';
 import {meteoMetricLines} from '../lib/meteo-realtime.js?v=weather-terrain-20261015';
-import {TerrainMeasureManager,elevationLabel,segmentSlope} from '../lib/terrain-measure.mjs?v=height-labels-20261016';
+import {TerrainMeasureManager,elevationLabel,segmentSlope} from '../lib/terrain-measure.mjs?v=metres-20261016';
 import { RegionalLocationManager } from '../lib/regional-location.mjs';
 import { Settings } from '../lib/settings.js?v=world-regional-location-20261012';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -1146,8 +1146,8 @@ export class RegionalMap {
       if (version!==this.terrainReadoutVersion || !this.visible) return;
       const slope=points.length===2?segmentSlope(points[0],points[1],heights[0],heights[1]):null;
       output.textContent=heights.map((height,index)=>`${points.length===2?(index?'B: ':'A: '):''}~${elevationLabel(height)}`).join(' → ')
-        +(slope?` · Δh ${(slope.riseM*100).toFixed(0)} cm · ${slope.degrees.toFixed(2)}° · ${slope.percent.toFixed(2)}/100 (${slope.percent.toFixed(2)}%) · horizontal ${slope.distanceM.toFixed(0)} m`:points.length===2?' · Slope undefined at coincident points':'')
-        +' · Open-Meteo / Copernicus DEM (90 m grid); cm display does not imply cm accuracy. Segment endpoint grade, not a route profile.';
+        +(slope?` · Δh ${elevationLabel(slope.riseM)} · ${slope.degrees.toFixed(2)}° · ${slope.percent.toFixed(2)}/100 (${slope.percent.toFixed(2)}%) · horizontal ${slope.distanceM.toFixed(0)} m`:points.length===2?' · Slope undefined at coincident points':'')
+        +' · Open-Meteo / Copernicus DEM (90 m grid); two decimal places do not imply centimetre accuracy. Segment endpoint grade, not a route profile.';
     } catch {
       if(version===this.terrainReadoutVersion)output.textContent='Terrain elevation unavailable. No height or slope assumed.';
     }

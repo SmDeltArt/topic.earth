@@ -57,7 +57,9 @@ There are **no enabled content-write endpoints** in this first change, including
 
 The guard also requires an exact same-origin Origin header for writes, rejecting missing or cross-site origins. Use 401 for signed-out sessions, 403 for denied permission/origin, and a generic 503 for configuration or verification failures. Do not continue after any verification error. Middleware is defense in depth; keep the guard inside every future write handler too.
 
-Browser `AppAccess` remains a UI helper. On production hosts it displays server-verified roles and ignores legacy unlock/profile flags. Local demo editing/proposals can still use browser storage; those changes do not write to production. This change enables no layer reorder, layer deletion or topic deletion permissions in the production UI.
+Browser `AppAccess` remains a UI helper. Admin is now a browser-local authoring mode available without GitHub: create layers/topics, edit local drafts and download review ZIPs (including custom layer JSON). Left-click Δ reveals User/Admin choices and never starts OAuth. Right-click or long-press Δ first selects Admin, then reveals GitHub login. A server-verified owner identity activates Super Admin automatically; ordinary GitHub users and editors do not gain owner tools.
+
+Super Admin adds local layer/topic up/down and remove controls plus workspace JSON export. Removing an item hides it in this browser; it does not delete published data or discard drafts. Settings → Super Admin → Restore order and removed items clears these preferences. Workspace exports contain visible layers/topics and local ordering/removal metadata; draft ZIPs remain available in Admin. Neither export includes cookies, OAuth tokens or API settings. There is no GitHub push or production content-write endpoint. Browser flags may enable local authoring, but never authorize server writes. Logout, expiry or revocation removes the owner tools while local Admin authoring remains available. Ambassador/editor policy can be expanded separately.
 
 ## Logout, expiry and removal of access
 

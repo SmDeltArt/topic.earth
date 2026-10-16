@@ -56,37 +56,14 @@ context.content.dispatchEvent(new Event('click'));
 assert.equal(opened - beforeClicks, 1, 'Ten redraws must still produce only one action per click');
 console.log('Repeated Settings redraws retain exactly one click handler.');
 
-let unlockCount = 0;
-context.AppAccess.can = () => false;
-context.AppAccess.unlockAdminAccess = () => { unlockCount++; };
-panel.unlockSettingsAccess();
-assert.equal(unlockCount, 0, 'Delta disclosure must not unlock Admin access');
-await panel.setSettingsAccessMode('admin', null);
-assert.equal(unlockCount, 1, 'Only selecting Admin unlocks local editing access');
-console.log('Delta disclosure leaves access permissions unchanged.');
-
-// Production cannot use the local shortcut. Refresh identity before choosing Admin.
+// Admin is browser-local on production too; selecting modes never invokes OAuth.
 mode = 'user';
 context.window.location.hostname = 'www.topic.earth';
-let refreshCount = 0; let revealed = 0;
+let refreshCount = 0;
 context.GitHubAuth = { user: null, async refresh() { refreshCount++; } };
-panel.revealGitHubAccess = () => { revealed++; };
-const status = { textContent: '' };
-const content = { scrollTop: 250, querySelector: () => status, querySelectorAll: () => [] };
-await panel.setSettingsAccessMode('admin', content);
-assert.equal(mode, 'user');
-assert.equal(unlockCount, 1, 'Production must never use the local unlock');
-assert.match(status.textContent, /Sign in with GitHub first/);
-context.GitHubAuth.user = { role: 'user' };
-await panel.setSettingsAccessMode('admin', content);
-assert.equal(mode, 'user');
-assert.match(status.textContent, /ordinary user access/);
-assert.equal(revealed, 2);
-context.GitHubAuth.user = { role: 'super-admin' };
-context.AppAccess.can = () => true;
 await panel.setSettingsAccessMode('admin', null);
 assert.equal(mode, 'admin');
 await panel.setSettingsAccessMode('user', null);
 assert.equal(mode, 'user');
-assert.equal(refreshCount, 3);
-console.log('Production refreshes identity; signed-out/ordinary users get an explanation; authorized Admin can return to User.');
+assert.equal(refreshCount, 0);
+console.log('User/Admin switching works on production without GitHub or an OAuth refresh.');

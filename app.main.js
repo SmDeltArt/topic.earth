@@ -1,9 +1,11 @@
 import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=topic-proxy-bridge-20261013';
 import { RegionalLocationManager } from './lib/regional-location.mjs';
+import { LocalWorkspace } from './lib/local-workspace.mjs';
+import { GitHubAuth } from './lib/github-auth.mjs';
 import { CYCLONE_LAYER_ID, fetchLiveCyclones, buildCycloneTopics, validateCycloneSnapshot } from './lib/tropical-cyclones.mjs?v=cyclones-20261013';
 import { TopicStoryMedia } from './lib/topic-story-media.mjs?v=story-media-20261013';
-import { GlobeRenderer } from './lib/globe.js?v=hover-preview-20261016';
-import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
+import { GlobeRenderer } from './lib/globe.js?v=meteo-hover-20261016';
+import { AppAccess } from './lib/capabilities.js?v=local-admin-20261016';
 import { LAYERS } from './data/layers.js?v=regional-ambassadors-20261016';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchMeteoAtPoint, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=weather-terrain-20261015';
 import { CLIMATE_LAYER_ID, fetchClimateIndicatorSnapshot } from './lib/climate-indicators.js?v=topic-earth-nasa-proxy-20261016';
@@ -16,9 +18,9 @@ import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-e
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=github-delta-20261016';
-import { RegionalMap } from './components/RegionalMap.js?v=height-labels-20261016';
-import { LayerPanel } from './components/LayerPanel.js?v=hover-preview-20261016';
-import { DetailPanel } from './components/DetailPanel.js?v=delta-access-20261016';
+import { RegionalMap } from './components/RegionalMap.js?v=metres-20261016';
+import { LayerPanel } from './components/LayerPanel.js?v=local-admin-20261016';
+import { DetailPanel } from './components/DetailPanel.js?v=story-links-20261016';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -113,7 +115,7 @@ class TopicEarthApp {
     // Combine default, fever, tipping, and custom data
     this.customLayers = LocalStorage.getCustomLayers();
     this.customPoints = LocalStorage.getCustomPoints();
-    this.allLayers = [...LAYERS, ...this.customLayers];
+    this.rebuildAllLayers();
 
     this.rebuildAllPoints();
     console.log(`[Tipping Points] Loaded ${TIPPING_POINT_TOPICS.length} tipping topics into layer system`);
@@ -147,6 +149,7 @@ class TopicEarthApp {
     const customOnlyPoints = this.customPoints.filter(point => point && !baseIds.has(String(point.id)));
 
     this.allPoints = [...mergedBasePoints, ...customOnlyPoints, ...this.realtimeMeteoPoints, ...(this.cyclonePoints || []), ...this.climateIndicatorPoints, ...this.goodInitiativePoints];
+    this.allPoints = LocalWorkspace.visibleTopics(this.allPoints, this.allLayers);
     return this.allPoints;
   }
 
@@ -2691,6 +2694,29 @@ class TopicEarthApp {
       if (status) status.textContent = `${additions.length} topic(s) added for review; ${topics.length - additions.length} already present.`;
     });
 
+    let previousIdentityRole = null;
+    window.addEventListener('topicIdentityChanged', () => {
+      const role = GitHubAuth.user?.role || null;
+      if (role === previousIdentityRole) return;
+      if (role === 'super-admin' && previousIdentityRole !== role) AppAccess.setMode('admin');
+      previousIdentityRole = role;
+      window.dispatchEvent(new CustomEvent('adminModeChanged', { detail: AppAccess.getState() }));
+    });
+    window.addEventListener('localWorkspaceAction', event => {
+      if (!AppAccess.can('workspace:manage')) return;
+      if (event.detail === 'reset') {
+        if (!confirm('Restore the default order and all locally removed layers/topics? Local drafts are kept.')) return;
+        LocalWorkspace.reset(); this.refreshAdminDataViews(); return;
+      }
+      if (event.detail === 'export') {
+        const payload = { schemaVersion: 1, scope: 'browser-workspace-only', exportedAt: new Date().toISOString(),
+          workspace: LocalWorkspace.read(), layers: this.allLayers, topics: this.allPoints };
+        const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
+        const link = document.createElement('a'); link.href = url; link.download = 'topic-earth-local-workspace.json';
+        document.body.appendChild(link); link.click(); link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+    });
     // Listen for admin mode changes to update layer panel and initialize debug tools
     window.addEventListener('adminModeChanged', (e) => {
       const accessState = AppAccess.enforceProfile();
@@ -2791,6 +2817,16 @@ class TopicEarthApp {
       },
       onDeleteLayer: (layer) => {
         this.handleDeleteLayer(layer);
+      },
+      onWorkspaceItem: ({ kind, item, operation, siblings }) => {
+        if (!AppAccess.can('workspace:manage')) return;
+        if (operation === 'hide') {
+          if (!confirm(`Remove "${item.name || item.title}" from this browser workspace? Restore it in Super Admin settings. Published data is unchanged.`)) return;
+          LocalWorkspace.hide(kind, item.id);
+        } else if (operation === 'up' || operation === 'down') {
+          LocalWorkspace.move(kind, item.id, operation === 'up' ? -1 : 1, siblings);
+        }
+        this.refreshAdminDataViews();
       }
     });
   }
@@ -3504,7 +3540,7 @@ class TopicEarthApp {
   }
 
   rebuildAllLayers() {
-    this.allLayers = [...LAYERS, ...this.customLayers];
+    this.allLayers = LocalWorkspace.visibleLayers([...LAYERS, ...this.customLayers]);
     return this.allLayers;
   }
 

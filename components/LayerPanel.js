@@ -3,8 +3,9 @@
  * Manages data layer toggles and news items
  */
 import { RegionalLocationManager } from '../lib/regional-location.mjs';
+import { LocalWorkspace } from '../lib/local-workspace.mjs';
 import { Settings } from '../lib/settings.js?v=world-regional-location-20261012';
-import { AppAccess } from '../lib/capabilities.js?v=topic-earth-access-shortcuts-20260517';
+import { AppAccess } from '../lib/capabilities.js?v=local-admin-20261016';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-tab-layers-20260507';
 import { getDirectImageUrl, getMediaTokensForPoint } from '../lib/media-utils.js';
 
@@ -194,12 +195,12 @@ export class LayerPanel {
     const layers = topLevelLayers.filter(layer => this.layerBelongsToFilter(layer, this.layerFilter));
     if (this.layerFilter !== 'regional' || !this.regionalContext) return layers;
     const nearest = layer => Math.min(...this.points.filter(point => point.category === layer.id).map(point => RegionalLocationManager.distance(point, this.regionalContext)));
-    return layers.sort((a, b) => {
+    return LocalWorkspace.sort(layers.sort((a, b) => {
       if (a.id === 'ambassadors' || b.id === 'ambassadors') return Number(b.id === 'ambassadors') - Number(a.id === 'ambassadors');
       if (a.id === 'regional-examples' || b.id === 'regional-examples') return Number(a.id === 'regional-examples') - Number(b.id === 'regional-examples');
       const da = nearest(a), db = nearest(b);
       return da === db ? 0 : da < db ? -1 : 1;
-    });
+    }), 'layers');
   }
 
   getLayerModeTabs(layer) {
@@ -261,10 +262,11 @@ export class LayerPanel {
     info.appendChild(icon);
     info.appendChild(name);
     header.appendChild(info);
-    if (deleteBtn) {
+    if (deleteBtn && !AppAccess.can('workspace:manage')) {
       header.appendChild(deleteBtn);
     }
     header.appendChild(expandBtn);
+    if (AppAccess.can('workspace:manage')) header.appendChild(this.createWorkspaceControls('layers', layer.id));
     item.appendChild(header);
 
     const content = this.isLayerGroup(layer)
@@ -275,6 +277,20 @@ export class LayerPanel {
     }
 
     return item;
+  }
+
+  createWorkspaceControls(kind, id) {
+    const controls = document.createElement('span');
+    controls.className = 'workspace-item-controls';
+    for (const [operation, icon, label] of [['up', '↑', 'Move up locally'], ['down', '↓', 'Move down locally'], ['hide', '×', 'Remove from this browser workspace']]) {
+      const button = document.createElement('button');
+      button.type = 'button'; button.textContent = icon;
+      button.dataset.action = 'workspace-item'; button.dataset.kind = kind;
+      button.dataset.itemId = String(id); button.dataset.operation = operation;
+      button.title = label; button.setAttribute('aria-label', label);
+      controls.appendChild(button);
+    }
+    return controls;
   }
 
   createLayerIcon(layer) {
@@ -434,7 +450,7 @@ export class LayerPanel {
       }
     }
 
-    return layerNews;
+    return LocalWorkspace.sort(layerNews, 'topics');
   }
 
   shouldSortLayerByRegionalContext(layer) {
@@ -606,7 +622,7 @@ export class LayerPanel {
     if ((point.worldMeteoRuntime || point.onlineLayerSignal) && point.markerColor) {
       item.style.setProperty('--news-meteo-color', point.markerColor);
     }
-    const canDeletePoint = AppAccess.canDeleteTopic(point);
+    const canDeletePoint = point.isCustom && AppAccess.canDeleteTopic(point) && !AppAccess.can('workspace:manage');
     const deleteButton = canDeletePoint ? `
       <button class="news-delete-btn" data-action="delete-topic" data-point-id="${point.id}" ${AppAccess.can('topic:delete') ? 'data-admin-only="true"' : ''} title="${this.t('layer.removeBrowserTopic')}">
         &times;
@@ -643,6 +659,7 @@ export class LayerPanel {
       ${deleteButton}
     `;
 
+    if (AppAccess.can('workspace:manage')) item.appendChild(this.createWorkspaceControls('topics', point.id));
     return item;
   }
 
@@ -728,6 +745,17 @@ export class LayerPanel {
     const action = target.dataset.action;
 
     switch (action) {
+      case 'workspace-item': {
+        if (!AppAccess.can('workspace:manage')) return;
+        const { kind, itemId, operation } = target.dataset;
+        const item = kind === 'layers' ? this.layers.find(layer => String(layer.id) === itemId) : this.findPointById(itemId);
+        if (!item) return;
+        const siblings = kind === 'layers'
+          ? LocalWorkspace.sort(this.layers.filter(layer => (layer.parentLayerId || '') === (item.parentLayerId || '') && this.layerBelongsToFilter(layer, this.layerFilter)), 'layers')
+          : this.getLayerNews(this.layers.find(layer => layer.id === item.category) || { id: item.category });
+        this.callbacks.onWorkspaceItem?.({ kind, item, operation, siblings });
+        break;
+      }
       case 'collapse':
         this.handleCollapse(target);
         break;

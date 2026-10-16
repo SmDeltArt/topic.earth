@@ -5553,6 +5553,17 @@ body.regional-map-search-open #layer-panel {
     background: var(--bg-card);
 }
 
+.topic-media-grid { grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr)); }
+.topic-media-item-embed { grid-column: 1 / -1; min-width: 0; }
+.topic-media-item-embed .media-token-iframe-frame { width: 100%; min-height: 0; aspect-ratio: 16 / 10; }
+.topic-media-item-embed iframe.media-token-iframe { width: 100%; height: 100%; min-height: 0; max-height: none; }
+.topic-embed-full-dialog { width: calc(100vw - 24px); max-width: none; height: calc(100dvh - 24px); max-height: none; padding: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-primary); color: var(--text-primary); overflow: hidden; }
+.topic-embed-full-dialog[open] { display: flex; flex-direction: column; }
+.topic-embed-full-dialog::backdrop { background: rgba(0,0,0,.8); }
+.topic-embed-view-close { flex: 0 0 auto; min-height: 44px; align-self: flex-start; margin: 6px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); background: var(--bg-secondary); font: inherit; cursor: pointer; }
+.topic-embed-full-dialog iframe.media-token-iframe { flex: 1 1 auto; width: 100%; min-height: 0; height: 0; max-height: none; border: 0; border-radius: 0; }
+.globe-tooltip.meteo-hover-tooltip:not(.hidden) { pointer-events: auto; }
+
 .topic-media-zoom-btn {
     position: relative;
     width: 100%;
@@ -9377,6 +9388,12 @@ body.topic-mode-space #layer-panel { top: calc(var(--top-bar-height) + 84px); ma
 .settings-access-caption { display: flex; align-items: baseline; gap: 6px; }
 .settings-access-caption .settings-access-unlock { flex: 0 0 28px; }
 .settings-access-caption .setting-hint { margin: 0; }
+.workspace-item-controls { display: inline-flex; flex: 0 0 auto; gap: 3px; align-items: center; }
+.workspace-item-controls button { min-width: 26px; min-height: 30px; padding: 2px 5px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font: inherit; }
+.workspace-item-controls button:hover, .workspace-item-controls button:focus-visible { color: var(--accent); border-color: var(--accent); }
+.news-item > .workspace-item-controls { position: absolute; right: 5px; bottom: 3px; }
+.news-item:has(> .workspace-item-controls) { padding-bottom: 36px; }
+.settings-owner-workspace button { margin: 4px 4px 4px 0; }
 .settings-access-unlock:focus-visible { outline: 1px solid var(--accent); }
 @media (max-width: 420px) {
  #scene-interaction-controls { left: 12px; right: 52px; gap: 4px; justify-content: flex-end; }

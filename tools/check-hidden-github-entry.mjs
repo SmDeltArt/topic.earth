@@ -10,13 +10,16 @@ const menu = { hidden: true, querySelector: selector => selector.includes('githu
 const content = { querySelector: () => menu, addEventListener: (type, handler) => handlers.set(type, handler) };
 const auth = { user: null };
 let hold;
-const context = vm.createContext({ content, GitHubAuth: auth, Date, Math, settingsEventOptions: {},
+let admin = false;
+const context = vm.createContext({ content, AppAccess: { isAdminMode: () => admin }, GitHubAuth: auth, Date, Math, settingsEventOptions: {},
   setTimeout: callback => { hold = callback; return 1; }, clearTimeout: () => { hold = null; } });
-vm.runInContext(`this.panel = {${reveal}, settingsEvents: { signal: { addEventListener() {} } } }; (function(){${listeners}}).call(panel);`, context);
+context.enableAdmin = () => { admin = true; };
+vm.runInContext(`this.panel = {${reveal}, setSettingsAccessMode: enableAdmin, settingsEvents: { signal: { addEventListener() {} } } }; (function(){${listeners}}).call(panel);`, context);
 const delta = { closest: () => ({}) };
 let prevented = false;
 handlers.get('contextmenu')({ target: delta, preventDefault() { prevented = true; } });
 assert.ok(prevented); assert.equal(menu.hidden, false); assert.equal(button.textContent, 'GitHub login');
+assert.equal(admin, true, 'Right-click enters Admin before revealing GitHub');
 assert.ok(context.panel.suppressDeltaClickUntil > Date.now());
 menu.hidden = true;
 handlers.get('pointerdown')({ target: delta, pointerType: 'touch', clientX: 10, clientY: 10 });
@@ -28,7 +31,7 @@ assert.equal(menu.hidden, false, 'A deliberate long press reveals login');
 auth.user = { login: 'owner-test', role: 'super-admin' };
 context.panel.revealGitHubAccess(content);
 assert.equal(button.textContent, 'Sign out of GitHub');
-assert.equal(status.textContent, 'owner-test · super-admin');
+assert.equal(status.textContent, 'owner-test · Super Admin');
 const topBar = await readFile(new URL('../components/TopBar.js', import.meta.url), 'utf8');
 assert.ok(!topBar.includes('data-action="github-auth"'), 'No top-bar login button remains');
 console.log('Delta right-click, touch long-press, scroll cancellation, click suppression and signed-in menu passed; no top-bar login control.');

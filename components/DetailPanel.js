@@ -9,7 +9,7 @@ import { scanTopicZip } from '../lib/topic-importer.mjs?v=story-media-20261013';
 import { Settings } from '../lib/settings.js?v=world-regional-location-20261012';
 import { GitHubAuth } from '../lib/github-auth.mjs';
 import { buildCaptionEmbedUrl } from '../lib/video-captions.mjs?v=topic-earth-video-captions-20261003';
-import { AppAccess } from '../lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
+import { AppAccess } from '../lib/capabilities.js?v=local-admin-20261016';
 import { LanguageManager } from '../lib/language.js?v=topic-earth-fever-scenario-layer-20260521';
 import { ReadTranslationService } from '../lib/read-translation.js?v=translation-20261004';
 import { TopicTranslations, plainTopicText } from '../lib/topic-translations.mjs?v=translation-20261004';
@@ -30,7 +30,7 @@ import {
   downloadAdminTopicPackage,
   downloadTopicAdminSubmission,
   getAdminTopicExportSummary
-} from '../lib/topic-exporter.js?v=story-media-20261013';
+} from '../lib/topic-exporter.js?v=local-admin-20261016';
 
 const CAD_DELTAI_BRAND_LOGO_URL = 'https://res.cloudinary.com/dsbfcgtdv/image/upload/v1785945660/cad-deltai/api/assets/brand/favicon/svg/smai-cad-deltai-brand-favicon-animated-192x192-en-v001.svg';
 
@@ -705,6 +705,8 @@ export class DetailPanel {
         this.showTopicMediaZoom(image?.currentSrc || target.dataset.mediaUrl, target.dataset.mediaCaption, target.dataset.videoLanguage);
       } else if (action === 'close-topic-media-zoom') {
         this.closeTopicMediaZoom();
+      } else if (action === 'full-topic-embed') {
+        this.openTopicEmbedViewer(target);
       }
     });
     
@@ -6991,7 +6993,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
         <div class="story-style-sample" data-paint-field="backgroundPaint" tabindex="0" role="button" aria-label="${label('background')}">
           <button type="button" data-paint-field="titlePaint" class="story-sample-title">${label('storyTitle')}</button>
           <div class="story-sample-panel" data-paint-field="panelPaint" tabindex="0" role="button" aria-label="${label('panels')}"><button type="button" data-paint-field="textPaint" class="story-sample-text">Aa · ${label('textColour')}</button><button type="button" data-paint-field="linkPaint" class="story-sample-link">↗ ${label('links')}</button></div>
-        </div><iframe class="story-style-live-preview" sandbox="" referrerpolicy="no-referrer" title="${label('sandboxPreview')}"></iframe>
+        </div><iframe class="story-style-live-preview" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" title="${label('sandboxPreview')}"></iframe>
       </aside><form method="dialog">
         <div class="topic-story-theme-tabs" role="group" aria-label="${label('presets')}">${[['world','🌍'],['regional','🌱'],['space','🌌'],['fever','🌡️']].map(([mode,emoji]) => `<button type="button" data-style-preset="${mode}" title="${mode}" aria-pressed="${themeMode === mode}">${emoji}</button>`).join('')}<button type="button" data-preset-save title="${label('savePreset')}">💾</button><button type="button" data-preset-load title="${label('loadPreset')}">↺</button><span data-preset-status class="setting-hint" role="status"></span></div>
         <div class="story-paint-controls">${fields.map(([field,key,icon]) => `<div class="story-paint-control"><button type="button" class="story-paint-button" data-paint-field="${field}" title="${label(key)}"><span class="story-paint-swatch" data-paint-swatch="${field}"></span>${icon} ${label(key)}</button><button type="button" class="story-paint-clear" data-paint-clear="${field}" title="${label('keepOriginal')}">↺</button></div>`).join('')}</div>
@@ -7095,7 +7097,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     const dialog = document.createElement('dialog');
     dialog.className = 'topic-story-full-dialog';
     dialog.setAttribute('aria-label', story.title || this.t('topic.story.fullView'));
-    dialog.innerHTML = `<button type="button" class="topic-story-read-controls">🌐 ▷ ${this.escapeHtml(this.t('topic.story.readTranslate'))}</button><button type="button" class="topic-story-view-close" aria-label="${this.escapeHtml(this.t('topic.story.closeView'))}">← ✕</button><iframe sandbox="" referrerpolicy="no-referrer" title="${this.escapeHtml(story.title || this.t('topic.story.fullView'))}"></iframe>`;
+    dialog.innerHTML = `<button type="button" class="topic-story-read-controls">🌐 ▷ ${this.escapeHtml(this.t('topic.story.readTranslate'))}</button><button type="button" class="topic-story-view-close" aria-label="${this.escapeHtml(this.t('topic.story.closeView'))}">← ✕</button><iframe sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" title="${this.escapeHtml(story.title || this.t('topic.story.fullView'))}"></iframe>`;
     dialog.querySelector('iframe').srcdoc = html.replace('</body>', '<style>body{padding-top:56px!important}</style></body>');
     const focus = document.activeElement;
     const token = 'topic-story-' + Date.now();
@@ -7211,6 +7213,20 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
             node.removeAttribute(attr.name);
           }
         });
+      });
+      doc.querySelectorAll('a, area').forEach(node => {
+        const href = (node.getAttribute('href') || node.getAttribute('xlink:href') || '').trim();
+        node.removeAttribute('xlink:href');
+        node.removeAttribute('ping'); node.removeAttribute('download');
+        if (href.startsWith('#')) {
+          node.setAttribute('href', href); node.setAttribute('target', '_self'); return;
+        }
+        try {
+          const url = new URL(href, window.location.href);
+          if (!href || !['https:', 'http:', 'mailto:', 'tel:'].includes(url.protocol)) throw Error('Unsupported story link');
+          node.setAttribute('href', url.href);
+          node.setAttribute('target', '_blank'); node.setAttribute('rel', 'noopener noreferrer');
+        } catch { node.removeAttribute('href'); node.removeAttribute('target'); }
       });
       return (Array.from(doc.head.querySelectorAll('style')).map(node=>node.outerHTML).join('\n') + doc.body.innerHTML).trim();
     } catch (error) {
@@ -7411,7 +7427,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
     container.innerHTML = `
       <iframe
         class="topic-story-preview-frame"
-        sandbox=""
+        sandbox="allow-popups allow-popups-to-escape-sandbox"
         referrerpolicy="no-referrer"
         srcdoc="${this.escapeHtml(html)}"
         title="${this.escapeHtml(story.title || 'Topic story preview')}"
@@ -10951,7 +10967,8 @@ Rules:
     if (!media) return '';
     const content = this.renderMediaTokenImage(media, 'topic-media-image', title);
     const player = media.mediaType === 'video' || media.mediaType === 'iframe';
-    return `<div class="topic-media-item${media.portrait ? ' topic-media-item-portrait' : ''}">
+    return `<div class="topic-media-item${media.mediaType === 'iframe' ? ' topic-media-item-embed' : ''}${media.portrait ? ' topic-media-item-portrait' : ''}">
+      ${media.mediaType === 'iframe' ? '<button type="button" class="btn-media-action" data-action="full-topic-embed">⛶ Full view</button>' : ''}
       ${player ? content : `<button type="button" class="topic-media-zoom-btn" data-action="zoom-topic-media"
         data-media-url="${this.escapeHtml(media.embedUrl || media.url)}"
         data-video-language="${this.escapeHtml(media.videoLanguage)}"
@@ -11338,6 +11355,38 @@ Rules:
     });
   }
 
+  openTopicEmbedViewer(target) {
+    const frame = target?.closest('.topic-media-item')?.querySelector('iframe');
+    if (!frame) return;
+    this.closeTopicEmbedViewer(false);
+    const placeholder = document.createElement('span'); placeholder.hidden = true;
+    frame.before(placeholder);
+    const dialog = document.createElement('dialog'); dialog.className = 'topic-embed-full-dialog';
+    dialog.setAttribute('aria-label', frame.title || 'Embedded media full view');
+    const close = document.createElement('button'); close.type = 'button'; close.className = 'topic-embed-view-close';
+    close.textContent = '← Back / Close';
+    dialog.append(close, frame);
+    const token = `topic-embed-${Date.now()}`;
+    const onPop = () => this.closeTopicEmbedViewer(false);
+    this.topicEmbedViewer = { dialog, frame, placeholder, focus: target, token, onPop };
+    close.addEventListener('click', () => this.closeTopicEmbedViewer());
+    dialog.addEventListener('cancel', event => { event.preventDefault(); this.closeTopicEmbedViewer(); });
+    document.body.append(dialog); dialog.showModal();
+    window.history.pushState({ ...window.history.state, topicEmbedView: token }, '');
+    window.addEventListener('popstate', onPop);
+  }
+
+  closeTopicEmbedViewer(useBack = true) {
+    const viewer = this.topicEmbedViewer;
+    if (!viewer) return;
+    this.topicEmbedViewer = null;
+    window.removeEventListener('popstate', viewer.onPop);
+    if (viewer.placeholder.isConnected) viewer.placeholder.replaceWith(viewer.frame);
+    else viewer.frame.src = 'about:blank';
+    viewer.dialog.close(); viewer.dialog.remove(); viewer.focus?.focus?.();
+    if (useBack && window.history.state?.topicEmbedView === viewer.token) window.history.back();
+  }
+
   showTopicMediaZoom(url, caption = 'Topic media', videoLanguage = '') {
     if (!url) return;
 
@@ -11711,24 +11760,7 @@ Rules:
   }
 
   async setSettingsAccessMode(mode = 'user', content = this.container.querySelector('#detail-content')) {
-    const attempt = this.settingsModeAttempt = (this.settingsModeAttempt || 0) + 1;
     const nextMode = mode === 'admin' ? 'admin' : 'user';
-    if (nextMode === 'admin') {
-      const local = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
-      if (!local) await GitHubAuth.refresh();
-      if (attempt !== this.settingsModeAttempt) return AppAccess.getState();
-      if (!AppAccess.can('admin:ui-toggle')) {
-        if (local) AppAccess.unlockAdminAccess(true);
-        else {
-          this.revealGitHubAccess(content);
-          const status = content?.querySelector('[data-github-status]');
-          if (status) status.textContent = GitHubAuth.user
-            ? 'Your GitHub account has ordinary user access. Admin mode requires an authorized owner or editor role.'
-            : 'Sign in with GitHub first, then select Admin. Access is verified by the server.';
-          return AppAccess.getState();
-        }
-      }
-    }
 
     const scrollTop = content?.scrollTop || 0;
     const state = AppAccess.setMode(nextMode);
@@ -11751,8 +11783,8 @@ Rules:
 
     const status = content?.querySelector('#settings-access-status');
     if (status) {
-      const activeLabel = state.isAdminMode ? 'Admin mode active' : 'User mode active';
-      status.textContent = `${activeLabel}. ${state.isAdminMode ? 'Available editing tools follow your verified permissions.' : 'Published content stays protected; local drafts remain available.'}`;
+      const activeLabel = state.isSuperAdmin ? 'Super Admin active' : state.isAdminMode ? 'Admin mode active' : 'User mode active';
+      status.textContent = `${activeLabel}. ${state.isAdminMode ? 'Create and edit locally; download JSON/ZIP for review. Publishing is separate.' : 'Published content stays protected; local drafts remain available.'}`;
     }
     return state;
   }
@@ -11768,12 +11800,14 @@ Rules:
   }
 
   revealGitHubAccess(content) {
+    if (!AppAccess.isAdminMode()) this.setSettingsAccessMode('admin', content);
+    content = this.container?.querySelector('#detail-content') || content;
     const menu = content?.querySelector('[data-github-access]');
     if (!menu) return;
     menu.hidden = false;
     const user = GitHubAuth.user;
     menu.querySelector('[data-action="github-auth"]').textContent = user ? 'Sign out of GitHub' : 'GitHub login';
-    menu.querySelector('[data-github-status]').textContent = user ? `${user.login} · ${user.role}` : 'Sign in to verify your topic.earth access.';
+    menu.querySelector('[data-github-status]').textContent = user ? `${user.login} · ${user.role === 'super-admin' ? 'Super Admin' : user.role}` : 'Admin is active for local authoring. GitHub verifies access to Super Admin tools.';
   }
 
   setPwaActionStatus(content, message, state = 'info') {
@@ -11892,13 +11926,13 @@ Rules:
           label: 'Mode d acces',
           hint: 'Explorez et enregistrez des brouillons locaux. Les modifications publiees necessitent un acces autorise.',
           userHint: 'Explorer et enregistrer des brouillons locaux sans modifier les donnees publiees.',
-          adminHint: 'Utiliser les outils de modification autorises par votre role.'
+          adminHint: 'Creer des couches et sujets locaux, puis exporter en JSON/ZIP. GitHub reserve aux outils Super Admin.'
         }
       : {
           label: 'Access mode',
           hint: 'Explore and save local drafts. Published changes require authorized access.',
           userHint: 'Explore and save local drafts without changing published data.',
-          adminHint: 'Use the editing tools permitted by your role.'
+          adminHint: 'Create local layers and topics, then export JSON/ZIP. GitHub is for Super Admin tools.'
         };
 
     content.innerHTML = `
@@ -12263,11 +12297,20 @@ Rules:
             </button>
           </div>
           <div id="settings-access-status" class="setting-hint">
+            ${accessState.isSuperAdmin ? 'Super Admin' : isAdmin ? 'Admin · local authoring and export' : 'User'}
             <span class="settings-access-profile">${this.escapeHtml(accessState.profile)}</span>
           </div>
         ` : ''}
       </div>
 
+      ${AppAccess.can('workspace:manage') ? `
+        <div class="detail-section settings-owner-workspace">
+          <div class="section-label">Super Admin · local workspace</div>
+          <p class="setting-hint">Use ↑ ↓ × beside layers and topics to arrange or remove them from this browser. Published data is unchanged.</p>
+          <button type="button" class="btn-secondary" data-action="workspace-export">Download workspace JSON</button>
+          <button type="button" class="btn-secondary" data-action="workspace-reset">Restore order and removed items</button>
+        </div>
+      ` : ''}
       <div class="detail-section regional-settings-section" data-tutorial-id="settings-regional">
         <div class="section-label">${this.escapeHtml(t('settings.regional'))}</div>
         <div class="form-group">
@@ -12298,6 +12341,8 @@ Rules:
       ${isAdmin ? `
         <div class="detail-section admin-topic-export-section" data-admin-only="true">
           <div class="section-label">${this.escapeHtml(t('settings.adminReviewPackage'))}</div>
+          <p class="setting-hint">${topicExportSummary.topicCount} local draft(s). The ZIP includes custom layers and topic/media files for review.</p>
+          <button type="button" class="btn-secondary" data-action="export-admin-topic-zip">Download local layers/topics ZIP</button>
           <div class="admin-topic-export-card">
             <div>
               <div class="admin-topic-export-title">Import topics for review</div>
@@ -12326,6 +12371,10 @@ Rules:
       if (!target) return;
       
       const action = target.dataset.action;
+      if (action === 'workspace-export' || action === 'workspace-reset') {
+        if (AppAccess.can('workspace:manage')) window.dispatchEvent(new CustomEvent('localWorkspaceAction', { detail: action === 'workspace-export' ? 'export' : 'reset' }));
+        return;
+      }
       if (action === 'set-personal-location' || action === 'clear-personal-location') {
         this.setPersonalLocation(content, target, action === 'clear-personal-location');
         return;
@@ -12573,6 +12622,7 @@ Rules:
   
   hide() {
     this.closeTopicStoryViewer?.();
+    this.closeTopicEmbedViewer?.();
     this.container.querySelectorAll('video').forEach(video => video.pause());
     this.container.querySelectorAll('iframe.media-token-iframe, iframe.topic-media-zoom-video').forEach(frame => { frame.src = 'about:blank'; });
     if (this.currentGlobe && this.currentGlobe.inFeverMode && this.mode === 'detail') {

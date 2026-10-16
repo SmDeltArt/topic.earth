@@ -1,9 +1,9 @@
-const CACHE_NAME = 'topic-earth-shell-v42-delta-access';
+const CACHE_NAME = 'topic-earth-shell-v44-story-links';
 const APP_SHELL = [
   './lib/weather-models.mjs?v=weather-mesh-20261015',
   './assets/models/weather-symbols.glb?v=weather-mesh-20261015',
   './lib/weather-visuals.mjs?v=weather-terrain-20261015',
-  './lib/terrain-measure.mjs?v=height-labels-20261016',
+  './lib/terrain-measure.mjs?v=metres-20261016',
   './lib/meteo-realtime.js?v=weather-terrain-20261015',
   './',
   './assets/widgets/color/smart-color-picker.html',

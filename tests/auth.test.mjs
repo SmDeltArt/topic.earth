@@ -193,7 +193,7 @@ test('complete OAuth callback issues an encrypted identity session using mocked 
     assert.equal((await identity(request('/api/identity', 'GET', { cookie }), env, fetchUser)).role, 'super-admin');
   } finally { globalThis.fetch = originalFetch; }
 });
-test('session output never exposes OAuth tokens; production UI ignores legacy unlocks', async () => {
+test('session output never exposes tokens; local Admin cannot grant Super Admin or server writes', async () => {
   const config = authConfig(env);
   const session = await config.callbacks.session({ session: { user: { name: 'test' } }, token });
   assert.ok(!JSON.stringify(session).includes(token.githubToken));
@@ -203,19 +203,21 @@ test('session output never exposes OAuth tokens; production UI ignores legacy un
   globalThis.window = { location: { hostname: 'topic.earth' }, TOPIC_EARTH_PROFILE: 'dev' };
   globalThis.localStorage = { getItem() { return 'true'; }, setItem() {} };
   const access = await import(`data:text/javascript;base64,${Buffer.from(source.replace("import { GitHubAuth } from './github-auth.mjs';", 'const GitHubAuth = globalThis.__testAuth;')).toString('base64')}`);
-  assert.equal(access.AppAccess.can('topic:update'), false);
+  assert.equal(access.AppAccess.can('topic:update'), true, 'Admin may edit browser-local drafts without GitHub');
+  assert.equal(access.AppAccess.can('workspace:manage'), false);
   access.AppAccess.unlockAdminAccess(true);
-  assert.equal(access.AppAccess.getProfile(), 'demo');
+  assert.equal(access.AppAccess.getProfile(), 'admin');
   assert.equal(access.AppAccess.can('project:data-write'), false);
   auth.user = { role: 'editor' };
   assert.equal(access.AppAccess.can('topic:update'), true);
-  assert.equal(access.AppAccess.can('settings:api'), false);
-  assert.equal(access.AppAccess.can('topic:delete'), false);
+  assert.equal(access.AppAccess.can('workspace:manage'), false);
+  assert.equal(access.AppAccess.can('project:data-write'), false);
   auth.user = { role: 'super-admin' };
   assert.equal(access.AppAccess.can('settings:api'), true);
-  assert.equal(access.AppAccess.can('layer:delete'), false);
+  assert.equal(access.AppAccess.can('workspace:manage'), true);
   auth.user = null;
-  assert.equal(access.AppAccess.can('topic:update'), false);
+  assert.equal(access.AppAccess.can('topic:update'), true);
+  assert.equal(access.AppAccess.can('workspace:manage'), false);
   delete globalThis.__testAuth;
   delete globalThis.window;
   delete globalThis.localStorage;
