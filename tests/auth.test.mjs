@@ -6,6 +6,8 @@ import { authConfig, configuration, cookieName, identity, resolveIdentity, can, 
 import { requestAllowed } from '../server/request-policy.mjs';
 import middleware from '../middleware.mjs';
 import authHandler from '../api/auth/[...action].mjs';
+import githubSignInHandler from '../api/auth/signin/github.mjs';
+import githubCallbackHandler from '../api/auth/callback/github.mjs';
 import identityHandler from '../api/identity.mjs';
 
 const env = { AUTH_URL: 'https://topic.earth', AUTH_GITHUB_ID: 'test-client',
@@ -43,6 +45,8 @@ test('configuration fails closed and production cookies require HTTPS', () => {
   assert.deepEqual(options, { httpOnly: true, secure: true, sameSite: 'lax', path: '/' });
 });
 test('Vercel function adapters return no-store responses and preserve separate OAuth cookies', async () => {
+  assert.equal(githubSignInHandler, authHandler);
+  assert.equal(githubCallbackHandler, authHandler);
   const previous = Object.fromEntries(Object.keys(env).map(key => [key, process.env[key]]));
   const res = () => ({ headers: {}, setHeader(name, value) { this.headers[name.toLowerCase()] = value; }, end(body) { this.body = body; } });
   try {

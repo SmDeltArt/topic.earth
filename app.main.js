@@ -2,7 +2,7 @@ import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=topic-proxy-bridge-20
 import { RegionalLocationManager } from './lib/regional-location.mjs';
 import { CYCLONE_LAYER_ID, fetchLiveCyclones, buildCycloneTopics, validateCycloneSnapshot } from './lib/tropical-cyclones.mjs?v=cyclones-20261013';
 import { TopicStoryMedia } from './lib/topic-story-media.mjs?v=story-media-20261013';
-import { GlobeRenderer } from './lib/globe.js?v=texture-settings-20261016';
+import { GlobeRenderer } from './lib/globe.js?v=hover-preview-20261016';
 import { AppAccess } from './lib/capabilities.js?v=topic-earth-user-default-v2-20261001';
 import { LAYERS } from './data/layers.js?v=regional-ambassadors-20261016';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchMeteoAtPoint, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=weather-terrain-20261015';
@@ -17,7 +17,7 @@ import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=github-delta-20261016';
 import { RegionalMap } from './components/RegionalMap.js?v=height-labels-20261016';
-import { LayerPanel } from './components/LayerPanel.js?v=preserve-layer-scroll-20261016';
+import { LayerPanel } from './components/LayerPanel.js?v=hover-preview-20261016';
 import { DetailPanel } from './components/DetailPanel.js?v=github-delta-20261016';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';

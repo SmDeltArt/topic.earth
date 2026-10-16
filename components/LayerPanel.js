@@ -647,6 +647,7 @@ export class LayerPanel {
   }
 
   hideTopicPreview() {
+    clearTimeout(this.topicPreviewTimer);
     this.topicPreview?.remove();
     this.topicPreview = null;
   }
@@ -667,6 +668,7 @@ export class LayerPanel {
     preview.style.left = `${Math.min(rect.right + 8, window.innerWidth - preview.offsetWidth - 8)}px`;
     preview.style.top = `${Math.max(8, Math.min(rect.top, window.innerHeight - preview.offsetHeight - 8))}px`;
     this.topicPreview = preview;
+    this.topicPreviewTimer = setTimeout(() => this.hideTopicPreview(), 2000);
   }
 
   getRegionalProposalLabel() {
