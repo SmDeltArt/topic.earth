@@ -73,6 +73,7 @@ export const LAYER_SOURCE_MAPPING = {
   'meteo-live': ['official', 'media'],
   'meteo-clouds': ['official'],
   'climate': ['scientific', 'official'],
+  'biodiversity': ['scientific', 'official'],
   'carbon-history': ['official', 'scientific', 'media'],
   'good-initiatives-world': ['official', 'scientific', 'media'],
   'good-initiatives-eu': ['official', 'media'],
