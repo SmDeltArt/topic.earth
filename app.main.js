@@ -1,3 +1,4 @@
+import { ATLANTIC_STORM_TOPICS } from './data/atlantic-storm-topics.mjs?v=atlantic-20261021';
 import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=topic-proxy-bridge-20261013';
 import { BIODIVERSITY_TOPICS } from './data/biodiversity-topics.mjs?v=biodiversity-20261021';
 import { RegionalLocationManager } from './lib/regional-location.mjs';
@@ -140,7 +141,7 @@ class TopicEarthApp {
         .filter(Boolean)
         .map(point => [String(point.id), point])
     );
-    const basePoints = [...EL_NINO_TOPICS, ...BIODIVERSITY_TOPICS, ...MOCK_POINTS, ...REGIONAL_AMBASSADOR_TOPICS, ...SPACE_TOPICS, ...CARBON_HISTORY_TOPICS, ...FEVER_TOPICS, ...TIPPING_POINT_TOPICS];
+    const basePoints = [...ATLANTIC_STORM_TOPICS, ...EL_NINO_TOPICS, ...BIODIVERSITY_TOPICS, ...MOCK_POINTS, ...REGIONAL_AMBASSADOR_TOPICS, ...SPACE_TOPICS, ...CARBON_HISTORY_TOPICS, ...FEVER_TOPICS, ...TIPPING_POINT_TOPICS];
 
     const mergedBasePoints = basePoints.map(point => {
       const customPoint = customPointById.get(String(point.id));
