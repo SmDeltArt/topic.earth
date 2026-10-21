@@ -3171,10 +3171,10 @@ Keep response concise (3-4 sentences).`;
         <div class="detail-section" data-tutorial-id="topic-evidence">
           <div class="section-label" style="display: flex; justify-content: space-between; align-items: center;">
             <span>Sources (${point.researchSources.length})</span>
-            ${canManageTopicSources ? `<button class="manage-sources-btn" data-action="manage-sources" title="Manage this topic draft's evidence and media">Evidence</button>` : ''}
+            ${canManageTopicSources ? `<a href="#" class="manage-sources-btn" data-action="manage-sources" title="Edit evidence sources">Edit sources ↗</a>` : ''}
           </div>
-          <div class="sources-list">
-            ${point.researchSources.slice(0, 3).map(source => `
+          <div class="sources-list ${point.researchSources.length>3?'sources-list-scroll':''}" tabindex="${point.researchSources.length>3?'0':'-1'}">
+            ${point.researchSources.map(source => `
               <div class="source-item">
                 <span class="source-icon">${source.verified ? '&#10003;' : '&#128279;'}</span>
                 <div class="source-content">
@@ -9332,6 +9332,11 @@ Return ONLY JSON:
         <button type="button" class="btn-media-action" data-action="preview-media-url">Search img URL</button>
         <button type="button" class="btn-media-action" data-action="add-media-url">Add URL</button>
       </div>
+      <div class="video-trim-controls">
+        <label>Video start (mm:ss)<input type="text" data-video-start placeholder="0:00" value="${this.escapeHtml(this.videoTrimStart||'0:00')}"></label>
+        <label>Video end (mm:ss · optional)<input type="text" data-video-end placeholder="Full video" value="${this.escapeHtml(this.videoTrimEnd||'')}"></label>
+        <label>Original spoken language<input type="text" data-video-original-language placeholder="en / fr / nl" maxlength="10" value="${this.escapeHtml(this.videoOriginalLanguage||'')}"></label>
+      </div>
       ${this.renderMediaUrlPreview()}
     `;
   }
@@ -9412,7 +9417,10 @@ Return ONLY JSON:
           sourceName: youtubeDetails?.title || 'YouTube evidence',
           provider: 'youtube',
           mediaType: 'youtube',
-          embedUrl: youtubeMeta.embedUrl,
+          embedUrl: this.getTimedVideoEmbed(youtubeMeta.embedUrl),
+          videoLanguage: this.container.querySelector('[data-video-original-language]')?.value.trim() || '',
+          startSeconds: this.parseVideoSeconds(this.container.querySelector('[data-video-start]')?.value),
+          endSeconds: this.parseVideoSeconds(this.container.querySelector('[data-video-end]')?.value),
           thumbnailUrl: youtubeDetails?.thumbnailUrl || youtubeMeta.thumbnailUrl,
           videoId: youtubeMeta.videoId,
           portrait: youtubeMeta.portrait,
@@ -10585,6 +10593,27 @@ Return ONLY a JSON object with this exact format, no other text:
     return createTopicMediaToken(input);
   }
 
+  getTimedVideoEmbed(url) {
+    const start=this.parseVideoSeconds(this.container.querySelector('[data-video-start]')?.value);
+    const end=this.parseVideoSeconds(this.container.querySelector('[data-video-end]')?.value);
+    const dest=new URL(url,window.location.href);
+    if(start)dest.searchParams.set('start',String(start));
+    if(end>start)dest.searchParams.set('end',String(end));
+    return dest.toString();
+  }
+
+  parseVideoSeconds(value) {
+    const str=String(value||'').trim().toLowerCase();
+    if(!str)return 0;
+    if(/^\d+$/.test(str))return Math.min(86400,Number(str));
+    if(/^\d+(?:h\d+)?(?:m\d+)?s?$/.test(str)) {
+      const m=str.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/);
+      return m?Math.min(86400,Number(m[1]||0)*3600+Number(m[2]||0)*60+Number(m[3]||0)):0;
+    }
+    const parts=str.split(':').map(Number);
+    return parts.length<=3&&parts.every(Number.isFinite)?Math.min(86400,parts.reduce((a,b)=>a*60+b,0)):0;
+  }
+
   getYoutubeVideoMeta(url = '') {
     const safeUrl = this.sanitizeUrl(url);
     if (!safeUrl) return null;
@@ -10611,6 +10640,9 @@ Return ONLY a JSON object with this exact format, no other text:
         portrait: parsed.pathname.startsWith('/shorts/'),
         watchUrl: `https://www.youtube.com/watch?v=${videoId}`,
         embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
+        startSeconds: this.parseVideoSeconds(parsed.searchParams.get('t') || parsed.searchParams.get('start')),
+        endSeconds: this.parseVideoSeconds(parsed.searchParams.get('end')),
+        originalLanguage: parsed.searchParams.get('original_lang') || '',
         thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
       };
     } catch {

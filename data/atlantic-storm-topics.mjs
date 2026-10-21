@@ -26,7 +26,7 @@ export const ATLANTIC_STORM_TOPICS = [
         "url": "https://img.youtube.com/vi/N279suBr3OE/hqdefault.jpg",
         "thumbnailUrl": "https://img.youtube.com/vi/N279suBr3OE/hqdefault.jpg",
         "sourceUrl": "https://www.youtube.com/watch?v=N279suBr3OE&t=428s",
-        "embedUrl": "https://www.youtube-nocookie.com/embed/N279suBr3OE?start=428",
+        "embedUrl": "https://www.youtube-nocookie.com/embed/N279suBr3OE?start=0",
         "sourceName": "Storm Austen · A storm corridor is opening towards Europe",
         "watermarkText": "YouTube · Commentary",
         "generated": false
