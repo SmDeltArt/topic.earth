@@ -1269,12 +1269,15 @@
     async generateImage(request = {}) {
       const apiSettings = this.readApiSettings();
       const imageConfig = this.getImageConfig(apiSettings);
+      if (request.allowFallback === false && !((imageConfig.provider === "openai-dalle") && (imageConfig.apiKey || imageConfig.proxy))) {
+        throw new Error("The linked OpenAI image provider is not ready. Unlock API Settings before generating a paid image.");
+      }
 
       if (imageConfig.provider === "openai-dalle" && (imageConfig.apiKey || imageConfig.proxy)) {
         try {
           return await this.callOpenAIImage(request, imageConfig);
         } catch (error) {
-          if (imageConfig.proxy) throw error;
+          if (imageConfig.proxy || request.allowFallback === false) throw error;
           console.warn(
             "[Smart AI API] OpenAI image generation failed, using fallback:",
             error,
@@ -1299,7 +1302,9 @@
         body: JSON.stringify({
           model: imageConfig.model || imageConfig.config.defaultModel,
           prompt: request.prompt || "earth data visualization",
-          size: request.aspect_ratio === "16:9" ? "1536x1024" : "1024x1024",
+          size: ["1024x1024","1536x1024","1024x1536"].includes(request.size)
+            ? request.size : request.aspect_ratio === "16:9" ? "1536x1024" : "1024x1024",
+          quality: ["low","medium","high","auto"].includes(request.quality) ? request.quality : "auto",
           n: 1,
         }),
       });

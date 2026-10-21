@@ -64,6 +64,8 @@ export class DetailPanel {
     this.showMediaUrlInput = false;
     this.mediaUrlDraftUrl = '';
     this.mediaUrlPreviewToken = null;
+    this.imageComposerOpen = false;
+    this.imageComposerPrompt = '';
     this.topicStoryDraft = {
       enabled: false,
       title: '',
@@ -601,6 +603,14 @@ export class DetailPanel {
         this.autopopulateTopicDraft(target);
       } else if (action === 'ai-generate-image') {
         this.aiGenerateImage();
+      } else if (['topic-media-reorder','topic-media-remove','topic-media-toggle-thumbnail'].includes(action)) {
+        this.updateTopicMediaFromComposer(action,target);
+      } else if (action === 'open-image-composer') {
+        this.saveFormState(); this.imageComposerOpen = !this.imageComposerOpen; this.renderCreateTopic({preserveState:true});
+      } else if (action === 'refine-topic-image-prompt') {
+        this.refineTopicImagePrompt(target);
+      } else if (action === 'generate-topic-image') {
+        this.generateTopicImage(target);
       } else if (action === 'import-media') {
         this.importMedia();
       } else if (action === 'import-file') {
@@ -8168,6 +8178,7 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
               <div class="topic-composer-media-row">
                 <button type="button" class="btn-media-action" data-action="import-file">Add file</button>
                 <button type="button" class="btn-media-action" data-action="show-media-url-input">Add URL</button>
+               ${this.isTopicImageBridgeReady() ? `<button type="button" class="btn-media-action" data-action="open-image-composer">✨ AI Image</button>` : ""}
               </div>
               ${this.showMediaUrlInput ? this.renderMediaUrlInput('topic-composer-media-url-input') : ''}
               ${mediaTokens.length > 0 ? `
@@ -8175,6 +8186,12 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
                   ${mediaTokens.map((token, index) => `
                     <div class="topic-builder-media-token">
                       ${this.renderMediaTokenImage(token, 'topic-builder-media-image', `Topic media ${index + 1}`)}
+<div class="topic-media-controls">
+ <button type="button" data-action="topic-media-reorder" data-index="${index}" data-direction="-1" ${index===0?'disabled':''} title="Move up">↑</button>
+ <button type="button" data-action="topic-media-reorder" data-index="${index}" data-direction="1" ${index===mediaTokens.length-1?'disabled':''} title="Move down">↓</button>
+ <button type="button" data-action="topic-media-toggle-thumbnail" data-index="${index}" title="Hide or show in preview">${token.hideFromThumbnail?'◯ Hidden':'◉ Thumb'}</button>
+ <button type="button" data-action="topic-media-remove" data-index="${index}" title="Remove media">✕</button>
+ </div>
                     </div>
                   `).join('')}
                 </div>
@@ -8225,13 +8242,21 @@ Skip categories with no significant news. Return ONLY the JSON, no other text.`;
                 Add file
               </button>
               <button type="button" class="btn-media-action" data-action="show-media-url-input">Add URL</button>
+               ${this.isTopicImageBridgeReady() ? `<button type="button" class="btn-media-action" data-action="open-image-composer">✨ AI Image</button>` : ""}
             </div>
             ${this.showMediaUrlInput ? this.renderMediaUrlInput('topic-media-url-input') : ''}
+            ${this.imageComposerOpen && this.isTopicImageBridgeReady() ? this.renderTopicImageComposer() : ''}
             ${mediaTokens.length > 0 ? `
               <div class="topic-builder-media-preview">
                 ${mediaTokens.map((token, index) => `
                   <div class="topic-builder-media-token">
                     ${this.renderMediaTokenImage(token, 'topic-builder-media-image', `Topic media ${index + 1}`)}
+<div class="topic-media-controls">
+ <button type="button" data-action="topic-media-reorder" data-index="${index}" data-direction="-1" ${index===0?'disabled':''} title="Move up">↑</button>
+ <button type="button" data-action="topic-media-reorder" data-index="${index}" data-direction="1" ${index===mediaTokens.length-1?'disabled':''} title="Move down">↓</button>
+ <button type="button" data-action="topic-media-toggle-thumbnail" data-index="${index}" title="Hide or show in preview">${token.hideFromThumbnail?'◯ Hidden':'◉ Thumb'}</button>
+ <button type="button" data-action="topic-media-remove" data-index="${index}" title="Remove media">✕</button>
+ </div>
                   </div>
                 `).join('')}
               </div>
@@ -9126,6 +9151,99 @@ Return ONLY JSON:
       btn.innerHTML = originalHTML;
       btn.disabled = false;
     }
+  }
+
+  isTopicImageBridgeReady() {
+    const summary=window.ourEarthAI?.getSummary?.();
+    return Boolean(this.isAdminMode() && summary?.imageHasKey && typeof window.ourEarthAI?.generateImage==='function');
+  }
+
+  topicImageTheme() {
+    const layer=this.layers.find(l=>l.id===(this.topicFormState.category||this.currentPoint?.category));
+    const mode=layer?.feverOnly?'fever':layer?.modeTabs?.includes('regional')?'regional':layer?.modeTabs?.includes('space')?'space':'world';
+    const presets={world:'editorial environmental visualization, teal and deep ocean blue',regional:'human-scale ecological community photography, natural green',space:'scientific space illustration, indigo and starlight',fever:'scientific warming visualization, amber and red'};
+    return {mode,style:presets[mode],layer:layer?.name||'World'};
+  }
+
+  renderTopicImageComposer() {
+    const theme=this.topicImageTheme();
+    return `<fieldset class="topic-image-composer"><legend>✨ AI Image · ${this.escapeHtml(theme.mode)}</legend>
+    <p class="setting-hint">The connected API Settings image provider must be ready. Generate only after reviewing the prompt and cost choices.</p>
+    <label>Editable image prompt<textarea data-topic-image-prompt maxlength="3900" rows="4" placeholder="Write your prompt or refine from the topic">${this.escapeHtml(this.imageComposerPrompt||'')}</textarea></label>
+    <div class="story-layout-controls">
+      <label>Size<select data-topic-image-size><option value="1024x1024">Square · 1024</option><option value="1536x1024">Landscape · 1536</option><option value="1024x1536">Portrait · 1536</option></select></label>
+      <label>Quality<select data-topic-image-quality><option value="low">Low · economical</option><option value="medium">Medium</option><option value="high">High</option></select></label>
+      <label>Style<select data-topic-image-style><option value="layer">Layer default</option><option value="photo">Photorealistic</option><option value="scientific">Scientific illustration</option><option value="minimal">Minimal editorial</option></select></label>
+    </div><p class="setting-hint">Provider costs vary with model, format and quality; these controls do not guarantee a fixed price.</p>
+    <div class="topic-image-composer-actions"><button type="button" data-action="refine-topic-image-prompt">✨ Refine prompt</button>
+    <button type="button" data-action="generate-topic-image">Generate (paid)</button></div><p data-topic-image-status role="status"></p></fieldset>`;
+  }
+
+  updateTopicMediaFromComposer(action,target) {
+    if (!this.isAdminMode() && !AppAccess.isRegionalProposalTopic(this.currentPoint)) return;
+    const index=Number(target.dataset.index),tokens=this.getMediaTokensForPoint(this.currentPoint||{});
+    if(!Number.isInteger(index)||index<0||index>=tokens.length)return;
+    this.saveFormState();
+    if(action==='topic-media-remove') tokens.splice(index,1);
+    else if(action==='topic-media-toggle-thumbnail')tokens[index]={...tokens[index],hideFromThumbnail:!tokens[index].hideFromThumbnail};
+    else {
+      const next=index+Number(target.dataset.direction);
+      if(next<0||next>=tokens.length||!Number.isInteger(next))return;
+      [tokens[index],tokens[next]]=[tokens[next],tokens[index]];
+    }
+    this.currentPoint ||= {};
+    this.currentPoint.mediaTokens=tokens;
+    this.currentPoint.media=tokens.map(t=>t.url);
+    this.renderCreateTopic({preserveState:true});
+  }
+
+  async refineTopicImagePrompt(button) {
+    if(!this.isTopicImageBridgeReady())return;
+    this.saveFormState();
+    const area=this.container.querySelector('[data-topic-image-prompt]');
+    const status=this.container.querySelector('[data-topic-image-status]');
+    const theme=this.topicImageTheme();
+    button.disabled=true;
+    if(status)status.textContent='Refining prompt…';
+    try {
+      if(!window.ourEarthAI.getSummary()?.textHasKey)throw Error('Connect text AI in API Settings or edit the prompt manually.');
+      const topic=[this.topicFormState.title,this.topicFormState.summary,this.topicFormState.insight].filter(Boolean).join('\n').slice(0,3000);
+      const result=await window.ourEarthAI.createChatCompletion({messages:[
+        {role:'system',content:'Create one precise editable image-generation prompt. No fake charts, unsupported forecasts, data labels or invented facts. Return only the prompt.'},
+        {role:'user',content:`Topic: ${topic}\nExisting prompt: ${area?.value||''}\nVisual style: ${theme.style}. Frame centrally for responsive thumbnail.`}
+      ]});
+      this.imageComposerPrompt=String(result.content||'').trim().slice(0,3900);
+      if(area)area.value=this.imageComposerPrompt;
+      if(status)status.textContent='Review and edit before generating.';
+    }catch(error){if(status)status.textContent=error.message}
+    finally{button.disabled=false}
+  }
+
+  async generateTopicImage(button) {
+    if(!this.isTopicImageBridgeReady())return;
+    const root=button.closest('.topic-image-composer');
+    const status=root?.querySelector('[data-topic-image-status]');
+    const prompt=root?.querySelector('[data-topic-image-prompt]')?.value.trim();
+    if(!prompt){if(status)status.textContent='Enter a prompt first.';return;}
+    if(this.getMediaTokensForPoint(this.currentPoint||{}).length>=3){if(status)status.textContent='Remove a media item first (limit: 3).';return;}
+    const size=root.querySelector('[data-topic-image-size]').value;
+    const quality=root.querySelector('[data-topic-image-quality]').value;
+    const style=root.querySelector('[data-topic-image-style]').value;
+    const preset=this.topicImageTheme().style;
+    const look={layer:preset,photo:'photorealistic, credible documentary image',scientific:'scientific illustration, no numerical claims',minimal:'minimal editorial design'}[style]||preset;
+    if(!confirm(`Generate one ${size} image at ${quality} quality? Your connected API may charge for this request.`))return;
+    this.imageComposerPrompt=prompt;
+    button.disabled=true;
+    if(status)status.textContent='Generating image through API Settings…';
+    try {
+      const result=await window.ourEarthAI.generateImage({prompt:`${prompt}\nStyle: ${look}. No fake forecast data or text.`,size,quality,allowFallback:false});
+      if(!result?.url)throw Error('Image generation returned no file.');
+      this.saveFormState();
+      const token=this.createMediaToken({url:result.url,sourceName:'AI-generated topic illustration',sourceUrl:'',query:prompt,generated:true,provider:result.provider});
+      if(!this.addMediaTokenToCurrentPoint(token))throw Error('Media limit reached.');
+      this.renderCreateTopic({preserveState:true});
+    }catch(error){if(status)status.textContent=this.getActionErrorMessage(error,'AI Image')}
+    finally{button.disabled=false}
   }
 
   async aiGenerateImage() {

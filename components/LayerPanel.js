@@ -583,7 +583,7 @@ export class LayerPanel {
   }
 
   getNewsThumbnail(point = {}) {
-    const imageToken = getMediaTokensForPoint(point).find(token => (
+    const imageToken = getMediaTokensForPoint(point).find(token => !token.hideFromThumbnail && (
       token?.kind === 'image'
       || token?.type === 'image'
       || getDirectImageUrl(token?.url)
