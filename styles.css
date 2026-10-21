@@ -9980,3 +9980,32 @@ body.regional-mode #detail-panel .detail-toolbar button:hover { background:rgba(
 .topic-image-composer-actions { display:flex;flex-wrap:wrap;gap:8px }
 .topic-image-composer-actions button { min-height:38px;padding:7px 12px;border:1px solid #70d4cb;border-radius:6px;background:#16434c;color:#e9fffa;cursor:pointer }
 .topic-image-composer [data-topic-image-status] { font-size:12px;overflow-wrap:anywhere }
+
+/* WebGL2 may be disabled by a browser/driver: keep the independent Regional map usable. */
+.webgl-fallback-notice {
+  position: fixed;
+  top: calc(var(--top-bar-height, 64px) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2600;
+  width: min(570px, calc(100vw - 24px));
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #f8d58b;
+  border-radius: 10px;
+  background: rgba(12, 28, 39, .97);
+  color: #f5f9ff;
+  box-shadow: 0 10px 32px #0008;
+  font: 13px/1.55 system-ui, sans-serif;
+}
+.webgl-fallback-notice div { flex: 1; min-width: 0; }
+.webgl-fallback-notice code { color: #f8d58b; }
+.webgl-fallback-notice button {
+  border: 0;
+  background: transparent;
+  color: #f5f9ff;
+  font: 24px/1 system-ui, sans-serif;
+  cursor: pointer;
+}

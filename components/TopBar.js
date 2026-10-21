@@ -198,14 +198,16 @@ export class TopBar {
 
   renderModeTab(tab, activeModeTab) {
     const isActive = activeModeTab === tab.id;
+    const blocked = window.topicEarthWebglUnavailable === true && tab.id !== 'regional';
     return `
         <button
           class="filter-btn ${isActive ? 'active' : ''}"
+          ${blocked ? 'disabled aria-disabled="true"' : ''}
           data-filter="${this.escapeHtml(tab.id)}"
           role="tab"
           aria-selected="${isActive ? 'true' : 'false'}"
           tabindex="${isActive ? '0' : '-1'}"
-          title="${this.escapeHtml(tab.title)}"
+          title="${blocked ? 'WebGL2 is unavailable; Regional 2D mode still works' : this.escapeHtml(tab.title)}"
         >
           <span class="filter-icon" aria-hidden="true">${tab.icon}</span>
           <span class="header-label">${this.escapeHtml(tab.label)}</span>

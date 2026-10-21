@@ -21,7 +21,7 @@ import { SPACE_TOPICS } from './data/space-topics.js?v=topic-earth-janus-short-2
 import { CARBON_HISTORY_TOPICS } from './data/carbon-history-topics.js?v=topic-earth-carbon-media-20260515';
 import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-earth-good-initiatives-watch-20260601';
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
-import { TopBar } from './components/TopBar.js?v=idle-clock-20261016';
+import { TopBar } from './components/TopBar.js?v=firefox-webgl-fallback-20261022';
 import { RegionalMap } from './components/RegionalMap.js?v=metres-20261016';
 import { LayerPanel } from './components/LayerPanel.js?v=local-admin-20261016';
 import { DetailPanel } from './components/DetailPanel.js?v=story-links-20261016';
@@ -67,6 +67,7 @@ const TIPPING_BOUNDARY_COLORS = {
 class TopicEarthApp {
   constructor() {
     this.globe = null;
+    this.webglUnavailable = false;
     this.topBar = null;
     this.layerPanel = null;
     this.detailPanel = null;
@@ -253,7 +254,9 @@ class TopicEarthApp {
     this.checkDailyUpdate();
 
     const requestedMode = new URLSearchParams(window.location.search).get('mode');
-    if (['main', 'regional', 'space', 'fever'].includes(requestedMode)) {
+    if (this.webglUnavailable) {
+      this.switchLayerFilter('regional', { force: true });
+    } else if (['main', 'regional', 'space', 'fever'].includes(requestedMode)) {
       this.switchLayerFilter(requestedMode);
     }
 
@@ -785,7 +788,7 @@ class TopicEarthApp {
   
   initDebugTools() {
     const isAdmin = AppAccess.isAdminMode();
-    if (!isAdmin) return;
+    if (!isAdmin || !this.globe) return;
 
     // Create debug adapter
     this.feverDebugAdapter = new FeverDebugAdapter(this.globe);
@@ -966,6 +969,11 @@ class TopicEarthApp {
     window.addEventListener('layerFilterChanged', (e) => {
       const filter = e.detail.filter;
       const previous = e.detail.previous;
+      if (!this.globe && filter !== 'regional') {
+        this.topBar?.setLayerFilter?.('regional', { emit: false, force: true });
+        this.showWebGLFallbackNotice();
+        return;
+      }
       const transitionToken = this.beginModeTransition(filter, previous);
       
       // Store current filter
@@ -990,10 +998,10 @@ class TopicEarthApp {
       }
       
       // Clean exit from previous mode
-      if (filter !== 'space' && this.globe.inSolarSystemView) {
+      if (filter !== 'space' && this.globe?.inSolarSystemView) {
         this.globe.transitionBackToGlobe();
       }
-      if (filter !== 'fever' && this.globe.inFeverMode) {
+      if (filter !== 'fever' && this.globe?.inFeverMode) {
         this.globe.exitFeverMode();
         if (this.feverSimulationActive) {
           this.hideFeverSimulation();
@@ -1004,9 +1012,9 @@ class TopicEarthApp {
       }
       
       // Handle scene mode changes based on filter
-      if (filter === 'space' && !this.globe.inSolarSystemView) {
+      if (filter === 'space' && !this.globe?.inSolarSystemView) {
         this.enterSpaceMode(transitionToken);
-      } else if (filter === 'fever' && !this.globe.inFeverMode) {
+      } else if (filter === 'fever' && !this.globe?.inFeverMode) {
         this.enterFeverMode(transitionToken);
       } else if (filter === 'regional') {
         this.enterRegionalMode(transitionToken);
@@ -1026,7 +1034,7 @@ class TopicEarthApp {
       if (this.topBar) {
         this.topBar.updateViewMode(e.detail.mode, { layerFilter: this.currentLayerFilter });
       }
-      if (e.detail.mode === 'solar-system' && this.currentLayerFilter === 'space' && this.getActiveLayersForFilter('space').has('janus-system')) {
+      if (this.globe && e.detail.mode === 'solar-system' && this.currentLayerFilter === 'space' && this.getActiveLayersForFilter('space').has('janus-system')) {
         this.globe.janusLayer.setVisible(true).catch(error => console.error('[Janus System]', error));
       }
       
@@ -1168,10 +1176,10 @@ class TopicEarthApp {
   }
   
   exitSpecialModes() {
-    if (this.globe.inSolarSystemView) {
+    if (this.globe?.inSolarSystemView) {
       this.globe.transitionBackToGlobe();
     }
-    if (this.globe.inFeverMode) {
+    if (this.globe?.inFeverMode) {
       this.globe.exitFeverMode();
     }
     
@@ -2500,6 +2508,10 @@ class TopicEarthApp {
   }
 
   async openFeverMonitorPanel() {
+    if (!this.globe) {
+      this.showWebGLFallbackNotice();
+      return;
+    }
     if (this.currentLayerFilter !== 'fever') {
       this.topBar?.setLayerFilter?.('fever');
     }
@@ -2761,6 +2773,7 @@ class TopicEarthApp {
           this.cancelRegionalLayerPreview();
         }
         if (layerId === 'janus-system') {
+          if (!this.globe) return;
           this.globe.janusLayer.setVisible(visible && this.currentLayerFilter === 'space').catch((error) => {
             console.error('[Janus System] Could not load layer:', error);
             this.layerPanel.setLayerActive('janus-system', false);
@@ -2790,6 +2803,7 @@ class TopicEarthApp {
         }
 
         if (layerId === 'amoc-watch') {
+          if (!this.globe) return;
           console.log(`[AMOC Layer] ${visible ? 'Showing' : 'Hiding'} AMOC overlay from layer panel`);
           
           if (visible && !this.globe.inFeverMode) {
@@ -3004,7 +3018,7 @@ class TopicEarthApp {
             this.restoreRegionalTopicState(point);
           }
           if (!focused && hasCoordinates) {
-            this.globe.focusOnPoint(lat, lon, this.getGlobeFocusOptions());
+            this.globe?.focusOnPoint(lat, lon, this.getGlobeFocusOptions());
           }
         } else {
           this.focusGlobePoint(point);
@@ -3059,18 +3073,61 @@ class TopicEarthApp {
     });
   }
 
+  showWebGLFallbackNotice() {
+    if (!this.webglUnavailable || document.getElementById('webgl-fallback-notice')) return;
+    const notice = document.createElement('aside');
+    notice.id = 'webgl-fallback-notice';
+    notice.className = 'webgl-fallback-notice';
+    notice.setAttribute('role', 'status');
+    notice.innerHTML = `<div><strong>3D globe unavailable in this browser.</strong><br>
+      Regional 2D maps and topic layers remain available. Check Firefox
+      <code>about:support</code> → Graphics → WebGL 2, then reload to restore World, Space and Fever.</div>
+      <button type="button" aria-label="Dismiss WebGL notice">×</button>`;
+    notice.querySelector('button').addEventListener('click', () => notice.remove());
+    document.body.appendChild(notice);
+  }
+
+  enableRegionalWebGLFallback(reason = '') {
+    this.globe = null;
+    window.currentGlobe = null;
+    this.webglUnavailable = true;
+    window.topicEarthWebglUnavailable = true;
+    console.warn('[App Init] WebGL2 unavailable; enabling the independent Regional 2D map.', reason);
+    const globeContainer = document.getElementById('globe-container');
+    if (!this.regionalMap && globeContainer) this.initRegionalMap(globeContainer);
+    this.topBar?.render?.();
+    this.showWebGLFallbackNotice();
+  }
+
   initGlobe() {
     const globeContainer = document.getElementById('globe-container');
+    let webgl2Available = false;
+    try {
+      const context = document.createElement('canvas').getContext('webgl2');
+      webgl2Available = Boolean(context);
+      context?.getExtension('WEBGL_lose_context')?.loseContext();
+    } catch (error) {
+      console.warn('[WebGL] Feature probe failed:', error);
+    }
+    if (!webgl2Available) {
+      this.enableRegionalWebGLFallback('WebGL2 context creation was refused.');
+      return;
+    }
     const isSmallScreen = window.matchMedia?.('(max-width: 768px)').matches;
     
-    this.globe = new GlobeRenderer(globeContainer, {
-      earthTexture: './assets/textures/main/Material.001_baseColor_1k.jpeg',
-      minDistance: 1.3,
-      maxDistance: isSmallScreen ? 7 : 6,
-      initialDistance: isSmallScreen ? 3.15 : 2.5,
-      autoRotate: true,
-      rotationSpeed: Settings.get().rotationSpeed
-    });
+    try {
+      this.globe = new GlobeRenderer(globeContainer, {
+        earthTexture: './assets/textures/main/Material.001_baseColor_1k.jpeg',
+        minDistance: 1.3,
+        maxDistance: isSmallScreen ? 7 : 6,
+        initialDistance: isSmallScreen ? 3.15 : 2.5,
+        autoRotate: true,
+        rotationSpeed: Settings.get().rotationSpeed
+      });
+    } catch (error) {
+      this.enableRegionalWebGLFallback(error.message);
+      return;
+    }
 
     if (isSmallScreen) {
       this.topBar?.setInteractionMode?.('interaction');
@@ -3146,6 +3203,7 @@ class TopicEarthApp {
   }
 
   updateMarkers() {
+    if (!this.globe) return;
     this.globe.removeAllMarkers();
     
     const markerPoints = this.allPoints.filter(point =>
@@ -3176,6 +3234,7 @@ class TopicEarthApp {
   }
   
   updateMarkersByFilter(filter) {
+    if (!this.globe) return;
     // Show/hide markers based on active filter
     // Requirements:
     // - Fever mode shows all fever-related markers including 'earths-fever', 'tipping-points', 'amoc-watch',
@@ -3242,7 +3301,7 @@ class TopicEarthApp {
     }
 
     if (layerId === METEO_REALTIME_LAYER_ID) {
-      this.globe.updateMarkerVisibility(METEO_REALTIME_LAYER_ID, visible && this.currentLayerFilter === 'main');
+      this.globe?.updateMarkerVisibility(METEO_REALTIME_LAYER_ID, visible && this.currentLayerFilter === 'main');
     }
 
     if (this.currentLayerFilter === 'regional') {
