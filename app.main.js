@@ -1735,6 +1735,8 @@ class TopicEarthApp {
         city: context.city || '',
         region: context.region || '',
         country: context.country || '',
+        province: context.province || '',
+        countryCode: context.countryCode || '',
         continent: context.continent || '',
         road: context.road || '',
         houseNumber: context.houseNumber || ''
@@ -1780,6 +1782,8 @@ class TopicEarthApp {
         city: address.city || address.town || address.village || address.municipality || address.hamlet,
         region: address.state || address.region || address.county || address.state_district,
         country: address.country,
+        countryCode: address.country_code || '',
+        province: address.county || address.state_district || '',
         continent: address.continent,
         road: address.road || address.pedestrian || address.cycleway,
         houseNumber: address.house_number,
