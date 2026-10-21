@@ -1,3 +1,4 @@
+import { buildRegionalWindWatchTopics } from './lib/regional-wind-watch.mjs?v=regional-wind-20261022';
 import { fetchEuropeStormTopics } from './lib/europe-storm-topics.mjs?v=europe-wind-watch-20261022';
 import { ATLANTIC_STORM_TOPICS } from './data/atlantic-storm-topics.mjs?v=atlantic-20261021';
 import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=topic-proxy-bridge-20261013';
@@ -83,6 +84,7 @@ class TopicEarthApp {
     this.tippingDraftState = null;
     this.realtimeMeteoPoints = [];
     this.cyclonePoints = buildCycloneTopics({pending:true,fetchedAt:new Date().toISOString(),storms:[],sources:{nhc:{ok:false},jma:{ok:false},jtwc:{ok:false}},coverage:'Worldwide agency watch: Atlantic, Pacific, Indian Ocean and Australian region.'});
+    this.regionalWindWatchPoints = [];
     this.europeStormPoints = [];
     this.europeStormSnapshot = null;
     this.europeStormLastFetchTime = 0;
@@ -155,7 +157,7 @@ class TopicEarthApp {
     const baseIds = new Set(basePoints.map(point => String(point.id)));
     const customOnlyPoints = this.customPoints.filter(point => point && !baseIds.has(String(point.id)));
 
-    this.allPoints = [...mergedBasePoints, ...customOnlyPoints, ...this.realtimeMeteoPoints, ...(this.cyclonePoints || []), ...this.europeStormPoints, ...this.climateIndicatorPoints, ...this.goodInitiativePoints];
+    this.allPoints = [...mergedBasePoints, ...customOnlyPoints, ...this.realtimeMeteoPoints, ...(this.cyclonePoints || []), ...this.europeStormPoints, ...this.regionalWindWatchPoints, ...this.climateIndicatorPoints, ...this.goodInitiativePoints];
     this.allPoints = LocalWorkspace.visibleTopics(this.allPoints, this.allLayers);
     return this.allPoints;
   }
@@ -223,6 +225,7 @@ class TopicEarthApp {
     this.refreshGoodInitiatives({ launchAuto: true });
     this.startCycloneRefresh();
     this.startEuropeStormRefresh();
+    this.rebuildRegionalWindWatch();
 
     // Setup news update button
     this.setupNewsUpdate();
@@ -1299,6 +1302,7 @@ class TopicEarthApp {
 
     this.updateRegionalMobilityCheck(this.regionalContext);
 
+    this.rebuildRegionalWindWatch();
     this.refreshRealtimeMeteo({
       force: this.currentLayerFilter === 'regional',
       regionalContext: this.regionalContext,
@@ -2760,6 +2764,11 @@ class TopicEarthApp {
           });
           return;
         }
+        if (layerId === 'regional-wind-watch') {
+          if (visible) this.refreshEuropeStormWarnings({force:!this.europeStormSnapshot});
+          this.refreshRegionalMap();
+          return;
+        }
         if (layerId === 'atlantic-storms' && visible) this.refreshEuropeStormWarnings({force:!this.europeStormSnapshot});
         if (layerId === CYCLONE_LAYER_ID) {
           if (visible) this.refreshTropicalCyclones({force:!this.cycloneSnapshot});
@@ -3287,16 +3296,28 @@ class TopicEarthApp {
     this.globe.updateMarkerVisibility(METEO_REALTIME_LAYER_ID, showLiveMeteo);
   }
 
+  rebuildRegionalWindWatch() {
+    const settings=Settings.get();
+    const context=RegionalLocationManager.normalize(settings.regionalHomeLocation)
+      || this.regionalContext || null;
+    this.regionalWindWatchPoints=buildRegionalWindWatchTopics(this.europeStormSnapshot,context);
+    this.rebuildAllPoints();
+    this.layerPanel?.updateData(this.allLayers,this.allPoints);
+    if(this.currentLayerFilter==='regional' && this.regionalMap?.visible)
+      this.refreshRegionalMap();
+    return this.regionalWindWatchPoints;
+  }
+
   startEuropeStormRefresh() {
     this.refreshEuropeStormWarnings({force:true});
     if(this.europeStormTimer)clearInterval(this.europeStormTimer);
     this.europeStormTimer=setInterval(()=>{
-      if(!document.hidden && this.currentLayerFilter==='main'
-        && this.getActiveLayersForFilter('main').has('atlantic-storms'))this.refreshEuropeStormWarnings();
+      if(!document.hidden && (this.currentLayerFilter==='main' && this.getActiveLayersForFilter('main').has('atlantic-storms')
+        || this.currentLayerFilter==='regional' && this.getActiveLayersForFilter('regional').has('regional-wind-watch')))this.refreshEuropeStormWarnings();
     },15*60*1000);
     document.addEventListener('visibilitychange',()=>{
-      if(!document.hidden && this.currentLayerFilter==='main'
-        && this.getActiveLayersForFilter('main').has('atlantic-storms'))this.refreshEuropeStormWarnings();
+      if(!document.hidden && (this.currentLayerFilter==='main' && this.getActiveLayersForFilter('main').has('atlantic-storms')
+        || this.currentLayerFilter==='regional' && this.getActiveLayersForFilter('regional').has('regional-wind-watch')))this.refreshEuropeStormWarnings();
     });
   }
 
@@ -3306,10 +3327,12 @@ class TopicEarthApp {
     this.europeStormRefreshPromise=fetchEuropeStormTopics().then(({snapshot,points})=>{
       this.europeStormSnapshot=snapshot;
       this.europeStormPoints=points;
+      this.regionalWindWatchPoints=buildRegionalWindWatchTopics(snapshot,RegionalLocationManager.normalize(Settings.get().regionalHomeLocation)||this.regionalContext);
       this.europeStormLastFetchTime=Date.now();
       this.rebuildAllPoints();
       this.layerPanel?.updateData(this.allLayers,this.allPoints);
       this.updateMarkers();
+      if(this.currentLayerFilter==='regional')this.refreshRegionalMap();
       return snapshot;
     }).catch(error=>{
       console.warn('[European storm watch] Official warning feed unavailable:',error);

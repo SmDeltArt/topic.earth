@@ -1,5 +1,6 @@
 export const LAYERS = [
   {id:'bike-tools',name:'Bike Ways',modeTabs:['regional'],isGroup:true,icon:'🚲',color:'#66bb6a',enabled:true,defaultExpanded:true},
+  { id:'regional-wind-watch', name:'Regional wind watch · official advisories', icon:'🌬️', color:'#80ccf5', enabled:false, modeTabs:['regional'], previewLimit:8, sortByRegionalContext:true },
   { id:'atlantic-storms', name:'Atlantic Storms · EU wind warnings', icon:'🌪️', color:'#8cd8ff', enabled:true, modeTabs:['main'], defaultExpanded:true, previewLimit:5 },
   { id:'biodiversity', name:'Biodiversity · living systems', icon:'🦋', color:'#69d79a', enabled:true, modeTabs:['main'], defaultExpanded:true, previewLimit:8 },
   { id:'tropical-cyclones', name:'Tropical cyclones · world live', icon:'🌀', color:'#00d4ff', enabled:true, modeTabs:['main'], defaultExpanded:true, previewLimit:12 },

@@ -1055,6 +1055,7 @@ export class RegionalMap {
   }
 
   getRegionalMarkerColor(point = {}) {
+    if (point.isRegionalStormWatch) return point.markerColor || '#80ccf5';
     if (point.isAutoMeteoEvent) {
       return this.getMeteoSeverityColor(point.severity);
     }
@@ -1099,6 +1100,7 @@ export class RegionalMap {
     });
 
     marker.bindTooltip(`
+      ${point.isRegionalStormWatch ? '<small>Watch reference point only · not an official warning location</small><br>' : ''}
       ${isRealtimeMeteo ? weatherPreviewHtml(point,value=>this.escapeHtml(value)) : ''}
       <strong>${this.escapeHtml(title)}</strong><br>
       <span>${this.escapeHtml(location)}</span>
@@ -1521,7 +1523,7 @@ export class RegionalMap {
   }
 
   getFitPoints() {
-    const nonMeteoPoints = this.points.filter(point => !point.isRealtimeMeteo && point.category !== METEO_REALTIME_LAYER_ID);
+    const nonMeteoPoints = this.points.filter(point => !point.isRegionalStormWatch && !point.isRealtimeMeteo && point.category !== METEO_REALTIME_LAYER_ID);
     const europeanNonMeteo = nonMeteoPoints.filter(point => this.isInEurope(point));
     if (europeanNonMeteo.length) return europeanNonMeteo;
 
@@ -1537,7 +1539,7 @@ export class RegionalMap {
 
     const topicId = this.getTopicKey(target);
     this.activeTopicId = topicId;
-    this.updateTerrainReadout([[target.lat,target.lon]],[this.getPointElevation(target)]);
+    if (!target.isRegionalStormWatch) this.updateTerrainReadout([[target.lat,target.lon]],[this.getPointElevation(target)]);
     this.updateFallbackPinFocus();
     this.setActiveLeafletMarker(topicId);
 
