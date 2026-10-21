@@ -1,3 +1,4 @@
+import { fetchEuropeStormTopics } from './lib/europe-storm-topics.mjs?v=europe-wind-watch-20261022';
 import { ATLANTIC_STORM_TOPICS } from './data/atlantic-storm-topics.mjs?v=atlantic-20261021';
 import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=topic-proxy-bridge-20261013';
 import { BIODIVERSITY_TOPICS } from './data/biodiversity-topics.mjs?v=biodiversity-20261021';
@@ -82,6 +83,10 @@ class TopicEarthApp {
     this.tippingDraftState = null;
     this.realtimeMeteoPoints = [];
     this.cyclonePoints = buildCycloneTopics({pending:true,fetchedAt:new Date().toISOString(),storms:[],sources:{nhc:{ok:false},jma:{ok:false},jtwc:{ok:false}},coverage:'Worldwide agency watch: Atlantic, Pacific, Indian Ocean and Australian region.'});
+    this.europeStormPoints = [];
+    this.europeStormSnapshot = null;
+    this.europeStormLastFetchTime = 0;
+    this.europeStormRefreshPromise = null;
     this.cycloneSnapshot = null;
     this.cycloneRefreshPromise = null;
     this.cycloneLastFetchTime = 0;
@@ -150,7 +155,7 @@ class TopicEarthApp {
     const baseIds = new Set(basePoints.map(point => String(point.id)));
     const customOnlyPoints = this.customPoints.filter(point => point && !baseIds.has(String(point.id)));
 
-    this.allPoints = [...mergedBasePoints, ...customOnlyPoints, ...this.realtimeMeteoPoints, ...(this.cyclonePoints || []), ...this.climateIndicatorPoints, ...this.goodInitiativePoints];
+    this.allPoints = [...mergedBasePoints, ...customOnlyPoints, ...this.realtimeMeteoPoints, ...(this.cyclonePoints || []), ...this.europeStormPoints, ...this.climateIndicatorPoints, ...this.goodInitiativePoints];
     this.allPoints = LocalWorkspace.visibleTopics(this.allPoints, this.allLayers);
     return this.allPoints;
   }
@@ -217,6 +222,7 @@ class TopicEarthApp {
     this.refreshClimateIndicators({ launchAuto: true });
     this.refreshGoodInitiatives({ launchAuto: true });
     this.startCycloneRefresh();
+    this.startEuropeStormRefresh();
 
     // Setup news update button
     this.setupNewsUpdate();
@@ -2754,6 +2760,7 @@ class TopicEarthApp {
           });
           return;
         }
+        if (layerId === 'atlantic-storms' && visible) this.refreshEuropeStormWarnings({force:!this.europeStormSnapshot});
         if (layerId === CYCLONE_LAYER_ID) {
           if (visible) this.refreshTropicalCyclones({force:!this.cycloneSnapshot});
           this.updateMarkersByFilter(this.currentLayerFilter);
@@ -3280,6 +3287,37 @@ class TopicEarthApp {
     this.globe.updateMarkerVisibility(METEO_REALTIME_LAYER_ID, showLiveMeteo);
   }
 
+  startEuropeStormRefresh() {
+    this.refreshEuropeStormWarnings({force:true});
+    if(this.europeStormTimer)clearInterval(this.europeStormTimer);
+    this.europeStormTimer=setInterval(()=>{
+      if(!document.hidden && this.currentLayerFilter==='main'
+        && this.getActiveLayersForFilter('main').has('atlantic-storms'))this.refreshEuropeStormWarnings();
+    },15*60*1000);
+    document.addEventListener('visibilitychange',()=>{
+      if(!document.hidden && this.currentLayerFilter==='main'
+        && this.getActiveLayersForFilter('main').has('atlantic-storms'))this.refreshEuropeStormWarnings();
+    });
+  }
+
+  async refreshEuropeStormWarnings({force=false}={}) {
+    if(this.europeStormRefreshPromise)return this.europeStormRefreshPromise;
+    if(!force && Date.now()-this.europeStormLastFetchTime<15*60*1000)return this.europeStormSnapshot;
+    this.europeStormRefreshPromise=fetchEuropeStormTopics().then(({snapshot,points})=>{
+      this.europeStormSnapshot=snapshot;
+      this.europeStormPoints=points;
+      this.europeStormLastFetchTime=Date.now();
+      this.rebuildAllPoints();
+      this.layerPanel?.updateData(this.allLayers,this.allPoints);
+      this.updateMarkers();
+      return snapshot;
+    }).catch(error=>{
+      console.warn('[European storm watch] Official warning feed unavailable:',error);
+      return this.europeStormSnapshot;
+    }).finally(()=>{this.europeStormRefreshPromise=null});
+    return this.europeStormRefreshPromise;
+  }
+
   startCycloneRefresh() {
     try {
       const saved=window.localStorage.getItem('topicEarthCyclonesV1');
@@ -3475,7 +3513,7 @@ class TopicEarthApp {
     
     points.forEach((point, i) => {
       if (processed.has(i)) return;
-      if (point.isTropicalCyclone || point.isRealtimeMeteo) { clusters.push(point); processed.add(i); return; }
+      if (point.isTropicalCyclone || point.isRealtimeMeteo || point.isEuropeanWindWarning || point.isAtlanticStorm) { clusters.push(point); processed.add(i); return; }
       
       // Find nearby points
       const nearby = [point];

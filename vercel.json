@@ -29,6 +29,9 @@
     "api/tropical-cyclones.js": {
       "maxDuration": 30
     },
+    "api/europe-storm-warnings.js": {
+      "maxDuration": 30
+    },
     "api/mcp.js": {
       "maxDuration": 15
     }
