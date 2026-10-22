@@ -23,7 +23,7 @@ import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=firefox-webgl-fallback-20261022';
 import { RegionalMap } from './components/RegionalMap.js?v=metres-20261016';
-import { LayerPanel } from './components/LayerPanel.js?v=local-admin-20261016';
+import { LayerPanel } from './components/LayerPanel.js?v=mobile-reopen-20261022';
 import { DetailPanel } from './components/DetailPanel.js?v=story-links-20261016';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';
@@ -3101,18 +3101,6 @@ class TopicEarthApp {
 
   initGlobe() {
     const globeContainer = document.getElementById('globe-container');
-    let webgl2Available = false;
-    try {
-      const context = document.createElement('canvas').getContext('webgl2');
-      webgl2Available = Boolean(context);
-      context?.getExtension('WEBGL_lose_context')?.loseContext();
-    } catch (error) {
-      console.warn('[WebGL] Feature probe failed:', error);
-    }
-    if (!webgl2Available) {
-      this.enableRegionalWebGLFallback('WebGL2 context creation was refused.');
-      return;
-    }
     const isSmallScreen = window.matchMedia?.('(max-width: 768px)').matches;
     
     try {

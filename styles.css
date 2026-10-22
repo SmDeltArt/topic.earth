@@ -2969,6 +2969,21 @@ body.regional-map-search-open #layer-panel {
     background: rgba(0, 212, 255, 0.14);
 }
 
+body > .panel-reopen-btn:not([hidden]) {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    left: 12px;
+    top: 50dvh;
+    width: 48px;
+    height: 48px;
+    z-index: 1000;
+    pointer-events: auto;
+    touch-action: manipulation;
+    transform: translateY(-50%);
+}
+
 #layer-panel.closed {
     left: 0;
     top: 0;
