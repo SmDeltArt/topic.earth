@@ -43,6 +43,10 @@ export class LayerPanel {
     this.handleRegionalContextChanged = this.handleRegionalContextChanged.bind(this);
 
     this.render();
+    this.reopenButton = this.createReopenButton();
+    this.reopenButton.hidden = true;
+    this.reopenButton.addEventListener('click', () => this.reopen());
+    document.body.appendChild(this.reopenButton);
     this.attachEventListeners();
 
     window.addEventListener('layerFilterChanged', (e) => {
@@ -110,7 +114,6 @@ export class LayerPanel {
 
     this.container.appendChild(collapseBtn);
     this.container.appendChild(this.createCloseButton());
-    this.container.appendChild(this.createReopenButton());
     this.container.appendChild(header);
     this.container.appendChild(feverMessageDiv);
     this.container.appendChild(controls);
@@ -154,6 +157,8 @@ export class LayerPanel {
     btn.dataset.action = 'reopen-panel';
     btn.title = 'Show data layers';
     btn.setAttribute('aria-label', 'Show data layers');
+    btn.setAttribute('aria-controls', this.container.id);
+    btn.setAttribute('aria-expanded', 'false');
     return btn;
   }
 
@@ -828,6 +833,8 @@ export class LayerPanel {
       this.container.classList.remove('collapsed');
     }
     this.container.classList.toggle('closed', this.isClosed);
+    this.reopenButton.hidden = !this.isClosed;
+    this.reopenButton.setAttribute('aria-expanded', String(!this.isClosed));
     const collapseBtn = this.container.querySelector('.panel-collapse-btn');
     if (collapseBtn) {
       collapseBtn.innerHTML = '&#9664;';
