@@ -16,7 +16,7 @@ import { TopicTranslations, plainTopicText } from '../lib/topic-translations.mjs
 import { buildFeverAudioText, getFeverSpeedProfile } from '../lib/fever-audio-manifest.mjs?v=normal-20261008';
 import { getFeverWarmingTranslation } from '../lib/fever-warming-translations.js?v=topic-earth-fever-json-i18n-20260422';
 import { LocalStorage } from '../lib/storage.js?v=topic-earth-meteo-draft-20260531';
-import { pwaInstallManager } from '../lib/pwa-install-manager.js?v=earth-clock-install-20261012';
+import { pwaInstallManager } from '../lib/pwa-install-manager.js?v=regression-textures-20261103';
 import { renderResponsiveMediaImage, installMediaFallbackHandler } from '../lib/responsive-media.mjs';
 import {
   createMediaToken as createTopicMediaToken,
@@ -448,6 +448,11 @@ export class DetailPanel {
     window.addEventListener('feverReverseChanged', (e) => {
       this.updateControlButton('toggle-fever-reverse', e.detail.reversed);
     });
+    window.addEventListener('boundaryOverlayChanged', (e) => {
+      const select = this.container.querySelector('[data-boundary-overlay-mode]');
+      if (select) select.value = e.detail.mode;
+      this.updateControlButton('toggle-tipping-overlay', e.detail.mode !== 'off');
+    });
     
     // Handle source input changes
     this.container.addEventListener('loadedmetadata', e => {
@@ -722,6 +727,11 @@ export class DetailPanel {
     
     // Add listeners for coordinate changes to update globe
     this.container.addEventListener('change', (e) => {
+      if (e.target.matches('[data-boundary-overlay-mode]')) {
+        this.currentGlobe?.setBoundaryOverlayMode(e.target.value);
+        this.updateControlButton('toggle-tipping-overlay', e.target.value !== 'off');
+        return;
+      }
       if ((e.target.id === 'topic-lat' || e.target.id === 'topic-lon') && this.currentPoint) {
         const latInput = this.container.querySelector('#topic-lat');
         const lonInput = this.container.querySelector('#topic-lon');
@@ -898,7 +908,14 @@ export class DetailPanel {
     document.body.classList.toggle('detail-panel-top', !this.container.classList.contains('hidden') && this.panelSize === 'top');
 
     document.body.classList.toggle('fever-monitor-expanded', !this.container.classList.contains('hidden') && !this.isCompact && this.mode === 'fever-simulation');
+    this.syncFeverYearOverlay();
     this.updateCompactSummary();
+  }
+
+  syncFeverYearOverlay() {
+    if (this.mode !== 'fever-simulation' || !this.currentGlobe) return;
+    if (this.isCompact || this.container.classList.contains('hidden')) this.currentGlobe.showFeverYearOverlay();
+    else this.currentGlobe.hideFeverYearOverlay();
   }
 
   getAdjacentTopic(direction = 'next') {
@@ -1334,10 +1351,8 @@ export class DetailPanel {
     }
     this.updateTopicNavigation();
     
-    // Hide year overlay when monitoring panel is visible
-    if (this.currentGlobe) {
-      this.currentGlobe.hideFeverYearOverlay();
-    }
+    // Compact monitoring leaves the year visible on Earth, like a closed panel.
+    this.syncFeverYearOverlay();
     
     // Listen for year changes
     this.feverYearListener = (e) => {
@@ -1559,9 +1574,7 @@ export class DetailPanel {
   }
   
   renderFeverSimulation() {
-    if (this.currentGlobe) {
-      this.currentGlobe.hideFeverYearOverlay();
-    }
+    this.syncFeverYearOverlay();
     
     // Import monitoring content
     import('../data/fever-topics.js').then(module => {
@@ -1580,7 +1593,9 @@ export class DetailPanel {
     const voiceEnabled = this.currentGlobe ? this.currentGlobe.getFeverVoiceEnabled() : true;
     const isPaused = this.currentGlobe ? this.currentGlobe.isFeverPaused() : false;
     const isReversed = this.currentGlobe ? this.currentGlobe.isFeverReversed() : false;
-    const tippingVisible = this.currentGlobe ? this.currentGlobe.getTippingOverlayVisible() : true;
+    const boundaryMode = this.currentGlobe?.getBoundaryOverlayMode() || 'glb';
+    const tippingVisible = boundaryMode !== 'off';
+    const overlayLabels = ({fr:['Superposition des limites','Désactivée','GLB · 3D','SVG · indices Fever'],nl:['Grenzen-overlay','Uit','GLB · 3D','SVG · Fever-indices'],de:['Grenzen-Overlay','Aus','GLB · 3D','SVG · Fever-Indizes']})[this.getCurrentLanguage()] || ['Boundaries overlay','Off','GLB · 3D','SVG · Fever indices'];
     const selectedBoundary = this.currentGlobe ? this.currentGlobe.getSelectedBoundary() : null;
     const isAdmin = AppAccess.isAdminMode();
     
@@ -1636,6 +1651,9 @@ export class DetailPanel {
                 <path d="M7 3V7L10 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
             </button>
+            <select data-boundary-overlay-mode aria-label="${this.escapeHtml(overlayLabels[0])}" title="${this.escapeHtml(overlayLabels[0])}" style="max-width:145px;background:var(--bg-secondary,#14232f);color:inherit;border:1px solid #49606e;border-radius:5px;padding:5px;font:inherit;font-size:11px;min-height:30px">
+              ${['off','glb','svg'].map((value,index)=>`<option value="${value}" ${boundaryMode===value?'selected':''}>${this.escapeHtml(overlayLabels[index+1])}</option>`).join('')}
+            </select>
             <button class="fever-control-btn ${this.currentGlobe && this.currentGlobe.getAMOCOverlayVisible() ? 'active' : ''}" data-action="toggle-amoc-overlay" title="${this.escapeHtml(this.t('fever.amocWatchOverlay'))}">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M7 2C4 2 2 4 2 7C2 10 4 12 7 12C10 12 12 10 12 7C12 4 10 2 7 2Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
@@ -1644,6 +1662,7 @@ export class DetailPanel {
             </button>
           </div>
         </div>
+        <div data-monitor-svg-controls></div>
         <div class="fever-scenario-controls">
           <div class="fever-scenario-group">
             <span style="font-size: 10px; opacity: 0.7; margin-right: 6px;">${this.escapeHtml(this.t('fever.scenarioLabel'))}</span>
@@ -1737,6 +1756,7 @@ export class DetailPanel {
         </div>
       </div>
     `;
+    this.currentGlobe?.planetaryBoundariesOverlay?.mountControls(content.querySelector('[data-monitor-svg-controls]'));
     this.updateCompactSummary();
     
     // Initialize visualizations
@@ -2785,8 +2805,10 @@ export class DetailPanel {
   
   toggleTippingOverlay() {
     if (this.currentGlobe) {
-      const newState = !this.currentGlobe.getTippingOverlayVisible();
-      this.currentGlobe.setTippingOverlayVisible(newState);
+      const newState = this.currentGlobe.getBoundaryOverlayMode() === 'off';
+      this.currentGlobe.setBoundaryOverlayMode(newState ? (this.currentGlobe.lastBoundaryOverlayMode || 'glb') : 'off');
+      const select = this.container.querySelector('[data-boundary-overlay-mode]');
+      if (select) select.value = this.currentGlobe.getBoundaryOverlayMode();
       this.updateControlButton('toggle-tipping-overlay', newState);
     }
   }

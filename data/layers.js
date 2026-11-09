@@ -1,4 +1,5 @@
 export const LAYERS = [
+  { id:'planetary-boundaries', name:'Planetary Boundaries · Earth Health Monitor', icon:'🌍', color:'#86d7c5', enabled:true, modeTabs:['main'], defaultExpanded:true, previewLimit:1 },
   {id:'bike-tools',name:'Bike Ways',modeTabs:['regional'],isGroup:true,icon:'🚲',color:'#66bb6a',enabled:true,defaultExpanded:true},
   { id:'regional-wind-watch', name:'Regional wind watch · official advisories', icon:'🌬️', color:'#80ccf5', enabled:false, modeTabs:['regional'], previewLimit:8, sortByRegionalContext:true },
   { id:'atlantic-storms', name:'Atlantic Storms · EU wind warnings', icon:'🌪️', color:'#8cd8ff', enabled:true, modeTabs:['main'], defaultExpanded:true, previewLimit:5 },

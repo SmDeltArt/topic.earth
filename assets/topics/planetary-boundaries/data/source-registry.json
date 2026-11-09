@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "lastReviewedAt": "2026-11-04",
+  "purpose": "Future server-side publication detection; no browser polling or automatic scientific approval",
+  "sources": [
+    {"id":"phc-downloads","url":"https://www.planetaryhealthcheck.org/downloads/","organization":"Planetary Boundaries Science / PIK","expectedCadence":"annual","candidateCheckCadence":"weekly, if an authorized server-side monitor is later enabled","review":"Verify publication version, DOI, source table and correction notices; retain report digest"},
+    {"id":"richardson-2023","url":"https://doi.org/10.1126/sciadv.adh2458","organization":"Richardson et al. / Science Advances","expectedCadence":"fixed publication; check corrections","review":"Do not overwrite a historical snapshot; publish a newly named correction version"},
+    {"id":"src-framework","url":"https://www.stockholmresilience.org/research/planetary-boundaries.html","organization":"Stockholm Resilience Centre","expectedCadence":"irregular","review":"Framework context, not a substitute for an assessment source table"},
+    {"id":"globaia-method","url":"https://globaia.org/boundaries/","organization":"Globaïa","expectedCadence":"irregular","review":"Visualization conventions and artwork attribution; never use mixed-year illustrative text to replace assessment measurements"}
+  ],
+  "workflow": ["Detect new official publication or correction", "Store candidate provenance and original report checksum outside public source", "Extract quantities with page locators; AI assistance is untrusted", "Validate schema, units, comparators, ranges, normalization, observation periods and source-version consistency", "Independent human scientific review", "Master Admin authorizes a new immutable assessment version", "Explicitly approved release updates latest pointer and integrity manifest"],
+  "adminIntegration": {"status":"prepared, not connected","permission":"owner:manage","authentication":"Existing server/auth.mjs verified server session and exact super-admin identity; never trust a local Admin flag","writes":"Future endpoints must be explicitly allowed by server/request-policy.mjs and enforce existing unsafe-method/origin checks","audit":"Record candidate, old/new digests, scientific reviewer, approving admin, timestamps and release authorization","separation":"Independent from Earth’s Fever simulation; no client-side credentials, write endpoint or scheduler added"}
+}

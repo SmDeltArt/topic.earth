@@ -1,0 +1,538 @@
+{
+  "schemaVersion": 1,
+  "type": "validated_scientific_assessment",
+  "version": "2023.publisher-2023.v1",
+  "assessmentYear": 2023,
+  "publicationDate": "2023-09-13",
+  "publicationDateNote": "Publication / official launch date, not observation date.",
+  "checkedAt": "2026-11-04",
+  "source": {
+    "name": "Richardson et al. (2023), Science Advances",
+    "url": "https://doi.org/10.1126/sciadv.adh2458",
+    "doi": "10.1126/sciadv.adh2458",
+    "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+  },
+  "license": "Scientific facts transcribed with attribution. PHC figures: CC BY 4.0 unless otherwise noted; source artwork provenance must be verified separately. Richardson article: CC BY-NC 4.0. No exclusive ownership or endorsement claimed.",
+  "methodologyNotes": "Original Fig. 1 uses logarithmic wedge lengths and explicitly excepts freshwater from the common-radius normalization. This adaptation instead exposes a project reference-relative ratio and keeps the existing linear radius for every channel. It does not reproduce Fig. 1 distances. Table 1 is authoritative for this snapshot: forcing 2.91, ocean 2.8, ozone 284.6; later retrospective columns differ. HANPP reference 1.9 is reported NPP variability, not an observed human-appropriation baseline. Ocean high-risk column is ambiguous in the original table; left unavailable rather than copied from a later report.",
+  "normalizationNote": "Project reference-relative-v1: q=(observed-reference)/(boundary-reference). Lower-is-worse variables use negative denominator; no universal observed/boundary division. Not an official risk severity score. Published boundary comparators and uncertainties remain explicit.",
+  "displayTransformation": "pb-high-risk-aligned-v1: q=(observed-reference)/(PB-reference); h=(highRisk-reference)/(PB-reference). Display d=q for q<=1; d=1+(q-1)/(h-1) for q>1 when h is known. PB radius=green radius; high-risk radius=2*green radius is a visual choice, not q=2. Unknown high-risk thresholds fall back to linear q with explicit unknown status. Only display radius is capped. Manual illustration retains the legacy linear controller.",
+  "boundaries": [
+    {
+      "id": "biosphere_integrity",
+      "label": "Biosphere integrity",
+      "status": "exceeded"
+    },
+    {
+      "id": "land_system_change",
+      "label": "Land system change",
+      "status": "exceeded"
+    },
+    {
+      "id": "biogeochemical_flows",
+      "label": "Biogeochemical flows",
+      "status": "exceeded"
+    },
+    {
+      "id": "novel_entities",
+      "label": "Novel entities",
+      "status": "exceeded"
+    },
+    {
+      "id": "climate_change",
+      "label": "Climate change",
+      "status": "exceeded"
+    },
+    {
+      "id": "freshwater_change",
+      "label": "Freshwater change",
+      "status": "exceeded"
+    },
+    {
+      "id": "ocean_acidification",
+      "label": "Ocean acidification",
+      "status": "not_exceeded_globally"
+    },
+    {
+      "id": "atmospheric_aerosol_loading",
+      "label": "Atmospheric aerosol loading",
+      "status": "not_exceeded_globally"
+    },
+    {
+      "id": "stratospheric_ozone_depletion",
+      "label": "Stratospheric ozone depletion",
+      "status": "not_exceeded_globally"
+    }
+  ],
+  "indicators": [
+    {
+      "id": "biosphere_integrity__genetic_diversity",
+      "boundaryId": "biosphere_integrity",
+      "label": "Genetic diversity",
+      "definition": "Extinctions per million species-years. Boundary anchor 10 represents the published <10 precautionary threshold.",
+      "unit": "E/MSY",
+      "observed": {
+        "kind": "lower_bound",
+        "min": 100
+      },
+      "referenceValue": 1,
+      "boundaryValue": 10,
+      "boundaryComparator": "<",
+      "upperRiskThreshold": 100,
+      "normalizationMethod": "reference-relative-v1",
+      "normalizedValue": {
+        "kind": "lower_bound",
+        "min": 11.0
+      },
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": null,
+      "observationPeriod": null,
+      "observationMethod": "Observation-based estimate",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "Wide extinction-rate uncertainty; retain the published range or one-sided estimate, never an exact midpoint.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "available"
+    },
+    {
+      "id": "land_system_change",
+      "boundaryId": "land_system_change",
+      "label": "Remaining forest cover",
+      "definition": "Remaining area of forest as a percentage of original forest cover; global aggregate, with distinct biome thresholds.",
+      "unit": "% original forest",
+      "observed": {
+        "kind": "point",
+        "value": 60
+      },
+      "referenceValue": 100,
+      "boundaryValue": 75,
+      "boundaryComparator": ">=",
+      "upperRiskThreshold": 54,
+      "normalizationMethod": "reference-relative-v1",
+      "normalizedValue": {
+        "kind": "point",
+        "value": 1.6
+      },
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": null,
+      "observationPeriod": null,
+      "observationMethod": "Remote sensing and potential-forest reconstruction",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "available"
+    },
+    {
+      "id": "biogeochemical_flows__phosphorus",
+      "boundaryId": "biogeochemical_flows",
+      "label": "Phosphorus applied to cropland",
+      "definition": "Mined phosphorus applied to cropland / erodible soils. This is the regional-distribution criterion aggregated globally, not ocean P flow.",
+      "unit": "Tg P/year",
+      "observed": {
+        "kind": "point",
+        "value": 17.5
+      },
+      "referenceValue": 0,
+      "boundaryValue": 6.2,
+      "boundaryComparator": "<=",
+      "upperRiskThreshold": 11.2,
+      "normalizationMethod": "reference-relative-v1",
+      "normalizedValue": {
+        "kind": "point",
+        "value": 2.82258064516129
+      },
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": null,
+      "observationPeriod": null,
+      "observationMethod": "Data integration and statistical modeling",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "available"
+    },
+    {
+      "id": "novel_entities",
+      "boundaryId": "novel_entities",
+      "label": "Novel entities",
+      "definition": "Percentage of synthetic chemicals released without adequate safety testing. Exceeded qualitatively; global percentage is not quantified.",
+      "unit": "% untested releases",
+      "observed": {
+        "kind": "qualitative",
+        "text": ">0; exceeded, global percentage unquantified"
+      },
+      "referenceValue": 0,
+      "boundaryValue": 0,
+      "boundaryComparator": "<=",
+      "upperRiskThreshold": null,
+      "normalizationMethod": "unquantified",
+      "normalizedValue": null,
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": null,
+      "observationPeriod": null,
+      "observationMethod": "Qualitative evidence synthesis",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "No quantified global fraction or high-risk threshold. Boundary equals zero; division by zero is prohibited.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "unknown"
+    },
+    {
+      "id": "climate_change__co2_concentration",
+      "boundaryId": "climate_change",
+      "label": "Atmospheric CO₂",
+      "definition": "Global atmospheric carbon dioxide concentration.",
+      "unit": "ppm",
+      "observed": {
+        "kind": "point",
+        "value": 417
+      },
+      "referenceValue": 280,
+      "boundaryValue": 350,
+      "boundaryComparator": "<=",
+      "upperRiskThreshold": 450,
+      "normalizationMethod": "reference-relative-v1",
+      "normalizedValue": {
+        "kind": "point",
+        "value": 1.957142857142857
+      },
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": 2022,
+      "observationPeriod": null,
+      "observationMethod": "Ground-based observations",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "available"
+    },
+    {
+      "id": "freshwater_change__green_water",
+      "boundaryId": "freshwater_change",
+      "label": "Green water disturbance",
+      "definition": "Ice-free land area with root-zone soil moisture deviations outside preindustrial variability; captures wet and dry disturbance.",
+      "unit": "% land area",
+      "observed": {
+        "kind": "point",
+        "value": 15.8
+      },
+      "referenceValue": 9.8,
+      "boundaryValue": 11.1,
+      "boundaryComparator": "<=",
+      "upperRiskThreshold": 50,
+      "normalizationMethod": "reference-relative-v1",
+      "normalizedValue": {
+        "kind": "point",
+        "value": 4.615384615384619
+      },
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": null,
+      "observationPeriod": null,
+      "observationMethod": "Global hydrological model ensemble",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "provisional"
+    },
+    {
+      "id": "ocean_acidification",
+      "boundaryId": "ocean_acidification",
+      "label": "Ocean aragonite saturation",
+      "definition": "Global mean surface seawater saturation state with respect to aragonite (Ω); declining values indicate greater acidification.",
+      "unit": "Ω (dimensionless)",
+      "observed": {
+        "kind": "point",
+        "value": 2.8
+      },
+      "referenceValue": 3.44,
+      "boundaryValue": 2.75,
+      "boundaryComparator": ">=",
+      "upperRiskThreshold": null,
+      "normalizationMethod": "reference-relative-v1",
+      "normalizedValue": {
+        "kind": "point",
+        "value": 0.9275362318840582
+      },
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": null,
+      "observationPeriod": null,
+      "observationMethod": "Data integration and statistical modeling",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "Lower saturation means greater acidification. Reference/boundary revised in 2025; high-risk threshold provisional. Original 2023 table ambiguity is not resolved with a later value.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "unknown"
+    },
+    {
+      "id": "atmospheric_aerosol_loading",
+      "boundaryId": "atmospheric_aerosol_loading",
+      "label": "Interhemispheric aerosol difference",
+      "definition": "Annual mean difference in aerosol optical depth between hemispheres; dimensionless, not aerosol radiative forcing.",
+      "unit": "AOD difference (dimensionless)",
+      "observed": {
+        "kind": "point",
+        "value": 0.076
+      },
+      "referenceValue": 0.03,
+      "boundaryValue": 0.1,
+      "boundaryComparator": "<=",
+      "upperRiskThreshold": 0.25,
+      "normalizationMethod": "reference-relative-v1",
+      "normalizedValue": {
+        "kind": "point",
+        "value": 0.657142857142857
+      },
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": null,
+      "observationPeriod": null,
+      "observationMethod": "Observations and model integration",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "available"
+    },
+    {
+      "id": "stratospheric_ozone_depletion",
+      "boundaryId": "stratospheric_ozone_depletion",
+      "label": "Stratospheric ozone",
+      "definition": "Global mean stratospheric ozone concentration; regional and seasonal depletion can occur below a globally unexceeded classification.",
+      "unit": "DU",
+      "observed": {
+        "kind": "point",
+        "value": 284.6
+      },
+      "referenceValue": 290,
+      "boundaryValue": 276,
+      "boundaryComparator": ">=",
+      "upperRiskThreshold": 261,
+      "normalizationMethod": "reference-relative-v1",
+      "normalizedValue": {
+        "kind": "point",
+        "value": 0.38571428571428407
+      },
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": null,
+      "observationPeriod": null,
+      "observationMethod": "Remote sensing",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "available"
+    },
+    {
+      "id": "biosphere_integrity__functional_diversity",
+      "boundaryId": "biosphere_integrity",
+      "label": "Functional integrity (HANPP)",
+      "definition": "Human appropriation of net primary production as a percentage of preindustrial NPP. Boundary anchor 10 represents <10%.",
+      "unit": "% preindustrial NPP",
+      "observed": {
+        "kind": "point",
+        "value": 30
+      },
+      "referenceValue": 1.9,
+      "boundaryValue": 10,
+      "boundaryComparator": "<",
+      "upperRiskThreshold": 20,
+      "normalizationMethod": "reference-relative-v1",
+      "normalizedValue": {
+        "kind": "point",
+        "value": 3.469135802469136
+      },
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": 2020,
+      "observationPeriod": null,
+      "observationMethod": "Data integration and statistical modeling",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "HANPP estimates depend on model and reference NPP. Published reference 1.9 is natural NPP variability, not a measured appropriation baseline.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "available"
+    },
+    {
+      "id": "biogeochemical_flows__nitrogen",
+      "boundaryId": "biogeochemical_flows",
+      "label": "Intentional nitrogen fixation",
+      "definition": "Industrial and intentional biological fixation of nitrogen for agriculture.",
+      "unit": "Tg N/year",
+      "observed": {
+        "kind": "point",
+        "value": 190
+      },
+      "referenceValue": 0,
+      "boundaryValue": 62,
+      "boundaryComparator": "<=",
+      "upperRiskThreshold": 82,
+      "normalizationMethod": "reference-relative-v1",
+      "normalizedValue": {
+        "kind": "point",
+        "value": 3.064516129032258
+      },
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": null,
+      "observationPeriod": null,
+      "observationMethod": "Data integration and statistical modeling",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "available"
+    },
+    {
+      "id": "freshwater_change__blue_water",
+      "boundaryId": "freshwater_change",
+      "label": "Blue water disturbance",
+      "definition": "Ice-free land area with river-discharge deviations outside preindustrial variability; captures wet and dry disturbance.",
+      "unit": "% land area",
+      "observed": {
+        "kind": "point",
+        "value": 18.2
+      },
+      "referenceValue": 9.4,
+      "boundaryValue": 10.2,
+      "boundaryComparator": "<=",
+      "upperRiskThreshold": 50,
+      "normalizationMethod": "reference-relative-v1",
+      "normalizedValue": {
+        "kind": "point",
+        "value": 11.000000000000014
+      },
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": null,
+      "observationPeriod": null,
+      "observationMethod": "Global hydrological model ensemble",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "provisional"
+    },
+    {
+      "id": "climate_change__radiative_forcing",
+      "boundaryId": "climate_change",
+      "label": "Radiative forcing",
+      "definition": "Total anthropogenic top-of-atmosphere radiative forcing relative to the preindustrial reference.",
+      "unit": "W/m²",
+      "observed": {
+        "kind": "point",
+        "value": 2.91
+      },
+      "referenceValue": 0,
+      "boundaryValue": 1,
+      "boundaryComparator": "<=",
+      "upperRiskThreshold": 1.5,
+      "normalizationMethod": "reference-relative-v1",
+      "normalizedValue": {
+        "kind": "point",
+        "value": 2.91
+      },
+      "displayTransformation": "pb-high-risk-aligned-v1",
+      "observationYear": 2022,
+      "observationPeriod": null,
+      "observationMethod": "Observations and climate models",
+      "assessmentYear": 2023,
+      "publicationDate": "2023-09-13",
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "uncertainty": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+      "validationStatus": "source_checked",
+      "thresholdAvailability": "available"
+    }
+  ],
+  "additionalMeasurements": [
+    {
+      "id": "phosphorus_ocean_flow",
+      "label": "Phosphorus flow to ocean (not the selected P wedge)",
+      "observedValue": 22.6,
+      "unit": "Tg P/year",
+      "referenceValue": 0,
+      "boundaryValue": 11,
+      "upperRiskThreshold": 100,
+      "source": {
+        "name": "Richardson et al. (2023), Science Advances",
+        "url": "https://doi.org/10.1126/sciadv.adh2458",
+        "doi": "10.1126/sciadv.adh2458",
+        "locator": "Table 1, pp. 5–6; Fig. 1 and freshwater section"
+      },
+      "note": "The single P wedge uses cropland application consistently for all four assessments. Ocean flow is shown separately; do not substitute it silently."
+    }
+  ]
+}

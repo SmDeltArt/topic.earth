@@ -10024,3 +10024,55 @@ body.regional-mode #detail-panel .detail-toolbar button:hover { background:rgba(
   font: 24px/1 system-ui, sans-serif;
   cursor: pointer;
 }
+
+/* Empty toolbar space must not intercept Layers panel controls. */
+#scene-interaction-controls { pointer-events: none; }
+#scene-interaction-controls > * { pointer-events: auto; }
+
+@media (max-width: 768px), (max-height: 450px) {
+  .webgl-fallback-notice {
+    top: auto;
+    bottom: 12px;
+    max-height: 28dvh;
+    overflow: auto;
+    box-sizing: border-box;
+  }
+  .webgl-fallback-notice button {
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+}
+
+/* Mobile Regional actions stay at the scene corner, independent of the bottom sheet. */
+@media (max-width:768px), (pointer:coarse) {
+  body.regional-mode #detail-panel .detail-toolbar {
+    position:fixed;
+    top:var(--mobile-controls-bottom,calc(var(--top-bar-height) + 54px));
+    right:max(12px,env(safe-area-inset-right));
+    left:auto;
+    max-width:calc(100vw - 24px);
+    flex-wrap:wrap;
+    padding:0;
+    gap:6px;
+  }
+  body.regional-mode #detail-panel.compact .detail-compact-summary { margin-top:0; }
+  body.regional-mode .regional-map-search.collapsed-side,
+  body.regional-mode.regional-map-search-open .regional-map-search.collapsed-side {
+    left:auto!important;
+    right:12px!important;
+    width:44px!important;
+    max-width:44px!important;
+  }
+  body.regional-mode #scene-interaction-controls button,
+  body.regional-mode #detail-panel .detail-toolbar button,
+  body.regional-mode .regional-map-panel-collapse {
+    background:rgba(18,29,43,.98);
+    color:#eafaff;
+    border:1px solid rgba(93,209,234,.8);
+    box-shadow:0 2px 7px #0007;
+    opacity:1;
+  }
+  body.regional-mode #scene-interaction-controls button:hover,
+  body.regional-mode #detail-panel .detail-toolbar button:hover { background:#25465a; }
+}

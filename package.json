@@ -13,12 +13,16 @@
     "check:mcp": "node -c api/mcp.js && node tools/check-mcp-helpers.cjs",
     "audio:read-cache": "node tools/generate-read-audio.mjs",
     "audio:record": "node tools/generate-read-audio.mjs",
-    "csv:copy": "node tools/generate-ui-csv-copy.mjs"
+    "csv:copy": "node tools/generate-ui-csv-copy.mjs",
+    "test:browser": "playwright test"
   },
   "dependencies": {
     "@auth/core": "^0.41.3",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@vercel/functions": "^3.10.1",
     "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
   }
 }

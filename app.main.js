@@ -2,13 +2,15 @@ import { buildRegionalWindWatchTopics } from './lib/regional-wind-watch.mjs?v=re
 import { fetchEuropeStormTopics } from './lib/europe-storm-topics.mjs?v=europe-wind-watch-20261022';
 import { ATLANTIC_STORM_TOPICS } from './data/atlantic-storm-topics.mjs?v=atlantic-20261021';
 import { EL_NINO_TOPICS } from './data/el-nino-topic.mjs?v=topic-proxy-bridge-20261013';
+import { PLANETARY_BOUNDARIES_TOPICS } from './data/planetary-boundaries-topic.mjs?v=planetary-20261103';
 import { BIODIVERSITY_TOPICS } from './data/biodiversity-topics.mjs?v=biodiversity-20261021';
 import { RegionalLocationManager } from './lib/regional-location.mjs';
 import { LocalWorkspace } from './lib/local-workspace.mjs';
 import { GitHubAuth } from './lib/github-auth.mjs';
 import { CYCLONE_LAYER_ID, fetchLiveCyclones, buildCycloneTopics, validateCycloneSnapshot } from './lib/tropical-cyclones.mjs?v=cyclones-20261013';
 import { TopicStoryMedia } from './lib/topic-story-media.mjs?v=story-media-20261013';
-import { GlobeRenderer } from './lib/globe.js?v=cyclone-hover-20261016';
+import { GlobeRenderer } from './lib/globe.js?v=regression-textures-20261103';
+import {PlanetaryBoundariesOverlay} from './lib/planetary-boundaries-overlay.mjs';
 import { AppAccess } from './lib/capabilities.js?v=local-admin-20261016';
 import { LAYERS } from './data/layers.js?v=regional-ambassadors-20261016';
 import { METEO_CLOUD_LAYER_ID, METEO_REALTIME_LAYER_ID, fetchMeteoAtPoint, fetchRealtimeMeteoSnapshot } from './lib/meteo-realtime.js?v=weather-terrain-20261015';
@@ -23,8 +25,8 @@ import { fetchGoodInitiativesSnapshot } from './lib/good-initiatives.js?v=topic-
 import { COUNTRY_METADATA, getCountryFromCoordinates } from './data/countries.js';
 import { TopBar } from './components/TopBar.js?v=firefox-webgl-fallback-20261022';
 import { RegionalMap } from './components/RegionalMap.js?v=metres-20261016';
-import { LayerPanel } from './components/LayerPanel.js?v=mobile-reopen-20261022';
-import { DetailPanel } from './components/DetailPanel.js?v=story-links-20261016';
+import { LayerPanel } from './components/LayerPanel.js?v=regression-textures-20261103';
+import { DetailPanel } from './components/DetailPanel.js?v=mobile-year-controls-20261109';
 import { LocalStorage } from './lib/storage.js?v=reading-save-20261004';
 import { Settings } from './lib/settings.js?v=local-colour-picker-20261012';
 import { LanguageManager } from './lib/language.js?v=topic-earth-meteo-draft-20260531';
@@ -149,7 +151,7 @@ class TopicEarthApp {
         .filter(Boolean)
         .map(point => [String(point.id), point])
     );
-    const basePoints = [...ATLANTIC_STORM_TOPICS, ...EL_NINO_TOPICS, ...BIODIVERSITY_TOPICS, ...MOCK_POINTS, ...REGIONAL_AMBASSADOR_TOPICS, ...SPACE_TOPICS, ...CARBON_HISTORY_TOPICS, ...FEVER_TOPICS, ...TIPPING_POINT_TOPICS];
+    const basePoints = [...ATLANTIC_STORM_TOPICS, ...EL_NINO_TOPICS, ...PLANETARY_BOUNDARIES_TOPICS, ...BIODIVERSITY_TOPICS, ...MOCK_POINTS, ...REGIONAL_AMBASSADOR_TOPICS, ...SPACE_TOPICS, ...CARBON_HISTORY_TOPICS, ...FEVER_TOPICS, ...TIPPING_POINT_TOPICS];
 
     const mergedBasePoints = basePoints.map(point => {
       const customPoint = customPointById.get(String(point.id));
@@ -3123,6 +3125,7 @@ class TopicEarthApp {
     
     // Make globe globally accessible for fever mode
     window.currentGlobe = this.globe;
+    this.globe.planetaryBoundariesOverlay=new PlanetaryBoundariesOverlay(this.globe);
     
     this.globe.markerClickCallback = (point) => {
       if (point.isCluster) {

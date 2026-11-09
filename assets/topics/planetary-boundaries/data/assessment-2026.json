@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "assessmentId": "phc-2026-status",
+  "title": "Planetary Health Check 2026 \u2014 global boundary status",
+  "assessmentDate": "2026-09-21",
+  "type": "official_status_summary",
+  "source": {
+    "title": "Planetary Health Check 2026",
+    "url": "https://www.planetaryhealthcheck.org/downloads/",
+    "doi": "10.48485/pik.2026.25"
+  },
+  "notes": "Verified boundary-level status only. Indicator-level measurements and normalized ratios are intentionally unset until checked against the report. Global aerosol status can mask regional impacts.",
+  "boundaries": [
+    {
+      "id": "biosphere_integrity",
+      "status": "exceeded"
+    },
+    {
+      "id": "land_system_change",
+      "status": "exceeded"
+    },
+    {
+      "id": "biogeochemical_flows",
+      "status": "exceeded"
+    },
+    {
+      "id": "novel_entities",
+      "status": "exceeded"
+    },
+    {
+      "id": "climate_change",
+      "status": "exceeded"
+    },
+    {
+      "id": "freshwater_change",
+      "status": "exceeded"
+    },
+    {
+      "id": "ocean_acidification",
+      "status": "exceeded"
+    },
+    {
+      "id": "atmospheric_aerosol_loading",
+      "status": "not_exceeded_globally"
+    },
+    {
+      "id": "stratospheric_ozone_depletion",
+      "status": "not_exceeded_globally"
+    }
+  ],
+  "indicators": [
+    {
+      "id": "biosphere_integrity__genetic_diversity",
+      "boundary": "biosphere_integrity",
+      "subchannel": "genetic_diversity",
+      "label": "Genetic Diversity",
+      "svgGroupId": "tp_group_biosphere_integrity_genetic_diversity",
+      "svgRectId": "tp_rect_biosphere_integrity_genetic_diversity",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    },
+    {
+      "id": "land_system_change",
+      "boundary": "land_system_change",
+      "subchannel": null,
+      "label": "Land System Change",
+      "svgGroupId": "tp_group_land_system_change",
+      "svgRectId": "tp_rect_land_system_change",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    },
+    {
+      "id": "biogeochemical_flows__phosphorus",
+      "boundary": "biogeochemical_flows",
+      "subchannel": "phosphorus",
+      "label": "Phosphorus",
+      "svgGroupId": "tp_group_biogeochemical_flows_phosphorus",
+      "svgRectId": "tp_rect_biogeochemical_flows_phosphorus",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    },
+    {
+      "id": "novel_entities",
+      "boundary": "novel_entities",
+      "subchannel": null,
+      "label": "Novel Entities",
+      "svgGroupId": "tp_group_novel_entities",
+      "svgRectId": "tp_rect_novel_entities",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    },
+    {
+      "id": "climate_change__co2_concentration",
+      "boundary": "climate_change",
+      "subchannel": "co2_concentration",
+      "label": "Co2 Concentration",
+      "svgGroupId": "tp_group_climate_change_co2_concentration",
+      "svgRectId": "tp_rect_climate_change_co2_concentration",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    },
+    {
+      "id": "freshwater_change__green_water",
+      "boundary": "freshwater_change",
+      "subchannel": "green_water",
+      "label": "Green Water",
+      "svgGroupId": "tp_group_freshwater_change_green_water",
+      "svgRectId": "tp_rect_freshwater_change_green_water",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    },
+    {
+      "id": "ocean_acidification",
+      "boundary": "ocean_acidification",
+      "subchannel": null,
+      "label": "Ocean Acidification",
+      "svgGroupId": "tp_group_ocean_acidification",
+      "svgRectId": "tp_rect_ocean_acidification",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    },
+    {
+      "id": "atmospheric_aerosol_loading",
+      "boundary": "atmospheric_aerosol_loading",
+      "subchannel": null,
+      "label": "Atmospheric Aerosol Loading",
+      "svgGroupId": "tp_group_atmospheric_aerosol_loading",
+      "svgRectId": "tp_rect_atmospheric_aerosol_loading",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    },
+    {
+      "id": "stratospheric_ozone_depletion",
+      "boundary": "stratospheric_ozone_depletion",
+      "subchannel": null,
+      "label": "Stratospheric Ozone Depletion",
+      "svgGroupId": "tp_group_stratospheric_ozone_depletion",
+      "svgRectId": "tp_rect_stratospheric_ozone_depletion",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    },
+    {
+      "id": "biosphere_integrity__functional_diversity",
+      "boundary": "biosphere_integrity",
+      "subchannel": "functional_diversity",
+      "label": "Functional Diversity",
+      "svgGroupId": "tp_group_biosphere_integrity_functional_diversity",
+      "svgRectId": "tp_rect_biosphere_integrity_functional_diversity",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    },
+    {
+      "id": "biogeochemical_flows__nitrogen",
+      "boundary": "biogeochemical_flows",
+      "subchannel": "nitrogen",
+      "label": "Nitrogen",
+      "svgGroupId": "tp_group_biogeochemical_flows_nitrogen",
+      "svgRectId": "tp_rect_biogeochemical_flows_nitrogen",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    },
+    {
+      "id": "freshwater_change__blue_water",
+      "boundary": "freshwater_change",
+      "subchannel": "blue_water",
+      "label": "Blue Water",
+      "svgGroupId": "tp_group_freshwater_change_blue_water",
+      "svgRectId": "tp_rect_freshwater_change_blue_water",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    },
+    {
+      "id": "climate_change__radiative_forcing",
+      "boundary": "climate_change",
+      "subchannel": "radiative_forcing",
+      "label": "Radiative Forcing",
+      "svgGroupId": "tp_group_climate_change_radiative_forcing",
+      "svgRectId": "tp_rect_climate_change_radiative_forcing",
+      "observedValue": null,
+      "boundaryLimit": null,
+      "unit": null,
+      "ratio": null,
+      "ratioMethod": null,
+      "verified": false
+    }
+  ]
+}

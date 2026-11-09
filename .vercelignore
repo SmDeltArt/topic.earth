@@ -40,3 +40,9 @@ AGENTS.override.md
 
 # Private local agent notes
 .local-agent/
+
+# Browser regression tooling and generated evidence are not site assets.
+tests/browser/
+playwright.config.cjs
+playwright-report/
+test-results/

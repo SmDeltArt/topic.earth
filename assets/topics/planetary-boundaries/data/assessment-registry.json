@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "latest": 2026,
+  "checkedAt": "2026-11-04",
+  "assessments": [
+    {
+      "year": 2023,
+      "file": "assessments/assessment-2023-v1.json",
+      "version": "2023.publisher-2023.v1",
+      "label": "Richardson et al. (2023), Science Advances",
+      "sha256": "5576faf07dbe6a695212864093be4ec49a62888e45792b022c418a8607a1dddf"
+    },
+    {
+      "year": 2024,
+      "file": "assessments/assessment-2024-v1.json",
+      "version": "2024.january-2025-reprint.v1",
+      "label": "Planetary Health Check 2024",
+      "sha256": "6fafea0047b754bb66e4366177cefcec1ee585d248e50baf227ac922c87da51f"
+    },
+    {
+      "year": 2025,
+      "file": "assessments/assessment-2025-v1.json",
+      "version": "2025.official-mobile-edition.v1",
+      "label": "Planetary Health Check 2025",
+      "sha256": "ab145f1be97530718291d80f1183eff2e71fd8ac9f380a351bbfbe67bc5b36b7"
+    },
+    {
+      "year": 2026,
+      "file": "assessments/assessment-2026-v1.json",
+      "version": "2026.official-full-report.v1",
+      "label": "Planetary Health Check 2026",
+      "sha256": "cb495899e3d08a9396ed8690935b8c5e5ed04c669bd6676df97e6655e11e4c4a"
+    }
+  ]
+}

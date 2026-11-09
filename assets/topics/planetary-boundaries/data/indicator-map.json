@@ -1,0 +1,158 @@
+[
+  {
+    "id": "biosphere_integrity__genetic_diversity",
+    "boundary": "biosphere_integrity",
+    "subchannel": "genetic_diversity",
+    "label": "Genetic Diversity",
+    "svgGroupId": "tp_group_biosphere_integrity_genetic_diversity",
+    "svgRectId": "tp_rect_biosphere_integrity_genetic_diversity",
+    "svgWedgeAngles": [
+      -150,
+      -130
+    ]
+  },
+  {
+    "id": "land_system_change",
+    "boundary": "land_system_change",
+    "subchannel": null,
+    "label": "Land System Change",
+    "svgGroupId": "tp_group_land_system_change",
+    "svgRectId": "tp_rect_land_system_change",
+    "svgWedgeAngles": [
+      150,
+      190
+    ]
+  },
+  {
+    "id": "biogeochemical_flows__phosphorus",
+    "boundary": "biogeochemical_flows",
+    "subchannel": "phosphorus",
+    "label": "Phosphorus",
+    "svgGroupId": "tp_group_biogeochemical_flows_phosphorus",
+    "svgRectId": "tp_rect_biogeochemical_flows_phosphorus",
+    "svgWedgeAngles": [
+      90,
+      110
+    ]
+  },
+  {
+    "id": "novel_entities",
+    "boundary": "novel_entities",
+    "subchannel": null,
+    "label": "Novel Entities",
+    "svgGroupId": "tp_group_novel_entities",
+    "svgRectId": "tp_rect_novel_entities",
+    "svgWedgeAngles": [
+      -90,
+      -50
+    ]
+  },
+  {
+    "id": "climate_change__co2_concentration",
+    "boundary": "climate_change",
+    "subchannel": "co2_concentration",
+    "label": "Co2 Concentration",
+    "svgGroupId": "tp_group_climate_change_co2_concentration",
+    "svgRectId": "tp_rect_climate_change_co2_concentration",
+    "svgWedgeAngles": [
+      -130,
+      -110
+    ]
+  },
+  {
+    "id": "freshwater_change__green_water",
+    "boundary": "freshwater_change",
+    "subchannel": "green_water",
+    "label": "Green Water",
+    "svgGroupId": "tp_group_freshwater_change_green_water",
+    "svgRectId": "tp_rect_freshwater_change_green_water",
+    "svgWedgeAngles": [
+      110,
+      130
+    ]
+  },
+  {
+    "id": "ocean_acidification",
+    "boundary": "ocean_acidification",
+    "subchannel": null,
+    "label": "Ocean Acidification",
+    "svgGroupId": "tp_group_ocean_acidification",
+    "svgRectId": "tp_rect_ocean_acidification",
+    "svgWedgeAngles": [
+      30,
+      70
+    ]
+  },
+  {
+    "id": "atmospheric_aerosol_loading",
+    "boundary": "atmospheric_aerosol_loading",
+    "subchannel": null,
+    "label": "Atmospheric Aerosol Loading",
+    "svgGroupId": "tp_group_atmospheric_aerosol_loading",
+    "svgRectId": "tp_rect_atmospheric_aerosol_loading",
+    "svgWedgeAngles": [
+      -10,
+      30
+    ]
+  },
+  {
+    "id": "stratospheric_ozone_depletion",
+    "boundary": "stratospheric_ozone_depletion",
+    "subchannel": null,
+    "label": "Stratospheric Ozone Depletion",
+    "svgGroupId": "tp_group_stratospheric_ozone_depletion",
+    "svgRectId": "tp_rect_stratospheric_ozone_depletion",
+    "svgWedgeAngles": [
+      -50,
+      -10
+    ]
+  },
+  {
+    "id": "biosphere_integrity__functional_diversity",
+    "boundary": "biosphere_integrity",
+    "subchannel": "functional_diversity",
+    "label": "Functional Diversity",
+    "svgGroupId": "tp_group_biosphere_integrity_functional_diversity",
+    "svgRectId": "tp_rect_biosphere_integrity_functional_diversity",
+    "svgWedgeAngles": [
+      -170,
+      -150
+    ]
+  },
+  {
+    "id": "biogeochemical_flows__nitrogen",
+    "boundary": "biogeochemical_flows",
+    "subchannel": "nitrogen",
+    "label": "Nitrogen",
+    "svgGroupId": "tp_group_biogeochemical_flows_nitrogen",
+    "svgRectId": "tp_rect_biogeochemical_flows_nitrogen",
+    "svgWedgeAngles": [
+      70,
+      90
+    ]
+  },
+  {
+    "id": "freshwater_change__blue_water",
+    "boundary": "freshwater_change",
+    "subchannel": "blue_water",
+    "label": "Blue Water",
+    "svgGroupId": "tp_group_freshwater_change_blue_water",
+    "svgRectId": "tp_rect_freshwater_change_blue_water",
+    "svgWedgeAngles": [
+      130,
+      150
+    ]
+  },
+  {
+    "id": "climate_change__radiative_forcing",
+    "boundary": "climate_change",
+    "subchannel": "radiative_forcing",
+    "label": "Radiative Forcing",
+    "svgGroupId": "tp_group_climate_change_radiative_forcing",
+    "svgRectId": "tp_rect_climate_change_radiative_forcing",
+    "svgWedgeAngles": [
+      -110,
+      -90
+    ]
+  }
+]

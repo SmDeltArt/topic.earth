@@ -1,0 +1,13 @@
+{
+  "id": "planetary-boundaries-monitor",
+  "title": "Planetary Boundaries \u2014 Earth Health Monitor",
+  "category": "environment",
+  "mode": "independent",
+  "description": "Interactive chart of nine planetary boundaries and 13 control-variable visual channels. Scientific status: Planetary Health Check 2026. Indicator ratios await independent verification.",
+  "entrypoint": "planetary-boundaries-topic/index.html",
+  "sources": [
+    "https://www.planetaryhealthcheck.org/downloads/",
+    "https://doi.org/10.48485/pik.2026.25"
+  ],
+  "integration": "Template only; map to actual topic.earth schema after inspecting current repository."
+}

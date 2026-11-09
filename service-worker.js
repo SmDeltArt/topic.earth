@@ -1,4 +1,4 @@
-const CACHE_NAME = 'topic-earth-shell-v47-mobile-reopen-webgl';
+const CACHE_NAME = 'topic-earth-shell-v49-planetary-topic';
 const APP_SHELL = [
   './lib/weather-models.mjs?v=weather-mesh-20261015',
   './assets/models/weather-symbols.glb?v=weather-mesh-20261015',
@@ -19,7 +19,7 @@ const APP_SHELL = [
   './lib/tropical-cyclones.mjs?v=cyclones-20261013',
   './lib/cyclone-visuals.mjs?v=cyclones-20261013',
   './index.html',
-  './styles.css?v=mobile-reopen-webgl-20261022',
+  './styles.css?v=regression-textures-20261103',
   './site.webmanifest?v=transparent-20261016',
   './assets/logo/local/favicon.svg?v=earth-clock-20261012',
   './assets/logo/local/earth-128.svg',

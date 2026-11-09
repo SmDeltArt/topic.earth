@@ -809,9 +809,11 @@ export class LayerPanel {
   setCollapsed(isCollapsed) {
     this.isCollapsed = Boolean(isCollapsed);
     if (!this.isCollapsed && window.innerWidth <= 768) window.dispatchEvent(new CustomEvent('expandMobileLayers'));
-    if (this.isCollapsed) this.isClosed = false;
+    this.isClosed = false;
     this.container.classList.remove('closed');
     this.container.classList.toggle('collapsed', this.isCollapsed);
+    this.reopenButton.hidden = true;
+    this.reopenButton.setAttribute('aria-expanded', 'true');
     const btn = this.container.querySelector('.panel-collapse-btn');
     if (!btn) return;
     btn.innerHTML = this.isCollapsed ? '&#9654;' : '&#9664;';

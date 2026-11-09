@@ -1,0 +1,792 @@
+{
+  "language": "en",
+  "sourceRevision": "[\"v1\",\"en\",\"Planetary Boundaries · Earth Health Monitor\",\"Explore nine planetary boundaries and 13 SVG indicator channels. The 2026 assessment reports seven global boundaries exceeded. Explore source-checked 2023–2026 assessments, scientific units, uncertainty and explicitly documented boundary-relative ratios; manual slider values remain illustrative.\",\"<p>This independent World topic presents the dated Planetary Health Check assessment. Five tabs present versioned report data and methodology; manual controls change a local illustration only.</p><p><a href=\\\"/assets/topics/planetary-boundaries/index.html\\\" target=\\\"_blank\\\" rel=\\\"noopener noreferrer\\\">Open the SVG controller in full view</a></p><p>Automatic scientific monitoring and Master Admin review/publishing are not connected yet.</p>\"]",
+  "version": "v002",
+  "savedAt": "2026-11-04T00:00:00.000Z",
+  "provider": "packaged",
+  "title": "Planetary Boundaries · Earth Health Monitor",
+  "summary": "Explore nine planetary boundaries and 13 SVG indicator channels. The 2026 assessment reports seven global boundaries exceeded. Explore source-checked 2023–2026 assessments, scientific units, uncertainty and explicitly documented boundary-relative ratios; manual slider values remain illustrative.",
+  "insight": "<p>This independent World topic presents the dated Planetary Health Check assessment. Five tabs present versioned report data and methodology; manual controls change a local illustration only.</p><p><a href=\"/assets/topics/planetary-boundaries/index.html\" target=\"_blank\" rel=\"noopener noreferrer\">Open the SVG controller in full view</a></p><p>Automatic scientific monitoring and Master Admin review/publishing are not connected yet.</p>",
+  "visualization": {
+    "schemaVersion": 1,
+    "sourceLanguage": "en",
+    "status": "source",
+    "scientificProseLanguage": "en",
+    "ui": {
+      "title": "Planetary Boundaries",
+      "language": "Language",
+      "publication": "Publication",
+      "source": "Scientific source ↗",
+      "assessment": "Assessment",
+      "showScience": "Show scientific assessment",
+      "tabStatus": "Indicators & details",
+      "tabLimits": "Boundaries & Limits",
+      "tabData": "Scientific Data",
+      "tabHistory": "Reports & History",
+      "tabMethod": "Sources & Methodology",
+      "channels": "13 indicator channels",
+      "selectHelp": "Select a row or a sector in the chart. The highlight follows both ways.",
+      "scientificNotes": "Scientific notes & uncertainty",
+      "illustrationTools": "Illustration tools",
+      "illustrative": "Visual geometry test — illustrative only",
+      "demo": "Test all 13",
+      "artwork": "View original artwork",
+      "previewNotice": "Manual values are illustrations, not observations. They retain linear display distances. The orange ring is not a validated scientific threshold for a manual example.",
+      "legend": "100% = planetary boundary · Orange ring = high-risk reference · Outer edge = display cap",
+      "chartHelp": "The high-risk ring aligns each indicator’s own known threshold. Unknown thresholds remain unknown. Dashed edges show uncertainty; an absent fill is not zero pressure. The outer edge is a visual cap, never maximum damage.",
+      "chartExplanation": "Chart explanation",
+      "historyHelp": "Published assessment snapshots, not annual measured time series. Selecting a report updates the chart and table. No interpolated measurements.",
+      "exportTitle": "Export & reuse",
+      "exportHelp": "One dated export with the assessment, all 13 indicators, descriptions, sources, display state and attribution. Manual values remain separate from scientific measurements.",
+      "format": "Format",
+      "jsonPackage": "Complete data package (.json)",
+      "svgPackage": "Sanitized artwork + metadata (.svg)",
+      "download": "Download dated export",
+      "sources": "Sources & licensing ↗",
+      "translationNote": "Interface and SVG labels are packaged translations. Extended scientific notes retain the English source pending review.",
+      "safeSpace": "Safe Operating Space",
+      "highRiskReference": "High-risk reference",
+      "pbLabel": "100% PB",
+      "displayMax": "Display max",
+      "scientificMode": "Scientific assessment · thresholds aligned",
+      "artworkMode": "Original artwork · historical geometry",
+      "manualMode": "Manual illustration · not observations",
+      "manualStatus": "Manual illustration active. Scientific source values are unchanged.",
+      "artworkStatus": "Original artwork view. Its historical shapes are not current assessment values.",
+      "headline": "{count} of 9 global boundaries exceeded · {year}",
+      "freshness": "Checked {date} · dated assessment, not live observations",
+      "ratioLabel": "Illustrative ratio: 0–{max}% (100% = green edge)",
+      "previewValue": "Illustrative preview: {value}%",
+      "scientificValue": "Assessment ratio q: {value} · threshold-aligned display",
+      "artworkValue": "Original artwork — no measured radius",
+      "exported": "Dated export downloaded. Scientific values and illustration state are identified separately.",
+      "attribution": "Visualization adaptation: Benoît Descy / topic.earth. Science: Planetary Boundaries Science / PIK; Richardson et al. Source artwork rights remain to be confirmed. No scientific endorsement claimed.",
+      "clippedWarning": "The scientific value exceeds the visual display radius; see the full ratio above.",
+      "scientificDataTitle": "Scientific data · {year}",
+      "selectedVersion": "Selected: {version}.",
+      "loadReport": "Load {label}",
+      "publicationUnknown": "{year} · exact publication day unavailable",
+      "svgLoaded": "SVG loaded: {count} / {total} indicators addressable.",
+      "additionalP": "{label}: {value} {unit}; reference {reference}; PB {boundary}; upper risk {highRisk}.",
+      "additionalPNote": "The single P wedge uses cropland application consistently for all four assessments. Ocean flow is shown separately; do not substitute it silently."
+    },
+    "terms": {
+      "Observed": "Observed",
+      "Reference": "Reference",
+      "Planetary boundary": "Planetary boundary",
+      "High-risk threshold": "High-risk threshold",
+      "Derived ratio q": "Derived ratio q",
+      "Risk zone": "Risk zone",
+      "Assessment year": "Assessment year",
+      "Observation year": "Observation year",
+      "Dataset period": "Dataset period",
+      "Not available": "Not available",
+      "Unknown": "Unknown",
+      "unknown": "unknown",
+      "available": "available",
+      "provisional": "provisional",
+      "Safe Operating Space": "Safe Operating Space",
+      "Zone of Increasing Risk": "Zone of Increasing Risk",
+      "High-Risk Zone": "High-Risk Zone",
+      "At planetary boundary": "At planetary boundary",
+      "Beyond boundary; high-risk threshold unknown": "Beyond boundary; high-risk threshold unknown",
+      "Exceeded qualitatively; high-risk threshold unknown": "Exceeded qualitatively; high-risk threshold unknown",
+      "range estimate": "range estimate",
+      "one-sided estimate": "one-sided estimate",
+      "Official boundary status: exceeded": "Official boundary status: exceeded",
+      "Official boundary status: not exceeded globally": "Official boundary status: not exceeded globally",
+      "Boundary": "Boundary",
+      "Control variable": "Control variable",
+      "Control variable / select": "Control variable / select",
+      "Unit": "Unit",
+      "High risk": "High risk",
+      "Threshold availability": "Threshold availability",
+      "Data status": "Data status",
+      "Scientific source": "Scientific source",
+      "Scientific data": "Scientific data",
+      "Why do all boundaries share a 100% reference?": "Why do all boundaries share a 100% reference?",
+      "From observations to a display radius": "From observations to a display radius",
+      "Scientific sources and attribution": "Scientific sources and attribution",
+      "Updates and Master Admin review": "Updates and Master Admin review",
+      "Additional phosphorus criterion": "Additional phosphorus criterion"
+    },
+    "boundaries": {
+      "climate_change": "Climate change",
+      "biosphere_integrity": "Biosphere integrity",
+      "land_system_change": "Land-system change",
+      "freshwater_change": "Freshwater change",
+      "biogeochemical_flows": "Biogeochemical flows",
+      "ocean_acidification": "Ocean acidification",
+      "atmospheric_aerosol_loading": "Atmospheric aerosol loading",
+      "stratospheric_ozone_depletion": "Stratospheric ozone depletion",
+      "novel_entities": "Novel entities"
+    },
+    "indicators": {
+      "biosphere_integrity__genetic_diversity": "Genetic diversity",
+      "land_system_change": "Remaining forest cover",
+      "biogeochemical_flows__phosphorus": "Phosphorus applied to cropland",
+      "novel_entities": "Novel entities",
+      "climate_change__co2_concentration": "Atmospheric CO₂",
+      "freshwater_change__green_water": "Green water disturbance",
+      "ocean_acidification": "Ocean aragonite saturation",
+      "atmospheric_aerosol_loading": "Interhemispheric aerosol difference",
+      "stratospheric_ozone_depletion": "Stratospheric ozone",
+      "biosphere_integrity__functional_diversity": "Functional integrity (HANPP)",
+      "biogeochemical_flows__nitrogen": "Intentional nitrogen fixation",
+      "freshwater_change__blue_water": "Blue water disturbance",
+      "climate_change__radiative_forcing": "Radiative forcing"
+    },
+    "svgLabels": {
+      "g591": {
+        "lines": [
+          "Biosphere",
+          "integrity"
+        ],
+        "weight": 700
+      },
+      "g607": {
+        "lines": [
+          "Genetic",
+          "diversity"
+        ],
+        "weight": 400
+      },
+      "g614": {
+        "lines": [
+          "Forcing"
+        ],
+        "weight": 400
+      },
+      "g623": {
+        "lines": [
+          "radiation"
+        ],
+        "weight": 400
+      },
+      "g636": {
+        "lines": [
+          "concentration"
+        ],
+        "weight": 400
+      },
+      "g649": {
+        "lines": [
+          "Functional"
+        ],
+        "weight": 400
+      },
+      "g658": {
+        "lines": [
+          "diversity"
+        ],
+        "weight": 400
+      },
+      "g751": {
+        "lines": [
+          "Freshwater",
+          "change"
+        ],
+        "weight": 700
+      },
+      "g722": {
+        "lines": [
+          "Climate",
+          "change"
+        ],
+        "weight": 700
+      },
+      "g769": {
+        "lines": [
+          "Blue",
+          "water"
+        ],
+        "weight": 400
+      },
+      "g789": {
+        "lines": [
+          "Green",
+          "water"
+        ],
+        "weight": 400
+      },
+      "g843": {
+        "lines": [
+          "Stratospheric",
+          "ozone depletion"
+        ],
+        "weight": 700
+      },
+      "g911": {
+        "lines": [
+          "Atmospheric",
+          "aerosol loading"
+        ],
+        "weight": 700
+      },
+      "g929": {
+        "lines": [
+          "Global AOD difference"
+        ],
+        "weight": 400
+      },
+      "g971": {
+        "lines": [
+          "Ocean",
+          "acidification"
+        ],
+        "weight": 700
+      },
+      "g1106": {
+        "lines": [
+          "Introduction of",
+          "novel entities",
+          "into the",
+          "biosphere"
+        ],
+        "weight": 700
+      },
+      "g1138": {
+        "lines": [
+          "Land system",
+          "change"
+        ],
+        "weight": 700
+      },
+      "pb_detail_label_biogeochemical_flows": {
+        "lines": [
+          "Biogeochemical flows:",
+          "Phosphorus and",
+          "Nitrogen cycles"
+        ],
+        "weight": 700
+      },
+      "pb_detail_increasing_risk_label": {
+        "lines": [
+          "Increasing risk"
+        ],
+        "weight": 400,
+        "vertical": true
+      }
+    },
+    "prose": {
+      "source.1": {
+        "source": "Nine Earth system processes use different physical and ecological measurements. Their 13 indicator channels cannot be compared in raw units. A boundary-relative value of 1.0 (100%) marks each variable’s own precautionary boundary, not maximum disturbance, equal harm or equal risk severity.",
+        "translation": "Nine Earth system processes use different physical and ecological measurements. Their 13 indicator channels cannot be compared in raw units. A boundary-relative value of 1.0 (100%) marks each variable’s own precautionary boundary, not maximum disturbance, equal harm or equal risk severity."
+      },
+      "source.2": {
+        "source": "The green Safe Operating Space is bounded by the green/yellow transition. Exceedance increases concern about Earth system stability; it does not identify a precise tipping point or guarantee immediate collapse. A tipping point is a threshold for self-reinforcing system change; precautionary planetary boundaries aim to reduce the chance of reaching such thresholds.",
+        "translation": "The green Safe Operating Space is bounded by the green/yellow transition. Exceedance increases concern about Earth system stability; it does not identify a precise tipping point or guarantee immediate collapse. A tipping point is a threshold for self-reinforcing system change; precautionary planetary boundaries aim to reduce the chance of reaching such thresholds."
+      },
+      "source.3": {
+        "source": "Yellow, orange and red are a continuous visual guide. This shared palette is not a universal quantitative risk scale: each variable has its own upper-risk threshold, and some thresholds are unknown. Global unexceeded status does not imply that every region is safe. The boundaries interact; the diagram is not a sum of independent damage scores.",
+        "translation": "Yellow, orange and red are a continuous visual guide. This shared palette is not a universal quantitative risk scale: each variable has its own upper-risk threshold, and some thresholds are unknown. Global unexceeded status does not imply that every region is safe. The boundaries interact; the diagram is not a sum of independent damage scores."
+      },
+      "source.4": {
+        "source": "Raw observation → publication-specific reference and boundary → project-derived ratio q = (observed − reference) / (boundary − reference). Lower-is-worse variables (forest, ocean and ozone) have a negative denominator. Zero-boundary novel entities remain unquantified: no division by zero. Ranges stay ranges; no midpoint is invented.",
+        "translation": "Raw observation → publication-specific reference and boundary → project-derived ratio q = (observed − reference) / (boundary − reference). Lower-is-worse variables (forest, ocean and ozone) have a negative denominator. Zero-boundary novel entities remain unquantified: no division by zero. Ranges stay ranges; no midpoint is invented."
+      },
+      "source.5": {
+        "source": "Scientific display now aligns both thresholds: h = (high-risk − reference) / (boundary − reference). For q ≤ 1, display distance d=q. Above the boundary, d=1+(q−1)/(h−1). Radius=green-circle radius × max(0,d). Thus q=1 stays at the green ring, and each indicator’s own h maps to the orange ring. Its radius of twice the green radius is a visual choice, not a universal scientific ratio of 200%. Extrapolation beyond h reaches the purple region and is capped only at the display edge. If h is unknown, no high-risk classification is inferred and a known q uses the legacy linear display with an explicit unknown-threshold warning.",
+        "translation": "Scientific display now aligns both thresholds: h = (high-risk − reference) / (boundary − reference). For q ≤ 1, display distance d=q. Above the boundary, d=1+(q−1)/(h−1). Radius=green-circle radius × max(0,d). Thus q=1 stays at the green ring, and each indicator’s own h maps to the orange ring. Its radius of twice the green radius is a visual choice, not a universal scientific ratio of 200%. Extrapolation beyond h reaches the purple region and is capped only at the display edge. If h is unknown, no high-risk classification is inferred and a known q uses the legacy linear display with an explicit unknown-threshold warning."
+      },
+      "source.6": {
+        "source": "This explicitly documented project normalization uses the selected report’s anchors; it is not a published universal risk score. For zero-reference variables q reduces to observed/boundary. The scientific display has changed explicitly to threshold alignment; manual illustration retains the original controller’s linear radial transform. Richardson et al. (2023), Fig. 1 uses logarithmic wedge lengths and explicitly excepts freshwater from common-radius normalization. This adaptation aligns freshwater using its own reference, boundary and high-risk threshold. It does not reproduce the paper’s wedge distances.",
+        "translation": "This explicitly documented project normalization uses the selected report’s anchors; it is not a published universal risk score. For zero-reference variables q reduces to observed/boundary. The scientific display has changed explicitly to threshold alignment; manual illustration retains the original controller’s linear radial transform. Richardson et al. (2023), Fig. 1 uses logarithmic wedge lengths and explicitly excepts freshwater from common-radius normalization. This adaptation aligns freshwater using its own reference, boundary and high-risk threshold. It does not reproduce the paper’s wedge distances."
+      },
+      "source.7": {
+        "source": "Freshwater values describe land area with wet or dry streamflow / soil-moisture departures from preindustrial variability, not water withdrawals. In 2023, the baseline is a preindustrial median and the boundary a 95th percentile. Subtracting the reference therefore matters. Later report revisions must not be interpreted as a continuous annual observation series.",
+        "translation": "Freshwater values describe land area with wet or dry streamflow / soil-moisture departures from preindustrial variability, not water withdrawals. In 2023, the baseline is a preindustrial median and the boundary a 95th percentile. Subtracting the reference therefore matters. Later report revisions must not be interpreted as a continuous annual observation series."
+      },
+      "source.8": {
+        "source": "The outer circle is a visual cap only. Exact scientific ratios stay in the table and export even when a wedge is clipped. Range estimates show a lower filled extent and dashed upper extent. One-sided estimates have a dashed edge. Unquantified indicators have no quantitative fill and remain selectable in the indicator list. Manual controls enter a clearly marked illustrative mode and never modify the assessment JSON. Restored source artwork is also illustrative.",
+        "translation": "The outer circle is a visual cap only. Exact scientific ratios stay in the table and export even when a wedge is clipped. Range estimates show a lower filled extent and dashed upper extent. One-sided estimates have a dashed edge. Unquantified indicators have no quantitative fill and remain selectable in the indicator list. Manual controls enter a clearly marked illustrative mode and never modify the assessment JSON. Restored source artwork is also illustrative."
+      },
+      "source.9": {
+        "source": "PHC assessments combine observations, remote sensing, statistical integration, hydrological and climate models, and expert synthesis. Publication year is not observation year. “Not available” means a single observation year or quantity has not been verified here; available dataset periods are listed separately. This is a dated source transcription, not live monitoring or an independent scientific review.",
+        "translation": "PHC assessments combine observations, remote sensing, statistical integration, hydrological and climate models, and expert synthesis. Publication year is not observation year. “Not available” means a single observation year or quantity has not been verified here; available dataset periods are listed separately. This is a dated source transcription, not live monitoring or an independent scientific review."
+      },
+      "source.10": {
+        "source": "PHC figures: credit Planetary Boundaries Science (PBScience), assessment year; CC BY 4.0 unless otherwise stated. Report art credits include Globaïa. Richardson article: CC BY-NC 4.0; consult the original license for artwork reuse. The supplied SVG’s original artwork provenance/license is not established here. Visualization adaptation: Benoît Descy, topic.earth. Scientific research and third-party artwork remain attributed to their creators; no endorsement or exclusive ownership is claimed.",
+        "translation": "PHC figures: credit Planetary Boundaries Science (PBScience), assessment year; CC BY 4.0 unless otherwise stated. Report art credits include Globaïa. Richardson article: CC BY-NC 4.0; consult the original license for artwork reuse. The supplied SVG’s original artwork provenance/license is not established here. Visualization adaptation: Benoît Descy, topic.earth. Scientific research and third-party artwork remain attributed to their creators; no endorsement or exclusive ownership is claimed."
+      },
+      "source.11": {
+        "source": "Latest verified assessment: 2026. Sources checked 4 November 2026. Reports are normally annual; no automatic polling or privileged publishing runs in this page. A source registry supports a future server-side watcher → candidate extraction → schema and scientific review → Master Admin approval → new immutable version. AI can assist extraction but cannot approve scientific changes. Credentials and authorization belong on the server. This topic remains independent of Earth’s Fever.",
+        "translation": "Latest verified assessment: 2026. Sources checked 4 November 2026. Reports are normally annual; no automatic polling or privileged publishing runs in this page. A source registry supports a future server-side watcher → candidate extraction → schema and scientific review → Master Admin approval → new immutable version. AI can assist extraction but cannot approve scientific changes. Credentials and authorization belong on the server. This topic remains independent of Earth’s Fever."
+      }
+    },
+    "assessmentText": {
+      "2023.publisher-2023.v1": {
+        "indicators.biosphere_integrity__genetic_diversity.definition": {
+          "source": "Extinctions per million species-years. Boundary anchor 10 represents the published <10 precautionary threshold.",
+          "translation": "Extinctions per million species-years. Boundary anchor 10 represents the published <10 precautionary threshold."
+        },
+        "indicators.biosphere_integrity__genetic_diversity.uncertainty": {
+          "source": "Wide extinction-rate uncertainty; retain the published range or one-sided estimate, never an exact midpoint.",
+          "translation": "Wide extinction-rate uncertainty; retain the published range or one-sided estimate, never an exact midpoint."
+        },
+        "indicators.land_system_change.definition": {
+          "source": "Remaining area of forest as a percentage of original forest cover; global aggregate, with distinct biome thresholds.",
+          "translation": "Remaining area of forest as a percentage of original forest cover; global aggregate, with distinct biome thresholds."
+        },
+        "indicators.land_system_change.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.biogeochemical_flows__phosphorus.definition": {
+          "source": "Mined phosphorus applied to cropland / erodible soils. This is the regional-distribution criterion aggregated globally, not ocean P flow.",
+          "translation": "Mined phosphorus applied to cropland / erodible soils. This is the regional-distribution criterion aggregated globally, not ocean P flow."
+        },
+        "indicators.biogeochemical_flows__phosphorus.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.novel_entities.definition": {
+          "source": "Percentage of synthetic chemicals released without adequate safety testing. Exceeded qualitatively; global percentage is not quantified.",
+          "translation": "Percentage of synthetic chemicals released without adequate safety testing. Exceeded qualitatively; global percentage is not quantified."
+        },
+        "indicators.novel_entities.uncertainty": {
+          "source": "No quantified global fraction or high-risk threshold. Boundary equals zero; division by zero is prohibited.",
+          "translation": "No quantified global fraction or high-risk threshold. Boundary equals zero; division by zero is prohibited."
+        },
+        "indicators.climate_change__co2_concentration.definition": {
+          "source": "Global atmospheric carbon dioxide concentration.",
+          "translation": "Global atmospheric carbon dioxide concentration."
+        },
+        "indicators.climate_change__co2_concentration.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.freshwater_change__green_water.definition": {
+          "source": "Ice-free land area with root-zone soil moisture deviations outside preindustrial variability; captures wet and dry disturbance.",
+          "translation": "Ice-free land area with root-zone soil moisture deviations outside preindustrial variability; captures wet and dry disturbance."
+        },
+        "indicators.freshwater_change__green_water.uncertainty": {
+          "source": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional.",
+          "translation": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional."
+        },
+        "indicators.ocean_acidification.definition": {
+          "source": "Global mean surface seawater saturation state with respect to aragonite (Ω); declining values indicate greater acidification.",
+          "translation": "Global mean surface seawater saturation state with respect to aragonite (Ω); declining values indicate greater acidification."
+        },
+        "indicators.ocean_acidification.uncertainty": {
+          "source": "Lower saturation means greater acidification. Reference/boundary revised in 2025; high-risk threshold provisional. Original 2023 table ambiguity is not resolved with a later value.",
+          "translation": "Lower saturation means greater acidification. Reference/boundary revised in 2025; high-risk threshold provisional. Original 2023 table ambiguity is not resolved with a later value."
+        },
+        "indicators.atmospheric_aerosol_loading.definition": {
+          "source": "Annual mean difference in aerosol optical depth between hemispheres; dimensionless, not aerosol radiative forcing.",
+          "translation": "Annual mean difference in aerosol optical depth between hemispheres; dimensionless, not aerosol radiative forcing."
+        },
+        "indicators.atmospheric_aerosol_loading.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.stratospheric_ozone_depletion.definition": {
+          "source": "Global mean stratospheric ozone concentration; regional and seasonal depletion can occur below a globally unexceeded classification.",
+          "translation": "Global mean stratospheric ozone concentration; regional and seasonal depletion can occur below a globally unexceeded classification."
+        },
+        "indicators.stratospheric_ozone_depletion.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.biosphere_integrity__functional_diversity.definition": {
+          "source": "Human appropriation of net primary production as a percentage of preindustrial NPP. Boundary anchor 10 represents <10%.",
+          "translation": "Human appropriation of net primary production as a percentage of preindustrial NPP. Boundary anchor 10 represents <10%."
+        },
+        "indicators.biosphere_integrity__functional_diversity.uncertainty": {
+          "source": "HANPP estimates depend on model and reference NPP. Published reference 1.9 is natural NPP variability, not a measured appropriation baseline.",
+          "translation": "HANPP estimates depend on model and reference NPP. Published reference 1.9 is natural NPP variability, not a measured appropriation baseline."
+        },
+        "indicators.biogeochemical_flows__nitrogen.definition": {
+          "source": "Industrial and intentional biological fixation of nitrogen for agriculture.",
+          "translation": "Industrial and intentional biological fixation of nitrogen for agriculture."
+        },
+        "indicators.biogeochemical_flows__nitrogen.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.freshwater_change__blue_water.definition": {
+          "source": "Ice-free land area with river-discharge deviations outside preindustrial variability; captures wet and dry disturbance.",
+          "translation": "Ice-free land area with river-discharge deviations outside preindustrial variability; captures wet and dry disturbance."
+        },
+        "indicators.freshwater_change__blue_water.uncertainty": {
+          "source": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional.",
+          "translation": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional."
+        },
+        "indicators.climate_change__radiative_forcing.definition": {
+          "source": "Total anthropogenic top-of-atmosphere radiative forcing relative to the preindustrial reference.",
+          "translation": "Total anthropogenic top-of-atmosphere radiative forcing relative to the preindustrial reference."
+        },
+        "indicators.climate_change__radiative_forcing.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "methodologyNotes": {
+          "source": "Original Fig. 1 uses logarithmic wedge lengths and explicitly excepts freshwater from the common-radius normalization. This adaptation instead exposes a project reference-relative ratio and keeps the existing linear radius for every channel. It does not reproduce Fig. 1 distances. Table 1 is authoritative for this snapshot: forcing 2.91, ocean 2.8, ozone 284.6; later retrospective columns differ. HANPP reference 1.9 is reported NPP variability, not an observed human-appropriation baseline. Ocean high-risk column is ambiguous in the original table; left unavailable rather than copied from a later report.",
+          "translation": "Original Fig. 1 uses logarithmic wedge lengths and explicitly excepts freshwater from the common-radius normalization. This adaptation instead exposes a project reference-relative ratio and keeps the existing linear radius for every channel. It does not reproduce Fig. 1 distances. Table 1 is authoritative for this snapshot: forcing 2.91, ocean 2.8, ozone 284.6; later retrospective columns differ. HANPP reference 1.9 is reported NPP variability, not an observed human-appropriation baseline. Ocean high-risk column is ambiguous in the original table; left unavailable rather than copied from a later report."
+        },
+        "normalizationNote": {
+          "source": "Project reference-relative-v1: q=(observed-reference)/(boundary-reference). Lower-is-worse variables use negative denominator; no universal observed/boundary division. Not an official risk severity score. Published boundary comparators and uncertainties remain explicit.",
+          "translation": "Project reference-relative-v1: q=(observed-reference)/(boundary-reference). Lower-is-worse variables use negative denominator; no universal observed/boundary division. Not an official risk severity score. Published boundary comparators and uncertainties remain explicit."
+        },
+        "displayTransformation": {
+          "source": "pb-high-risk-aligned-v1: q=(observed-reference)/(PB-reference); h=(highRisk-reference)/(PB-reference). Display d=q for q<=1; d=1+(q-1)/(h-1) for q>1 when h is known. PB radius=green radius; high-risk radius=2*green radius is a visual choice, not q=2. Unknown high-risk thresholds fall back to linear q with explicit unknown status. Only display radius is capped. Manual illustration retains the legacy linear controller.",
+          "translation": "pb-high-risk-aligned-v1: q=(observed-reference)/(PB-reference); h=(highRisk-reference)/(PB-reference). Display d=q for q<=1; d=1+(q-1)/(h-1) for q>1 when h is known. PB radius=green radius; high-risk radius=2*green radius is a visual choice, not q=2. Unknown high-risk thresholds fall back to linear q with explicit unknown status. Only display radius is capped. Manual illustration retains the legacy linear controller."
+        }
+      },
+      "2024.january-2025-reprint.v1": {
+        "indicators.biosphere_integrity__genetic_diversity.definition": {
+          "source": "Extinctions per million species-years. Boundary anchor 10 represents the published <10 precautionary threshold.",
+          "translation": "Extinctions per million species-years. Boundary anchor 10 represents the published <10 precautionary threshold."
+        },
+        "indicators.biosphere_integrity__genetic_diversity.uncertainty": {
+          "source": "Wide extinction-rate uncertainty; retain the published range or one-sided estimate, never an exact midpoint.",
+          "translation": "Wide extinction-rate uncertainty; retain the published range or one-sided estimate, never an exact midpoint."
+        },
+        "indicators.land_system_change.definition": {
+          "source": "Remaining area of forest as a percentage of original forest cover; global aggregate, with distinct biome thresholds.",
+          "translation": "Remaining area of forest as a percentage of original forest cover; global aggregate, with distinct biome thresholds."
+        },
+        "indicators.land_system_change.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.biogeochemical_flows__phosphorus.definition": {
+          "source": "Mined phosphorus applied to cropland / erodible soils. This is the regional-distribution criterion aggregated globally, not ocean P flow.",
+          "translation": "Mined phosphorus applied to cropland / erodible soils. This is the regional-distribution criterion aggregated globally, not ocean P flow."
+        },
+        "indicators.biogeochemical_flows__phosphorus.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.novel_entities.definition": {
+          "source": "Percentage of synthetic chemicals released without adequate safety testing. Exceeded qualitatively; global percentage is not quantified.",
+          "translation": "Percentage of synthetic chemicals released without adequate safety testing. Exceeded qualitatively; global percentage is not quantified."
+        },
+        "indicators.novel_entities.uncertainty": {
+          "source": "No quantified global fraction or high-risk threshold. Boundary equals zero; division by zero is prohibited.",
+          "translation": "No quantified global fraction or high-risk threshold. Boundary equals zero; division by zero is prohibited."
+        },
+        "indicators.climate_change__co2_concentration.definition": {
+          "source": "Global atmospheric carbon dioxide concentration.",
+          "translation": "Global atmospheric carbon dioxide concentration."
+        },
+        "indicators.climate_change__co2_concentration.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.freshwater_change__green_water.definition": {
+          "source": "Ice-free land area with root-zone soil moisture deviations outside preindustrial variability; captures wet and dry disturbance.",
+          "translation": "Ice-free land area with root-zone soil moisture deviations outside preindustrial variability; captures wet and dry disturbance."
+        },
+        "indicators.freshwater_change__green_water.uncertainty": {
+          "source": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional.",
+          "translation": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional."
+        },
+        "indicators.ocean_acidification.definition": {
+          "source": "Global mean surface seawater saturation state with respect to aragonite (Ω); declining values indicate greater acidification.",
+          "translation": "Global mean surface seawater saturation state with respect to aragonite (Ω); declining values indicate greater acidification."
+        },
+        "indicators.ocean_acidification.uncertainty": {
+          "source": "Lower saturation means greater acidification. Reference/boundary revised in 2025; high-risk threshold provisional. Original 2023 table ambiguity is not resolved with a later value.",
+          "translation": "Lower saturation means greater acidification. Reference/boundary revised in 2025; high-risk threshold provisional. Original 2023 table ambiguity is not resolved with a later value."
+        },
+        "indicators.atmospheric_aerosol_loading.definition": {
+          "source": "Annual mean difference in aerosol optical depth between hemispheres; dimensionless, not aerosol radiative forcing.",
+          "translation": "Annual mean difference in aerosol optical depth between hemispheres; dimensionless, not aerosol radiative forcing."
+        },
+        "indicators.atmospheric_aerosol_loading.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.stratospheric_ozone_depletion.definition": {
+          "source": "Global mean stratospheric ozone concentration; regional and seasonal depletion can occur below a globally unexceeded classification.",
+          "translation": "Global mean stratospheric ozone concentration; regional and seasonal depletion can occur below a globally unexceeded classification."
+        },
+        "indicators.stratospheric_ozone_depletion.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.biosphere_integrity__functional_diversity.definition": {
+          "source": "Human appropriation of net primary production as a percentage of preindustrial NPP. Boundary anchor 10 represents <10%.",
+          "translation": "Human appropriation of net primary production as a percentage of preindustrial NPP. Boundary anchor 10 represents <10%."
+        },
+        "indicators.biosphere_integrity__functional_diversity.uncertainty": {
+          "source": "HANPP estimates depend on model and reference NPP. Published reference 1.9 is natural NPP variability, not a measured appropriation baseline.",
+          "translation": "HANPP estimates depend on model and reference NPP. Published reference 1.9 is natural NPP variability, not a measured appropriation baseline."
+        },
+        "indicators.biogeochemical_flows__nitrogen.definition": {
+          "source": "Industrial and intentional biological fixation of nitrogen for agriculture.",
+          "translation": "Industrial and intentional biological fixation of nitrogen for agriculture."
+        },
+        "indicators.biogeochemical_flows__nitrogen.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.freshwater_change__blue_water.definition": {
+          "source": "Ice-free land area with river-discharge deviations outside preindustrial variability; captures wet and dry disturbance.",
+          "translation": "Ice-free land area with river-discharge deviations outside preindustrial variability; captures wet and dry disturbance."
+        },
+        "indicators.freshwater_change__blue_water.uncertainty": {
+          "source": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional.",
+          "translation": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional."
+        },
+        "indicators.climate_change__radiative_forcing.definition": {
+          "source": "Total anthropogenic top-of-atmosphere radiative forcing relative to the preindustrial reference.",
+          "translation": "Total anthropogenic top-of-atmosphere radiative forcing relative to the preindustrial reference."
+        },
+        "indicators.climate_change__radiative_forcing.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "methodologyNotes": {
+          "source": "Selected January 2025 reprint of the 2024 assessment. Original publication day has not been verified. Uses its own PHC column, not its retrospective R23 column (which lists forcing 2.79 and ocean 2.81). HANPP reference 1.9 describes preindustrial NPP variability. Freshwater references and disturbance definitions differ from PHC2025. No interpolated annual observations.",
+          "translation": "Selected January 2025 reprint of the 2024 assessment. Original publication day has not been verified. Uses its own PHC column, not its retrospective R23 column (which lists forcing 2.79 and ocean 2.81). HANPP reference 1.9 describes preindustrial NPP variability. Freshwater references and disturbance definitions differ from PHC2025. No interpolated annual observations."
+        },
+        "normalizationNote": {
+          "source": "Project reference-relative-v1: q=(observed-reference)/(boundary-reference). Lower-is-worse variables use negative denominator; no universal observed/boundary division. Not an official risk severity score. Published boundary comparators and uncertainties remain explicit.",
+          "translation": "Project reference-relative-v1: q=(observed-reference)/(boundary-reference). Lower-is-worse variables use negative denominator; no universal observed/boundary division. Not an official risk severity score. Published boundary comparators and uncertainties remain explicit."
+        },
+        "displayTransformation": {
+          "source": "pb-high-risk-aligned-v1: q=(observed-reference)/(PB-reference); h=(highRisk-reference)/(PB-reference). Display d=q for q<=1; d=1+(q-1)/(h-1) for q>1 when h is known. PB radius=green radius; high-risk radius=2*green radius is a visual choice, not q=2. Unknown high-risk thresholds fall back to linear q with explicit unknown status. Only display radius is capped. Manual illustration retains the legacy linear controller.",
+          "translation": "pb-high-risk-aligned-v1: q=(observed-reference)/(PB-reference); h=(highRisk-reference)/(PB-reference). Display d=q for q<=1; d=1+(q-1)/(h-1) for q>1 when h is known. PB radius=green radius; high-risk radius=2*green radius is a visual choice, not q=2. Unknown high-risk thresholds fall back to linear q with explicit unknown status. Only display radius is capped. Manual illustration retains the legacy linear controller."
+        }
+      },
+      "2025.official-mobile-edition.v1": {
+        "indicators.biosphere_integrity__genetic_diversity.definition": {
+          "source": "Extinctions per million species-years. Boundary anchor 10 represents the published <10 precautionary threshold.",
+          "translation": "Extinctions per million species-years. Boundary anchor 10 represents the published <10 precautionary threshold."
+        },
+        "indicators.biosphere_integrity__genetic_diversity.uncertainty": {
+          "source": "Wide extinction-rate uncertainty; retain the published range or one-sided estimate, never an exact midpoint.",
+          "translation": "Wide extinction-rate uncertainty; retain the published range or one-sided estimate, never an exact midpoint."
+        },
+        "indicators.land_system_change.definition": {
+          "source": "Remaining area of forest as a percentage of original forest cover; global aggregate, with distinct biome thresholds.",
+          "translation": "Remaining area of forest as a percentage of original forest cover; global aggregate, with distinct biome thresholds."
+        },
+        "indicators.land_system_change.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.biogeochemical_flows__phosphorus.definition": {
+          "source": "Mined phosphorus applied to cropland / erodible soils. This is the regional-distribution criterion aggregated globally, not ocean P flow.",
+          "translation": "Mined phosphorus applied to cropland / erodible soils. This is the regional-distribution criterion aggregated globally, not ocean P flow."
+        },
+        "indicators.biogeochemical_flows__phosphorus.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.novel_entities.definition": {
+          "source": "Percentage of synthetic chemicals released without adequate safety testing. Exceeded qualitatively; global percentage is not quantified.",
+          "translation": "Percentage of synthetic chemicals released without adequate safety testing. Exceeded qualitatively; global percentage is not quantified."
+        },
+        "indicators.novel_entities.uncertainty": {
+          "source": "No quantified global fraction or high-risk threshold. Boundary equals zero; division by zero is prohibited.",
+          "translation": "No quantified global fraction or high-risk threshold. Boundary equals zero; division by zero is prohibited."
+        },
+        "indicators.climate_change__co2_concentration.definition": {
+          "source": "Global atmospheric carbon dioxide concentration.",
+          "translation": "Global atmospheric carbon dioxide concentration."
+        },
+        "indicators.climate_change__co2_concentration.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.freshwater_change__green_water.definition": {
+          "source": "Ice-free land area with root-zone soil moisture deviations outside preindustrial variability; captures wet and dry disturbance.",
+          "translation": "Ice-free land area with root-zone soil moisture deviations outside preindustrial variability; captures wet and dry disturbance."
+        },
+        "indicators.freshwater_change__green_water.uncertainty": {
+          "source": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional.",
+          "translation": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional."
+        },
+        "indicators.ocean_acidification.definition": {
+          "source": "Global mean surface seawater saturation state with respect to aragonite (Ω); declining values indicate greater acidification.",
+          "translation": "Global mean surface seawater saturation state with respect to aragonite (Ω); declining values indicate greater acidification."
+        },
+        "indicators.ocean_acidification.uncertainty": {
+          "source": "Lower saturation means greater acidification. Reference/boundary revised in 2025; high-risk threshold provisional. Original 2023 table ambiguity is not resolved with a later value.",
+          "translation": "Lower saturation means greater acidification. Reference/boundary revised in 2025; high-risk threshold provisional. Original 2023 table ambiguity is not resolved with a later value."
+        },
+        "indicators.atmospheric_aerosol_loading.definition": {
+          "source": "Annual mean difference in aerosol optical depth between hemispheres; dimensionless, not aerosol radiative forcing.",
+          "translation": "Annual mean difference in aerosol optical depth between hemispheres; dimensionless, not aerosol radiative forcing."
+        },
+        "indicators.atmospheric_aerosol_loading.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.stratospheric_ozone_depletion.definition": {
+          "source": "Global mean stratospheric ozone concentration; regional and seasonal depletion can occur below a globally unexceeded classification.",
+          "translation": "Global mean stratospheric ozone concentration; regional and seasonal depletion can occur below a globally unexceeded classification."
+        },
+        "indicators.stratospheric_ozone_depletion.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.biosphere_integrity__functional_diversity.definition": {
+          "source": "Human appropriation of net primary production as a percentage of preindustrial NPP. Boundary anchor 10 represents <10%.",
+          "translation": "Human appropriation of net primary production as a percentage of preindustrial NPP. Boundary anchor 10 represents <10%."
+        },
+        "indicators.biosphere_integrity__functional_diversity.uncertainty": {
+          "source": "HANPP estimates depend on model and reference NPP. Published reference is 0; 2026 range reflects distinct estimates.",
+          "translation": "HANPP estimates depend on model and reference NPP. Published reference is 0; 2026 range reflects distinct estimates."
+        },
+        "indicators.biogeochemical_flows__nitrogen.definition": {
+          "source": "Industrial and intentional biological fixation of nitrogen for agriculture.",
+          "translation": "Industrial and intentional biological fixation of nitrogen for agriculture."
+        },
+        "indicators.biogeochemical_flows__nitrogen.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.freshwater_change__blue_water.definition": {
+          "source": "Ice-free land area with river-discharge deviations outside preindustrial variability; captures wet and dry disturbance.",
+          "translation": "Ice-free land area with river-discharge deviations outside preindustrial variability; captures wet and dry disturbance."
+        },
+        "indicators.freshwater_change__blue_water.uncertainty": {
+          "source": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional.",
+          "translation": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional."
+        },
+        "indicators.climate_change__radiative_forcing.definition": {
+          "source": "Total anthropogenic top-of-atmosphere radiative forcing relative to the preindustrial reference.",
+          "translation": "Total anthropogenic top-of-atmosphere radiative forcing relative to the preindustrial reference."
+        },
+        "indicators.climate_change__radiative_forcing.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "methodologyNotes": {
+          "source": "Selected official mobile-friendly report, Table 3; genetic diversity retained as >100 from the table, although the executive summary describes 100–1000. Freshwater reference/boundary revision, revised ocean preindustrial reference (3.57) and PB (2.86), HANPP reference 0, and nutrient method updates prevent interpreting all changes since 2024 as measured annual deterioration. Ocean high-risk 2.50 taken from Table 3; summary graphic has a different line.",
+          "translation": "Selected official mobile-friendly report, Table 3; genetic diversity retained as >100 from the table, although the executive summary describes 100–1000. Freshwater reference/boundary revision, revised ocean preindustrial reference (3.57) and PB (2.86), HANPP reference 0, and nutrient method updates prevent interpreting all changes since 2024 as measured annual deterioration. Ocean high-risk 2.50 taken from Table 3; summary graphic has a different line."
+        },
+        "normalizationNote": {
+          "source": "Project reference-relative-v1: q=(observed-reference)/(boundary-reference). Lower-is-worse variables use negative denominator; no universal observed/boundary division. Not an official risk severity score. Published boundary comparators and uncertainties remain explicit.",
+          "translation": "Project reference-relative-v1: q=(observed-reference)/(boundary-reference). Lower-is-worse variables use negative denominator; no universal observed/boundary division. Not an official risk severity score. Published boundary comparators and uncertainties remain explicit."
+        },
+        "displayTransformation": {
+          "source": "pb-high-risk-aligned-v1: q=(observed-reference)/(PB-reference); h=(highRisk-reference)/(PB-reference). Display d=q for q<=1; d=1+(q-1)/(h-1) for q>1 when h is known. PB radius=green radius; high-risk radius=2*green radius is a visual choice, not q=2. Unknown high-risk thresholds fall back to linear q with explicit unknown status. Only display radius is capped. Manual illustration retains the legacy linear controller.",
+          "translation": "pb-high-risk-aligned-v1: q=(observed-reference)/(PB-reference); h=(highRisk-reference)/(PB-reference). Display d=q for q<=1; d=1+(q-1)/(h-1) for q>1 when h is known. PB radius=green radius; high-risk radius=2*green radius is a visual choice, not q=2. Unknown high-risk thresholds fall back to linear q with explicit unknown status. Only display radius is capped. Manual illustration retains the legacy linear controller."
+        }
+      },
+      "2026.official-full-report.v1": {
+        "indicators.biosphere_integrity__genetic_diversity.definition": {
+          "source": "Extinctions per million species-years. Boundary anchor 10 represents the published <10 precautionary threshold.",
+          "translation": "Extinctions per million species-years. Boundary anchor 10 represents the published <10 precautionary threshold."
+        },
+        "indicators.biosphere_integrity__genetic_diversity.uncertainty": {
+          "source": "Wide extinction-rate uncertainty; retain the published range or one-sided estimate, never an exact midpoint.",
+          "translation": "Wide extinction-rate uncertainty; retain the published range or one-sided estimate, never an exact midpoint."
+        },
+        "indicators.land_system_change.definition": {
+          "source": "Remaining area of forest as a percentage of original forest cover; global aggregate, with distinct biome thresholds.",
+          "translation": "Remaining area of forest as a percentage of original forest cover; global aggregate, with distinct biome thresholds."
+        },
+        "indicators.land_system_change.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.biogeochemical_flows__phosphorus.definition": {
+          "source": "Mined phosphorus applied to cropland / erodible soils. This is the regional-distribution criterion aggregated globally, not ocean P flow.",
+          "translation": "Mined phosphorus applied to cropland / erodible soils. This is the regional-distribution criterion aggregated globally, not ocean P flow."
+        },
+        "indicators.biogeochemical_flows__phosphorus.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.novel_entities.definition": {
+          "source": "Percentage of synthetic chemicals released without adequate safety testing. Exceeded qualitatively; global percentage is not quantified.",
+          "translation": "Percentage of synthetic chemicals released without adequate safety testing. Exceeded qualitatively; global percentage is not quantified."
+        },
+        "indicators.novel_entities.uncertainty": {
+          "source": "No quantified global fraction or high-risk threshold. Boundary equals zero; division by zero is prohibited.",
+          "translation": "No quantified global fraction or high-risk threshold. Boundary equals zero; division by zero is prohibited."
+        },
+        "indicators.climate_change__co2_concentration.definition": {
+          "source": "Global atmospheric carbon dioxide concentration.",
+          "translation": "Global atmospheric carbon dioxide concentration."
+        },
+        "indicators.climate_change__co2_concentration.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.freshwater_change__green_water.definition": {
+          "source": "Ice-free land area with root-zone soil moisture deviations outside preindustrial variability; captures wet and dry disturbance.",
+          "translation": "Ice-free land area with root-zone soil moisture deviations outside preindustrial variability; captures wet and dry disturbance."
+        },
+        "indicators.freshwater_change__green_water.uncertainty": {
+          "source": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional.",
+          "translation": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional."
+        },
+        "indicators.ocean_acidification.definition": {
+          "source": "Global mean surface seawater saturation state with respect to aragonite (Ω); declining values indicate greater acidification.",
+          "translation": "Global mean surface seawater saturation state with respect to aragonite (Ω); declining values indicate greater acidification."
+        },
+        "indicators.ocean_acidification.uncertainty": {
+          "source": "Lower saturation means greater acidification. Reference/boundary revised in 2025; high-risk threshold provisional. Original 2023 table ambiguity is not resolved with a later value.",
+          "translation": "Lower saturation means greater acidification. Reference/boundary revised in 2025; high-risk threshold provisional. Original 2023 table ambiguity is not resolved with a later value."
+        },
+        "indicators.atmospheric_aerosol_loading.definition": {
+          "source": "Annual mean difference in aerosol optical depth between hemispheres; dimensionless, not aerosol radiative forcing.",
+          "translation": "Annual mean difference in aerosol optical depth between hemispheres; dimensionless, not aerosol radiative forcing."
+        },
+        "indicators.atmospheric_aerosol_loading.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.stratospheric_ozone_depletion.definition": {
+          "source": "Global mean stratospheric ozone concentration; regional and seasonal depletion can occur below a globally unexceeded classification.",
+          "translation": "Global mean stratospheric ozone concentration; regional and seasonal depletion can occur below a globally unexceeded classification."
+        },
+        "indicators.stratospheric_ozone_depletion.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified. Chapter value refers to 2022; report series metadata also mentions 2025. No single observation year assigned.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified. Chapter value refers to 2022; report series metadata also mentions 2025. No single observation year assigned."
+        },
+        "indicators.biosphere_integrity__functional_diversity.definition": {
+          "source": "Human appropriation of net primary production as a percentage of preindustrial NPP. Boundary anchor 10 represents <10%.",
+          "translation": "Human appropriation of net primary production as a percentage of preindustrial NPP. Boundary anchor 10 represents <10%."
+        },
+        "indicators.biosphere_integrity__functional_diversity.uncertainty": {
+          "source": "HANPP estimates depend on model and reference NPP. Published reference is 0; 2026 range reflects distinct estimates.",
+          "translation": "HANPP estimates depend on model and reference NPP. Published reference is 0; 2026 range reflects distinct estimates."
+        },
+        "indicators.biogeochemical_flows__nitrogen.definition": {
+          "source": "Industrial and intentional biological fixation of nitrogen for agriculture.",
+          "translation": "Industrial and intentional biological fixation of nitrogen for agriculture."
+        },
+        "indicators.biogeochemical_flows__nitrogen.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "indicators.freshwater_change__blue_water.definition": {
+          "source": "Ice-free land area with river-discharge deviations outside preindustrial variability; captures wet and dry disturbance.",
+          "translation": "Ice-free land area with river-discharge deviations outside preindustrial variability; captures wet and dry disturbance."
+        },
+        "indicators.freshwater_change__blue_water.uncertainty": {
+          "source": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional.",
+          "translation": "Hydrological model-based land-area disturbance, not water withdrawal. Preindustrial variability and model/reference revision affect comparisons; 50% high-risk is provisional."
+        },
+        "indicators.climate_change__radiative_forcing.definition": {
+          "source": "Total anthropogenic top-of-atmosphere radiative forcing relative to the preindustrial reference.",
+          "translation": "Total anthropogenic top-of-atmosphere radiative forcing relative to the preindustrial reference."
+        },
+        "indicators.climate_change__radiative_forcing.uncertainty": {
+          "source": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified.",
+          "translation": "Source estimate; table precision is not a confidence interval. Observation year unavailable unless explicitly verified."
+        },
+        "methodologyNotes": {
+          "source": "Selected full report, Table 7.1. Forest 64% and PB 78% reflect classification/method correction, not evidence of forest recovery. Biosphere ranges retained; no midpoint is estimated. Ocean high-risk 2.50 is provisional and under review. Ozone value unchanged: chapter states 2022 while Table 7.2 lists a series through 2025; observation year is left unavailable. Latest assessment means latest verified publication here, not live data.",
+          "translation": "Selected full report, Table 7.1. Forest 64% and PB 78% reflect classification/method correction, not evidence of forest recovery. Biosphere ranges retained; no midpoint is estimated. Ocean high-risk 2.50 is provisional and under review. Ozone value unchanged: chapter states 2022 while Table 7.2 lists a series through 2025; observation year is left unavailable. Latest assessment means latest verified publication here, not live data."
+        },
+        "normalizationNote": {
+          "source": "Project reference-relative-v1: q=(observed-reference)/(boundary-reference). Lower-is-worse variables use negative denominator; no universal observed/boundary division. Not an official risk severity score. Published boundary comparators and uncertainties remain explicit.",
+          "translation": "Project reference-relative-v1: q=(observed-reference)/(boundary-reference). Lower-is-worse variables use negative denominator; no universal observed/boundary division. Not an official risk severity score. Published boundary comparators and uncertainties remain explicit."
+        },
+        "displayTransformation": {
+          "source": "pb-high-risk-aligned-v1: q=(observed-reference)/(PB-reference); h=(highRisk-reference)/(PB-reference). Display d=q for q<=1; d=1+(q-1)/(h-1) for q>1 when h is known. PB radius=green radius; high-risk radius=2*green radius is a visual choice, not q=2. Unknown high-risk thresholds fall back to linear q with explicit unknown status. Only display radius is capped. Manual illustration retains the legacy linear controller.",
+          "translation": "pb-high-risk-aligned-v1: q=(observed-reference)/(PB-reference); h=(highRisk-reference)/(PB-reference). Display d=q for q<=1; d=1+(q-1)/(h-1) for q>1 when h is known. PB radius=green radius; high-risk radius=2*green radius is a visual choice, not q=2. Unknown high-risk thresholds fall back to linear q with explicit unknown status. Only display radius is capped. Manual illustration retains the legacy linear controller."
+        }
+      }
+    }
+  }
+}
