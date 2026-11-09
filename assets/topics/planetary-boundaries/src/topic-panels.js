@@ -5,6 +5,7 @@ const quantityText=value=>formatQuantity(value,getTopicLocale().language);
 const ratioText=value=>formatRatio(value,getTopicLocale().language);
 const $=id=>document.getElementById(id);
 const el=(tag,text,className)=>{const n=document.createElement(tag);if(text!==undefined){n.textContent=typeof text==='string'?term(text):text;if(typeof text==='string'&&text.length<150)n.dataset.term=text;}if(className)n.className=className;return n;};
+const HANPP_ID='biosphere_integrity__functional_diversity';
 function link(text,url) {const a=el('a',text);a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;}
 function table(headers,rows,caption) {
   const wrap=el('div',undefined,'table-scroll');wrap.tabIndex=0;wrap.setAttribute('role','region');wrap.setAttribute('aria-label',caption);
@@ -13,6 +14,18 @@ function table(headers,rows,caption) {
   const body=el('tbody');for(const cells of rows){const row=el('tr');for(const value of cells){const cell=el('td');cell.append(value instanceof Node?value:el('span',String(value)));row.append(cell);}body.append(row);}t.append(body);wrap.append(t);return wrap;
 }
 function paragraph(parent,text,className) {const p=el('p',proseText(text),className);p.dataset.sourceProse=text;parent.append(p);}
+function hanppContext(indicator) {
+  const observed=quantityText(indicator.observed);
+  const ratio=ratioText(indicator);
+  const observation=indicator.observationPeriod
+    ? `observation period ${indicator.observationPeriod}`
+    : `observation year ${numberText(indicator.observationYear)}`;
+  const context=`${indicator.assessmentYear} assessment · ${observation} · observed HANPP ${observed}% of preindustrial NPP · project-derived normalized ratio q ${ratio}.`;
+  if(indicator.observed.kind==='range'){
+    return `${context} The filled wedge ends at the lower endpoint (${numberText(indicator.observed.min)}%; q ${numberText(indicator.normalizedValue.min)}); the dashed edge marks the upper endpoint (${numberText(indicator.observed.max)}%; q ${numberText(indicator.normalizedValue.max)}). This range represents distinct source estimates and methodological uncertainty, not a measured improvement from the 30% values reported in earlier assessments.`;
+  }
+  return `${context} Comparisons across assessment years use each report's published reference and observation metadata; a different q does not by itself show measured environmental improvement.`;
+}
 export function createTopicPanels({registry,onAssessment,onSelect,onScience}) {
   let activeVersion=null;
   const tabs=[...document.querySelectorAll('[role=tab]')];
@@ -79,7 +92,7 @@ export function createTopicPanels({registry,onAssessment,onSelect,onScience}) {
       choose.addEventListener('click',()=>{onSelect(i.id);activate(tabs[0]);$('selected-name').scrollIntoView({block:'nearest'});});
       return [boundaryLabel(i.boundaryId,i.boundaryId.replaceAll('_',' ')),choose,quantityText(i.observed),i.unit,numberText(i.referenceValue),`${i.boundaryComparator} ${numberText(i.boundaryValue)}`,numberText(i.upperRiskThreshold),i.thresholdAvailability,ratioText(i),riskZone(i),assessment.assessmentYear,numberText(i.observationYear),i.observationPeriod??'Not available',`${term(i.validationStatus.replaceAll('_',' '))} · ${term(i.observed.kind.replaceAll('_',' '))}`,link(i.source.locator,i.source.url)];
     });
-    data.append(table(['Boundary','Control variable / select','Observed','Unit','Reference','PB','High risk','Threshold availability','Derived ratio q','Risk zone','Assessment year','Observation year','Dataset period','Data status','Scientific source'],rows,'Verified source values — scroll horizontally for all fields'));
+    data.append(table(['Boundary','Control variable / select','Observed source value','Unit','Reference','PB','High risk','Threshold availability','Project-derived normalized ratio q','Risk zone','Assessment year','Observation year','Observation period','Data status','Scientific source'],rows,'Verified source values — scroll horizontally for all fields'));
     data.append(el('h3','Additional phosphorus criterion'));
     for(const p of assessment.additionalMeasurements)paragraph(data,`${t('additionalP',{label:term(p.label),value:p.observedValue,unit:term(p.unit),reference:p.referenceValue,boundary:p.boundaryValue,highRisk:p.upperRiskThreshold})} ${t('additionalPNote')}`);
     const old=$('units-table');if(old)old.remove();
@@ -88,10 +101,14 @@ export function createTopicPanels({registry,onAssessment,onSelect,onScience}) {
   }
   function details(indicator,mode,clipped) {
     const grid=el('dl',undefined,'detail-grid');
-    for(const [name,value] of [['Observed',`${term(quantityText(indicator.observed))} ${term(indicator.unit)}`],['Reference',numberText(indicator.referenceValue)],['Planetary boundary',`${indicator.boundaryComparator} ${numberText(indicator.boundaryValue)} ${term(indicator.unit)}`],['High-risk threshold',`${numberText(indicator.upperRiskThreshold)} (${indicator.thresholdAvailability})`],['Derived ratio q',ratioText(indicator)],['Risk zone',riskZone(indicator)],['Assessment year',indicator.assessmentYear],['Observation year',numberText(indicator.observationYear)],['Dataset period',indicator.observationPeriod??'Not available']]){
+    const observedLabel=indicator.id===HANPP_ID?'Observed HANPP':'Observed source value';
+    const observedValue=indicator.id===HANPP_ID?`${quantityText(indicator.observed)}% of preindustrial NPP`:`${term(quantityText(indicator.observed))} ${term(indicator.unit)}`;
+    for(const [name,value] of [[observedLabel,observedValue],['Reference',numberText(indicator.referenceValue)],['Planetary boundary',`${indicator.boundaryComparator} ${numberText(indicator.boundaryValue)} ${term(indicator.unit)}`],['High-risk threshold',`${numberText(indicator.upperRiskThreshold)} (${indicator.thresholdAvailability})`],['Project-derived normalized ratio q',ratioText(indicator)],['Risk zone',riskZone(indicator)],['Assessment year',indicator.assessmentYear],['Observation year',numberText(indicator.observationYear)],['Observation period',indicator.observationPeriod??'Not available']]){
       const field=el('div');field.append(el('dt',name),el('dd',value));grid.append(field);
     }
-    $('scientific-detail').replaceChildren(grid);
+    const content=[grid];
+    if(indicator.id===HANPP_ID)content.push(el('p',hanppContext(indicator),'note hanpp-context'));
+    $('scientific-detail').replaceChildren(...content);
     $('uncertainty').textContent=`${scientificText(activeVersion,`indicators.${indicator.id}.uncertainty`,indicator.uncertainty)}${clipped?' '+t('clippedWarning'):''}`;
     $('view-mode').textContent=t(mode==='scientific'?'scientificMode':mode==='artwork'?'artworkMode':'manualMode');
     $('preview-notice').hidden=mode==='scientific';

@@ -20,6 +20,11 @@ test('five keyboard tabs, verified data selection and four immutable assessment 
     const h=(2.5-3.57)/(2.86-3.57);
     expect(radius).toBeCloseTo(year<2025?q:1+(q-1)/(h-1),5);
   }
+  await page.locator('#indicator-list [data-indicator-id="biosphere_integrity__functional_diversity"]').click();
+  await expect(page.locator('.hanpp-context')).toContainText('2026 assessment · observation period 1910–2010 · observed HANPP 21–30%');
+  await expect(page.locator('.hanpp-context')).toContainText('project-derived normalized ratio q 2.1–3');
+  await expect(page.locator('.hanpp-context')).toContainText('not a measured improvement');
+  await expect(page.locator('#chart-selected')).toContainText('fill lower / dashed upper');
   await page.getByRole('tab',{name:'Reports & History'}).click();await page.locator('[data-assessment-year="2023"]').click();await expect(page.locator('#history-note')).toContainText('2023.publisher');
   expect(errors).toEqual([]);
 });
@@ -33,6 +38,23 @@ test('scientific export stays distinct from illustrative changes and preserves r
   const state=await page.locator('#chart').evaluate(o=>{
     const d=o.contentDocument;return {novel:d.getElementById('preview-group-novel_entities').getAttribute('fill'),core:!!d.getElementById('preview-safe-operating-space'),stroke:d.getElementById('preview-limit-circle').getAttribute('stroke-opacity')};
   });expect(state).toEqual({novel:'none',core:true,stroke:'0.05'});
+});
+test('SVG occupies 90% of its panel and is capped at 75vw in full view',async({page})=>{
+  await ready(page);
+  const embedded=await page.locator('#chart').evaluate(object=>({width:object.getBoundingClientRect().width,available:object.parentElement.getBoundingClientRect().width}));
+  expect(embedded.width).toBeCloseTo(embedded.available*.9,0);
+  await page.evaluate(controller=>{
+    const dialog=document.createElement('dialog');dialog.className='topic-embed-full-dialog';
+    Object.assign(dialog.style,{width:'100vw',height:'100vh',maxWidth:'none',maxHeight:'none',margin:'0',padding:'0'});
+    const frame=document.createElement('iframe');frame.src=controller;
+    Object.assign(frame.style,{width:'100vw',height:'100vh',border:'0'});
+    dialog.append(frame);document.body.append(dialog);dialog.showModal();
+  },controller);
+  const full=page.frameLocator('dialog.topic-embed-full-dialog iframe');
+  await expect(full.locator('#message')).toHaveText('SVG loaded: 13 / 13 indicators addressable.');
+  await expect(full.locator('html')).toHaveClass(/topic-full-view/);
+  const size=await full.locator('#chart').evaluate(object=>({width:object.getBoundingClientRect().width,viewport:innerWidth}));
+  expect(size.width).toBeLessThanOrEqual(size.viewport*.75+1);
 });
 test('SVG preflight rejects active content, duplicates, broken and external references',async({page})=>{
   await ready(page);

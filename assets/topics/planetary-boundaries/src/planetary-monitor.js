@@ -1,5 +1,5 @@
 import { createRadialPreview, createCircleLimit } from './radial-preview.js?v=risk-gradient-20261104';
-import {loadAssessment, displayValue, ratioText, thresholdDisplayRatio} from './scientific-assessments.mjs';
+import {loadAssessment, displayValue, quantityText, ratioText, thresholdDisplayRatio} from './scientific-assessments.mjs';
 import {createTopicPanels} from './topic-panels.js';
 import {safeSvgUrl,safeSvgDocument} from './svg-safety.mjs';
 import {createTopicExport,downloadTopicExport} from './topic-export.mjs';
@@ -15,6 +15,10 @@ let registry=null, panels=null, mode='scientific', assessmentRequest=0;
 let sceneOverlay=null;
 const scientificIndicator=id=>assessment?.indicators.find(i=>i.id===id);
 const maxPreviewRatio = () => circleLimit?.maxRatio ?? 2;
+const scientificQuantity=indicator=>quantityText(indicator.observed,getTopicLocale().language);
+const scientificObservation=indicator=>indicator.id==='biosphere_integrity__functional_diversity'
+  ? `${scientificQuantity(indicator)}% of preindustrial NPP`
+  : `${scientificQuantity(indicator)} ${indicator.unit}`;
 
 function fitPreview() {
   if (!originalViewBox) return;
@@ -63,8 +67,12 @@ function hoverIndicator(id,active){
 function select(id,origin='list') {
   const item = map.find(i => i.id === id); if (!item) return;
   selected = id;
-  $('selected-name').textContent = indicatorLabel(id,scientificIndicator(id).label);
-  $('chart-selected').textContent=`${String(map.indexOf(item)+1).padStart(2,'0')} · ${$('selected-name').textContent}`;
+  const indicator=scientificIndicator(id);
+  $('selected-name').textContent = indicatorLabel(id,indicator.label);
+  const rangeContext=mode==='scientific'&&indicator.observed.kind==='range'
+    ? ` · ${indicator.assessmentYear} assessment · observed ${scientificObservation(indicator)} · project-derived q ${ratioText(indicator)} · fill lower / dashed upper`
+    : '';
+  $('chart-selected').textContent=`${String(map.indexOf(item)+1).padStart(2,'0')} · ${$('selected-name').textContent}${rangeContext}`;
   const official = statusFor(item.boundary);
   $('selected-status').textContent = term(official === 'exceeded' ? 'Official boundary status: exceeded' : official === 'not_exceeded_globally' ? 'Official boundary status: not exceeded globally' : 'Official status: unknown');
   const val = preview.get(id);
@@ -72,7 +80,7 @@ function select(id,origin='list') {
   $('ratio').value = String(displayedPercent);
   $('ratio-number').value = String(displayedPercent);
   $('preview-value').textContent = mode==='scientific' ? t('scientificValue',{value:ratioText(scientificIndicator(id))}) : val === undefined ? t('artworkValue') : t('previewValue',{value:(val*100).toFixed(0)});
-  const indicator=scientificIndicator(id), upper=indicator.normalizedValue?.max??displayValue(indicator);
+  const upper=indicator.normalizedValue?.max??displayValue(indicator);
   panels?.details(indicator,mode,upper!==null&&thresholdDisplayRatio(indicator,upper)>maxPreviewRatio());
   renderSidebar();
   if(origin==='svg'){
@@ -110,7 +118,14 @@ function applyRatio(id, value, scientific=false) {
       const displayUncertainty=scientific&&q ? {...q,...(q.min!==undefined?{min:thresholdDisplayRatio(indicator,q.min)}:{}),...(q.max!==undefined?{max:thresholdDisplayRatio(indicator,q.max)}:{})} : null;
       base.geometry.uncertainty(displayUncertainty);
       const shape=svgDocument.getElementById(`preview-group-${id}`);
-      if(shape){shape.dataset.scientificRatio=scientific?String(ratio):'';shape.dataset.scientificClipped=String(scientific && thresholdDisplayRatio(indicator,q?.max??ratio)>maxPreviewRatio());shape.setAttribute('aria-label',`${indicator.label}: ${scientific?`assessment ratio ${ratioText(indicator)}`:`illustrative ${ratio}`}`);}
+      if(shape){
+        shape.dataset.scientificRatio=scientific?String(ratio):'';
+        shape.dataset.scientificClipped=String(scientific && thresholdDisplayRatio(indicator,q?.max??ratio)>maxPreviewRatio());
+        const rangeDescription=scientific&&q?.kind==='range'
+          ? `observed ${scientificObservation(indicator)}; project-derived ratio ${ratioText(indicator)}; filled lower endpoint and dashed upper endpoint`
+          : scientific?`project-derived assessment ratio ${ratioText(indicator)}`:`illustrative ${ratio}`;
+        shape.setAttribute('aria-label',`${indicator.label}: ${rangeDescription}`);
+      }
       const group = svgDocument.getElementById(entry.svgGroupId);
       if (group) {
         group.dataset.previewRatio = String(ratio);
@@ -183,6 +198,13 @@ function connectSvg(inlineDocument=null) {
   }
 }
 function setupEvents() {
+  const syncPresentationContext=()=>{
+    const embeddedFullView=Boolean(window.frameElement?.closest?.('dialog.topic-embed-full-dialog'));
+    document.documentElement.classList.toggle('topic-full-view',Boolean(document.fullscreenElement)||embeddedFullView);
+  };
+  syncPresentationContext();
+  window.addEventListener('resize',syncPresentationContext);
+  document.addEventListener('fullscreenchange',syncPresentationContext);
   $('chart').addEventListener('load', connectSvg);
   $('ratio').addEventListener('input', e => { $('ratio-number').value = e.target.value; if (selected) applyRatio(selected, Number(e.target.value) / 100); });
   $('ratio-number').addEventListener('input', e => { const raw = Number(e.target.value); if (!Number.isFinite(raw)) return; const v=clamp(raw,0,Number($('ratio-number').max)); $('ratio').value=String(v); if(selected) applyRatio(selected,v/100); });

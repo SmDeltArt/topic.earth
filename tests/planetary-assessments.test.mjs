@@ -41,6 +41,17 @@ test('historical method revisions stay separate and frozen',()=>{
   const frozen=freezeAssessment(structuredClone(latest));
   assert.throws(()=>{frozen.indicators[0].observed.min=200;},TypeError);
 });
+test('HANPP keeps assessment, observation, source value and project-derived ratio distinct',()=>{
+  const hanpp=year=>snapshots.get(year).indicators.find(i=>i.id==='biosphere_integrity__functional_diversity');
+  assert.deepEqual([2023,2024,2025].map(year=>hanpp(year).observed),[
+    {kind:'point',value:30},{kind:'point',value:30},{kind:'point',value:30}
+  ]);
+  assert.deepEqual([2023,2024,2025,2026].map(year=>hanpp(year).referenceValue),[1.9,1.9,0,0]);
+  assert.deepEqual(hanpp(2026).observed,{kind:'range',min:21,max:30});
+  assert.deepEqual(hanpp(2026).normalizedValue,{kind:'range',min:2.1,max:3});
+  assert.equal(hanpp(2026).observationPeriod,'1910–2010');
+  assert.equal(displayValue(hanpp(2026)),2.1);
+});
 test('each known high-risk threshold maps to the same visual ring using a different scientific ratio',()=>{
   const known=latest.indicators.filter(i=>i.upperRiskThreshold!==null);
   assert.ok(new Set(known.map(highRiskRatio)).size>6);
