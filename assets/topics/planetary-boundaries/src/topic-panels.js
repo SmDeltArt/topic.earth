@@ -113,5 +113,6 @@ export function createTopicPanels({registry,onAssessment,onSelect,onScience}) {
     $('view-mode').textContent=t(mode==='scientific'?'scientificMode':mode==='artwork'?'artworkMode':'manualMode');
     $('preview-notice').hidden=mode==='scientific';
   }
-  return {render,details,activateStatus:()=>activate(tabs[0])};
+  // Indicator selection is always visible beside the chart, outside the tabs.
+  return {render,details,activateStatus:()=>{}};
 }

@@ -1,7 +1,7 @@
 import {validateAssessment, riskZone} from './scientific-assessments.mjs';
 import {validateSvgDocument} from './svg-safety.mjs';
 
-export function createTopicExport({assessment,map,svgDocument,mode,selected,language,translation,limit,now=new Date()}){
+export function createTopicExport({assessment,map,svgDocument,mode,selected,language,translation,limit,copContext=null,now=new Date()}){
   validateAssessment(assessment,map.map(i=>i.id));
   const metadata={schemaVersion:2,type:'topic_earth_planetary_boundaries_export',exportedAt:now.toISOString(),
     topic:{id:'planetary-boundaries-monitor',title:translation.title,description:translation.summary,
@@ -30,6 +30,11 @@ export function createTopicExport({assessment,map,svgDocument,mode,selected,lang
     reuse:{geometry:'Semantic IDs, gradients, masks and clipping paths are preserved. Scientific quantities are separate from SVG coordinates.',
       translations:'Packaged topic.earth translation JSON uses title/summary/insight/sourceRevision plus visualization.ui, boundaries, indicators and svgLabels.',
       updates:'Use a new validated assessment version. This file does not authorize scientific publication or privileged writes.'}};
+  if(copContext){
+    metadata.topic={...metadata.topic,...copContext.topic};
+    metadata.copContext=copContext;
+    metadata.visualization.progressAnnotations='Optional regional observational markers; not global PB measurements, normalized ratios or COP-attributed gains. Scientific geometry is unchanged.';
+  }
   const doc=svgDocument.cloneNode(true),root=doc.documentElement;
   doc.getElementById('preview-interaction-layer')?.remove();
   doc.getElementById('topic-earth-export-metadata')?.remove();
@@ -42,7 +47,7 @@ export function createTopicExport({assessment,map,svgDocument,mode,selected,lang
   validateSvgDocument(doc);
   const svg=new XMLSerializer().serializeToString(doc);
   return {metadata,svg,package:{...metadata,artwork:{mimeType:'image/svg+xml',sanitizedSvg:svg}},
-    filename:`topic-earth-planetary-boundaries-${assessment.assessmentYear}-${language}-${now.toISOString().replace(/[:.]/g,'-')}`};
+    filename:`topic-earth-${copContext?'cop-'+copContext.conferenceId:'planetary-boundaries'}-${assessment.assessmentYear}-${language}-${now.toISOString().replace(/[:.]/g,'-')}`};
 }
 export function downloadTopicExport(bundle,format){
   if(!['json','svg'].includes(format))throw Error('Unsupported export format');

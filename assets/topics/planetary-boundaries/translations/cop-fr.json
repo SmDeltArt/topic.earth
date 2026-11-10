@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "topicId": "planetary-boundaries-cop",
+  "language": "fr",
+  "version": "v001",
+  "sourceLanguage": "en",
+  "sourceRevision": "[\"v1\",\"en\",\"COP21 → COP31 — Commitments & Achievements\",\"Explore COP21–COP31 commitments, documented implementation and independently measured environmental outcomes. Conference years never substitute for scientific assessments; COP31 outcomes remain pending official adoption.\",\"<p>Use the conference selector to compare agreements and remaining gaps. An optional progress marker links comparable regional observations to the shared planetary-boundaries chart, without changing its scientific values or attributing recovery to a COP.</p>\"]",
+  "title": "COP21 → COP31 — Engagements et réalisations",
+  "summary": "Aucune COP n’a eu lieu en 2020. La conférence est indépendante des évaluations scientifiques et des années Fever.",
+  "insight": "<p>Repère vert creux : observation régionale comparable ; ni rapport à une limite mondiale ni résultat attribué à une COP. Les secteurs et seuils scientifiques restent inchangés.</p>",
+  "cop": {
+    "ui": {
+      "title": "COP21 → COP31 — Engagements et réalisations",
+      "conference": "Conférence",
+      "progress": "Progrès et réalisations",
+      "agreements": "Accords et objectifs principaux",
+      "commitments": "Engagements chiffrés · politique",
+      "implementation": "Mise en œuvre documentée · processus",
+      "gaps": "Lacunes restantes",
+      "sources": "Sources officielles",
+      "verified": "Vérifié",
+      "pending": "En attente d’adoption officielle",
+      "monitoring": "Dernier contexte de suivi vérifié",
+      "backdrop": "Évaluation scientifique de fond",
+      "independence": "Aucune COP n’a eu lieu en 2020. La conférence est indépendante des évaluations scientifiques et des années Fever.",
+      "scheduled": "Session prévue",
+      "adopted": "Adoption / clôture",
+      "regionalProgress": "Amélioration observée à l’échelle régionale",
+      "insufficient": "Preuves insuffisantes d’amélioration de la limite mondiale",
+      "markerLegend": "Repère vert creux : observation régionale comparable ; ni rapport à une limite mondiale ni résultat attribué à une COP. Les secteurs et seuils scientifiques restent inchangés.",
+      "evidenceLegend": "Types de preuves : mesures · engagements politiques · mise en œuvre · projections (aucune tracée). La position du repère est illustrative et non normalisée à partir de la mesure.",
+      "latestContext": "Dernières observations vérifiées dans ce module, au 10 novembre 2026 ; communes aux conférences, sans mesures annuelles COP ni attribution causale.",
+      "previous": "Précédent",
+      "latest": "Récent",
+      "difference": "Différence réelle",
+      "translationNote": "Les résumés des conférences, les observations et les réserves scientifiques sont traduits en français. Les valeurs, dates et références des sources sont conservées.",
+      "notComparable": "Non comparable",
+      "selectIndicator": "Sélectionner l’indicateur correspondant",
+      "openMonitor": "Ouvrir le suivi de santé de la Terre"
+    },
+    "conferenceProseLanguage": "fr",
+    "conferences": {
+      "cop21": {
+        "location": "Paris, France",
+        "agreements": "Accord de Paris : contributions déterminées au niveau national (CDN) successives, adaptation, financement et cadre de transparence.",
+        "commitments": "Maintenir le réchauffement nettement en dessous de 2 °C et poursuivre les efforts pour le limiter à 1,5 °C par rapport à l’ère préindustrielle ; communiquer des CDN successives tous les cinq ans. Ce sont des objectifs politiques, pas un refroidissement mesuré.",
+        "implementation": "L’Accord est entré en vigueur le 4 novembre 2016. Les COP suivantes ont élaboré ses règles de déclaration et de mise en œuvre.",
+        "gaps": "Un traité et des CDN déposées ne prouvent ni leur réalisation ni le respect de l’objectif de température."
+      },
+      "cop22": {
+        "location": "Marrakech, Maroc",
+        "agreements": "La Proclamation d’action de Marrakech a réaffirmé l’orientation de Paris et le passage à la mise en œuvre.",
+        "commitments": "Engagements de mise en œuvre et de soutien ; aucun nouvel objectif universel chiffré de réduction des émissions n’est recensé ici.",
+        "implementation": "Les travaux sur les lignes directrices d’application de l’Accord de Paris se sont poursuivis ; les règles ont ensuite été adoptées à Katowice en 2018.",
+        "gaps": "Une proclamation politique ne quantifie ni les réductions réelles d’émissions ni les financements effectivement versés."
+      },
+      "cop23": {
+        "location": "Bonn, Allemagne · présidence fidjienne",
+        "agreements": "La dynamique de Fidji pour la mise en œuvre a lancé le dialogue de Talanoa afin de préparer une action climatique renforcée.",
+        "commitments": "Le dialogue devait se dérouler en 2018 pour éclairer l’ambition des CDN. Aucune nouvelle réduction chiffrée commune des émissions n’a été adoptée lors de cette conférence.",
+        "implementation": "Le dialogue de Talanoa a débuté en janvier 2018, conformément à la décision 1/CP.23, et a contribué à la conférence suivante.",
+        "gaps": "Participer à un dialogue constitue un progrès de procédure, pas une amélioration environnementale vérifiée."
+      },
+      "cop24": {
+        "location": "Katowice, Pologne",
+        "agreements": "Le paquet climat de Katowice a établi des lignes directrices détaillées pour la mise en œuvre et la transparence de l’Accord de Paris.",
+        "commitments": "Déclaration, examen technique et suivi de la mise en œuvre des CDN ; aucun nouveau seuil physique commun pour les limites planétaires.",
+        "implementation": "Des procédures communes de déclaration et d’examen ont été adoptées. Il s’agit d’une mise en œuvre institutionnelle documentée, pas d’un résultat sur les émissions.",
+        "gaps": "Les règles de comptabilisation doivent ensuite être appliquées au niveau national ; les règles de l’article 6 n’étaient pas toutes résolues à cette conférence."
+      },
+      "cop25": {
+        "location": "Madrid, Espagne · présidence chilienne",
+        "agreements": "« Chili–Madrid, le temps de l’action » ; création du réseau de Santiago pour l’assistance technique relative aux pertes et préjudices.",
+        "commitments": "Renforcer l’ambition et le soutien. Aucun nouvel objectif collectif chiffré de réduction des émissions n’est recensé ici.",
+        "implementation": "La création du réseau de Santiago constitue un résultat institutionnel ; la fourniture effective d’assistance doit être évaluée séparément.",
+        "gaps": "Les négociations sur l’article 6 sont restées sans résolution ; créer un réseau ne prouve ni le financement du relèvement ni une réduction de la pression sur la planète."
+      },
+      "cop26": {
+        "location": "Glasgow, Royaume-Uni",
+        "agreements": "Pacte de Glasgow pour le climat : renforcer l’action pendant cette décennie ; réduire progressivement le charbon sans dispositif d’atténuation et supprimer les subventions inefficaces aux combustibles fossiles.",
+        "commitments": "Les pays développés ont été exhortés à au moins doubler leur financement collectif de l’adaptation d’ici 2025 par rapport aux niveaux de 2019.",
+        "implementation": "Le programme de travail Glasgow–Charm el-Cheikh sur l’adaptation a été établi ; les règles d’application de l’article 6 ont été convenues.",
+        "gaps": "Les règles convenues et les promesses financières ne sont pas des versements. L’objectif de doublement nécessite un audit distinct des financements réellement fournis."
+      },
+      "cop27": {
+        "location": "Charm el-Cheikh, Égypte",
+        "agreements": "Création de nouveaux dispositifs de financement, dont un fonds répondant aux pertes et préjudices dans les pays en développement vulnérables.",
+        "commitments": "Un mécanisme de financement a été convenu ; cette décision ne constitue pas un montant vérifié versé aux communautés touchées.",
+        "implementation": "Un processus transitoire a été établi pour rendre le fonds opérationnel ; la COP28 a ensuite adopté ses modalités de fonctionnement.",
+        "gaps": "La gouvernance du fonds, les contributions réelles et les versements doivent être suivis séparément ; on ne peut en déduire un rétablissement environnemental mondial."
+      },
+      "cop28": {
+        "location": "Dubaï, Émirats arabes unis",
+        "agreements": "Le premier bilan mondial a appelé à une transition hors des combustibles fossiles dans les systèmes énergétiques, de manière juste, ordonnée et équitable.",
+        "commitments": "Contribuer au triplement de la capacité mondiale d’énergie renouvelable et au doublement du rythme annuel moyen mondial d’amélioration de l’efficacité énergétique d’ici 2030.",
+        "implementation": "Le premier bilan mondial a été achevé et les modalités du fonds pour les pertes et préjudices ont été rendues opérationnelles.",
+        "gaps": "Les objectifs énergétiques et les modalités de fonctionnement sont des résultats politiques ou de procédure. Le déploiement réel, les versements et les réductions d’émissions nécessitent un suivi."
+      },
+      "cop29": {
+        "location": "Bakou, Azerbaïdjan",
+        "agreements": "Nouvel objectif collectif chiffré de financement climatique et accord sur les règles restantes d’application des marchés du carbone.",
+        "commitments": "Au moins 300 milliards de dollars par an d’ici 2035, les pays développés prenant l’initiative ; mobilisation plus large vers 1 300 milliards de dollars par an d’ici 2035 par l’ensemble des acteurs.",
+        "implementation": "Le nouvel objectif de financement a été adopté. Le processus de Bakou à Belém a poursuivi l’élaboration de la feuille de route financière plus large.",
+        "gaps": "Les objectifs ne sont pas des paiements. Leur adéquation, la répartition entre dons et dette et les versements effectifs restent distincts du montant annoncé."
+      },
+      "cop30": {
+        "location": "Belém, Brésil",
+        "agreements": "Le résultat de Belém appelle à renforcer le soutien à l’adaptation ainsi que l’accompagnement des travailleurs et des communautés dans une transition juste.",
+        "commitments": "Appel à des efforts pour tripler le financement de l’adaptation d’ici 2035. Aucune référence non vérifiée ni aucun total de fonds versés ne remplace cet appel.",
+        "implementation": "Le résultat adopté fournit une base politique à la mise en œuvre ; les versements effectifs et les effets environnementaux nécessitent une évaluation ultérieure.",
+        "gaps": "La mise en œuvre, un financement suffisant et la transition hors des combustibles fossiles restent à réaliser ; un appel négocié n’est pas une amélioration observée."
+      },
+      "cop31": {
+        "location": "Antalya, Türkiye",
+        "agreements": "En attente d’adoption officielle. Au 10 novembre 2026, la conférence est en cours.",
+        "commitments": "Les objectifs comprennent l’accélération de la mise en œuvre et la traduction des décisions antérieures en actions mesurables. Aucun engagement final de la COP31 n’est affirmé.",
+        "implementation": "La conférence a débuté ; les décisions finales adoptées et leur mise en œuvre ultérieure restent en attente.",
+        "gaps": "Ne pas considérer les points à l’ordre du jour, annonces, projets de texte ou projections comme des résultats adoptés ou des progrès environnementaux vérifiés."
+      }
+    },
+    "observations": {
+      "antarctic-ozone-seasonal-area": {
+        "label": "Superficie moyenne saisonnière du trou d’ozone antarctique",
+        "scope": "Région antarctique",
+        "method": "NASA Ozone Watch · superficie moyenne du 7 septembre au 13 octobre",
+        "uncertainty": "Les valeurs publiées sont arrondies à 0,1 million de km² ; ce tableau ne fournit aucun intervalle d’incertitude. La variation annuelle dépend notamment de la météorologie et ne démontre pas une tendance de long terme. La superficie régionale n’est pas la colonne d’ozone mondiale, mesurée en unités Dobson (DU). Le Protocole de Montréal est un traité distinct ; aucun résultat n’est attribué à une COP. Les valeurs saisonnières de 2026 ne figuraient pas dans le tableau vérifié."
+      },
+      "global-co2-2025": {
+        "label": "Concentration mondiale de CO₂ à la surface",
+        "scope": "Monde",
+        "method": "Moyenne mondiale annuelle du programme de la Veille de l’atmosphère globale de l’OMM",
+        "uncertainty": "Concentration record, et non amélioration. Aucune comparaison n’est fabriquée entre différentes révisions de rapports. Cette valeur de contexte de l’OMM ne remplace pas l’évaluation existante du Planetary Health Check."
+      }
+    },
+    "units": {
+      "million km²": "millions de km²",
+      "ppm": "ppm"
+    },
+    "periods": {
+      "2025 annual mean": "moyenne annuelle de 2025"
+    },
+    "sourceNames": {
+      "UNFCCC": "CCNUCC",
+      "Chile Ministry of Environment · COP25": "Ministère chilien de l’Environnement · COP25",
+      "United Nations · COP28": "Nations unies · COP28",
+      "United Nations · COP29": "Nations unies · COP29",
+      "United Nations · COP30": "Nations unies · COP30",
+      "UN Secretary-General": "Secrétaire général des Nations unies",
+      "UNFCCC Global Climate Action Portal": "Portail de l’action climatique mondiale de la CCNUCC",
+      "NASA Ozone Watch": "NASA Ozone Watch",
+      "WMO · Greenhouse Gas Bulletin release": "OMM · communiqué du Bulletin sur les gaz à effet de serre"
+    },
+    "locators": {
+      "Scheduled session dates": "Dates prévues de la session",
+      "Adoption, temperature goals and entry into force": "Adoption, objectifs de température et entrée en vigueur",
+      "Marrakech session, 7–18 November 2016": "Session de Marrakech, du 7 au 18 novembre 2016",
+      "17 November proclamation": "Proclamation du 17 novembre",
+      "Negotiations began in 2016; 2018 implementation guidelines": "Début des négociations en 2016 ; lignes directrices de 2018",
+      "Bonn session, 6–17 November 2017": "Session de Bonn, du 6 au 17 novembre 2017",
+      "Decision 1/CP.23, paragraphs 10–11 and Annex II": "Décision 1/CP.23, paragraphes 10–11 et annexe II",
+      "Scheduled session, 2–14 December 2018": "Session prévue du 2 au 14 décembre 2018",
+      "Transparency and implementation guidelines": "Lignes directrices de transparence et de mise en œuvre",
+      "Session dates and adopted decisions": "Dates de session et décisions adoptées",
+      "Santiago Network and Article 6": "Réseau de Santiago et article 6",
+      "Conference and Glasgow Pact": "Conférence et Pacte de Glasgow",
+      "2019 baseline, 2025 doubling call and work programme": "Référence de 2019, appel au doublement en 2025 et programme de travail",
+      "Dates": "Dates",
+      "20 November 2022 outcome": "Résultat du 20 novembre 2022",
+      "First global stocktake and adopted decisions": "Premier bilan mondial et décisions adoptées",
+      "Energy goals and loss-and-damage fund": "Objectifs énergétiques et fonds pour les pertes et préjudices",
+      "Scheduled dates and adopted decisions": "Dates prévues et décisions adoptées",
+      "24 November conclusion and finance goal": "Conclusion du 24 novembre et objectif de financement",
+      "22 November conclusion and support package": "Conclusion du 22 novembre et mesures de soutien",
+      "Triple adaptation finance by 2035": "Tripler le financement de l’adaptation d’ici 2035",
+      "Dates, location and session documents": "Dates, lieu et documents de session",
+      "Action Agenda objectives": "Objectifs du programme d’action",
+      "2020 conference postponed to November 2021": "Conférence de 2020 reportée à novembre 2021",
+      "Second table: seasonal means, 2024 and 2025; updated 3 November 2026": "Deuxième tableau : moyennes saisonnières de 2024 et 2025 ; mise à jour du 3 novembre 2026",
+      "27 October 2026 press release; 2025 global mean": "Communiqué du 27 octobre 2026 ; moyenne mondiale de 2025"
+    }
+  }
+}

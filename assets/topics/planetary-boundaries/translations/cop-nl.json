@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "topicId": "planetary-boundaries-cop",
+  "language": "nl",
+  "version": "v001",
+  "sourceLanguage": "en",
+  "sourceRevision": "[\"v1\",\"en\",\"COP21 → COP31 — Commitments & Achievements\",\"Explore COP21–COP31 commitments, documented implementation and independently measured environmental outcomes. Conference years never substitute for scientific assessments; COP31 outcomes remain pending official adoption.\",\"<p>Use the conference selector to compare agreements and remaining gaps. An optional progress marker links comparable regional observations to the shared planetary-boundaries chart, without changing its scientific values or attributing recovery to a COP.</p>\"]",
+  "title": "COP21 → COP31 — Toezeggingen en resultaten",
+  "summary": "Er was geen COP in 2020. De conferentie staat los van wetenschappelijke beoordelingen en Fever-jaren.",
+  "insight": "<p>Holle groene markering: vergelijkbare regionale waarneming; geen mondiale grensverhouding of COP-resultaat. Wetenschappelijke vlakken en drempels blijven gelijk.</p>",
+  "cop": {
+    "ui": {
+      "title": "COP21 → COP31 — Toezeggingen en resultaten",
+      "conference": "Conferentie",
+      "progress": "Vooruitgang en resultaten",
+      "agreements": "Belangrijkste afspraken en doelen",
+      "commitments": "Gekwantificeerde toezeggingen · beleid",
+      "implementation": "Gedocumenteerde uitvoering · proces",
+      "gaps": "Resterende tekorten",
+      "sources": "Officiële bronnen",
+      "verified": "Gecontroleerd",
+      "pending": "Officiële aanneming in afwachting",
+      "monitoring": "Laatst geverifieerde monitoringcontext",
+      "backdrop": "Wetenschappelijke achtergrond",
+      "independence": "Er was geen COP in 2020. De conferentie staat los van wetenschappelijke beoordelingen en Fever-jaren.",
+      "scheduled": "Geplande sessie",
+      "adopted": "Aanneming / afsluiting",
+      "regionalProgress": "Regionale waargenomen verbetering",
+      "insufficient": "Onvoldoende bewijs voor verbetering van de mondiale grens",
+      "markerLegend": "Holle groene markering: vergelijkbare regionale waarneming; geen mondiale grensverhouding of COP-resultaat. Wetenschappelijke vlakken en drempels blijven gelijk.",
+      "evidenceLegend": "Bewijstypen: metingen · beleidstoezeggingen · uitvoering · projecties (geen getekend). De positie is illustratief en niet uit de meting genormaliseerd.",
+      "latestContext": "Laatst geverifieerde waarnemingen in deze module, 10 november 2026; gedeeld door conferenties, zonder historische COP-jaarmetingen of causale toeschrijving.",
+      "previous": "Vorige",
+      "latest": "Laatste",
+      "difference": "Werkelijk verschil",
+      "translationNote": "Bronteksten en wetenschappelijke kanttekeningen blijven in het Engels. Wetenschappelijke interface en SVG-teksten volgen de gekozen taal.",
+      "notComparable": "Niet vergelijkbaar",
+      "selectIndicator": "Bijbehorende indicator selecteren",
+      "openMonitor": "Aardgezondheidsmonitor openen"
+    },
+    "conferenceProseLanguage": "en"
+  }
+}

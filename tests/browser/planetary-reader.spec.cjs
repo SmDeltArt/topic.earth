@@ -1,12 +1,12 @@
 const {test,expect}=require('@playwright/test');
 const path='/assets/topics/planetary-boundaries/index.html';
 async function ready(page,suffix=''){await page.goto(path+suffix);await expect(page.locator('#message')).toContainText('SVG loaded: 13 / 13');}
-test('chart persists above all tabs; indicator/detail columns match height and explanations collapse',async({page})=>{
+test('chart and indicator rail persist outside all explanation tabs',async({page})=>{
   await ready(page);
   expect(await page.locator('#chart-stage').evaluate(n=>!!(n.compareDocumentPosition(document.querySelector('.tabs'))&Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
   for(const tab of await page.getByRole('tab').all()){await tab.click();await expect(page.locator('#chart')).toBeVisible();}
-  await page.locator('#tab-status').click();
-  const heights=await page.locator('.indicator-columns>.panel').evaluateAll(nodes=>nodes.map(n=>n.getBoundingClientRect().height));expect(heights[0]).toBeCloseTo(heights[1],1);
+  await expect(page.locator('#panel-status')).toBeVisible();
+  await expect(page.locator('#tab-status')).toHaveCount(0);
   expect(await page.locator('#indicator-list button').first().evaluate(button=>{const row=button.getBoundingClientRect(),name=button.querySelector('.indicator-name').getBoundingClientRect();return name.top>=row.top&&name.bottom<=row.bottom;})).toBe(true);
   await expect(page.locator('#chart-explanation')).not.toHaveAttribute('open','');await expect(page.locator('.chart-caption')).toBeHidden();
   await expect(page.locator('#export-download')).toHaveCount(1);await expect(page.locator('#export-science,#export-preview,#import-preview')).toHaveCount(0);

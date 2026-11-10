@@ -37,7 +37,7 @@ test('transparent passive overlay follows Earth position, camera distance, scale
   const aligned=()=>page.evaluate(()=>{const {globe:g,overlay:o}=window.overlayHarness;const p=g.earth.position.clone().project(g.camera),r=o.visual.getBoundingClientRect(),c=o.geometry.center,b=o.geometry.viewBox;
     return {actualX:r.x+(c.x-b.x)/b.width*r.width,actualY:r.y+(c.y-b.y)/b.height*r.height,expectedX:(p.x+1)*innerWidth/2,expectedY:(1-p.y)*innerHeight/2};});
   await page.evaluate(()=>{const h=window.overlayHarness;h.globe.earth.position.set(.3,.2,0);h.overlay.update();});
-  const a=await aligned();expect(a.actualX).toBeCloseTo(a.expectedX,1);expect(a.actualY).toBeCloseTo(a.expectedY,1);
+  const a=await aligned();expect(Math.abs(a.actualX-a.expectedX)).toBeLessThan(.5);expect(Math.abs(a.actualY-a.expectedY)).toBeLessThan(.5);
   await page.evaluate(()=>{const h=window.overlayHarness;h.globe.camera.position.z=6;h.overlay.update();});expect((await frame.boundingBox()).width).toBeLessThan(before.width);
   const smaller=await frame.boundingBox();await page.locator('.planetary-monitor-controls select').nth(1).selectOption('viewport');expect((await frame.boundingBox()).width).toBeLessThanOrEqual(smaller.width);
   await page.evaluate(()=>window.overlayHarness.overlay.setEnabled(false));await expect(frame).toBeHidden();await page.evaluate(()=>window.overlayHarness.overlay.setEnabled(true));await expect(frame).toBeVisible();

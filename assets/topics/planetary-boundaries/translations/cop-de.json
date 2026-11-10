@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "topicId": "planetary-boundaries-cop",
+  "language": "de",
+  "version": "v001",
+  "sourceLanguage": "en",
+  "sourceRevision": "[\"v1\",\"en\",\"COP21 → COP31 — Commitments & Achievements\",\"Explore COP21–COP31 commitments, documented implementation and independently measured environmental outcomes. Conference years never substitute for scientific assessments; COP31 outcomes remain pending official adoption.\",\"<p>Use the conference selector to compare agreements and remaining gaps. An optional progress marker links comparable regional observations to the shared planetary-boundaries chart, without changing its scientific values or attributing recovery to a COP.</p>\"]",
+  "title": "COP21 → COP31 — Zusagen und Ergebnisse",
+  "summary": "2020 fand keine COP statt. Die Konferenzwahl ist unabhängig von wissenschaftlichen Bewertungen und Fever-Jahren.",
+  "insight": "<p>Hohle grüne Markierung: vergleichbare regionale Beobachtung; kein globales Grenzverhältnis und kein COP-Erfolg. Wissenschaftliche Flächen und Schwellen bleiben unverändert.</p>",
+  "cop": {
+    "ui": {
+      "title": "COP21 → COP31 — Zusagen und Ergebnisse",
+      "conference": "Konferenz",
+      "progress": "Fortschritte und Ergebnisse",
+      "agreements": "Wichtigste Vereinbarungen und Ziele",
+      "commitments": "Quantifizierte Zusagen · Politik",
+      "implementation": "Dokumentierte Umsetzung · Prozess",
+      "gaps": "Verbleibende Lücken",
+      "sources": "Offizielle Quellen",
+      "verified": "Geprüft",
+      "pending": "Offizielle Annahme ausstehend",
+      "monitoring": "Zuletzt verifizierter Beobachtungskontext",
+      "backdrop": "Wissenschaftlicher Hintergrund",
+      "independence": "2020 fand keine COP statt. Die Konferenzwahl ist unabhängig von wissenschaftlichen Bewertungen und Fever-Jahren.",
+      "scheduled": "Geplante Sitzung",
+      "adopted": "Annahme / Abschluss",
+      "regionalProgress": "Regional beobachtete Verbesserung",
+      "insufficient": "Unzureichender Nachweis einer Verbesserung der globalen Grenze",
+      "markerLegend": "Hohle grüne Markierung: vergleichbare regionale Beobachtung; kein globales Grenzverhältnis und kein COP-Erfolg. Wissenschaftliche Flächen und Schwellen bleiben unverändert.",
+      "evidenceLegend": "Nachweistypen: Messungen · politische Zusagen · Umsetzung · Projektionen (keine gezeichnet). Die Markierung ist illustrativ, nicht aus der Messung normalisiert.",
+      "latestContext": "Zuletzt verifizierte Beobachtungen dieses Moduls, 10. November 2026; für alle Konferenzen, ohne historische COP-Jahresmessungen oder kausale Zuordnung.",
+      "previous": "Vorher",
+      "latest": "Zuletzt",
+      "difference": "Tatsächliche Differenz",
+      "translationNote": "Quellentexte und wissenschaftliche Einschränkungen bleiben auf Englisch. Wissenschaftliche Oberfläche und SVG-Texte folgen der gewählten Sprache.",
+      "notComparable": "Nicht vergleichbar",
+      "selectIndicator": "Zugehörigen Indikator auswählen",
+      "openMonitor": "Erdgesundheitsmonitor öffnen"
+    },
+    "conferenceProseLanguage": "en"
+  }
+}

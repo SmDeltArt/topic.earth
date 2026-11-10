@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "topicId": "planetary-boundaries-cop",
+  "language": "en",
+  "version": "v001",
+  "sourceLanguage": "en",
+  "sourceRevision": "[\"v1\",\"en\",\"COP21 → COP31 — Commitments & Achievements\",\"Explore COP21–COP31 commitments, documented implementation and independently measured environmental outcomes. Conference years never substitute for scientific assessments; COP31 outcomes remain pending official adoption.\",\"<p>Use the conference selector to compare agreements and remaining gaps. An optional progress marker links comparable regional observations to the shared planetary-boundaries chart, without changing its scientific values or attributing recovery to a COP.</p>\"]",
+  "title": "COP21 → COP31 — Commitments & Achievements",
+  "summary": "Explore COP21–COP31 commitments, documented implementation and independently measured environmental outcomes. Conference years never substitute for scientific assessments; COP31 outcomes remain pending official adoption.",
+  "insight": "<p>Use the conference selector to compare agreements and remaining gaps. An optional progress marker links comparable regional observations to the shared planetary-boundaries chart, without changing its scientific values or attributing recovery to a COP.</p>",
+  "cop": {
+    "ui": {
+      "title": "COP21 → COP31 — Commitments & Achievements",
+      "conference": "Conference",
+      "progress": "Progress & Achievements",
+      "agreements": "Principal agreements & objectives",
+      "commitments": "Quantified commitments · policy",
+      "implementation": "Documented implementation · process",
+      "gaps": "Remaining gaps",
+      "sources": "Official sources",
+      "verified": "Verified",
+      "pending": "Pending official adoption",
+      "monitoring": "Latest verified monitoring context",
+      "backdrop": "Scientific backdrop",
+      "independence": "No COP conference took place in 2020. Conference selection is independent of scientific assessments and Fever years.",
+      "scheduled": "Scheduled session",
+      "adopted": "Adopted / concluded",
+      "regionalProgress": "Regional observational improvement",
+      "insufficient": "Insufficient evidence for global boundary improvement",
+      "markerLegend": "Green hollow marker: comparable regional observation; not a global boundary ratio or COP achievement. Scientific fills and thresholds stay unchanged.",
+      "evidenceLegend": "Evidence types: measurements · policy commitments · implementation records · projections (none plotted). Marker position is illustrative, not normalized from its measurement.",
+      "latestContext": "Latest verified observations in this package, checked 2026-11-10; shared across conferences, not historical COP-year measurements or causal attribution.",
+      "previous": "Previous",
+      "latest": "Latest",
+      "difference": "Actual difference",
+      "translationNote": "Source summaries and scientific caveats are retained in English. Scientific interface and SVG labels follow the selected language.",
+      "notComparable": "Not comparable",
+      "selectIndicator": "Select corresponding indicator",
+      "openMonitor": "Open Earth Health Monitor"
+    },
+    "conferenceProseLanguage": "en"
+  }
+}

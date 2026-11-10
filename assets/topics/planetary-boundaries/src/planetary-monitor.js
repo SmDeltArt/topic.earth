@@ -13,6 +13,8 @@ let preview = new Map(), originalRects = new Map();
 let originalViewBox = null, circleLimit = null;
 let registry=null, panels=null, mode='scientific', assessmentRequest=0;
 let sceneOverlay=null;
+let copTopic=null;
+const copRequested=new URL(location.href).searchParams.get('topic')==='cop'&&new URL(location.href).searchParams.get('overlay')!=='1';
 const scientificIndicator=id=>assessment?.indicators.find(i=>i.id===id);
 const maxPreviewRatio = () => circleLimit?.maxRatio ?? 2;
 const scientificQuantity=indicator=>quantityText(indicator.observed,getTopicLocale().language);
@@ -46,11 +48,11 @@ function renderSidebar() {
     const name = document.createElement('span');name.className='indicator-name';name.textContent=indicatorLabel(entry.id,scientificIndicator(entry.id).label);
     const value = document.createElement('small');
     const ratio = preview.get(entry.id);
-    value.textContent = mode==='scientific' ? `q ${ratioText(scientificIndicator(entry.id))}` : ratio === undefined ? 'Artwork / unquantified' : `Preview ${Math.round(ratio*100)}%`;
+    value.textContent = mode==='scientific' ? `q ${term(ratioText(scientificIndicator(entry.id),getTopicLocale().language))}` : ratio === undefined ? t('artworkValue') : t('previewValue',{value:Math.round(ratio*100)});
     button.append(number,name, value);
     button.classList.toggle('active', selected === entry.id);
     button.setAttribute('aria-pressed',String(selected===entry.id));
-    button.addEventListener('click', () => select(entry.id));
+    button.addEventListener('click', () => select(entry.id,'user'));
     button.addEventListener('pointerenter',()=>hoverIndicator(entry.id,true));
     button.addEventListener('pointerleave',()=>hoverIndicator(entry.id,false));
     target.append(button);
@@ -69,6 +71,8 @@ function select(id,origin='list') {
   selected = id;
   const indicator=scientificIndicator(id);
   $('selected-name').textContent = indicatorLabel(id,indicator.label);
+  $('selected-summary').textContent = $('selected-name').textContent;
+  if(origin==='user'||origin==='svg') $('indicator-details').open=true;
   const rangeContext=mode==='scientific'&&indicator.observed.kind==='range'
     ? ` · ${indicator.assessmentYear} assessment · observed ${scientificObservation(indicator)} · project-derived q ${ratioText(indicator)} · fill lower / dashed upper`
     : '';
@@ -102,6 +106,7 @@ function select(id,origin='list') {
       }
     }
   }
+  copTopic?.refreshSvg();
 }
 function applyRatio(id, value, scientific=false) {
   const entry = map.find(i => i.id === id); if (!entry) return;
@@ -137,6 +142,7 @@ function applyRatio(id, value, scientific=false) {
   if (selected === id) select(id); else renderSidebar();
   $('preview-notice').hidden = mode === 'scientific';
   if(!scientific)setStatus(t('manualStatus'));
+  if(!scientific)copTopic?.refreshSvg();
 }
 function showScience() {
   mode='scientific';preview.clear();
@@ -146,6 +152,7 @@ function showScience() {
     else if(base){base.geometry.unquantified();const group=svgDocument.getElementById(entry.svgGroupId);delete group.dataset.previewRatio;delete group.dataset.previewOverflow;}
   }
   select(selected);setStatus(t('svgLoaded',{count:originalRects.size,total:map.length}));
+  copTopic?.refreshSvg();
 }
 async function switchAssessment(year){
   const item=registry.assessments.find(a=>a.year===year);if(!item)return;
@@ -153,7 +160,7 @@ async function switchAssessment(year){
   try{
     const data=await loadAssessment(new URL(`data/${item.file}`,BASE),map.map(i=>i.id),item.sha256);
     if(request!==assessmentRequest)return;
-    assessment=data;panels.render(data);localizePage();if(svgDocument)showScience();
+    assessment=data;panels.render(data);localizePage();if(svgDocument)showScience();copTopic?.refresh();
   }catch(error){$('assessment-year').value=assessment?.assessmentYear??registry.latest;setStatus(error.message);if(!assessment)throw error;}
 }
 function connectSvg(inlineDocument=null) {
@@ -175,7 +182,7 @@ function connectSvg(inlineDocument=null) {
       if (!rect || !group) { setStatus('Some semantic SVG elements could not be located.'); continue; }
       originalRects.set(entry.id, { geometry: createRadialPreview(svgDocument, entry, rect, () => select(entry.id,'svg'), circleLimit) });
       group.style.cursor = 'pointer';
-      group.addEventListener('click', (event) => { event.preventDefault(); select(entry.id); });
+      group.addEventListener('click', (event) => { event.preventDefault(); select(entry.id,'svg'); });
     }
     svgDocument.addEventListener('topic-indicator-hover',event=>hoverIndicator(event.detail.id,event.detail.active));
     localizeSvgLabels(svgDocument,circleLimit);
@@ -197,7 +204,25 @@ function connectSvg(inlineDocument=null) {
     setStatus(`Unable to control SVG: ${error.message}. Run via a local HTTP server, not a restricted file viewer.`);
   }
 }
+function setupIndicatorLayout() {
+  const chart=$('chart'),sidebar=$('panel-status');
+  let frame=0;
+  const sync=()=>{
+    frame=0;
+    const box=chart.getBoundingClientRect();
+    if(box.height<=0)return;
+    sidebar.style.setProperty('--indicator-rail-height',`${box.height}px`);
+    sidebar.style.setProperty('--indicator-rail-offset',`${box.top-$('chart-stage').getBoundingClientRect().top}px`);
+  };
+  const schedule=()=>{if(!frame)frame=requestAnimationFrame(sync);};
+  const observer=new ResizeObserver(schedule);
+  observer.observe(chart);
+  observer.observe(document.querySelector('.chart-heading'));
+  window.addEventListener('pagehide',event=>{if(!event.persisted){observer.disconnect();cancelAnimationFrame(frame);}});
+  schedule();
+}
 function setupEvents() {
+  setupIndicatorLayout();
   const syncPresentationContext=()=>{
     const embeddedFullView=Boolean(window.frameElement?.closest?.('dialog.topic-embed-full-dialog'));
     document.documentElement.classList.toggle('topic-full-view',Boolean(document.fullscreenElement)||embeddedFullView);
@@ -228,7 +253,7 @@ function setupEvents() {
     try{
       if(!svgDocument||!circleLimit)throw Error('Chart not ready');
       const {language,record:translation}=getTopicLocale();
-      const bundle=createTopicExport({assessment,map,svgDocument,mode,selected,language,translation,limit:circleLimit});
+      const bundle=createTopicExport({assessment,map,svgDocument,mode,selected,language,translation,limit:circleLimit,copContext:copTopic?.exportContext()});
       downloadTopicExport(bundle,$('export-format').value);setStatus(t('exported'));
     }catch(error){setStatus(`Export failed: ${error.message}`);}
   });
@@ -249,6 +274,7 @@ async function refreshLanguage(code){
     if(selected)select(selected);
     if(circleLimit)$('ratio-label').textContent=t('ratioLabel',{max:Math.ceil(maxPreviewRatio()*100)});
     if(mode!=='scientific')setStatus(t(mode==='artwork'?'artworkStatus':'manualStatus'));
+    if(copTopic)await copTopic.refreshLocale();
   }catch(error){setStatus(`Translation failed: ${error.message}`);}
 }
 async function init() {
@@ -260,9 +286,13 @@ async function init() {
       fetch(new URL('data/assessment-registry.json',BASE)).then(r=>{if(!r.ok)throw Error('Assessment registry unavailable');return r.json();})
     ]);
     map=m;registry=r;
-    panels=createTopicPanels({registry,onAssessment:switchAssessment,onSelect:select,onScience:showScience});
+    panels=createTopicPanels({registry,onAssessment:switchAssessment,onSelect:id=>select(id,'user'),onScience:showScience});
     await switchAssessment(registry.latest);
     if(!assessment)throw Error('No validated assessment available');
+    if(copRequested){
+      const {createCopTopic}=await import('./cop-topic.js');
+      copTopic=await createCopTopic({getState:()=>({assessment,svgDocument,mode,selected}),onSelect:id=>select(id,'svg'),onScience:showScience});
+    }
     selected=map[0]?.id;
     renderSidebar();select(selected);
     // Assign SVG path only after data is loaded, so its load handler has the indicator map.
